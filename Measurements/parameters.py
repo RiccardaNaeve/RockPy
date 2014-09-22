@@ -14,6 +14,7 @@ class mass(base.measurement):
                  log=None,
                  std=None, time=None,
                  **options):
+        log = 'RockPy.MEASUREMENT.mass'
 
         super(mass, self).__init__(sample_obj=sample_obj,
                                    mtype=mtype, mfile=mfile, machine=machine,
@@ -39,6 +40,7 @@ class length(base.measurement):
                  log=None,
                  std=None, time=None,
                  **options):
+        log = 'RockPy.MEASUREMENT.length'
         super(length, self).__init__(sample_obj=sample_obj,
                                      mtype=mtype, mfile=mfile, machine=machine,
                                      log=log,

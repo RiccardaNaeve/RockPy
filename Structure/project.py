@@ -35,6 +35,12 @@ class Sample():
         if mass is not None:
             self.add_measurement(mtype='mass', mfile=None, machine=mass_machine,
                                  value=mass, unit=mass_unit)
+        if diameter is not None:
+            self.add_measurement(mtype='diameter', mfile=None, machine=length_machine,
+                                 value=diameter, unit=length_unit)
+        if height is not None:
+            self.add_measurement(mtype='height', mfile=None, machine=length_machine,
+                                 value=height, unit=length_unit)
 
     def __repr__(self):
         return '<< %s - Structure.sample.Sample >>' % self.name
@@ -60,6 +66,8 @@ class Sample():
 
         implemented = {
             'mass': Measurements.parameters.mass,
+            'diameter': Measurements.parameters.length,
+            'height': Measurements.parameters.length,
                    }
 
         if mtype.lower() in implemented:
@@ -76,7 +84,21 @@ class Sample():
     def mass_kg(self):
         measurement = self.find_measurement(mtype='mass')
         if len(measurement) > 1:
-            self.log.info('FOUND more than 1 mass measurement. Returning first')
+            self.log.info('FOUND more than 1 << mass >> measurement. Returning first')
+        return measurement[0].data.data
+
+    @property
+    def height_m(self):
+        measurement = self.find_measurement(mtype='height')
+        if len(measurement) > 1:
+            self.log.info('FOUND more than 1 << height >> measurement. Returning first')
+        return measurement[0].data.data
+
+    @property
+    def diameter_m(self):
+        measurement = self.find_measurement(mtype='diameter')
+        if len(measurement) > 1:
+            self.log.info('FOUND more than 1 << diameter >> measurement. Returning first')
         return measurement[0].data.data
 
 

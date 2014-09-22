@@ -15,7 +15,7 @@ class measurement(object):
         else:
             self.log = logging.getLogger(log)
 
-        implemented = ['mass']
+        implemented = ['mass', 'diameter', 'height']
 
         self.normalization = {}
 

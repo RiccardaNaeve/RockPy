@@ -65,9 +65,9 @@ class Sample():
         '''
 
         implemented = {
-            'mass': parameters.mass,
-            'diameter': parameters.length,
-            'height': parameters.length,
+            'mass': parameters.Mass,
+            'diameter': parameters.Length,
+            'height': parameters.Length,
             'hys': hysteresis.Hysteresis,
             'backfield': backfield.Backfield,
         }

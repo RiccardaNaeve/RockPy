@@ -14,8 +14,8 @@ class Sample():
     general.create_logger('RockPy.SAMPLE')
 
     def __init__(self, name,
-                 mass=1.0, mass_unit=None, mass_machine='',
-                 height=None, diameter=None, length_unit=None, length_machine='',
+                 mass=1.0, mass_unit='kg', mass_machine='generic',
+                 height=None, diameter=None, length_unit=None, length_machine='generic',
                  **options):
         """
 
@@ -48,7 +48,7 @@ class Sample():
     ''' ADD FUNCTIONS '''
 
     def add_measurement(self,
-                        mtype=None, mfile=None, machine=None,  # general
+                        mtype=None, mfile=None, machine='generic',  # general
                         **options):
         '''
         All measurements have to be added here
@@ -68,7 +68,8 @@ class Sample():
             'mass': Measurements.parameters.mass,
             'diameter': Measurements.parameters.length,
             'height': Measurements.parameters.length,
-                   }
+            'hys': Measurements.hysteresis.hysteresis,
+        }
 
         if mtype.lower() in implemented:
             self.log.info(' ADDING\t << measurement >> %s' % mtype)
@@ -92,15 +93,14 @@ class Sample():
         measurement = self.find_measurement(mtype='height')
         if len(measurement) > 1:
             self.log.info('FOUND more than 1 << height >> measurement. Returning first')
-        return measurement[0].data.data
+            return measurement[0].data.data
 
     @property
     def diameter_m(self):
         measurement = self.find_measurement(mtype='diameter')
         if len(measurement) > 1:
             self.log.info('FOUND more than 1 << diameter >> measurement. Returning first')
-        return measurement[0].data.data
-
+            return measurement[0].data.data
 
 
     ''' FIND FUNCTIONS '''

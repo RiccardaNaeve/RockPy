@@ -2,74 +2,53 @@ __author__ = 'volk'
 import logging
 import numpy as np
 import Functions.general
+import Readin.machines as machines
 
 class measurement(object):
     Functions.general.create_logger('RockPy.MEASUREMENT')
     def __init__(self, sample_obj,
                  mtype, mfile, machine,
-                 log=None,
                  **options):
 
-        if not log:
-            self.log = logging.getLogger('RockPy.MEASUREMENT')
-        else:
-            self.log = logging.getLogger(log)
+        self.log = logging.getLogger('RockPy.MEASUREMENT.' + type(self).__name__)
 
-        implemented = ['mass', 'diameter', 'height']
+        self.implemented = {
+            'generic': {'mass': None,
+                        'height': None,
+                        'diameter': None,
+            },
+            'vftb': {'hys': machines.vftb,
+            }
+        }
 
-        self.normalization = {}
-
+        ''' initialize parameters '''
         self.raw_data = None # returned data from Readin.machines()
+        self.treatment = None
 
         ''' initial state '''
         self.is_raw_data = None # returned data from Readin.machines()
         self.initial_state = None
 
-        if mtype.lower() in implemented:
-            self.log.debug('FOUND\t measurement type: << %s >>' % mtype.lower())
-            self.mtype = mtype.lower()
-            self.sample_obj = sample_obj
-            self.mfile = mfile
-
-            if machine:
+        if machine in self.implemented:
+            if mtype.lower() in self.implemented[machine]:
+                self.log.debug('FOUND\t measurement type: << %s >>' % mtype.lower())
+                self.mtype = mtype.lower()
+                self.sample_obj = sample_obj
+                self.mfile = mfile
                 self.machine = machine.lower()
-            else:
-                self.machine = None #in case of simulation
 
-            if self.machine and self.mfile:
-                self.import_data()
+                if self.machine and self.mfile:
+                    self.import_data()
+                else:
+                    self.log.debug('NO machine or mfile passed -> no raw_data will be generated')
             else:
-                self.log.debug('NO machine or mfile passed -> no raw_data will be generated')
+                self.log.error('UNKNOWN\t measurement type: << %s >>' % mtype)
         else:
-            self.log.error('UNKNOWN\t measurement type: << %s >>' % mtype)
-            return None
+            self.log.error('UNKNOWN\t machine << %s >>' % self.machine)
 
-        self.treatment = None
 
     def import_data(self, rtn_raw_data=None, **options):
-        implemented = {
-        #     'sushibar': {'af-demag': machines.sushibar,
-        #                             'af': machines.sushibar,
-        #                             'parm-spectra': machines.sushibar,
-        #                             'nrm': machines.sushibar,  # externally applied magnetization
-        #                             'trm': machines.sushibar,  # externally applied magnetization
-        #                             'irm': machines.sushibar,  # externally applied magnetization
-        #                             'arm': machines.sushibar,  # externally applied magnetization
-        # },
-        #                'vsm': {'hys': machines.vsm,
-        #                        'irm': machines.vsm,
-        #                        'coe': machines.vsm,
-        #                        'visc': machines.vsm,
-        #                        'forc': machines.vsm_forc},
-        #                'cryo_nl': {'palint': machines.cryo_nl2},
-        #                'mpms': {'zfc': machines.mpms,
-        #                         'fc': machines.mpms, },
-        #                'simulation': {'palint': machines.simulation,
-        #                },
-        #                'vftb': {'hys': machines.vftb,
-        #                         'coe': machines.vftb,
-        #                         'rmp': machines.vftb}
-        }
+
 
         self.log.info(' IMPORTING << %s , %s >> data' % (self.machine, self.mtype))
 
@@ -77,22 +56,16 @@ class measurement(object):
         mtype = options.get('mtype', self.mtype)
         mfile = options.get('mfile', self.mfile)
 
-        if machine in implemented:
-            if mtype in implemented[machine]:
-                raw_data = implemented[machine][mtype](mfile, self.sample_obj.name)
-                if raw_data is None:
-                    self.log.error('IMPORTING\t did not transfer data - CHECK sample name and data file')
-                    return
-                else:
-                    if rtn_raw_data:
-                        self.log.info(' RETURNING raw_data for << %s , %s >> data' % (machine, mtype))
-                        return raw_data
-                    else:
-                        self.raw_data = raw_data
-            else:
-                self.log.error('IMPORTING UNKNOWN\t measurement type << %s >>' % self.mtype)
+        raw_data = self.implemented[machine][mtype](mfile, self.sample_obj.name)
+        if raw_data is None:
+            self.log.error('IMPORTING\t did not transfer data - CHECK sample name and data file')
+            return
         else:
-            self.log.error('UNKNOWN\t machine << %s >>' % self.machine)
+            if rtn_raw_data:
+                self.log.info(' RETURNING raw_data for << %s , %s >> data' % (machine, mtype))
+                return raw_data
+            else:
+                self.raw_data = raw_data
 
 
     def set_initial_state(self,

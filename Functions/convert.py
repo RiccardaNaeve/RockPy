@@ -1,7 +1,7 @@
 __author__ = 'Mike'
 import logging
-
-#todo implement in data.class
+from Functions.general import create_logger
+# todo implement in data.class
 def convert2(in_unit, out_unit, unit_type):
     """
 
@@ -29,6 +29,7 @@ def convert2(in_unit, out_unit, unit_type):
          * 'area' [only metric units]
 
     """
+    create_logger('RockPy.FUNCTIONS')
     conversion_table = {'mass':
                             {'T': 1E-9,
                              'kg': 1E-6,
@@ -94,6 +95,7 @@ def convert2(in_unit, out_unit, unit_type):
         log.error('UNKNOWN\t << unit_type >>')
 
     conversion = conversion_table[unit_type]
+
     if in_unit not in conversion:
         log.error('UNKNOWN\t << in_unit >>')
         return

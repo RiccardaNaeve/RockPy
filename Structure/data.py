@@ -16,10 +16,16 @@ class data(object):
         Generic 3D / 1D data contains with rudimentary functions concerning paleomagnetic data
         '''
 
+        if not isinstance(variable, np.ndarray):
+            variable = np.array(variable)
+        if not isinstance(measurement, np.ndarray):
+            measurement = np.array(measurement)
+        if not isinstance(std_dev, np.ndarray):
+            std_dev = np.array(std_dev)
+
         self.dimension = measurement.size / variable.size
         self.log = logging.getLogger('RockPy.DATA.data(%i, %i)' %(measurement.size/self.dimension, self.dimension))
         self.log.debug('CREATING data structure: dimension << (%i, %i) >>' %(measurement.size/self.dimension, self.dimension))
-
 
         # units
         self.var_unit = var_unit

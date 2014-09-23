@@ -21,6 +21,8 @@ class Measurement(object):
             'vftb': {'hys': machines.vftb,
                      'backfield': machines.vftb,
                      'thermocurve': machines.vftb,
+            },
+            'vsm': {'hys': machines.Vsm,
             }
         }
 

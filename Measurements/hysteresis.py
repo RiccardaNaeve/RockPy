@@ -11,7 +11,8 @@ class Hysteresis(base.Measurement):
                  **options):
         super(Hysteresis, self).__init__(sample_obj, mtype, mfile, machine)
 
-        data_formatting = {'vftb': self.format_vftb}
+        data_formatting = {'vftb': self.format_vftb,
+                           'vsm': self.format_vsm}
 
         # ## initialize
         self.virgin = None
@@ -44,7 +45,7 @@ class Hysteresis(base.Measurement):
                                             std_dev=[std_dev[i] for i in up_field_idx])
 
     def format_vsm(self):
-        pass
+        print self.raw_data.out
 
 
     def plt_hys(self):

@@ -12,7 +12,7 @@ def vftb(file, *args, **options):
     out = [i.strip('\r\n').split('\t') for i in reader_object.readlines()]
 
     mass = float(out[0][1].split()[1])
-    out = np.array(out[4:])
+    # out = np.array(out[4:])
     idx1 = [i for i in range(len(out)) if '' in out[i]]
     idx2 = [i for i in range(len(out)) if 'Set 2:' in out[i]]
     idx3 = [i for i in range(len(out)) if ' field / Oe' in out[i]]
@@ -23,7 +23,7 @@ def vftb(file, *args, **options):
     out_aux = []
 
     # out = [[np.nan if v is 'n/a' else v for v in i] for i in out]
-    out = np.array([map(float, i) for i in out[4:]])
+    out = np.array([map(float, i) for i in out[2:]])
     header = {"field": [0, float], "moment": [1, float], "temp": [2, float], "time": [3, float], "std_dev": [4, float],
               "suscep / emu / g / Oe": [5, float],
     }
@@ -40,3 +40,4 @@ def vftb(file, *args, **options):
     out['moment'] *= mass / 1E3
     out['field'] *= 0.0001
     return out
+

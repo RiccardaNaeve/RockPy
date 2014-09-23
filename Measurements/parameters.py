@@ -5,7 +5,7 @@ from Functions.convert import convert2
 import numpy as np
 
 
-class mass(base.measurement):
+class mass(base.Measurement):
     '''
     simple 1d measurement for mass
     '''
@@ -30,7 +30,7 @@ class mass(base.measurement):
                          time=time, std_dev=std)
 
 
-class length(base.measurement):
+class length(base.Measurement):
     '''
     simple 1d measurement for mass
     '''

@@ -21,11 +21,9 @@ d['M'] = np.array((( 77,87,97),(78,88,98),(79,89,99)))
 
 print( d['M'])
 
-print d.magnitude( 'M')
+print d.magnitude()
 
-#d.magnitude( column_name = 'M', result_column = 'magM')
-
-d.append_columns( ('magM',), d.magnitude( 'M'))
+d.append_columns( 'magM', d.magnitude( 'M'))
 
 print( d['magM'])
 

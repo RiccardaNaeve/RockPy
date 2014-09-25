@@ -14,7 +14,7 @@ class rockpydata(object):
             * columns: sequence of strings naming individual columns
         '''
 
-        if column_names is str: # if we got a single string, convert it to tuple with one entry
+        if type( column_names) is str: # if we got a single string, convert it to tuple with one entry
             column_names = (column_names,)
 
         # initialize member variables
@@ -26,7 +26,7 @@ class rockpydata(object):
         # define some default aliases
         self._update_all_alias()
         self._column_dict[ 'variable'] = (0,)
-        self._column_dict[ 'measurements'] = tuple( range( self.columncount)[1:])
+        self._column_dict[ 'measurement'] = tuple( range( self.columncount)[1:])
 
         self['all'] = data
 
@@ -38,7 +38,7 @@ class rockpydata(object):
         e.g. {'Mx': (0,),'My': (1,), 'Mz': (2,), 'Mx': (0,1,2))
         '''
 
-        if column_names is str: # if we got a single string, convert it to tuple with one entry
+        if type( column_names) is str: # if we got a single string, convert it to tuple with one entry
             column_names = (column_names,)
 
         if column_names == None:
@@ -97,7 +97,7 @@ class rockpydata(object):
         define an alias for a sequence of existing columns
         e.g. d.definealias( 'M', ('Mx', 'My', 'Mz'))
         '''
-        if column_names is str: # if we got a single string, convert it to tuple with one entry
+        if type( column_names) is str: # if we got a single string, convert it to tuple with one entry
             column_names = (column_names,)
 
         if len( column_names) < 1:
@@ -125,7 +125,7 @@ class rockpydata(object):
         add data columns to data object
         column_names: list of strings
         '''
-        if column_names is str: # if we got a single string, convert it to tuple with one entry
+        if type( column_names) is str: # if we got a single string, convert it to tuple with one entry
             column_names = (column_names,)
 
         # check if column names are already used as keys (= column names and aliases)
@@ -201,15 +201,14 @@ class rockpydata(object):
         self._data[:, self._column_dict[ key]] = data
 
 
-    def magnitude(self, column_name = 'measurement'):
+    def magnitude(self, key = 'measurement'):
         '''
         calculate magnitude of vector columns
         return
-        * np.array of data if new column is None
-        * reference to self including the newly calculated column
+        * np.array of data
         '''
 
-        return np.sum( np.abs( self[ column_name])**2,axis=-1)**(1./2)
+        return np.sum( np.abs( self[ key])**2,axis=-1)**(1./2)
 
 
     def differentiate(self):

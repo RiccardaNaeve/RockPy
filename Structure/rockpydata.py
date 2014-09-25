@@ -14,9 +14,11 @@ class rockpydata(object):
             * columns: sequence of strings naming individual columns
         '''
 
+        if column_names is str: # if we got a single string, convert it to tuple with one entry
+            column_names = (column_names,)
+
         # initialize member variables
         self._column_names = list( column_names)
-        # todo: make sure this is a list of strings!
         self._data = None
 
         self._updatecolumndictionary()
@@ -35,6 +37,9 @@ class rockpydata(object):
         * if column_names is list of column names (which must already exist in self._column_names), add or update those in _column_dict
         e.g. {'Mx': (0,),'My': (1,), 'Mz': (2,), 'Mx': (0,1,2))
         '''
+
+        if column_names is str: # if we got a single string, convert it to tuple with one entry
+            column_names = (column_names,)
 
         if column_names == None:
             self._column_dict = dict((name, (index,)) for (index, name) in enumerate( self._column_names))
@@ -92,7 +97,15 @@ class rockpydata(object):
         define an alias for a sequence of existing columns
         e.g. d.definealias( 'M', ('Mx', 'My', 'Mz'))
         '''
-        # todo: check if all column names exist and that there is at least one column
+        if column_names is str: # if we got a single string, convert it to tuple with one entry
+            column_names = (column_names,)
+
+        if len( column_names) < 1:
+            raise TypeError( 'at least one column name needed')
+
+        for n in column_names: # check if all column_names are valid, i.e. exist in self._column_names
+                if not self.column_exists( n):
+                    raise IndexError( 'column %s does not exist' % n)
 
         # add alias to _column_dict
         self._definealias_indices(alias_name, tuple(self._column_dict[cn][0] for cn in column_names))
@@ -112,7 +125,8 @@ class rockpydata(object):
         add data columns to data object
         column_names: list of strings
         '''
-        # todo: also allow simple string to add single column
+        if column_names is str: # if we got a single string, convert it to tuple with one entry
+            column_names = (column_names,)
 
         # check if column names are already used as keys (= column names and aliases)
         for n in column_names:
@@ -187,7 +201,7 @@ class rockpydata(object):
         self._data[:, self._column_dict[ key]] = data
 
 
-    def magnitude(self, column_name = 'measurement', result_column = None):
+    def magnitude(self, column_name = 'measurement'):
         '''
         calculate magnitude of vector columns
         return
@@ -195,17 +209,7 @@ class rockpydata(object):
         * reference to self including the newly calculated column
         '''
 
-        mag = np.sum( np.abs( self[ column_name])**2,axis=-1)**(1./2)
-
-        if result_column == None:
-            return mag # return the calculated magnitudes directly
-        else:
-            if not self.column_exists( result_column): # if result_column doesn't exist -> append it
-                self.append_columns( (result_column,))
-
-            self[result_column] = mag # write result into specified column
-
-            return self
+        return np.sum( np.abs( self[ column_name])**2,axis=-1)**(1./2)
 
 
     def differentiate(self):

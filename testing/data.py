@@ -23,7 +23,9 @@ print( d['M'])
 
 print d.magnitude( 'M')
 
-d.magnitude( column_name = 'M', result_column = 'magM')
+#d.magnitude( column_name = 'M', result_column = 'magM')
+
+d.append_columns( ('magM',), d.magnitude( 'M'))
 
 print( d['magM'])
 

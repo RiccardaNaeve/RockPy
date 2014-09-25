@@ -7,7 +7,7 @@ import numpy as np
 import scipy as sp
 import matplotlib.pyplot as plt
 import csv
-import Measurements
+from Measurements import parameters, hysteresis, backfield, thermocurve, irm
 
 
 class Sample():
@@ -65,10 +65,13 @@ class Sample():
         '''
 
         implemented = {
-            'mass': Measurements.parameters.mass,
-            'diameter': Measurements.parameters.length,
-            'height': Measurements.parameters.length,
-            'hys': Measurements.hysteresis.hysteresis,
+            'mass': parameters.Mass,
+            'diameter': parameters.Length,
+            'height': parameters.Length,
+            'hys': hysteresis.Hysteresis,
+            'backfield': backfield.Backfield,
+            'thermocurve': thermocurve.ThermoCurve,
+            'irm': irm.Irm,
         }
 
         if mtype.lower() in implemented:

@@ -11,6 +11,7 @@ class data(object):
                  variable, measurement,
                  var_unit, measure_unit,
                  std_dev=None, time=None,
+                 aux=None, aux_unit=None,
                  **options):
         '''
         Generic 3D / 1D data contains with rudimentary functions concerning paleomagnetic data

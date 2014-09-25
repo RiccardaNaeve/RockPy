@@ -22,6 +22,14 @@ class Hysteresis(base.Measurement):
 
         data_formatting[self.machine]()
 
+        # ## calculation initialization
+        self.ms = None
+        self.mrs = None
+        self.bc = None
+        self.brh = None
+
+
+
     def format_vftb(self):
         dfield = np.diff(self.raw_data['field'])
 

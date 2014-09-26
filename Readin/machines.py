@@ -88,8 +88,13 @@ class Vsm(object):
         return header
 
 
-def vftb(file, *args, **options):
+def Vftb(file, *args, **options):
     '''
+    read in routine for vftb files
+
+    header: 1:field [T]	    2:mag  [Am^2]	    3:temp [C]
+            4:time [s]  	5:std dev [%]   	6:suscep [emu / g / Oe]
+
     '''
     log = logging.getLogger('RockPy.READIN.vftb')
     log.info('IMPORTING\t VFTB file: << %s >>' % file)
@@ -104,8 +109,6 @@ def vftb(file, *args, **options):
     idx = idx1 + idx2 + idx3
     out = [['0.' if j == 'n/a' else j for j in i] for i in out]
     out = [out[i] for i in range(len(out)) if i not in idx]
-    aux = []
-    out_aux = []
 
     # out = [[np.nan if v is 'n/a' else v for v in i] for i in out]
     out = np.array([map(float, i) for i in out[2:]])
@@ -113,17 +116,13 @@ def vftb(file, *args, **options):
               "suscep / emu / g / Oe": [5, float],
     }
 
-    out_aux = {}
-    for column in header:
-        aux = {column.lower(): np.array([header[column][1](i[header[column][0]]) for i in out])}
-        out_aux.update(aux)
+    out = np.array(out)
 
-    # out = {column.lower(): np.array([header[column][1](i[header[column][0]]) for i in out]) for column in
-    # header}
+    out[:,0] *= 0.0001 # recalculate to T
+    out[:,1] *= mass / 1E3 # de-normalize of mass
 
-    out = out_aux
-    out['moment'] *= mass / 1E3
-    out['field'] *= 0.0001
+    units = ['T', 'Am^2', 'C', 's', '%', 'emu/g/Oe']
+
     return out
 
 

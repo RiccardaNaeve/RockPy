@@ -1,6 +1,7 @@
 __author__ = 'volk'
 import base
 import Structure.data
+import Structure.rockpydata
 import matplotlib.pyplot as plt
 
 
@@ -19,12 +20,16 @@ class Backfield(base.Measurement):
         data_formatting[self.machine]()
 
     def format_vftb(self):
-        self.remanence = Structure.data.data(variable=self.raw_data['field'], var_unit='T',
-                                             measurement=self.raw_data['moment'], measure_unit='emu',
-                                             std_dev=self.raw_data['std_dev'])
+        self.remanence = Structure.rockpydata.rockpydata(column_names=('field', 'moment', 'temperature', 'time',
+                                                                  'std_dev', 'susceptibility'), data= self.raw_data)
 
     def plt_backfield(self):
-        plt.plot(self.remanence.variable, self.remanence.measurement)
+        plt.plot(self.remanence['field'], self.remanence['moment'])
+
         if self.induced:
-            plt.plot(self.induced.variable, self.induced.measurement)
+            plt.plot(self.induced['field'], self.induced['moment'])
+
+        plt.title('Backfield %s' %(self.sample_obj.name))
+        plt.xlabel('Field [%s]' %('T')) #todo replace with data unit
+        plt.ylabel('Moment [%s]' %('Am^2')) #todo replace with data unit
         plt.show()

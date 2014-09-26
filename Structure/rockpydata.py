@@ -58,6 +58,11 @@ class rockpydata(object):
         self._column_dict['all'] = tuple(range(self.columncount))
 
     @property
+    def column_names(self):
+        return self._column_names
+
+
+    @property
     def columncount(self):
         return len(self._column_names)
 
@@ -211,6 +216,16 @@ class rockpydata(object):
 
         return np.sum(np.abs(self[key]) ** 2, axis=-1) ** (1. / 2)
 
+    def normalize(self, column_name, value = 1.0):
+        '''
+        return column data normalized to given value
+        e.g. d.normalize('X', 100)
+        '''
+        if not self.column_exists( column_name):
+            raise IndexError
+        d = self[ column_name]
+        return d / np.max( d) * value
+
 
     def differentiate(self):
-        pass
+        raise NotImplemented

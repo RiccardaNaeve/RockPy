@@ -5,6 +5,7 @@ import numpy as np
 
 class rockpydata(object):
     #todo units
+    #question: do single values have to be asked with data['something'][0]?
     '''
     class to manage specific numeric data based on a numpy array
     e.g. d = rockpydata( column_names=( 'F','Mx', 'My', 'Mz'))

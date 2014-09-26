@@ -10,4 +10,11 @@ sample = Sample(name='vftb_test_sample')
 
 # add measurement
 M = sample.add_measurement(mtype='backfield', mfile=vftb_file, machine='vftb')
-M.plt_backfield()
+
+#get bcr
+# M.calculate_bcr() # prints the linear interpolation of the value (internal calculation)
+# print 'jsjs'
+# print M.bcr # returns the calculated value
+# print M.s300
+# rudimentary plot
+# M.plt_backfield()

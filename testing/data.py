@@ -13,7 +13,7 @@ testdata = ( (1, 2, 3, 4),
              (9, 10, 11, 12))
 
 # create a rockpydata object with named columns and filled with testdata
-d = Structure.rockpydata.rockpydata(column_names=( 'F', 'Mx', 'My', 'Mz'), data=testdata)
+d = Structure.rockpydata.rockpydata(column_names=( 'F', 'Mx', 'My', 'Mz'))
 
 # define as many aliases as you want
 d.definealias('M', ( 'Mx', 'My', 'Mz'))
@@ -29,7 +29,8 @@ d['Mx'] = np.array((13, 24, 35))
 
 # show M with modified Mx component
 print( 'M:\n%s' % d['M'])
-
+# show Mx
+print( 'Mx:\n%s' % d['Mx'])
 # we can also alter several columns at once
 d['M'] = ((2, 3, 4),
           (18, 88, 98),
@@ -47,5 +48,11 @@ d.append_columns(("T",), np.array((1, 2, 3)))
 print( 'all:\n%s' % d['all'])
 
 # do a plot of F vs magM
-plt.plot(d['F'], d['magM'])
-plt.show()
+# plt.plot(d['F'], d['magM'])
+# plt.show()
+
+# fancy filtering of data
+tf_array = (d['Mx'] > 10) & (d['Mx'] < 20)
+print 'filtering:'
+filtered_d = d.filter(tf_array)
+print filtered_d['Mx']

@@ -1,14 +1,20 @@
 __author__ = 'wack'
 
 import numpy as np
+from copy import deepcopy
 
 
 class rockpydata(object):
-    #todo units
+    # todo units
     #question: do single values have to be asked with data['something'][0]?
     '''
     class to manage specific numeric data based on a numpy array
     e.g. d = rockpydata( column_names=( 'F','Mx', 'My', 'Mz'))
+
+    variable naming guidelines:
+       key: can be column_name and alia
+       column_name: only used for single columns
+       alias: only used for alias
     '''
 
     def __init__(self, column_names, units=None, data=None):
@@ -176,14 +182,25 @@ class rockpydata(object):
         if not self.key_exists(key):
             raise KeyError('key %s is not a valid column name or alias' % key)
 
+        if self._data is None:
+            return None
+            # todo: return multiple Nones corresponding to alias length
+
         # return appropriate columns from self.data numpy array
-        return self._data[:, self._column_dict[key]]
+        d = self._data[:, self._column_dict[key]]
+        if d.shape[1] == 1:
+            d = d.T[0]
+        return d
 
     def __setitem__(self, key, data):
         '''
         allows access to data columns by index (names)
         e.g. data['Mx'] = (1,2,3)
         '''
+
+        if data is None:
+            return
+
         # check if key is valid
         if key not in self._column_dict:
             raise KeyError('key %s is not a valid column name or alias' % key)
@@ -193,7 +210,12 @@ class rockpydata(object):
 
         # if we have no data, initialize everything to zero with number of lines matching the new data
         if self._data == None:
-            self._data = np.zeros(( data.shape[0], self.columncount))
+            try:
+                data.shape[0]
+            except IndexError:
+                data = data.reshape((1,))
+
+            self._data = np.zeros((data.shape[0], self.columncount))
 
         # make sure data is 2 dim, even if there is only one column
         if data.ndim == 1:
@@ -213,4 +235,67 @@ class rockpydata(object):
 
 
     def differentiate(self):
-        pass
+        raise NotImplemented
+
+    def filter(self, tf_array):
+        '''
+        Returns a copy of the data filtered according to a True_False array. False entries are not returned.
+
+        tf_array = (d['Mx'] > 10) & (d['Mx'] < 20)
+        filtered_d = d.filter(tf_array)
+
+        :param column_name:
+        :param tf_array: array_like
+                       array with True/False values
+        :return: rockpydata
+        '''
+        self_copy = deepcopy(self)
+
+        if not isinstance(tf_array, np.ndarray):
+            tf_array = np.array(tf_array).T
+
+        self_copy._data = self_copy._data[tf_array]
+        return self_copy
+
+
+    def lin_regress(self, column_name_x, column_name_y):
+        """
+        calculates a least squares linear regression for given x/y data
+        :param column_name_x:
+        :param column_name_y:
+        """
+
+        x = self[column_name_x]
+        y = self[column_name_y]
+
+        if len(x) < 2 or len(y) < 2:
+            return None
+
+        ''' calculate averages '''
+        x_mean = np.mean(x)
+        y_mean = np.mean(y)
+
+        ''' calculate differences '''
+        x_diff = x - x_mean
+        y_diff = y - y_mean
+
+        ''' square differences '''
+        x_diff_sq = x_diff ** 2
+        y_diff_sq = y_diff ** 2
+
+        ''' sum squared differences '''
+        x_sum_diff_sq = np.sum(x_diff_sq)
+        y_sum_diff_sq = np.sum(y_diff_sq)
+
+        mixed_sum = np.sum(x_diff * y_diff)
+        ''' calculate slopes '''
+        N = len(x)
+
+        slope = np.sqrt(y_sum_diff_sq / x_sum_diff_sq) * np.sign(mixed_sum)
+
+        sigma = np.sqrt((2 * y_sum_diff_sq - 2 * slope * mixed_sum) / ((N - 2) * x_sum_diff_sq))
+
+        y_intercept = y_mean + abs(slope * x_mean)
+        x_intercept = - y_intercept / slope
+
+        return slope, sigma, y_intercept, x_intercept

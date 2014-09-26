@@ -5,7 +5,7 @@ from copy import deepcopy
 
 
 class rockpydata(object):
-    # todo units
+    #todo units
     #question: do single values have to be asked with data['something'][0]?
     '''
     class to manage specific numeric data based on a numpy array
@@ -62,6 +62,11 @@ class rockpydata(object):
 
     def _update_all_alias(self):  #
         self._column_dict['all'] = tuple(range(self.columncount))
+
+    @property
+    def column_names(self):
+        return self._column_names
+
 
     @property
     def columncount(self):
@@ -233,6 +238,16 @@ class rockpydata(object):
 
         return np.sum(np.abs(self[key]) ** 2, axis=-1) ** (1. / 2)
 
+    def normalize(self, column_name, value = 1.0):
+        '''
+        return column data normalized to given value
+        e.g. d.normalize('X', 100)
+        '''
+        if not self.column_exists( column_name):
+            raise IndexError
+        d = self[ column_name]
+        return d / np.max( d) * value
+
 
     def differentiate(self):
         raise NotImplemented
@@ -298,4 +313,4 @@ class rockpydata(object):
         y_intercept = y_mean + abs(slope * x_mean)
         x_intercept = - y_intercept / slope
 
-        return slope, sigma, y_intercept, x_intercept
+        return slope, sigma, y_intercept, x_intercept        raise NotImplemented

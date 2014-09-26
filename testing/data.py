@@ -41,10 +41,14 @@ print( 'M:\n%s' % d['M'])
 # calculate magnitude of vector 'M' and save it as new column 'magM'
 d.append_columns('magM', d.magnitude('M'))
 
+# calculate values of 'magM' normalized to 100
+d.append_columns('normM', d.normalize('magM', 100))
+
 # we can also add arbitrary data in a new column
 d.append_columns(("T",), np.array((1, 2, 3)))
 
 # show all data again, now including magM and T as the last two columns
+print( d.column_names)
 print( 'all:\n%s' % d['all'])
 
 # do a plot of F vs magM

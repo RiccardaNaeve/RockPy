@@ -272,6 +272,27 @@ class rockpydata(object):
         self_copy._data = self_copy._data[tf_array]
         return self_copy
 
+    def filter_idx(self, index_list):
+        '''
+        Returns a copy of the data filtered according to indices specified in index_list
+
+        :example:
+
+        .. code-block:: python
+
+           idx_list = [3,5,7,8]
+           data = rp.rockpydata(column_names=['testdata'], data=[0,1,2,3,4,5,6,7,8,9,10])
+           filtered_data = data.filter_idx(idx_list)
+           filtered_data['testdata']
+           array([ 3.,  5.,  7.,  8.])
+
+        :param index_list:
+        :return: rockpydata
+               filtered data
+        '''
+
+        tf_array = [True if x in index_list else False for x in range(len(self['measurement']))]
+        return self.filter(tf_array)
 
     def lin_regress(self, column_name_x, column_name_y):
         """
@@ -313,4 +334,4 @@ class rockpydata(object):
         y_intercept = y_mean + abs(slope * x_mean)
         x_intercept = - y_intercept / slope
 
-        return slope, sigma, y_intercept, x_intercept        raise NotImplemented
+        return slope, sigma, y_intercept, x_intercept

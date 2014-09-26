@@ -1,6 +1,5 @@
 __author__ = 'Mike'
 import logging
-from Functions.general import create_logger
 # todo implement in data.class
 def convert2(in_unit, out_unit, unit_type):
     """
@@ -29,7 +28,6 @@ def convert2(in_unit, out_unit, unit_type):
          * 'area' [only metric units]
 
     """
-    create_logger('RockPy.FUNCTIONS')
     conversion_table = {'mass':
                             {'T': 1E-9,
                              'kg': 1E-6,
@@ -44,8 +42,8 @@ def convert2(in_unit, out_unit, unit_type):
                              'cm': 1E-1,
                              'mm': 1,
                              'micron': 1E3,
-                             'mum': 1E6,
-                             'nm': 1E9},
+                             'mum': 1E3,
+                             'nm': 1E6},
                         'area':
                             {'km2': 1E-12,
                              'm2': 1E-6,
@@ -132,8 +130,8 @@ def conversion(unit):
                              'cm': 1E-1,
                              'mm': 1,
                              'micron': 1E3,
-                             'mum': 1E6,
-                             'nm': 1E9},
+                             'mum': 1E3,
+                             'nm': 1E6},
                         'area':
                             {'km2': 1E-12,
                              'm2': 1E-6,

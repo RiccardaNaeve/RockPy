@@ -1,3 +1,5 @@
+from Structure.rockpydata import rockpydata
+
 __author__ = 'volk'
 import base
 import numpy as np
@@ -24,16 +26,19 @@ class Irm(base.Measurement):
 
     def format_vftb(self):
         self.log.debug('FORMATTING << %s >> raw_data for << VFTB >> data structure' % ('IRM'))
-        self.data = Structure.data.data(variable=self.raw_data['field'], var_unit='T',
-                                        measurement=self.raw_data['moment'], measure_unit='Am^2',
-                                        std_dev=self.raw_data['std_dev'])
+        self.data = rockpydata(column_names=('field', 'moment', 'temperature', 'time',
+                                             'std_dev', 'susceptibility'), data=self.raw_data)
 
     def format_vsm(self):
-        pass
+        raise NotImplemented
 
 
     def plt_irm(self):
-        std, = plt.plot(self.data.variable, self.data.measurement)
-        plt.xlabel('Field [%s]' % self.data.var_unit)
-        plt.ylabel('Magnetic Moment [%s]' % self.data.measure_unit)
+        plt.title('IRM acquisition %s' % (self.sample_obj.name))
+        std, = plt.plot(self.data['field'], self.data['moment'], zorder=1)
+        plt.grid()
+        plt.axhline(0, color='#808080')
+        plt.axvline(0, color='#808080')
+        plt.xlabel('Field [%s]' % ('T'))  # todo data.unit
+        plt.ylabel('Magnetic Moment [%s]' % ('Am^2'))  # todo data.unit
         plt.show()

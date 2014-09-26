@@ -1,8 +1,10 @@
+from Structure.rockpydata import rockpydata
+
 __author__ = 'wack'
 
 # script to test data objects
 
-import Structure.rockpydata
+import Structure.data
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -13,7 +15,7 @@ testdata = ( (1, 2, 3, 4),
              (9, 10, 11, 12))
 
 # create a rockpydata object with named columns and filled with testdata
-d = Structure.rockpydata.rockpydata(column_names=( 'F', 'Mx', 'My', 'Mz'))
+d = rockpydata(column_names=( 'F', 'Mx', 'My', 'Mz'))
 
 # define as many aliases as you want
 d.definealias('M', ( 'Mx', 'My', 'Mz'))

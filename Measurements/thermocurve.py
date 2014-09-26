@@ -1,3 +1,5 @@
+from Structure.rockpydata import rockpydata
+
 __author__ = 'volk'
 import base
 import Structure.data
@@ -26,13 +28,13 @@ class ThermoCurve(base.Measurement):
                 idx = i
                 break
 
-        self.up_temp = Structure.data.data(variable=self.raw_data['temp'][:i], var_unit='C',
-                                           measurement=self.raw_data['moment'][:i], measure_unit='$Am^2$',
-                                           std_dev=self.raw_data['std_dev'][:i],
+        self.up_temp = rockpydata(variable=self.raw_data['temp'][:i], var_unit='C',
+                                  measurement=self.raw_data['moment'][:i], measure_unit='$Am^2$',
+                                  std_dev=self.raw_data['std_dev'][:i],
         )
-        self.down_temp = Structure.data.data(variable=self.raw_data['temp'][i:], var_unit='C',
-                                             measurement=self.raw_data['moment'][i:], measure_unit='$Am^2$',
-                                             std_dev=self.raw_data['std_dev'][i:],
+        self.down_temp = rockpydata(variable=self.raw_data['temp'][i:], var_unit='C',
+                                    measurement=self.raw_data['moment'][i:], measure_unit='$Am^2$',
+                                    std_dev=self.raw_data['std_dev'][i:],
         )
 
     @property

@@ -89,21 +89,22 @@ class Sample():
         measurement = self.find_measurement(mtype='mass')
         if len(measurement) > 1:
             self.log.info('FOUND more than 1 << mass >> measurement. Returning first')
-        return measurement[0].data.data
+        return measurement[0].data['mass'][0]
 
     @property
     def height_m(self):
         measurement = self.find_measurement(mtype='height')
         if len(measurement) > 1:
             self.log.info('FOUND more than 1 << height >> measurement. Returning first')
-            return measurement[0].data.data
+        return measurement[0].data['height'][0]
+
 
     @property
     def diameter_m(self):
         measurement = self.find_measurement(mtype='diameter')
         if len(measurement) > 1:
             self.log.info('FOUND more than 1 << diameter >> measurement. Returning first')
-            return measurement[0].data.data
+        return measurement[0].data['diameter'][0]
 
 
     ''' FIND FUNCTIONS '''

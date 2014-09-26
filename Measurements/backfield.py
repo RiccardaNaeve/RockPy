@@ -1,3 +1,5 @@
+from Structure.rockpydata import rockpydata
+
 __author__ = 'volk'
 import base
 import Structure.data
@@ -31,7 +33,7 @@ class Backfield(base.Measurement):
 
         data_formatting[self.machine]()
 
-        self.results = Structure.rockpydata.rockpydata(column_names=('bcr', 's300'))
+        self.results = rockpydata(column_names=('bcr', 's300'))
 
 
     def format_vftb(self):
@@ -39,23 +41,23 @@ class Backfield(base.Measurement):
         formats the output from vftb to measurement. data
         :return:
         '''
-        self.remanence = Structure.rockpydata.rockpydata(column_names=('field', 'moment', 'temperature', 'time',
+        self.remanence = rockpydata(column_names=('field', 'moment', 'temperature', 'time',
                                                                   'std_dev', 'susceptibility'), data= self.raw_data)
 
     @property
-    def bcr(self):#todo rockpydata stores value twice
+    def bcr(self):
         '''
         returns the bcr value if already calculated,
         calls calculate_bcr if not yet calculated
         :return:
         '''
-        if self.results['bcr'] is None:
+        if self.results['bcr'] is None or self.results['bcr'] == 0:
             self.calculate_bcr()
         return self.results['bcr'][0]
 
     @property
-    def s300(self):#todo rockpydata stores value twice
-        if self.results['s300'] is None:
+    def s300(self):
+        if self.results['s300'] is None or self.results['s300'] == 0:
             self.results['s300'] = self.calculate_s300()
         return self.results['s300'][0]
 
@@ -103,19 +105,15 @@ class Backfield(base.Measurement):
             idx1 = idx
             idx2 = idx - 1
 
-        print self.remanence['field'][idx1], self.remanence['moment'][idx1]
-        print self.remanence['field'][idx2], self.remanence['moment'][idx2]
+        i = [idx1, idx2]
+        tf_array = [True if x in i else False for x in range(len(self.remanence['moment']))]
 
-        dx = self.remanence['field'][idx1] - self.remanence['field'][idx2]
-        dy = self.remanence['moment'][idx1] - self.remanence['moment'][idx2]
+        d = self.remanence.filter(tf_array=tf_array)
+        slope, sigma, y_intercept, x_intercept = d.lin_regress('field', 'moment')
 
-        m = dy / dx
-        y_intercept = self.remanence['moment'][idx2] + m * self.remanence['field'][idx2]
-
-        m300 = y_intercept + (m * 0.3)
+        m300 = y_intercept + (slope * 0.3)
         mrs = self.remanence['moment'][0]
-        print m, 'x', y_intercept
-        print '-0.0385803 x-0.206456'
+
         s300 = (1 - ( m300 / mrs)) / 2
 
         return s300

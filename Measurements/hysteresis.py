@@ -1,3 +1,5 @@
+from Structure.rockpydata import rockpydata
+
 __author__ = 'volk'
 import base
 import numpy as np
@@ -23,41 +25,132 @@ class Hysteresis(base.Measurement):
         data_formatting[self.machine]()
 
         # ## calculation initialization
-        self.ms = None
-        self.mrs = None
-        self.bc = None
-        self.brh = None
+        self.results = rockpydata(column_names=['ms', 'mrs', 'bc', 'brh'])
 
-
-
+    ### formatting functions
     def format_vftb(self):
-        dfield = np.diff(self.raw_data['field'])
+        self.data = rockpydata(column_names=('field', 'moment', 'temperature', 'time',
+                                             'std_dev', 'susceptibility'), data=self.raw_data)
+        dfield = np.diff(self.data['field'])
 
         idx = [i for i in range(len(dfield)) if dfield[i] < 0]
         virgin_idx = range(0, idx[0])
         down_field_idx = idx
         up_field_idx = range(idx[-1], len(dfield) + 1)
 
-        field = self.raw_data['field']
-        moment = self.raw_data['moment']
-        std_dev = self.raw_data['std_dev']
-
-        self.virgin = Structure.data.data(variable=[field[i] for i in virgin_idx], var_unit='Oe',
-                                          measurement=[moment[i] for i in virgin_idx], measure_unit='emu',
-                                          std_dev=[std_dev[i] for i in virgin_idx])
-        self.down_field = Structure.data.data(variable=[field[i] for i in down_field_idx], var_unit='Oe',
-                                              measurement=[moment[i] for i in down_field_idx], measure_unit='emu',
-                                              std_dev=[std_dev[i] for i in down_field_idx])
-        self.up_field = Structure.data.data(variable=[field[i] for i in up_field_idx], var_unit='Oe',
-                                            measurement=[moment[i] for i in up_field_idx], measure_unit='emu',
-                                            std_dev=[std_dev[i] for i in up_field_idx])
+        self.virgin = self.data.filter_idx(virgin_idx)
+        self.down_field = self.data.filter_idx(down_field_idx)
+        self.up_field = self.data.filter_idx(up_field_idx)
 
     def format_vsm(self):
         print self.raw_data.out
 
+    # ## parameters
+    @property
+    def ms(self):
+        '''
+        returns the ms value if already calculated,
+        calls calculate_ms if not yet calculated
+        :return:
+        '''
+        if self.results['ms'] is None or self.results['ms'] == 0:
+            self.calculate_ms()
+            # return self.results['ms'][0]
 
+    @property
+    def mrs(self):
+        '''
+        returns the mrs value if already calculated,
+        calls calculate_mrs if not yet calculated
+        :return:
+        '''
+        if self.results['mrs'] is None or self.results['mrs'] == 0:
+            self.calculate_mrs()
+            # return self.results['mrs'][0]
+
+    @property
+    def bc(self):
+        '''
+        returns the bc value if already calculated,
+        calls calculate_bc if not yet calculated
+        :return:
+        '''
+        if self.results['bc'] is None or self.results['bc'] == 0:
+            self.calculate_bc()
+        return self.results['bc'][0]
+
+    @property
+    def brh(self):
+        '''
+        returns the brh value if already calculated,
+        calls calculate_brh if not yet calculated
+        :return:
+        '''
+        if self.results['brh'] is None or self.results['brh'] == 0:
+            self.calculate_brh()
+            # return self.results['brh'][0]
+
+    # ## calculations
+
+    def calculate_ms(self):
+        raise NotImplemented
+
+    def calculate_mrs(self):
+        raise NotImplemented
+
+    def calculate_bc(self):
+        self.log.info('CALCULATING << Bc >> parameter from linear interpolation')
+
+        def calc(direction):
+            d = getattr(self, direction)
+            idx = np.argmin(np.abs(d['moment']))  # index of closest to 0
+
+            if d['moment'][idx] < 0:
+                idx1 = idx
+                idx2 = idx - 1
+            else:
+                idx1 = idx + 1
+                idx2 = idx
+
+            i = [idx1, idx2]
+            tf_array = [True if x in i else False for x in range(len(d['moment']))]
+            d = d.filter(tf_array=tf_array)
+            slope, sigma, y_intercept, x_intercept = d.lin_regress('field', 'moment')
+            bc = - y_intercept / slope
+            return bc
+
+        df = calc('down_field')
+        uf = calc('up_field')
+        self.results['bc'] = np.mean([df, uf])
+
+    def calculate_brh(self):
+        raise NotImplemented
+
+
+    ### plotting functions
     def plt_hys(self):
-        std, = plt.plot(self.virgin.variable, self.virgin.measurement)
-        plt.plot(self.down_field.variable, self.down_field.measurement, color=std.get_color())
-        plt.plot(self.up_field.variable, self.up_field.measurement, color=std.get_color())
+        '''
+        Rudimentary plotting function for quick check of data
+        :return:
+        '''
+
+        std, = plt.plot(self.down_field['field'], self.down_field['moment'], zorder=1)
+        plt.plot(self.up_field['field'], self.up_field['moment'], color=std.get_color(), zorder=1)
+
+        if not self.virgin is None:
+            plt.plot(self.virgin['field'], self.virgin['moment'], color=std.get_color(), zorder=1)
+        plt.plot([-self.bc, self.bc], 'xr')
+        plt.axhline(0, color='#808080')
+        plt.axvline(0, color='#808080')
+        plt.grid()
+        plt.title('Hysteresis %s' % (self.sample_obj.name))
+        plt.xlabel('Field [%s]' % ('T'))  # todo replace with data unit
+        plt.ylabel('Moment [%s]' % ('Am^2'))  #todo replace with data unit
         plt.show()
+
+    def plt_hysteresis(self):
+        '''
+        helper calls plt_hys()
+        :return:
+        '''
+        self.plt_hys()

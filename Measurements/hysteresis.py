@@ -13,21 +13,20 @@ class Hysteresis(base.Measurement):
                  **options):
         super(Hysteresis, self).__init__(sample_obj, mtype, mfile, machine)
 
-        data_formatting = {'vftb': self.format_vftb,
-                           'vsm': self.format_vsm}
-
         # ## initialize
         self.virgin = None
         self.msi = None
         self.up_field = None
         self.down_field = None
 
-        data_formatting[self.machine]()
+        # data formatting
+        if callable(getattr(self, 'format_' + machine)):
+            getattr(self, 'format_' + machine)()
 
         # ## calculation initialization
         self.results = rockpydata(column_names=['ms', 'mrs', 'bc', 'brh'])
 
-    ### formatting functions
+    # ## formatting functions
     def format_vftb(self):
         self.data = rockpydata(column_names=('field', 'moment', 'temperature', 'time',
                                              'std_dev', 'susceptibility'), data=self.raw_data)
@@ -44,6 +43,23 @@ class Hysteresis(base.Measurement):
 
     def format_vsm(self):
         print self.raw_data.out
+
+    def format_microsense(self):
+
+        dfield = np.diff(self.raw_data.out['raw_applied_field_for_plot_'])
+        down_field_idx = [i for i in range(len(dfield)) if dfield[i] < 0]
+        up_field_idx = [i for i in range(len(dfield)) if dfield[i] > 0]
+
+        self.down_field = self.raw_data.out.filter_idx(down_field_idx)
+        self.down_field.definealias('field', 'raw_applied_field_for_plot_')
+        self.down_field.definealias('moment', 'raw_signal_mx')
+        self.down_field['field'] *= 0.1 * 1e-3  # conversion Oe to Tesla
+
+        self.up_field = self.raw_data.out.filter_idx(up_field_idx)
+        self.up_field.definealias('field', 'raw_applied_field_for_plot_')
+        self.up_field.definealias('moment', 'raw_signal_mx')
+        self.up_field['field'] *= 0.1 * 1e-3  # conversion Oe to Tesla
+
 
     # ## parameters
     @property
@@ -75,9 +91,19 @@ class Hysteresis(base.Measurement):
         calls calculate_bc if not yet calculated
         :return:
         '''
-        if self.results['bc'] is None or self.results['bc'] == 0:
+        if self.results['bc'] is None:
             self.calculate_bc()
-        return self.results['bc'][0]
+        return np.mean(self.results['bc'])
+
+    @property
+    def bc_diff(self):
+        '''
+        returns the difference between down_field and up_field calculation of bc
+        :return: float
+        '''
+        if self.results['bc'] is None:
+            self.calculate_bc()
+        return self.results['bc'][0] - self.results['bc'][1]
 
     @property
     def brh(self):
@@ -137,25 +163,69 @@ class Hysteresis(base.Measurement):
 
         df = calc('down_field')
         uf = calc('up_field')
-        self.results['bc'] = np.mean([df, uf])
+        self.results['bc'] = [df, uf]
 
     def calculate_brh(self):
         raise NotImplemented
 
 
-    ### plotting functions
+    def down_field_interp(self):
+        from scipy import interpolate
+
+        x = self.down_field['field']
+        y = self.down_field['moment']
+
+        if np.all(np.diff(x) > 0):
+            f = interpolate.interp1d(x, y, kind='slinear')
+        else:
+            x = x[::-1]
+            y = y[::-1]
+            f = interpolate.interp1d(x, y, kind='slinear')
+
+        x_new = np.arange(min(x), max(x), 0.01)
+        y_new = f(x_new)
+        return x_new, y_new
+
+    def up_field_interp(self):
+        from scipy import interpolate
+
+        x = self.up_field['field']
+        y = self.up_field['moment']
+
+        if np.all(np.diff(x) > 0):
+            f = interpolate.interp1d(x, y, kind='slinear')
+        else:
+            x = x[::-1]
+            y = y[::-1]
+            f = interpolate.interp1d(x, y, kind='slinear')
+
+        x_new = np.arange(min(x), max(x), 0.01)
+        y_new = f(x_new)
+        return x_new, y_new
+
+    # ## plotting functions
     def plt_hys(self):
         '''
         Rudimentary plotting function for quick check of data
         :return:
         '''
 
-        std, = plt.plot(self.down_field['field'], self.down_field['moment'], '.-', zorder=1)
-        plt.plot(self.up_field['field'], self.up_field['moment'], '.-', color=std.get_color(), zorder=1)
+        std, = plt.plot(self.down_field['field'], self.down_field['moment'], '.', zorder=1)
+        plt.plot(self.up_field['field'], self.up_field['moment'], '.',
+                 color=std.get_color(),
+                 zorder=1)
+        plt.plot(self.down_field_interp()[0], self.down_field_interp()[1], '--',
+                 color=std.get_color(),
+                 zorder=1)
+        plt.plot(self.up_field_interp()[0], self.up_field_interp()[1], '--',
+                 color=std.get_color(),
+                 zorder=1)
 
         if not self.virgin is None:
             plt.plot(self.virgin['field'], self.virgin['moment'], color=std.get_color(), zorder=1)
-        plt.plot([-self.bc, self.bc], [0,0], 'xr')
+
+        # ## plotting pc as crosses
+        plt.plot([-(self.bc + (self.bc_diff / 2)), self.bc - (self.bc_diff / 2)], [0, 0], 'xr')
         plt.axhline(0, color='#808080')
         plt.axvline(0, color='#808080')
         plt.grid()

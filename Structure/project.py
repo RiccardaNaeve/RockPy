@@ -7,7 +7,7 @@ import numpy as np
 import scipy as sp
 import matplotlib.pyplot as plt
 import csv
-from Measurements import parameters, hysteresis, backfield, thermocurve, irm
+from Measurements import parameters, hysteresis, backfield, thermocurve, irm, thellier
 
 
 class Sample():
@@ -72,6 +72,7 @@ class Sample():
             'backfield': backfield.Backfield,
             'thermocurve': thermocurve.ThermoCurve,
             'irm': irm.Irm,
+            'thellier': thellier.Thellier,
         }
 
         if mtype.lower() in implemented:

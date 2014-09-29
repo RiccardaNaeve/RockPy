@@ -99,24 +99,40 @@ class Hysteresis(base.Measurement):
         raise NotImplemented
 
     def calculate_bc(self):
-        self.log.info('CALCULATING << Bc >> parameter from linear interpolation')
+        '''
+
+        :return:
+        '''
+        self.log.info('CALCULATING << Bc >> parameter from linear interpolation between points closest to m=0')
 
         def calc(direction):
             d = getattr(self, direction)
-            idx = np.argmin(np.abs(d['moment']))  # index of closest to 0
+            idx = np.argmin(abs(d['moment']))  # index of closest to 0
 
             if d['moment'][idx] < 0:
-                idx1 = idx
-                idx2 = idx - 1
+                if d['moment'][idx + 1] < 0:
+                    idx1 = idx
+                    idx2 = idx - 1
+                else:
+                    idx1 = idx + 1
+                    idx2 = idx
             else:
-                idx1 = idx + 1
-                idx2 = idx
+                if d['moment'][idx + 1] < 0:
+                    idx1 = idx + 1
+                    idx2 = idx
+                else:
+                    idx1 = idx - 1
+                    idx2 = idx
 
             i = [idx1, idx2]
-            tf_array = [True if x in i else False for x in range(len(d['moment']))]
-            d = d.filter(tf_array=tf_array)
-            slope, sigma, y_intercept, x_intercept = d.lin_regress('field', 'moment')
-            bc = - y_intercept / slope
+            d = d.filter_idx(i)
+
+            dy = d['moment'][1] - d['moment'][0]
+            dx = d['field'][1] - d['field'][0]
+            m = dy / dx
+            b = d['moment'][1] - d['field'][1] * m
+            bc = abs(b / m)
+
             return bc
 
         df = calc('down_field')
@@ -134,12 +150,12 @@ class Hysteresis(base.Measurement):
         :return:
         '''
 
-        std, = plt.plot(self.down_field['field'], self.down_field['moment'], zorder=1)
-        plt.plot(self.up_field['field'], self.up_field['moment'], color=std.get_color(), zorder=1)
+        std, = plt.plot(self.down_field['field'], self.down_field['moment'], '.-', zorder=1)
+        plt.plot(self.up_field['field'], self.up_field['moment'], '.-', color=std.get_color(), zorder=1)
 
         if not self.virgin is None:
             plt.plot(self.virgin['field'], self.virgin['moment'], color=std.get_color(), zorder=1)
-        plt.plot([-self.bc, self.bc], 'xr')
+        plt.plot([-self.bc, self.bc], [0,0], 'xr')
         plt.axhline(0, color='#808080')
         plt.axvline(0, color='#808080')
         plt.grid()

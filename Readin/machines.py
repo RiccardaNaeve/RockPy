@@ -1,6 +1,45 @@
 __author__ = 'volk'
 import logging
 import numpy as np
+import time
+import base
+
+
+
+
+def cryo_nl(file, sample, *args, **options):
+    log = logging.getLogger('RockPy.READIN.CRYO_NL')
+    log.info('IMPORTING\t cryomag file: << %s >>' % file)
+
+    floats = ['x', 'y', 'z', 'm', 'sm', 'a95', 'dc', 'ic', 'dg', 'ig', 'ds', 'is']
+    data_f = open(file)
+    data = [i.strip('\n\r').split('\t') for i in data_f.readlines()]
+
+    header = ['name', 'coreaz', 'coredip', 'bedaz', 'beddip',
+              'vol', 'weight', 'step', 'type', 'comment',
+              'time', 'mode', 'x', 'y', 'z',
+              'M', 'sM', 'a95', 'Dc', 'Ic', 'Dg', 'Ig', 'Ds', 'Is']
+    sample_data = np.array([i for i in data[2:-1] if i[0] == sample or sample in i[9] if i[11] == 'results'])
+
+    holder_data = np.array([i for i in data[2:-1] if i[0].lower() == 'acryl' if i[11] == 'results'])
+
+    try:
+        out = {header[i].lower(): sample_data[:, i] for i in range(len(header))}
+        out['acryl'] = {header[i].lower(): holder_data[:, i] for i in range(len(header))}
+    except IndexError:
+        log.error('CANT find sample/holder')
+        return None
+
+    for i in floats:
+        out[i] = map(float, out[i])
+        out['acryl'][i] = map(float, out[i])
+    out['step'] = map(int, out['step'])
+
+    def time_conv(t):
+        return time.strptime(t, "%y-%m-%d %H:%M:%S")
+
+    out['time'] = map(time_conv, out['time'])
+    return out
 
 
 class Vsm(object):
@@ -118,8 +157,8 @@ def Vftb(file, *args, **options):
 
     out = np.array(out)
 
-    out[:,0] *= 0.0001 # recalculate to T
-    out[:,1] *= mass / 1E3 # de-normalize of mass
+    out[:, 0] *= 0.0001  # recalculate to T
+    out[:, 1] *= mass / 1E3  # de-normalize of mass
 
     units = ['T', 'Am^2', 'C', 's', '%', 'emu/g/Oe']
 
@@ -128,7 +167,7 @@ def Vftb(file, *args, **options):
 
 # def vsm_forc(file, sample=None):
 # log = logging.getLogger('RockPy.READIN.vsm_forc')
-#     log.info('IMPORTING\t VSM file: << %s >>' % file)
+# log.info('IMPORTING\t VSM file: << %s >>' % file)
 #
 #     file = open(file, 'rU')
 #     reader_object = file.readlines()
@@ -136,7 +175,8 @@ def Vftb(file, *args, **options):
 #     raw_out = [i for i in reader_object][header['meta']['numberoflines']:]  # without header
 #
 #     #### header part
-#     data_header = [i.split('\n')[0] for i in raw_out if not i.startswith('+') and not i.startswith('-') and not i.split() == []][:-1]
+#     data_header = [i.split('\n')[0] for i in raw_out if not i.startswith('+') and not i.startswith('-') and not
+# i.split() == []][:-1]
 #     aux = [i for i in data_header[-3:]]
 #     h_len = len(aux[0]) / len(aux[-1].split())+1
 #     splits = np.array([[i[x:x + h_len] for x in range(0, len(i), h_len)] for i in aux ]).T

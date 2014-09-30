@@ -294,6 +294,19 @@ class rockpydata(object):
         tf_array = [True if x in index_list else False for x in range(len(self['measurement']))]
         return self.filter(tf_array)
 
+    def check_duplicate(self):
+        #todo look for duplicate entries e.g Temp
+        raise NotImplemented
+
+    def sort_data(self):
+        #todo sort for variable
+        raise NotImplemented
+
+    def rename_column(self):
+        #todo rename columns easily
+        raise NotImplemented
+
+
     def lin_regress(self, column_name_x, column_name_y):
         """
         calculates a least squares linear regression for given x/y data
@@ -335,3 +348,6 @@ class rockpydata(object):
         x_intercept = - y_intercept / slope
 
         return slope, sigma, y_intercept, x_intercept
+
+    def minus_equal_var(self, other, variable):
+        self_copy = deepcopy(self)

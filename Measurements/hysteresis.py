@@ -24,7 +24,10 @@ class Hysteresis(base.Measurement):
             getattr(self, 'format_' + machine)()
 
         # ## calculation initialization
-        self.results = rockpydata(column_names=['ms', 'mrs', 'bc', 'brh'])
+        result_methods = [i[7:] for i in dir(self) if i.startswith('result_')]  # search for implemented results methods
+        self.results = rockpydata(
+            column_names=result_methods)  # dynamic entry creation for all available result methods
+        print self.results._column_names
 
     # ## formatting functions
     def format_vftb(self):
@@ -69,7 +72,7 @@ class Hysteresis(base.Measurement):
         calls calculate_ms if not yet calculated
         :return:
         '''
-        if self.results['ms'] is None or self.results['ms'] == 0:
+        if self.results['ms'] is None:
             self.calculate_ms()
             # return self.results['ms'][0]
 
@@ -80,7 +83,7 @@ class Hysteresis(base.Measurement):
         calls calculate_mrs if not yet calculated
         :return:
         '''
-        if self.results['mrs'] is None or self.results['mrs'] == 0:
+        if self.results['mrs'] is None:
             self.calculate_mrs()
             # return self.results['mrs'][0]
 
@@ -112,9 +115,51 @@ class Hysteresis(base.Measurement):
         calls calculate_brh if not yet calculated
         :return:
         '''
-        if self.results['brh'] is None or self.results['brh'] == 0:
+        if self.results['brh'] is None:
             self.calculate_brh()
             # return self.results['brh'][0]
+
+    @property
+    def generic(self):
+        '''
+        helper function that returns the value for a given statistical method. If result not available will calculate
+        it with standard parameters
+        '''
+        return self.result_generic()
+
+    # ## results
+
+    def result_generic(self, parameters='standard'):
+        '''
+        Generic for for result implementation. Every calculation of result should be in the self.results data structure
+        before calculation.
+        It should then be tested if a value for it exists, and if not it should be created by calling
+        _calculate_result_(result_name).
+
+        '''
+        if self.results['generic'] is None:
+            self.calculate_generic(parameters)
+        return self.results['generic']
+
+    def result_ms(self):
+        if self.results['ms'] is None:
+            self.calculate_generic()
+        return self.results['ms']
+
+    def result_mrs(self):
+        if self.results['mrs'] is None:
+            self.calculate_generic()
+        return self.results['mrs']
+
+    def result_bc(self):
+        if self.results['bc'] is None:
+            self.calculate_generic()
+        return self.results['bc']
+
+    def result_brh(self):
+        if self.results['brh'] is None:
+            self.calculate_generic()
+        return self.results['brh']
 
     # ## calculations
 
@@ -168,6 +213,13 @@ class Hysteresis(base.Measurement):
     def calculate_brh(self):
         raise NotImplemented
 
+    def calculate_generic(self, parameters):
+        '''
+        actual calculation of the result
+
+        :return:
+        '''
+        self.results['generic'] = 0
 
     def down_field_interp(self):
         from scipy import interpolate
@@ -214,12 +266,14 @@ class Hysteresis(base.Measurement):
         plt.plot(self.up_field['field'], self.up_field['moment'], '.',
                  color=std.get_color(),
                  zorder=1)
-        plt.plot(self.down_field_interp()[0], self.down_field_interp()[1], '--',
-                 color=std.get_color(),
-                 zorder=1)
-        plt.plot(self.up_field_interp()[0], self.up_field_interp()[1], '--',
-                 color=std.get_color(),
-                 zorder=1)
+
+        # plotting interpolated data
+        # plt.plot(self.down_field_interp()[0], self.down_field_interp()[1], '--',
+        #          color=std.get_color(),
+        #          zorder=1)
+        # plt.plot(self.up_field_interp()[0], self.up_field_interp()[1], '--',
+        #          color=std.get_color(),
+        #          zorder=1)
 
         if not self.virgin is None:
             plt.plot(self.virgin['field'], self.virgin['moment'], color=std.get_color(), zorder=1)

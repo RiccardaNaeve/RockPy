@@ -97,7 +97,7 @@ class Thellier(base.Measurement):
 
     def result_generic(self, parameters='standard'):
         '''
-        Generic for for result implementation. Every calculatable result should be in the self.results data structure
+        Generic for for result implementation. Every calculation of result should be in the self.results data structure
         before calculation.
         It should then be tested if a value for it exists, and if not it should be created by calling
         _calculate_result_(result_name).

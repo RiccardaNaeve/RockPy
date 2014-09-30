@@ -348,3 +348,6 @@ class rockpydata(object):
         x_intercept = - y_intercept / slope
 
         return slope, sigma, y_intercept, x_intercept
+
+    def minus_equal_var(self, other, variable):
+        self_copy = deepcopy(self)

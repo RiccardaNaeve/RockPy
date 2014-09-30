@@ -7,4 +7,5 @@ cryomag_file = 'test_data/NLCRY_Thellier_test.TT'
 sample = Sample(name='1a')
 
 M = sample.add_measurement(mtype='thellier', mfile=cryomag_file, machine='cryomag')
-M.plt_dunlop()
+M.result_test()
+# M.plt_dunlop()

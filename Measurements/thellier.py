@@ -1,9 +1,12 @@
+# coding=utf-8
 __author__ = 'volk'
 from Structure.rockpydata import rockpydata
 import base
 import numpy as np
+import scipy as sp
 import Structure.data
 import matplotlib.pyplot as plt
+import sys
 
 
 class Thellier(base.Measurement):
@@ -11,9 +14,6 @@ class Thellier(base.Measurement):
                  mtype, mfile, machine,
                  **options):
         super(Thellier, self).__init__(sample_obj, mtype, mfile, machine)
-
-        data_formatting = {'cryomag': self.format_cryomag,
-                           'sushibar': self.format_sushibar}
 
         # ## initialize data
         # paint data
@@ -23,12 +23,14 @@ class Thellier(base.Measurement):
         self.ac = None  #
         self.tr = None  #
         self.ck = None  #
-        # results
-        self.results = None
 
-        data_formatting[self.machine]()
-        print self.th['moment']
-        print self.th['temp']
+        # results
+        result_methods = [i[7:] for i in dir(self) if i.startswith('result_')]  # search for implemented results methods
+        self.results = rockpydata(
+            column_names=result_methods)  # dynamic entry creation for all available result methods
+
+        if callable(getattr(self, 'format_' + machine)):  # check for available formatting NEEDS TO START WITH format_
+            getattr(self, 'format_' + machine)()  # call format_ for appropriate machine
 
     def format_cryomag(self):
         '''
@@ -54,7 +56,7 @@ class Thellier(base.Measurement):
         self.trm = self.all_data.filter_idx(TRM_idx)
         self.th = self.all_data.filter_idx(np.append(NRM_idx, TH_idx))
         self.pt = self.all_data.filter_idx(np.append(NRM_idx, PT_idx))
-        self.ptrm = None
+        self.ptrm = self.pt.minus_equal_var(self.th, 'temp')
 
         self.ac = self.all_data.filter_idx(np.where(self.raw_data['type'] == 'AC')[0])
         self.ck = self.all_data.filter_idx(np.where(self.raw_data['type'] == 'CK')[0])
@@ -66,21 +68,49 @@ class Thellier(base.Measurement):
 
     # ## plotting functions
     def plt_dunlop(self):
-        ### workaround until data.sort()
+        # ## workaround until data.sort()
         # todo implements data.sort
         xy = np.c_[self.th['temp'], self.th['moment']]
-        xy = xy[np.lexsort((xy[:,1], xy[:,0]))]
-        plt.plot(xy[:,0], xy[:,1], '.-', zorder=1)
+        xy = xy[np.lexsort((xy[:, 1], xy[:, 0]))]
+        plt.plot(xy[:, 0], xy[:, 1], '.-', zorder=1)
 
         # plt.plot(self.th['temp'], self.th['moment'], '.-', zorder=1) #todo uncomment when data.sort
         plt.plot(self.pt['temp'], self.pt['moment'], '.-', zorder=1)
         plt.plot(self.tr['temp'], self.tr['moment'], 's')
         plt.grid()
-        plt.title('Dunlop Plot %s' %(self.sample_obj.name))
-        plt.xlabel('Temperature [%s]' %('C'))
-        plt.ylabel('Moment [%s]' %('Am^2'))
+        plt.title('Dunlop Plot %s' % (self.sample_obj.name))
+        plt.xlabel('Temperature [%s]' % ('C'))
+        plt.ylabel('Moment [%s]' % ('Am^2'))
         plt.xlim([min(self.th['temp']), max(self.th['temp'])])
         plt.show()
 
     def plt_arai(self):
         raise NotImplementedError
+
+    @property
+    def generic(self):
+        '''
+        helper function that returns the value for a given statistical method. If result not available will calculate
+        it with standard parameters
+        '''
+        return self.result_generic()
+
+    def result_generic(self, parameters='standard'):
+        '''
+        Generic for for result implementation. Every calculatable result should be in the self.results data structure
+        before calculation.
+        It should then be tested if a value for it exists, and if not it should be created by calling
+        _calculate_result_(result_name).
+
+        '''
+        if self.results['generic'] is None:
+            self.calculate_generic(parameters)
+        return self.results['generic']
+
+    def calculate_generic(self, parameters):
+        '''
+        actual calculation of the result
+
+        :return:
+        '''
+        self.results['generic'] = 0

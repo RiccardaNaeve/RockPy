@@ -5,7 +5,7 @@ from copy import deepcopy
 
 
 class rockpydata(object):
-    #todo units
+    # todo units
     #question: do single values have to be asked with data['something'][0]?
     '''
     class to manage specific numeric data based on a numpy array
@@ -42,7 +42,8 @@ class rockpydata(object):
         '''
         update internal _column_dict to assign single column names and aliases to column indices
         * if column_names == None, populate _column_dict with all columns, aliases will be lost
-        * if column_names is list of column names (which must already exist in self._column_names), add or update those in _column_dict
+        * if column_names is list of column names (which must already exist in self._column_names), add or update
+        those in _column_dict
         e.g. {'Mx': (0,),'My': (1,), 'Mz': (2,), 'Mx': (0,1,2))
         '''
 
@@ -238,15 +239,15 @@ class rockpydata(object):
 
         return np.sum(np.abs(self[key]) ** 2, axis=-1) ** (1. / 2)
 
-    def normalize(self, column_name, value = 1.0):
+    def normalize(self, column_name, value=1.0):
         '''
         return column data normalized to given value
         e.g. d.normalize('X', 100)
         '''
-        if not self.column_exists( column_name):
+        if not self.column_exists(column_name):
             raise IndexError
-        d = self[ column_name]
-        return d / np.max( d) * value
+        d = self[column_name]
+        return d / np.max(d) * value
 
 
     def differentiate(self):
@@ -298,9 +299,9 @@ class rockpydata(object):
         #todo look for duplicate entries e.g Temp
         raise NotImplemented
 
-    def sort_data(self):
-        #todo sort for variable
-        raise NotImplemented
+    def sort(self, variable='variable'):
+        idx = self.column_dict[variable][0]
+        self.data = self.data[self.data[:, idx].argsort()]
 
     def rename_column(self):
         #todo rename columns easily

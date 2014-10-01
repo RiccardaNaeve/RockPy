@@ -25,7 +25,7 @@ class Measurement(object):
             },
             'vsm': {'hys': machines.Vsm,
             },
-            'cryomag': {'thellier': machines.cryo_nl
+            'cryomag': {'thellier': machines.cryo_nl,
             },
             'microsense': {'hys': Readin.microsense.MicroSense}
         }

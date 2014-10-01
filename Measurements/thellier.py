@@ -40,12 +40,13 @@ class Thellier(base.Measurement):
 
         :return:
         '''
-        self.all_data = rockpydata(column_names=['type', 'x', 'y', 'z', 'moment', 'time', 'temp', 'std_dev'])
+        self.all_data = rockpydata(column_names=['temp', 'x', 'y', 'z', 'moment', 'time', 'std_dev'])
         self.all_data['x'] = self.raw_data['x']
         self.all_data['y'] = self.raw_data['y']
         self.all_data['z'] = self.raw_data['z']
         self.all_data['moment'] = self.raw_data['m']
         self.all_data['temp'] = self.raw_data['step']
+        self.all_data['std_dev'] = self.raw_data['sm']
 
         TH_idx = np.where(self.raw_data['type'] == 'TH')[0]
         PT_idx = np.where(self.raw_data['type'] == 'PT')[0]
@@ -55,8 +56,46 @@ class Thellier(base.Measurement):
         self.nrm = self.all_data.filter_idx(NRM_idx)
         self.trm = self.all_data.filter_idx(TRM_idx)
         self.th = self.all_data.filter_idx(np.append(NRM_idx, TH_idx))
+        self.th.definealias('m', ( 'x', 'y', 'z'))
+        self.th.sort('temp')
+
         self.pt = self.all_data.filter_idx(np.append(NRM_idx, PT_idx))
-        self.ptrm = self.pt.minus_equal_var(self.th, 'temp')
+        self.pt.sort('temp')
+        self.pt.definealias('m', ('x', 'y', 'z'))
+
+        # ## PTRM
+        var_index = np.array([(i, j) for i, v1 in enumerate(self.th['temp']) for j, v2 in enumerate(self.pt['temp'])
+                              if v1 == v2])
+
+        t = [self.pt['temp'][j] for i, j in var_index]
+        x = [self.pt['x'][j] - self.th['x'][i] for i, j in var_index]
+        y = [self.pt['y'][j] - self.th['y'][i] for i, j in var_index]
+        z = [self.pt['z'][j] - self.th['z'][i] for i, j in var_index]
+        m = [self.pt['moment'][j] - self.th['moment'][i] for i, j in var_index]
+        std_dev = [self.pt['std_dev'][j] + self.th['std_dev'][i] for i, j in var_index]
+        data = np.c_[t, x, y, z, m, std_dev]
+
+        data = data[data[:, 0].argsort()]
+
+        self.ptrm = rockpydata(column_names=['temp', 'x', 'y', 'z', 'moment', 'std_dev'], data=data)
+        self.ptrm.definealias('m', ( 'x', 'y', 'z'))
+        self.ptrm.append_columns('mag', self.ptrm.magnitude('m'))
+        ### SUM
+        var_index = np.array([(i, j) for i, v1 in enumerate(self.th['temp']) for j, v2 in enumerate(self.ptrm['temp'])
+                              if v1 == v2])
+
+        t = [self.th['temp'][j] for i, j in var_index]
+        x = [self.ptrm['x'][j] + self.th['x'][i] for i, j in var_index]
+        y = [self.ptrm['y'][j] + self.th['y'][i] for i, j in var_index]
+        z = [self.ptrm['z'][j] + self.th['z'][i] for i, j in var_index]
+        m = [self.ptrm['moment'][j] + self.th['moment'][i] for i, j in var_index]
+        std_dev = [self.ptrm['x'][j] + self.th['std_dev'][i] for i, j in var_index]
+        data = np.c_[t, x, y, z, m, std_dev]
+        data = data[data[:,0].argsort()]
+
+        self.sum = rockpydata(column_names=['temp', 'x', 'y', 'z', 'moment', 'std_dev'], data=data)
+        self.sum.definealias('m', ( 'x', 'y', 'z'))
+        self.sum.append_columns('mag', self.sum.magnitude('m'))
 
         self.ac = self.all_data.filter_idx(np.where(self.raw_data['type'] == 'AC')[0])
         self.ck = self.all_data.filter_idx(np.where(self.raw_data['type'] == 'CK')[0])
@@ -68,14 +107,11 @@ class Thellier(base.Measurement):
 
     # ## plotting functions
     def plt_dunlop(self):
-        # ## workaround until data.sort()
-        # todo implements data.sort
-        xy = np.c_[self.th['temp'], self.th['moment']]
-        xy = xy[np.lexsort((xy[:, 1], xy[:, 0]))]
-        plt.plot(xy[:, 0], xy[:, 1], '.-', zorder=1)
 
-        # plt.plot(self.th['temp'], self.th['moment'], '.-', zorder=1) #todo uncomment when data.sort
-        plt.plot(self.pt['temp'], self.pt['moment'], '.-', zorder=1)
+        plt.plot(self.th['temp'], self.th['moment'], '.-', zorder=1)
+        # plt.plot(self.ptrm['temp'], self.ptrm['moment'], '.-', zorder=1)
+        plt.plot(self.ptrm['temp'], self.ptrm['mag'], '.-', zorder=1)
+        plt.plot(self.sum['temp'], self.sum['mag'], '.--', zorder=1)
         plt.plot(self.tr['temp'], self.tr['moment'], 's')
         plt.grid()
         plt.title('Dunlop Plot %s' % (self.sample_obj.name))
@@ -85,6 +121,15 @@ class Thellier(base.Measurement):
         plt.show()
 
     def plt_arai(self):
+        equal = set(self.th['temp']) & set(self.ptrm['temp'])
+        idx = [i for i,v in enumerate(self.th['temp']) if v in equal]
+        th = self.th.filter_idx(idx)
+        plt.plot(self.ptrm['moment'], th['moment'], '.-', zorder=1)
+        plt.grid()
+        plt.title('Arai Diagram %s' % (self.sample_obj.name))
+        plt.xlabel('NRM remaining [%s]' % ('C'))
+        plt.ylabel('pTRM gained [%s]' % ('Am^2'))
+        plt.show()
         raise NotImplementedError
 
     @property

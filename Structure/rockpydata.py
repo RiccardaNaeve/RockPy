@@ -6,7 +6,6 @@ from copy import deepcopy
 
 class rockpydata(object):
     # todo units
-    #question: do single values have to be asked with data['something'][0]?
     '''
     class to manage specific numeric data based on a numpy array
     e.g. d = rockpydata( column_names=( 'F','Mx', 'My', 'Mz'))
@@ -29,16 +28,16 @@ class rockpydata(object):
         self._column_names = list(column_names)
         self._data = None
 
-        self._updatecolumndictionary()
+        self._update_column_dictionary()
 
         # define some default aliases
         self._update_all_alias()
         self._column_dict['variable'] = (0,)
-        self._column_dict['measurement'] = tuple(range(self.columncount)[1:])
+        self._column_dict['measurement'] = tuple(range(self.column_count)[1:])
 
         self['all'] = data
 
-    def _updatecolumndictionary(self, column_names=None):
+    def _update_column_dictionary(self, column_names=None):
         '''
         update internal _column_dict to assign single column names and aliases to column indices
         * if column_names == None, populate _column_dict with all columns, aliases will be lost
@@ -62,7 +61,7 @@ class rockpydata(object):
 
 
     def _update_all_alias(self):  #
-        self._column_dict['all'] = tuple(range(self.columncount))
+        self._column_dict['all'] = tuple(range(self.column_count))
 
     @property
     def column_names(self):
@@ -70,7 +69,7 @@ class rockpydata(object):
 
 
     @property
-    def columncount(self):
+    def column_count(self):
         return len(self._column_names)
 
     @property
@@ -101,12 +100,12 @@ class rockpydata(object):
         if d.ndim != 2:
             raise TypeError('wrong data dimension')
 
-        if d.shape[1] != self.columncount:
+        if d.shape[1] != self.column_count:
             raise TypeError('wrong number of columns in data')
 
         self._data = np.array(data)
 
-    def definealias(self, alias_name, column_names):
+    def define_alias(self, alias_name, column_names):
         '''
         define an alias for a sequence of existing columns
         e.g. d.definealias( 'M', ('Mx', 'My', 'Mz'))
@@ -122,15 +121,15 @@ class rockpydata(object):
                 raise IndexError('column %s does not exist' % n)
 
         # add alias to _column_dict
-        self._definealias_indices(alias_name, tuple(self._column_dict[cn][0] for cn in column_names))
+        self._define_alias_indices(alias_name, tuple(self._column_dict[cn][0] for cn in column_names))
 
-    def _definealias_indices(self, alias_name, column_indices):
+    def _define_alias_indices(self, alias_name, column_indices):
         '''
         define an alias as a sequence of numeric column indices
         '''
         # todo check if column_indices is integer array?
         # check if column indices are in valid range
-        if max(column_indices) > self.columncount or min(column_indices) < 0:
+        if max(column_indices) > self.column_count or min(column_indices) < 0:
             raise IndexError('column indices out of range')
         self._column_dict[alias_name] = tuple(column_indices)
 
@@ -151,7 +150,7 @@ class rockpydata(object):
         self._column_names.extend(column_names)
 
         # update internal column dictionary
-        self._updatecolumndictionary(column_names)
+        self._update_column_dictionary(column_names)
 
         if data == None:
             # if there is no data, create zeros
@@ -221,7 +220,7 @@ class rockpydata(object):
             except IndexError:
                 data = data.reshape((1,))
 
-            self._data = np.zeros((data.shape[0], self.columncount))
+            self._data = np.zeros((data.shape[0], self.column_count))
 
         # make sure data is 2 dim, even if there is only one column
         if data.ndim == 1:
@@ -336,7 +335,7 @@ class rockpydata(object):
         try:
             idx = self._column_names.index(old_key)
             self._column_names[idx] = new_key
-            self._updatecolumndictionary(self._column_names)
+            self._update_column_dictionary(self._column_names)
         except ValueError:
             print 'Key << %s >> does not exist' %(old_key)
 

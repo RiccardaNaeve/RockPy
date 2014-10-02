@@ -54,13 +54,13 @@ class Hysteresis(base.Measurement):
         up_field_idx = [i for i in range(len(dfield)) if dfield[i] > 0]
 
         self.down_field = self.raw_data.out.filter_idx(down_field_idx)
-        self.down_field.definealias('field', 'raw_applied_field_for_plot_')
-        self.down_field.definealias('moment', 'raw_signal_mx')
+        self.down_field.define_alias('field', 'raw_applied_field_for_plot_')
+        self.down_field.define_alias('moment', 'raw_signal_mx')
         self.down_field['field'] *= 0.1 * 1e-3  # conversion Oe to Tesla
 
         self.up_field = self.raw_data.out.filter_idx(up_field_idx)
-        self.up_field.definealias('field', 'raw_applied_field_for_plot_')
-        self.up_field.definealias('moment', 'raw_signal_mx')
+        self.up_field.define_alias('field', 'raw_applied_field_for_plot_')
+        self.up_field.define_alias('moment', 'raw_signal_mx')
         self.up_field['field'] *= 0.1 * 1e-3  # conversion Oe to Tesla
 
 

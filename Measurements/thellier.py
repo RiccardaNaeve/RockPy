@@ -52,12 +52,12 @@ class Thellier(base.Measurement):
         self.nrm = self.all_data.filter_idx(NRM_idx)
         self.trm = self.all_data.filter_idx(TRM_idx)
         self.th = self.all_data.filter_idx(np.append(NRM_idx, TH_idx))
-        self.th.definealias('m', ( 'x', 'y', 'z'))
+        self.th.define_alias('m', ( 'x', 'y', 'z'))
         self.th.sort('temp')
 
         self.pt = self.all_data.filter_idx(np.append(NRM_idx, PT_idx))
         self.pt.sort('temp')
-        self.pt.definealias('m', ('x', 'y', 'z'))
+        self.pt.define_alias('m', ('x', 'y', 'z'))
 
         # ## PTRM
         var_index = np.array([(i, j) for i, v1 in enumerate(self.th['temp']) for j, v2 in enumerate(self.pt['temp'])
@@ -74,7 +74,7 @@ class Thellier(base.Measurement):
         data = data[data[:, 0].argsort()]
 
         self.ptrm = rockpydata(column_names=['temp', 'x', 'y', 'z', 'moment', 'std_dev'], data=data)
-        self.ptrm.definealias('m', ( 'x', 'y', 'z'))
+        self.ptrm.define_alias('m', ( 'x', 'y', 'z'))
         self.ptrm.append_columns('mag', self.ptrm.magnitude('m'))
         ### SUM
         var_index = np.array([(i, j) for i, v1 in enumerate(self.th['temp']) for j, v2 in enumerate(self.ptrm['temp'])
@@ -90,7 +90,7 @@ class Thellier(base.Measurement):
         data = data[data[:,0].argsort()]
 
         self.sum = rockpydata(column_names=['temp', 'x', 'y', 'z', 'moment', 'std_dev'], data=data)
-        self.sum.definealias('m', ( 'x', 'y', 'z'))
+        self.sum.define_alias('m', ( 'x', 'y', 'z'))
         self.sum.append_columns('mag', self.sum.magnitude('m'))
 
         self.ac = self.all_data.filter_idx(np.where(self.raw_data['type'] == 'AC')[0])

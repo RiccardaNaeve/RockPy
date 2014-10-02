@@ -18,8 +18,8 @@ testdata = ( (1, 2, 3, 4),
 d = rockpydata(column_names=( 'F', 'Mx', 'My', 'Mz'))
 
 # define as many aliases as you want
-d.definealias('M', ( 'Mx', 'My', 'Mz'))
-d.definealias('Mzx', ( 'Mz', 'Mx'))
+d.define_alias('M', ( 'Mx', 'My', 'Mz'))
+d.define_alias('Mzx', ( 'Mz', 'Mx'))
 
 # show some data
 # aliases 'all', 'variable' and 'measurement are predefined

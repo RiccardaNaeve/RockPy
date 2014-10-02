@@ -4,6 +4,7 @@ import numpy as np
 import Functions.general
 import Readin.machines as machines
 import Readin
+from Structure.rockpydata import rockpydata
 
 class Measurement(object):
     Functions.general.create_logger('RockPy.MEASUREMENT')
@@ -54,6 +55,10 @@ class Measurement(object):
                 self.log.error('UNKNOWN\t measurement type: << %s >>' % mtype)
         else:
             self.log.error('UNKNOWN\t machine << %s >>' % self.machine)
+
+        self.result_methods = [i[7:] for i in dir(self) if i.startswith('result_') if not i.endswith('generic')]  # search for implemented results methods
+        self.results = rockpydata(
+            column_names=self.result_methods)  # dynamic entry creation for all available result methods
 
 
     def import_data(self, rtn_raw_data=None, **options):

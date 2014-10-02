@@ -24,13 +24,9 @@ class Thellier(base.Measurement):
         self.tr = None  #
         self.ck = None  #
 
-        # results
-        result_methods = [i[7:] for i in dir(self) if i.startswith('result_')]  # search for implemented results methods
-        self.results = rockpydata(
-            column_names=result_methods)  # dynamic entry creation for all available result methods
-
         if callable(getattr(self, 'format_' + machine)):  # check for available formatting NEEDS TO START WITH format_
             getattr(self, 'format_' + machine)()  # call format_ for appropriate machine
+
 
     def format_cryomag(self):
         '''
@@ -130,7 +126,6 @@ class Thellier(base.Measurement):
         plt.xlabel('NRM remaining [%s]' % ('C'))
         plt.ylabel('pTRM gained [%s]' % ('Am^2'))
         plt.show()
-        raise NotImplementedError
 
     @property
     def generic(self):

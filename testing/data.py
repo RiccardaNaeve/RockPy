@@ -49,6 +49,9 @@ d.append_columns('normM', d.normalize('magM', 100))
 # we can also add arbitrary data in a new column
 d.append_columns(("T",), np.array((1, 2, 3)))
 
+# renaming a column
+d.rename_column('Tt', 'temp')
+
 # show all data again, now including magM and T as the last two columns
 print( d.column_names)
 print( 'all:\n%s' % d['all'])

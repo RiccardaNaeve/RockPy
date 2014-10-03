@@ -19,20 +19,13 @@ def cryo_nl(file, sample, *args, **options):
               'vol', 'weight', 'step', 'type', 'comment',
               'time', 'mode', 'x', 'y', 'z',
               'M', 'sM', 'a95', 'Dc', 'Ic', 'Dg', 'Ig', 'Ds', 'Is']
+
     sample_data = np.array([i for i in data[2:-1] if i[0] == sample or sample in i[9] if i[11] == 'results'])
-
-    holder_data = np.array([i for i in data[2:-1] if i[0].lower() == 'acryl' if i[11] == 'results'])
-
-    try:
-        out = {header[i].lower(): sample_data[:, i] for i in range(len(header))}
-        out['acryl'] = {header[i].lower(): holder_data[:, i] for i in range(len(header))}
-    except IndexError:
-        log.error('CANT find sample/holder')
-        return None
+    out = {header[i].lower(): sample_data[:, i] for i in range(len(header))}
 
     for i in floats:
         out[i] = map(float, out[i])
-        out['acryl'][i] = map(float, out[i])
+
     out['step'] = map(int, out['step'])
 
     def time_conv(t):

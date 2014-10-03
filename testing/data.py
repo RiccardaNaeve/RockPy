@@ -18,8 +18,8 @@ testdata = ( (1, 2, 3, 4),
 d = rockpydata(column_names=( 'F', 'Mx', 'My', 'Mz'))
 
 # define as many aliases as you want
-d.definealias('M', ( 'Mx', 'My', 'Mz'))
-d.definealias('Mzx', ( 'Mz', 'Mx'))
+d.define_alias('M', ( 'Mx', 'My', 'Mz'))
+d.define_alias('Mzx', ( 'Mz', 'Mx'))
 
 # show some data
 # aliases 'all', 'variable' and 'measurement are predefined
@@ -48,6 +48,9 @@ d.append_columns('normM', d.normalize('magM', 100))
 
 # we can also add arbitrary data in a new column
 d.append_columns(("T",), np.array((1, 2, 3)))
+
+# renaming a column
+d.rename_column('Tt', 'temp')
 
 # show all data again, now including magM and T as the last two columns
 print( d.column_names)

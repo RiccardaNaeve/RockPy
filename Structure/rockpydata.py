@@ -50,13 +50,15 @@ class rockpydata(object):
             column_names = (column_names,)
 
         if column_names is None:
-            self._column_dict = dict((name, (index,)) for (index, name) in enumerate(self._column_names))
+            # Python < 2.7
+            #self._column_dict = dict((name, (index,)) for (index, name) in enumerate(self._column_names))
+            # Python > 2.7
+            self._column_dict = { name: (index,) for (index, name) in enumerate(self._column_names)}
         else:
             for n in column_names:  # check if all column_names are valid, i.e. exist in self._column_names
                 if not self.column_exists(n):
                     raise IndexError('column %s does not exist' % n)
             for n in column_names:  # add or update each column to _column_dict
-                # todo: rewrite this to dict comprehension for Python 2.7
                 self._column_dict[n] = (self._column_names.index(n),)
 
 

@@ -56,10 +56,14 @@ class Measurement(object):
         else:
             self.log.error('UNKNOWN\t machine << %s >>' % self.machine)
 
+        # data formatting
+        if callable(getattr(self, 'format_' + machine)):
+            getattr(self, 'format_' + machine)()
+
         self.result_methods = [i[7:] for i in dir(self) if i.startswith('result_') if not i.endswith('generic')]  # search for implemented results methods
         self.results = rockpydata(
             column_names=self.result_methods)  # dynamic entry creation for all available result methods
-
+        # data formatting
 
     def import_data(self, rtn_raw_data=None, **options):
 
@@ -92,65 +96,3 @@ class Measurement(object):
         self.initial_state = np.array([self.is_raw_data[i] for i in components]).T
         self.initial_state = np.c_[initial_state, self.initial_state]
         self.__dict__.update({mtype: self.initial_state})
-
-
-        # def add_treatment(self, ttype, options=None):
-        # self.ttype = ttype.lower()
-        #     self.log.info('ADDING\t treatment to measurement << %s >>' % self.ttype)
-        #
-        #     implemented = {
-        #         'pressure': treatments.Pressure,
-        #     }
-        #
-        #     if ttype.lower() in implemented:
-        #         self.treatment = implemented[ttype.lower()](self.sample_obj, self, options)
-        #     else:
-        #         self.log.error('UNKNOWN\t treatment type << %s >> is not know or not implemented' % ttype)
-
-        # def normalize(self, dtype, norm, value=1, **options):
-        # implemented = {
-        #         # 'mass': self.sample_obj.mass_kg,
-        #         # 'value': value,
-        #         # 'nrm': getattr(self, 'nrm', None),
-        #         # 'trm': getattr(self, 'trm', None),
-        #         # 'irm': getattr(self, 'irm', None),
-        #         # 'arm': getattr(self, 'arm', None),
-        #         # 'th': getattr(self, 'th', None),
-        #         # 'pt': getattr(self, 'pt', None),
-        #         # 'ptrm': getattr(self, 'ptrm', None),
-        #         # 'initial_state': getattr(self, 'initial_state', None),
-        #         # 'm': np.array([getattr(self, 'm', None)[0], getattr(self, 'm', None)[0], getattr(self, 'm', None)[0],
-        #         #                getattr(self, 'm', None)[0]]),
-        #         # 'x': getattr(self, 'x', None)[0],
-        #         # 'y': getattr(self, 'y', None)[0],
-        #         # 'z': getattr(self, 'z', None)[0],
-        #         # 'ms': getattr(self, 'ms', None)[0],
-        #     }
-        #
-        #     try:
-        #         norm_factor = implemented[norm.lower()]
-        #     except KeyError:
-        #         self.log.error('NORMALIZATION type << %s >> not found' % (norm))
-        #         return
-        #
-        #     if norm_factor is None:
-        #         self.log.error('NORMALIZATION type << %s >> not found' % (norm))
-        #         return
-        #
-        #     data = getattr(self, dtype)
-        #
-        #     try:
-        #         self.log.info(' Normalizing datatype << %s >> by << %s [ %s ]>>' % (dtype, norm, np.array_str(norm_factor)))
-        #         out = data
-        #         out[:, 1:] = data[:, 1:] / norm_factor[:, 1:]
-        #         return out
-        #     except IndexError:
-        #         self.log.info(' Normalizing datatype << %s >> by << %s [ %s ]>>' % (dtype, norm, np.array_str(norm_factor)))
-        #         out = data
-        #         out[:, 1:] = data[:, 1:] / norm_factor
-        #         return out
-        #
-        #     except KeyError:
-        #         self.log.error('CANT normalize by data-type << %s >>' % dtype)
-        #         self.log.warning('RETURNING NON NORMALIZED data-type << %s >>' % dtype)
-        #         return data

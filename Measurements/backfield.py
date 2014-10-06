@@ -24,16 +24,12 @@ class Backfield(base.Measurement):
                  **options):
         super(Backfield, self).__init__(sample_obj, mtype, mfile, machine)
 
-        data_formatting = {'vftb': self.format_vftb,
-        }
+
 
         ### initialize
         self.remanence = None
         self.induced = None
 
-        data_formatting[self.machine]()
-
-        self.results = rockpydata(column_names=('bcr', 's300'))
 
 
     def format_vftb(self):
@@ -60,6 +56,16 @@ class Backfield(base.Measurement):
         if self.results['s300'] is None or self.results['s300'] == 0:
             self.results['s300'] = self.calculate_s300()
         return self.results['s300'][0]
+
+    def result_bcr(self):
+        if self.results['bcr'] is None:
+            self.calculate_bcr()
+        return self.results['bcr']
+
+    def result_s300(self):
+        if self.results['s300'] is None:
+            self.calculate_s300()
+        return self.results['s300']
 
     def calculate_bcr(self):
         '''

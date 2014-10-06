@@ -3,7 +3,7 @@ from Structure.project import Sample
 import matplotlib.pyplot as plt
 
 # define measurement data file
-vftb_file = 'test_data/MUCVFTB_test.coe'
+vftb_file = 'test_data/MUCVFTB_test2.coe'
 
 # create a sample
 sample = Sample(name='vftb_test_sample')

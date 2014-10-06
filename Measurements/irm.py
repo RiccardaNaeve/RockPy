@@ -13,20 +13,13 @@ class Irm(base.Measurement):
                  **options):
         super(Irm, self).__init__(sample_obj, mtype, mfile, machine)
 
-        data_formatting = {
-            'vftb': self.format_vftb,
-            'vsm': self.format_vsm,
-        }
-
         # ## initialize
-        self.data = None
-
-        data_formatting[self.machine]()
+        self.remanence = None
 
 
     def format_vftb(self):
         self.log.debug('FORMATTING << %s >> raw_data for << VFTB >> data structure' % ('IRM'))
-        self.data = rockpydata(column_names=('field', 'moment', 'temperature', 'time',
+        self.remanence = rockpydata(column_names=('field', 'moment', 'temperature', 'time',
                                              'std_dev', 'susceptibility'), data=self.raw_data)
 
     def format_vsm(self):
@@ -35,7 +28,7 @@ class Irm(base.Measurement):
 
     def plt_irm(self):
         plt.title('IRM acquisition %s' % (self.sample_obj.name))
-        std, = plt.plot(self.data['field'], self.data['moment'], zorder=1)
+        std, = plt.plot(self.remanence['field'], self.remanence['moment'], zorder=1)
         plt.grid()
         plt.axhline(0, color='#808080')
         plt.axvline(0, color='#808080')

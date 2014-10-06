@@ -19,15 +19,6 @@ class Hysteresis(base.Measurement):
         self.up_field = None
         self.down_field = None
 
-        # data formatting
-        if callable(getattr(self, 'format_' + machine)):
-            getattr(self, 'format_' + machine)()
-
-        # ## calculation initialization
-        result_methods = [i[7:] for i in dir(self) if i.startswith('result_')]  # search for implemented results methods
-        self.results = rockpydata(
-            column_names=result_methods)  # dynamic entry creation for all available result methods
-        print self.results._column_names
 
     # ## formatting functions
     def format_vftb(self):
@@ -269,7 +260,7 @@ class Hysteresis(base.Measurement):
 
         # plotting interpolated data
         # plt.plot(self.down_field_interp()[0], self.down_field_interp()[1], '--',
-        #          color=std.get_color(),
+        # color=std.get_color(),
         #          zorder=1)
         # plt.plot(self.up_field_interp()[0], self.up_field_interp()[1], '--',
         #          color=std.get_color(),

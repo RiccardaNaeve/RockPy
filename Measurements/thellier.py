@@ -24,9 +24,6 @@ class Thellier(base.Measurement):
         self.tr = None  #
         self.ck = None  #
 
-        if callable(getattr(self, 'format_' + machine)):  # check for available formatting NEEDS TO START WITH format_
-            getattr(self, 'format_' + machine)()  # call format_ for appropriate machine
-
 
     def format_cryomag(self):
         '''
@@ -76,7 +73,7 @@ class Thellier(base.Measurement):
         self.ptrm = rockpydata(column_names=['temp', 'x', 'y', 'z', 'moment', 'std_dev'], data=data)
         self.ptrm.define_alias('m', ( 'x', 'y', 'z'))
         self.ptrm.append_columns('mag', self.ptrm.magnitude('m'))
-        ### SUM
+        # ## SUM
         var_index = np.array([(i, j) for i, v1 in enumerate(self.th['temp']) for j, v2 in enumerate(self.ptrm['temp'])
                               if v1 == v2])
 
@@ -87,7 +84,7 @@ class Thellier(base.Measurement):
         m = [self.ptrm['moment'][j] + self.th['moment'][i] for i, j in var_index]
         std_dev = [self.ptrm['x'][j] + self.th['std_dev'][i] for i, j in var_index]
         data = np.c_[t, x, y, z, m, std_dev]
-        data = data[data[:,0].argsort()]
+        data = data[data[:, 0].argsort()]
 
         self.sum = rockpydata(column_names=['temp', 'x', 'y', 'z', 'moment', 'std_dev'], data=data)
         self.sum.define_alias('m', ( 'x', 'y', 'z'))
@@ -103,7 +100,6 @@ class Thellier(base.Measurement):
 
     # ## plotting functions
     def plt_dunlop(self):
-
         plt.plot(self.th['temp'], self.th['moment'], '.-', zorder=1)
         # plt.plot(self.ptrm['temp'], self.ptrm['moment'], '.-', zorder=1)
         plt.plot(self.ptrm['temp'], self.ptrm['mag'], '.-', zorder=1)
@@ -118,7 +114,7 @@ class Thellier(base.Measurement):
 
     def plt_arai(self):
         equal = set(self.th['temp']) & set(self.ptrm['temp'])
-        idx = [i for i,v in enumerate(self.th['temp']) if v in equal]
+        idx = [i for i, v in enumerate(self.th['temp']) if v in equal]
         th = self.th.filter_idx(idx)
         plt.plot(self.ptrm['moment'], th['moment'], '.-', zorder=1)
         plt.grid()

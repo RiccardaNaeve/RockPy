@@ -32,6 +32,8 @@ class Mass(Measurement):
         # var_unit='idx', measure_unit='kg',
         #                  time=time, std_dev=std)
 
+    def format_generic(self):
+        pass
 
 class Length(Measurement):
     """
@@ -54,3 +56,6 @@ class Length(Measurement):
         self.data[mtype] = value * length_conversion
         self.data['time'] = time
         self.data['std_dev'] = std
+
+    def format_generic(self):
+        pass

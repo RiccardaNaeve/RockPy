@@ -13,12 +13,9 @@ class ThermoCurve(base.Measurement):
                  **options):
         super(ThermoCurve, self).__init__(sample_obj, mtype, mfile, machine)
 
-        data_formatting = {'vftb': self.format_vftb,
-        }
         # ## initialize
         self.data = None
 
-        data_formatting[self.machine]()
 
     def format_vftb(self):
         tdiff = np.diff(self.raw_data['temp'])

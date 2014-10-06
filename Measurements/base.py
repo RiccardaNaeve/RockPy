@@ -58,7 +58,11 @@ class Measurement(object):
 
         # data formatting
         if callable(getattr(self, 'format_' + machine)):
+            self.log.debug('FORMATTING raw data from << %s >>' % self.machine)
             getattr(self, 'format_' + machine)()
+        else:
+            self.log.error(
+                'FORMATTING raw data from << %s >> not possible, probably not implemented, yet.' % self.machine)
 
         self.result_methods = [i[7:] for i in dir(self) if i.startswith('result_') if not i.endswith('generic')]  # search for implemented results methods
         self.results = rockpydata(

@@ -253,6 +253,7 @@ class Hysteresis(base.Measurement):
 
         x_new = np.arange(min(x), max(x), 0.01)
         y_new = f(x_new)
+
         return x_new, y_new
 
     # ## plotting functions

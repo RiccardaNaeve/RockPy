@@ -5,6 +5,7 @@ import Functions.general
 import Readin.machines as machines
 import Readin
 from Structure.rockpydata import rockpydata
+import inspect
 
 class Measurement(object):
     Functions.general.create_logger('RockPy.MEASUREMENT')
@@ -67,7 +68,11 @@ class Measurement(object):
         self.result_methods = [i[7:] for i in dir(self) if i.startswith('result_') if not i.endswith('generic')]  # search for implemented results methods
         self.results = rockpydata(
             column_names=self.result_methods)  # dynamic entry creation for all available result methods
-        # data formatting
+        self.calculation_parameters = {i[10:]: None for i in dir(self) if i.startswith('calculate_') if
+                                       not i.endswith('generic')}
+        self.standard_parameters = {i[10:]: None for i in dir(self) if i.startswith('calculate_') if
+                                    not i.endswith('generic')}
+
 
     def import_data(self, rtn_raw_data=None, **options):
 
@@ -100,3 +105,105 @@ class Measurement(object):
         self.initial_state = np.array([self.is_raw_data[i] for i in components]).T
         self.initial_state = np.c_[initial_state, self.initial_state]
         self.__dict__.update({mtype: self.initial_state})
+
+    @property
+    def generic(self):
+        '''
+        helper function that returns the value for a given statistical method. If result not available will calculate
+        it with standard parameters
+        '''
+        return self.result_generic()
+
+
+    def result_generic(self, parameters='standard'):
+        '''
+        Generic for for result implementation. Every calculation of result should be in the self.results data structure
+        before calculation.
+        It should then be tested if a value for it exists, and if not it should be created by calling
+        _calculate_result_(result_name).
+
+        '''
+        if self.results['generic'] is None:
+            self.calculate_generic(parameters)
+        return self.results['generic']
+
+
+    def calculate_generic(self, parameters):
+        '''
+        actual calculation of the result
+
+        :return:
+        '''
+        self.results['generic'] = 0
+
+    def calc_result(self, parameter, recalc, force_caller=None):
+        '''
+        Helper function:
+        Calls any calculate_* function, but checks first:
+            1. does this calculation method exist
+            2. has it been calculated before
+               |- NO : calculate the result
+               |- YES: are given parameters equal to previous calculation parameters
+                  |- NO : calculate result with new parameters
+                  |- YES: return previous result
+        :param parameter: dict
+                        dictionary with parameters needed for calculation
+        :return:
+        '''
+
+        if force_caller is not None:
+            caller = force_caller
+        else:
+            caller = inspect.stack()[1][3].split('_')[-1]
+
+        if callable(getattr(self, 'calculate_' + caller)):
+            parameter = self.compare_parameters(caller, parameter)  # checks for None and replaces it with standard
+            if self.results[caller] is None or recalc:  # if results dont exist or force recalc
+                self.log.debug('CANNOT find result << %s >> -> calculating' % (caller))
+                getattr(self, 'calculate_' + caller)(**parameter)  # calling calculation method
+            else:
+                self.log.debug('FOUND previous << %s >> parameters' % (caller))
+                if self.check_parameters(caller, parameter):  # are parameters equal to previous parameters
+                    self.log.debug('RESULT parameters different from previous calculation -> recalculating')
+                    getattr(self, 'calculate_' + caller)(**parameter)  # recalculating if parameters different
+                else:
+                    self.log.debug('RESULT parameters equal to previous calculation')
+        else:
+            self.log.error(
+                'CALCULATION of << %s >> not possible, probably not implemented, yet.' % caller)
+
+    def compare_parameters(self, caller, parameter):
+        '''
+        checks if given parameter[key] is None and replaces it with standard parameter
+
+        :param caller: str
+                     name of calling function ('result_generic' should be given as 'result')
+        :param parameter:
+        :return:
+        '''
+
+        # caller = inspect.stack()[1][3].split('_')[-1]
+
+        for i, v in parameter.iteritems():
+            if v is None:
+                if self.calculation_parameters[caller]:
+                    parameter[i] = self.calculation_parameters[caller][i]
+                else:
+                    parameter[i] = self.standard_parameters[caller][i]
+        return parameter
+
+    def check_parameters(self, caller, parameter):
+        '''
+        Checks if previous calculation used the same parameters, if yes returns the previous clculation
+        if no calculates with new parameters
+        :param caller: str
+                     name of calling function ('result_generic' should be given as 'result')
+        :param parameter:
+        :return:
+        '''
+        a = [parameter[i] for i in self.calculation_parameters[caller]]
+        b = [self.calculation_parameters[caller][i] for i in self.calculation_parameters[caller]]
+        if a != b:
+            return True
+        else:
+            return False

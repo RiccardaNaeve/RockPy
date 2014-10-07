@@ -15,15 +15,8 @@ class Thellier(base.Measurement):
                  **options):
         super(Thellier, self).__init__(sample_obj, mtype, mfile, machine)
 
-        # ## initialize data
-        # paint data
-        self.th = None  # thermal demag steps
-        self.pt = None  # in field steps
-        # checks
-        self.ac = None  #
-        self.tr = None  #
-        self.ck = None  #
-
+        # # ## initialize data
+        self.standard_parameters['slope'] = {'t_min': 20, 't_max': 700, 'component': 'mag'}
 
     def format_cryomag(self):
         '''
@@ -50,6 +43,7 @@ class Thellier(base.Measurement):
         self.trm = self.all_data.filter_idx(TRM_idx)
         self.th = self.all_data.filter_idx(np.append(NRM_idx, TH_idx))
         self.th.define_alias('m', ( 'x', 'y', 'z'))
+        self.th.append_columns('mag', self.th.magnitude('m'))
         self.th.sort('temp')
 
         self.pt = self.all_data.filter_idx(np.append(NRM_idx, PT_idx))
@@ -123,30 +117,132 @@ class Thellier(base.Measurement):
         plt.ylabel('pTRM gained [%s]' % ('Am^2'))
         plt.show()
 
+
     @property
-    def generic(self):
+    def slope(self):
         '''
-        helper function that returns the value for a given statistical method. If result not available will calculate
+        helper function that returns the value for slope of arai line fit. If result not available will calculate
+        it with standard parameters
+        '''
+        return self.result_slope()
+
+    @property
+    def sigma(self):
+        '''
+        helper function that returns the value for slope of arai line fit. If result not available will calculate
+        it with standard parameters
+        '''
+        return self.result_sigma()
+
+    @property
+    def x_intercept(self):
+        '''
+        helper function that returns the value for slope of arai line fit. If result not available will calculate
         it with standard parameters
         '''
         return self.result_generic()
 
-    def result_generic(self, parameters='standard'):
+    @property
+    def y_intercept(self):
         '''
-        Generic for for result implementation. Every calculation of result should be in the self.results data structure
-        before calculation.
-        It should then be tested if a value for it exists, and if not it should be created by calling
-        _calculate_result_(result_name).
+        helper function that returns the value for slope of arai line fit. If result not available will calculate
+        it with standard parameters
+        '''
+        return self.result_generic()
 
+    @property
+    def intensity(self):
         '''
-        if self.results['generic'] is None:
-            self.calculate_generic(parameters)
-        return self.results['generic']
+        helper function that returns the value for slope of arai line fit. If result not available will calculate
+        it with standard parameters
+        '''
+        return self.result_generic()
 
-    def calculate_generic(self, parameters):
-        '''
-        actual calculation of the result
+    ''' RESULT SECTION '''
 
-        :return:
+    def result_slope(self, t_min=None, t_max=None, component=None, recalc=False):
         '''
-        self.results['generic'] = 0
+        Gives result for calculate_slope(t_min, t_max), returns slope value if not calculated already
+        '''
+        parameter = {'t_min': t_min,
+                     't_max': t_max,
+                     'component': component,
+        }
+
+        self.calc_result(parameter, recalc)
+        return self.results['slope']
+
+    def result_sigma(self, t_min=None, t_max=None, component=None, recalc=False):
+        parameter = {'t_min': t_min,
+                     't_max': t_max,
+                     'component': component,
+        }
+
+        self.calc_result(parameter, recalc, force_caller='slope')
+        return self.results['sigma']
+
+    def result_x_intercept(self, t_min=None, t_max=None, component=None, recalc=False):
+        parameter = {'t_min': t_min,
+                     't_max': t_max,
+                     'component': component,
+        }
+
+        self.calc_result(parameter, recalc, force_caller='slope')
+        return self.results['x_intercept']
+        pass
+
+    def result_y_intercept(self, t_min=None, t_max=None, component=None, recalc=False):
+        parameter = {'t_min': t_min,
+                     't_max': t_max,
+                     'component': component,
+        }
+
+        self.calc_result(parameter, recalc, force_caller='slope')
+        return self.results['y_intercept']
+
+    ''' CALCULATE SECTION '''
+
+    def calculate_slope(self, **parameter):
+        """
+        calculates the least squares slope for the specified temperature interval
+
+        :param parameter:
+        """
+        t_min = parameter.get('t_min', 20)
+        t_max = parameter.get('t_max', 700)
+        component = parameter.get('component', 'mag')
+        self.log.info('CALCULATING\t << %s >> arai line fit << t_min=%.1f , t_max=%.1f >>' % (component, t_min, t_max))
+
+        equal_steps = list(set(self.th['temp']) & set(self.ptrm['temp']))
+        th_steps = (t_min < self.th['temp']) & (self.th['temp'] < t_max)  # True if step between t_min, t_max
+        ptrm_steps = (t_min < self.ptrm['temp']) & (self.ptrm['temp'] < t_max)  # True if step between t_min, t_max
+
+        th_data = self.th.filter(th_steps)  # filtered data for t_min t_max
+        ptrm_data = self.ptrm.filter(ptrm_steps)  # filtered data for t_min t_max
+
+        # filtering for equal variables
+        th_idx = [i for i, v in enumerate(th_data['temp']) if v in equal_steps]
+        ptrm_idx = [i for i, v in enumerate(ptrm_data['temp']) if v in equal_steps]
+
+        th_data = th_data.filter_idx(th_idx)  # filtered data for equal t(th) & t(ptrm)
+        ptrm_data = ptrm_data.filter_idx(ptrm_idx)  # filtered data for equal t(th) & t(ptrm)
+
+        data = rockpydata(['th', 'ptrm'])
+
+        # setting the data
+        data['th'] = th_data[component]
+        data['ptrm'] = ptrm_data[component]
+
+        slope, sigma, y_intercept, x_intercept = data.lin_regress('ptrm', 'th')
+
+        self.results['slope'] = slope
+        self.results['sigma'] = sigma
+        self.results['y_intercept'] = y_intercept
+        self.results['x_intercept'] = x_intercept
+
+        self.calculation_parameters['slope'] = {'t_min': t_min, 't_max': t_max, 'component': component}
+
+
+
+
+

@@ -12,18 +12,19 @@ sample = Sample(name='1a')
 M = sample.add_measurement(mtype='thellier', mfile=cryomag_file, machine='cryomag')
 
 # calculation of slope
-print 'just returning the standard values'
-print M.result_slope()
-print 'recalculating with different parameters'
-print M.result_slope(t_min=300)
-print 'calculating slope 1: t_min=400'
-M.calculate_slope(t_min=400, component='z')  #calculation with non standard parameters
-print 'returning calculation'
-print M.result_slope(), M.result_sigma()
+# print 'just returning the standard values'
+# print M.result_slope()
+# print 'recalculating with different parameters'
+# print M.result_slope(t_min=300)
+# print 'calculating slope 1: t_min=400'
+# M.calculate_slope(t_min=400, component='z')  #calculation with non standard parameters
+# print 'returning calculation'
+# print M.result_slope(), M.result_sigma()
 
 # getting results -> simple calculation with standard parameters
-print M.slope
+# print M.slope, M.sigma, M.y_intercept, M.x_intercept
 
+print M.result_b_anc(t_min=300)
 # plotting dunlop plot
 # M.plt_dunlop()
 

@@ -73,7 +73,6 @@ class Measurement(object):
         self.standard_parameters = {i[10:]: None for i in dir(self) if i.startswith('calculate_') if
                                     not i.endswith('generic')}
 
-
     def import_data(self, rtn_raw_data=None, **options):
 
 
@@ -115,7 +114,7 @@ class Measurement(object):
         return self.result_generic()
 
 
-    def result_generic(self, parameters='standard'):
+    def result_generic(self, **parameter):
         '''
         Generic for for result implementation. Every calculation of result should be in the self.results data structure
         before calculation.
@@ -123,17 +122,19 @@ class Measurement(object):
         _calculate_result_(result_name).
 
         '''
+        # NAMING! no '_' allowed after result
         if self.results['generic'] is None:
-            self.calculate_generic(parameters)
+            self.calculate_generic(**parameter)
         return self.results['generic']
 
 
-    def calculate_generic(self, parameters):
+    def calculate_generic(self, **parameter):
         '''
         actual calculation of the result
 
         :return:
         '''
+
         self.results['generic'] = 0
 
     def calc_result(self, parameter, recalc, force_caller=None):
@@ -148,17 +149,20 @@ class Measurement(object):
                   |- YES: return previous result
         :param parameter: dict
                         dictionary with parameters needed for calculation
+        :param caller: calling function name without calculate_
+        :param force_caller: not dynamically retrieved caller name.
         :return:
         '''
 
         if force_caller is not None:
             caller = force_caller
         else:
-            caller = inspect.stack()[1][3].split('_')[-1]
+            caller = '_'.join(inspect.stack()[1][3].split('_')[1:])
 
-        if callable(getattr(self, 'calculate_' + caller)):
+        if callable(getattr(self, 'calculate_' + caller)):  # check if calculation function exists
             parameter = self.compare_parameters(caller, parameter)  # checks for None and replaces it with standard
-            if self.results[caller] is None or recalc:  # if results dont exist or force recalc
+            if self.results[caller] is None or self.results[
+                caller] == 0.000 or recalc:  # if results dont exist or force recalc
                 self.log.debug('CANNOT find result << %s >> -> calculating' % (caller))
                 getattr(self, 'calculate_' + caller)(**parameter)  # calling calculation method
             else:
@@ -194,16 +198,20 @@ class Measurement(object):
 
     def check_parameters(self, caller, parameter):
         '''
-        Checks if previous calculation used the same parameters, if yes returns the previous clculation
+        Checks if previous calculation used the same parameters, if yes returns the previous calculation
         if no calculates with new parameters
         :param caller: str
                      name of calling function ('result_generic' should be given as 'result')
         :param parameter:
         :return:
         '''
-        a = [parameter[i] for i in self.calculation_parameters[caller]]
-        b = [self.calculation_parameters[caller][i] for i in self.calculation_parameters[caller]]
-        if a != b:
-            return True
+
+        if self.calculation_parameters[caller]:
+            a = [parameter[i] for i in self.calculation_parameters[caller]]
+            b = [self.calculation_parameters[caller][i] for i in self.calculation_parameters[caller]]
+            if a != b:
+                return True
+            else:
+                return False
         else:
-            return False
+            return True

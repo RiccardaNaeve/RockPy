@@ -6,7 +6,9 @@ import numpy as np
 import scipy as sp
 import Structure.data
 import matplotlib.pyplot as plt
+from matplotlib.lines import Line2D
 import sys
+import copy
 
 
 class Thellier(base.Measurement):
@@ -140,7 +142,7 @@ class Thellier(base.Measurement):
         helper function that returns the value for slope of arai line fit. If result not available will calculate
         it with standard parameters
         '''
-        return self.result_generic()
+        return self.result_x_intercept()
 
     @property
     def y_intercept(self):
@@ -148,7 +150,7 @@ class Thellier(base.Measurement):
         helper function that returns the value for slope of arai line fit. If result not available will calculate
         it with standard parameters
         '''
-        return self.result_generic()
+        return self.result_y_intercept()
 
     @property
     def intensity(self):
@@ -189,7 +191,6 @@ class Thellier(base.Measurement):
 
         self.calc_result(parameter, recalc, force_caller='slope')
         return self.results['x_intercept']
-        pass
 
     def result_y_intercept(self, t_min=None, t_max=None, component=None, recalc=False):
         parameter = {'t_min': t_min,
@@ -198,7 +199,19 @@ class Thellier(base.Measurement):
         }
 
         self.calc_result(parameter, recalc, force_caller='slope')
-        return self.results['y_intercept']
+        return self.results['yintercept']
+
+    def result_b_anc(self, t_min=None, t_max=None, component=None, b_lab=35.0, recalc=False):
+        parameter_a = {'t_min': t_min,
+                       't_max': t_max,
+                       'component': component,
+        }
+
+        parameter_b = {'b_lab': b_lab}
+        self.calc_result(parameter_a, recalc, force_caller='slope')
+        self.calc_result(parameter_b, recalc)
+
+        return self.results['b_anc']
 
     ''' CALCULATE SECTION '''
 
@@ -211,6 +224,7 @@ class Thellier(base.Measurement):
         t_min = parameter.get('t_min', 20)
         t_max = parameter.get('t_max', 700)
         component = parameter.get('component', 'mag')
+
         self.log.info('CALCULATING\t << %s >> arai line fit << t_min=%.1f , t_max=%.1f >>' % (component, t_min, t_max))
 
         equal_steps = list(set(self.th['temp']) & set(self.ptrm['temp']))
@@ -242,7 +256,10 @@ class Thellier(base.Measurement):
 
         self.calculation_parameters['slope'] = {'t_min': t_min, 't_max': t_max, 'component': component}
 
+    def calculate_b_anc(self, **parameter):
+        b_lab = parameter.get('b_lab')
+        self.results['b_anc'] = b_lab * abs(self.results['slope'])
+        self.calculation_parameters['b_anc'] = {'b_lab': b_lab}
 
-
-
-
+    def calculate_sigma_banc(self, **parameter):
+        pass

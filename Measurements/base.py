@@ -137,6 +137,16 @@ class Measurement(object):
 
         self.results['generic'] = 0
 
+    def calc_generic(self, **parameter):
+        '''
+        helper function
+        actual calculation of the result
+
+        :return:
+        '''
+
+        self.results['generic'] = 0
+
     def calc_result(self, parameter, recalc, force_caller=None):
         '''
         Helper function:

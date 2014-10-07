@@ -24,7 +24,11 @@ M = sample.add_measurement(mtype='thellier', mfile=cryomag_file, machine='cryoma
 # getting results -> simple calculation with standard parameters
 # print M.slope, M.sigma, M.y_intercept, M.x_intercept
 
-print M.result_b_anc(t_min=300)
+# print M.result_b_anc(t_min=300)
+# print M.result_sigma_b_anc(t_min=300)
+
+print M.result_vds()
+
 # plotting dunlop plot
 # M.plt_dunlop()
 

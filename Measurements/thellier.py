@@ -19,6 +19,8 @@ class Thellier(base.Measurement):
 
         # # ## initialize data
         self.standard_parameters['slope'] = {'t_min': 20, 't_max': 700, 'component': 'mag'}
+        self.standard_parameters['vds'] = self.standard_parameters['slope']
+        self.standard_parameters['vd'] = self.standard_parameters['vds']
 
     def format_cryomag(self):
         '''
@@ -137,20 +139,20 @@ class Thellier(base.Measurement):
         return self.result_sigma()
 
     @property
-    def x_intercept(self):
+    def x_int(self):
         '''
         helper function that returns the value for slope of arai line fit. If result not available will calculate
         it with standard parameters
         '''
-        return self.result_x_intercept()
+        return self.result_x_int()
 
     @property
-    def y_intercept(self):
+    def y_int(self):
         '''
         helper function that returns the value for slope of arai line fit. If result not available will calculate
         it with standard parameters
         '''
-        return self.result_y_intercept()
+        return self.result_y_int()
 
     @property
     def intensity(self):
@@ -158,7 +160,7 @@ class Thellier(base.Measurement):
         helper function that returns the value for slope of arai line fit. If result not available will calculate
         it with standard parameters
         '''
-        return self.result_generic()
+        return self.result_b_anc()
 
     ''' RESULT SECTION '''
 
@@ -183,16 +185,16 @@ class Thellier(base.Measurement):
         self.calc_result(parameter, recalc, force_caller='slope')
         return self.results['sigma']
 
-    def result_x_intercept(self, t_min=None, t_max=None, component=None, recalc=False):
+    def result_x_int(self, t_min=None, t_max=None, component=None, recalc=False):
         parameter = {'t_min': t_min,
                      't_max': t_max,
                      'component': component,
         }
 
         self.calc_result(parameter, recalc, force_caller='slope')
-        return self.results['x_intercept']
+        return self.results['x_int']
 
-    def result_y_intercept(self, t_min=None, t_max=None, component=None, recalc=False):
+    def result_y_int(self, t_min=None, t_max=None, component=None, recalc=False):
         parameter = {'t_min': t_min,
                      't_max': t_max,
                      'component': component,
@@ -213,6 +215,25 @@ class Thellier(base.Measurement):
 
         return self.results['b_anc']
 
+    def result_sigma_b_anc(self, t_min=None, t_max=None, component=None, b_lab=35.0, recalc=False):
+        parameter_a = {'t_min': t_min,
+                       't_max': t_max,
+                       'component': component,
+        }
+
+        parameter_b = {'b_lab': b_lab}
+        self.calc_result(parameter_a, recalc, force_caller='slope')
+        self.calc_result(parameter_b, recalc)
+        return self.results['sigma_b_anc']
+
+    def result_vds(self, t_min=None, t_max=None, recalc=False):
+        parameter = {'t_min': t_min,
+                     't_max': t_max,
+        }
+        self.calc_result(parameter, recalc)
+        return self.results['vds']
+
+
     ''' CALCULATE SECTION '''
 
     def calculate_slope(self, **parameter):
@@ -221,15 +242,15 @@ class Thellier(base.Measurement):
 
         :param parameter:
         """
-        t_min = parameter.get('t_min', 20)
-        t_max = parameter.get('t_max', 700)
+        t_min = parameter.get('t_min', self.standard_parameters['slope']['t_min'])
+        t_max = parameter.get('t_max', self.standard_parameters['slope']['t_max'])
         component = parameter.get('component', 'mag')
 
         self.log.info('CALCULATING\t << %s >> arai line fit << t_min=%.1f , t_max=%.1f >>' % (component, t_min, t_max))
 
         equal_steps = list(set(self.th['temp']) & set(self.ptrm['temp']))
-        th_steps = (t_min < self.th['temp']) & (self.th['temp'] < t_max)  # True if step between t_min, t_max
-        ptrm_steps = (t_min < self.ptrm['temp']) & (self.ptrm['temp'] < t_max)  # True if step between t_min, t_max
+        th_steps = (t_min <= self.th['temp']) & (self.th['temp'] <= t_max)  # True if step between t_min, t_max
+        ptrm_steps = (t_min <= self.ptrm['temp']) & (self.ptrm['temp'] <= t_max)  # True if step between t_min, t_max
 
         th_data = self.th.filter(th_steps)  # filtered data for t_min t_max
         ptrm_data = self.ptrm.filter(ptrm_steps)  # filtered data for t_min t_max
@@ -247,12 +268,12 @@ class Thellier(base.Measurement):
         data['th'] = th_data[component]
         data['ptrm'] = ptrm_data[component]
 
-        slope, sigma, y_intercept, x_intercept = data.lin_regress('ptrm', 'th')
+        slope, sigma, y_int, x_int = data.lin_regress('ptrm', 'th')
 
         self.results['slope'] = slope
         self.results['sigma'] = sigma
-        self.results['y_intercept'] = y_intercept
-        self.results['x_intercept'] = x_intercept
+        self.results['y_int'] = y_int
+        self.results['x_int'] = x_int
 
         self.calculation_parameters['slope'] = {'t_min': t_min, 't_max': t_max, 'component': component}
 
@@ -261,5 +282,39 @@ class Thellier(base.Measurement):
         self.results['b_anc'] = b_lab * abs(self.results['slope'])
         self.calculation_parameters['b_anc'] = {'b_lab': b_lab}
 
-    def calculate_sigma_banc(self, **parameter):
-        pass
+    def calculate_sigma_b_anc(self, **parameter):
+        b_lab = parameter.get('b_lab')
+        self.results['sigma_b_anc'] = b_lab * abs(self.results['sigma'])
+        self.calculation_parameters['sigma_b_anc'] = {'b_lab': b_lab}
+
+    def calculate_vds(self, **parameter):  # todo move in rockpydata?
+        '''
+        The vector difference sum of the entire NRM vector :math:`($$\mathbf{NRM}$$)`.
+
+        .. math::
+
+           [ VDS=\left|\mathbf{NRM}_{n_{max}}\right|+\sum\limits_{i=1}^{n_{max}-1}{\left|\mathbf{NRM}_{i+1}-\mathbf{NRM}_{i}\right|}
+
+        where :math:`\left|\mathbf{NRM}_{i}\right|` denotes the length of the NRM vector at the :math:`i^{th}` step.
+
+
+        :param parameter:
+        :return:
+        '''
+        NRM_t_max = self.th['mag'][-1]
+        NRM_sum = np.sum(self.calculate_vd(**parameter))
+        self.results['vds'] = NRM_t_max + NRM_sum
+
+    def calculate_vd(self, **parameter):  # todo move in rockpydata?
+        '''
+        Vector differences
+        :param parameter:
+        :return:
+        '''
+        t_min = parameter.get('t_min', self.standard_parameters['vd']['t_min'])
+        t_max = parameter.get('t_max', self.standard_parameters['vd']['t_max'])
+
+        idx = (self.th['temp'] <= t_max) & (t_min <= self.th['temp'])
+        data = self.th.filter(idx)
+        vd = np.array([np.linalg.norm(i) for i in np.diff(data['m'], axis=0)])
+        return vd

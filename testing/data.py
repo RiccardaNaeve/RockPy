@@ -8,6 +8,8 @@ import Structure.data
 import numpy as np
 import matplotlib.pyplot as plt
 
+from copy import deepcopy
+
 
 # define some data for testing
 testdata = ( (1, 2, 3, 4),
@@ -15,7 +17,7 @@ testdata = ( (1, 2, 3, 4),
              (9, 10, 11, 12))
 
 # create a rockpydata object with named columns and filled with testdata
-d = rockpydata(column_names=( 'F', 'Mx', 'My', 'Mz'))
+d = rockpydata(column_names=( 'F', 'Mx', 'My', 'Mz'), data = testdata)
 
 # define as many aliases as you want
 d.define_alias('M', ( 'Mx', 'My', 'Mz'))
@@ -65,3 +67,22 @@ tf_array = (d['Mx'] > 10) & (d['Mx'] < 20)
 print 'filtering:'
 filtered_d = d.filter(tf_array)
 print filtered_d['Mx']
+
+
+
+# arithmetic operations
+e = deepcopy( d)
+# mutlipy one column with value
+e['Mx'] *= 2
+# calculate difference of two rockpydata objects
+c = e - d
+print c['all']
+
+c = e + d
+print c['all']
+
+c = e / d
+print c['all']
+
+c = e * d
+print c['all']

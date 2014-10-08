@@ -72,6 +72,17 @@ print filtered_d['Mx']
 
 # arithmetic operations
 e = deepcopy( d)
-print e.column_names_from_key( 'all')
+# mutlipy one column with value
+e['Mx'] *= 2
+# calculate difference of two rockpydata objects
 c = e - d
-#print c
+print c['all']
+
+c = e + d
+print c['all']
+
+c = e / d
+print c['all']
+
+c = e * d
+print c['all']

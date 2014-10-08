@@ -33,7 +33,7 @@ class rockpydata(object):
         # define some default aliases
         self._update_all_alias()
         self._column_dict['variable'] = (0,)
-        self._column_dict['measurement'] = tuple(range(self.column_count)[1:])
+        self._column_dict['data'] = tuple(range(self.column_count)[1:])
 
         self['all'] = data
 
@@ -255,14 +255,93 @@ class rockpydata(object):
         subtract operator
         subtracts other rockpydata object
 
-        looks for matching entries in the 'variable' aliased columns
-        returns difference of the remaining columns found in both rockpydata objects
+        .. code-block:: python
+
+           A = B - C
+
+        :param other: rockpydata
+        '''
+
+        # build and return a new rockpydata object containing the variable columns and matching remaining columns with
+        # the calculated data
+
+        result_c_names, results_variable, rd1, rd2 = self._get_arithmetic_data(other)
+
+        results_data = np.append( results_variable, rd1 - rd2, axis = 1) # variable columns + calculated data columns
+
+        return rockpydata(column_names=result_c_names, data=results_data)
+
+    def __add__(self, other):
+        '''
+        addition operator
+        add other rockpydata object
+
+        .. code-block:: python
+
+           A = B + C
+
+        :param other: rockpydata
+        '''
+
+        # build and return a new rockpydata object containing the variable columns and matching remaining columns with
+        # the calculated data
+
+        result_c_names, results_variable, rd1, rd2 = self._get_arithmetic_data(other)
+
+        results_data = np.append( results_variable, rd1 + rd2, axis = 1) # variable columns + calculated data columns
+
+        return rockpydata(column_names=result_c_names, data=results_data)
+
+    def __mul__(self, other):
+        '''
+        subtract operator
+        subtracts other rockpydata object
 
         .. code-block:: python
 
            A = B - C
 
         :param other: rockpydata
+        '''
+
+        # build and return a new rockpydata object containing the variable columns and matching remaining columns with
+        # the calculated data
+
+        result_c_names, results_variable, rd1, rd2 = self._get_arithmetic_data(other)
+
+        results_data = np.append( results_variable, rd1 * rd2, axis = 1) # variable columns + calculated data columns
+
+        return rockpydata(column_names=result_c_names, data=results_data)
+
+    def __div__(self, other):
+        '''
+        subtract operator
+        subtracts other rockpydata object
+
+        .. code-block:: python
+
+           A = B - C
+
+        :param other: rockpydata
+        '''
+
+        # build and return a new rockpydata object containing the variable columns and matching remaining columns with
+        # the calculated data
+
+        result_c_names, results_variable, rd1, rd2 = self._get_arithmetic_data(other)
+
+        results_data = np.append( results_variable, rd1 / rd2, axis = 1) # variable columns + calculated data columns
+
+        return rockpydata(column_names=result_c_names, data=results_data)
+
+    def _get_arithmetic_data(self, other):
+        '''
+        looks for matching entries in the 'variable' aliased columns and for matching data columns
+        this is needed to prepare an arithmetic operation of two rockpydata objects
+
+
+        :param other: rockpydata
+        :return
         '''
         # check if we have a proper rockpydata object for subtraction
 
@@ -297,24 +376,22 @@ class rockpydata(object):
         # make sure d1 is 2 dim, even if there is only one column
         if d2.ndim == 1:
             d2 = d2.reshape(d2.shape[0], 1)
-        mridx = np.array(np.all((d1[:,None,:]==d2[None,:,:]),axis=-1).nonzero()).T.tolist()
+        mridx = np.array(np.all((d1[:,None,:]==d2[None,:,:]),axis=-1).nonzero()).T
         # todo: check if matching rows are unique !!!
 
-        # build and return a new rockpydata object containing the variable columns and matching remaining columns with
-        # the calculated data
-
-
-        #print mcidx[:,0]
-        print 'TTT'
         result_c_names = self.column_names_from_key('variable') + self.column_indices_to_names( mcidx[:,0])
-        results_data = None# todo
 
-        result = rockpydata( column_names = results_c_names )
+        results_variable = d1[mridx[:,0],:] # all columns of variable but only those lines which match in both rockpydata objects
 
-        return reult
+        # data for calculation of both objects with reordered columns according to mcidx
+        rd1 = self.data[mridx[:,0],:][:,mcidx[:,0]]
+        rd2 = other.data[mridx[:,1],:][:,mcidx[:,1]]
 
 
-    def magnitude(self, key='measurement'):
+        return result_c_names, results_variable, rd1, rd2
+
+
+    def magnitude(self, key='data'):
         '''
         calculate magnitude of vector columns
         return
@@ -376,7 +453,7 @@ class rockpydata(object):
                filtered data
         '''
 
-        tf_array = [True if x in index_list else False for x in range(len(self['measurement']))]
+        tf_array = [True if x in index_list else False for x in range(len(self['data']))]
         return self.filter(tf_array)
 
     def check_duplicate(self):

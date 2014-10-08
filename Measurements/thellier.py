@@ -20,7 +20,8 @@ class Thellier(base.Measurement):
         # # ## initialize data
         self.standard_parameters['slope'] = {'t_min': 20, 't_max': 700, 'component': 'mag'}
         self.standard_parameters['vds'] = self.standard_parameters['slope']
-        self.standard_parameters['vd'] = self.standard_parameters['vds']
+        self.standard_parameters['vd'] = self.standard_parameters['slope']
+        self.standard_parameters['x_dash'] = self.standard_parameters['slope']
 
     def format_cryomag(self):
         '''
@@ -30,12 +31,14 @@ class Thellier(base.Measurement):
 
         :return:
         '''
+
         self.all_data = rockpydata(column_names=['temp', 'x', 'y', 'z', 'moment', 'time', 'std_dev'])
+
+        self.all_data['temp'] = self.raw_data['step']
         self.all_data['x'] = self.raw_data['x']
         self.all_data['y'] = self.raw_data['y']
         self.all_data['z'] = self.raw_data['z']
         self.all_data['moment'] = self.raw_data['m']
-        self.all_data['temp'] = self.raw_data['step']
         self.all_data['std_dev'] = self.raw_data['sm']
 
         TH_idx = np.where(self.raw_data['type'] == 'TH')[0]
@@ -162,6 +165,22 @@ class Thellier(base.Measurement):
         '''
         return self.result_b_anc()
 
+    @property
+    def sigma_int(self):
+        '''
+        helper function that returns the value for slope of arai line fit. If result not available will calculate
+        it with standard parameters
+        '''
+        return self.result_sigma_b_anc()
+
+    @property
+    def vds(self):
+        '''
+        helper function that returns the value for slope of arai line fit. If result not available will calculate
+        it with standard parameters
+        '''
+        return self.result_vds()
+
     ''' RESULT SECTION '''
 
     def result_slope(self, t_min=None, t_max=None, component=None, recalc=False):
@@ -201,18 +220,18 @@ class Thellier(base.Measurement):
         }
 
         self.calc_result(parameter, recalc, force_caller='slope')
-        return self.results['yintercept']
+        return self.results['y_int']
 
     def result_b_anc(self, t_min=None, t_max=None, component=None, b_lab=35.0, recalc=False):
         parameter_a = {'t_min': t_min,
                        't_max': t_max,
                        'component': component,
         }
-
         parameter_b = {'b_lab': b_lab}
-        self.calc_result(parameter_a, recalc, force_caller='slope')
-        self.calc_result(parameter_b, recalc)
 
+        self.calc_result(parameter_a, recalc,
+                         force_caller='slope')  # force caller because if not calculate_b_anc will be called
+        self.calc_result(parameter_b, recalc)
         return self.results['b_anc']
 
     def result_sigma_b_anc(self, t_min=None, t_max=None, component=None, b_lab=35.0, recalc=False):
@@ -318,3 +337,39 @@ class Thellier(base.Measurement):
         data = self.th.filter(idx)
         vd = np.array([np.linalg.norm(i) for i in np.diff(data['m'], axis=0)])
         return vd
+
+    def calculate_x_dash(self, **parameter):
+        '''
+        :math:`x_0 and :math:`y_0` the x and y points on the Arai plot projected on to the best-ﬁt line. These are
+        used to
+        calculate the NRM fraction and the length of the best-ﬁt line among other parameters. There are
+        multiple ways of calculating :math:`x_0 and :math:`y_0`, below is one example.
+
+        ..math:
+
+          x_i' = \frac{1}{2} \left( x_i + \frac{y_i - Y_{int}}{b}
+
+
+        :param parameter:
+        :return:
+        '''
+
+        t_min = parameter.get('t_min', self.standard_parameters['x_dash']['t_min'])
+        t_max = parameter.get('t_max', self.standard_parameters['x_dash']['t_max'])
+        component = parameter.get('component', self.standard_parameters['x_dash']['component'])
+
+        idx = (self.th['temp'] <= t_max) & (t_min <= self.th['temp'])  # filtering for t_min/t_max
+        x = self.th.filter(idx)
+
+        idx = (self.ptrm['temp'] <= t_max) & (t_min <= self.ptrm['temp'])
+        y = self.ptrm.filter(idx)
+
+        idx = np.array([(ix, iy) for iy, v1 in enumerate(self.ptrm['temp'])
+                        for ix, v2 in enumerate(self.th['temp'])
+                        if v1 == v2])  # filtering for equal var
+
+        x = x.filter_idx(idx[:, 0])
+        y = y.filter_idx(idx[:, 1])
+
+        x_dash = 0.5 * (x[component] + ((y[component] - self.y_int) / self.slope))
+        return x_dash

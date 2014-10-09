@@ -3,7 +3,9 @@ import logging
 import numpy as np
 import Functions.general
 import Readin.machines as machines
-import Readin
+from Readin import vftb, microsense, generic
+
+import Readin.base
 from Structure.rockpydata import rockpydata
 import inspect
 
@@ -15,22 +17,14 @@ class Measurement(object):
 
         self.log = logging.getLogger('RockPy.MEASUREMENT.' + type(self).__name__)
 
+        # setting implemented machines
+        # looking for all subclasses of Readin.base.Machine
+        # generating a dictionary of implemented machines : {implemented out_* method : machine_class}
+        implemented_machines = [cls for cls in Readin.base.Machine.__subclasses__()]
+
         self.implemented = {
-            'generic': {'mass': None,
-                        'height': None,
-                        'diameter': None,
-            },
-            'vftb': {'hys': machines.Vftb,
-                     'backfield': machines.Vftb,
-                     'thermocurve': machines.Vftb,
-                     'irm': machines.Vftb,
-            },
-            'vsm': {'hys': machines.Vsm,
-            },
-            'cryomag': {'thellier': machines.cryo_nl,
-            },
-            'microsense': {'hys': Readin.microsense.MicroSense}
-        }
+        cls.__name__.lower(): {'_'.join(i.split('_')[1:]).lower(): cls for i in dir(cls) if i.startswith('out_')}
+        for cls in implemented_machines}
 
         ''' initialize parameters '''
         self.raw_data = None # returned data from Readin.machines()
@@ -57,7 +51,8 @@ class Measurement(object):
         else:
             self.log.error('UNKNOWN\t machine << %s >>' % self.machine)
 
-        # data formatting
+        # dynamic data formatting
+        # checks is format_'machine_name' exists. If exists it formats self.raw_data according to format_'machine_name'
         if callable(getattr(self, 'format_' + machine)):
             self.log.debug('FORMATTING raw data from << %s >>' % self.machine)
             getattr(self, 'format_' + machine)()
@@ -65,9 +60,25 @@ class Measurement(object):
             self.log.error(
                 'FORMATTING raw data from << %s >> not possible, probably not implemented, yet.' % self.machine)
 
+        # dynamical creation of entries in results data. One column for each results_* method.
+        # calculation_* methods are not creating columns -> if a result is calculated a result_* method
+        # has to be written
         self.result_methods = [i[7:] for i in dir(self) if i.startswith('result_') if not i.endswith('generic')]  # search for implemented results methods
         self.results = rockpydata(
             column_names=self.result_methods)  # dynamic entry creation for all available result methods
+
+        # ## warning with calculation of results:
+        # M.result_slope() -> 1.2
+        # M.calculate_vds(t_min=300) -> ***
+        # M.results['slope'] -> 1.2
+        # M.result_slope(t_min=300) -> 0.9
+        #
+        # the results are stored for the calculation parameters that were used to calculate it.
+        # This means calculating a different result with different parameters can lead to inconsistencies.
+        # One has to be aware that comparing the two may not be useful
+
+        # dynamically generating the calculation and standard parameters for each calculation method.
+        # This just sets the values to non, the values have to be specified in the class itself
         self.calculation_parameters = {i[10:]: None for i in dir(self) if i.startswith('calculate_') if
                                        not i.endswith('generic')}
         self.standard_parameters = {i[10:]: None for i in dir(self) if i.startswith('calculate_') if

@@ -11,10 +11,6 @@ sample = Sample(name='1a')
 # adding the measurement to the sample
 M = sample.add_measurement(mtype='thellier', mfile=cryomag_file, machine='cryomag')
 
-# print np.c_[M.th['temp'], M.th['mag']]
-# print np.c_[M.ptrm['temp'], M.ptrm['mag']]
-# print np.c_[M.sum['temp'], M.sum['mag']]
-print M.result_slope(t_min=20)
 # calculation of slope
 # print 'just returning the standard values'
 # print M.result_slope()
@@ -26,13 +22,13 @@ print M.result_slope(t_min=20)
 # print M.result_slope(), M.result_sigma()
 
 # getting results -> simple calculation with standard parameters
-# print M.slope, M.sigma, M.y_intercept, M.x_intercept
+# print M.slope, M.sigma, M.y_int, M.x_int
 
 # print M.result_b_anc(t_min=300)
 # print M.result_sigma_b_anc(t_min=300)
 
-# print M.result_vds(t_min=100)
-# M.calculate_x_dash()
+
+# print M.calculate_y_dash()
 # plotting dunlop plot
 # M.plt_dunlop()
 

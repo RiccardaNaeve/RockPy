@@ -17,7 +17,7 @@ testdata = ( (1, 2, 3, 4),
              (9, 10, 11, 12))
 
 # create a rockpydata object with named columns and filled with testdata
-d = rockpydata(column_names=( 'F', 'Mx', 'My', 'Mz'), data = testdata)
+d = rockpydata(column_names=( 'F', 'Mx', 'My', 'Mz'), data=testdata)
 
 # define as many aliases as you want
 d.define_alias('M', ( 'Mx', 'My', 'Mz'))
@@ -52,7 +52,7 @@ d.append_columns('normM', d.normalize('magM', 100))
 d.append_columns(("T",), np.array((1, 2, 3)))
 
 # renaming a column
-d.rename_column('Tt', 'temp')
+d.rename_column('T', 'temp')
 
 # show all data again, now including magM and T as the last two columns
 print( d.column_names)
@@ -71,9 +71,13 @@ print filtered_d['Mx']
 
 
 # arithmetic operations
-e = deepcopy( d)
+d = rockpydata(column_names=['a', 'b', 'c'], data=[[1, 2, 3], [4, 5, 6], [7, 8, 9]])
+e = deepcopy(d)
+print 'e:', e['all']
 # mutlipy one column with value
-e['Mx'] *= 2
+e['b'] *= 2
+print 'e*2:', e['all']
+
 # calculate difference of two rockpydata objects
 c = e - d
 print c['all']
@@ -86,3 +90,8 @@ print c['all']
 
 c = e * d
 print c['all']
+
+a = rockpydata(column_names=['a', 'b', 'c'])
+a['b'] = 1
+print a['all']  # todo unset value -> None or np.nan not 0.
+# todo append row, insert row(idx), delete row(idx)

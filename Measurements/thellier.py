@@ -19,9 +19,10 @@ class Thellier(base.Measurement):
 
         # # ## initialize data
         self.standard_parameters['slope'] = {'t_min': 20, 't_max': 700, 'component': 'mag'}
-        self.standard_parameters['vds'] = self.standard_parameters['slope']
-        self.standard_parameters['vd'] = self.standard_parameters['slope']
-        self.standard_parameters['x_dash'] = self.standard_parameters['slope']
+
+        for i in self.standard_parameters:
+            if self.standard_parameters[i] is None:
+                self.standard_parameters[i] = self.standard_parameters['slope']
 
     def format_cryomag(self):
         '''
@@ -33,7 +34,7 @@ class Thellier(base.Measurement):
         '''
 
         self.all_data = rockpydata(column_names=['temp', 'x', 'y', 'z', 'moment', 'time', 'std_dev'])
-
+        # self.all_data.
         self.all_data['temp'] = self.raw_data['step']
         self.all_data['x'] = self.raw_data['x']
         self.all_data['y'] = self.raw_data['y']
@@ -47,49 +48,31 @@ class Thellier(base.Measurement):
         TRM_idx = np.where(self.raw_data['type'] == 'TRM')[0]
 
         self.nrm = self.all_data.filter_idx(NRM_idx)
+        self.nrm.define_alias('m', ( 'x', 'y', 'z'))
+        self.nrm.append_columns('mag', self.nrm.magnitude('m'))
+
         self.trm = self.all_data.filter_idx(TRM_idx)
+        self.trm.define_alias('m', ( 'x', 'y', 'z'))
+        self.trm.append_columns('mag', self.trm.magnitude('m'))
+
         self.th = self.all_data.filter_idx(np.append(NRM_idx, TH_idx))
+        self.th.sort('temp')
         self.th.define_alias('m', ( 'x', 'y', 'z'))
         self.th.append_columns('mag', self.th.magnitude('m'))
-        self.th.sort('temp')
 
         self.pt = self.all_data.filter_idx(np.append(NRM_idx, PT_idx))
         self.pt.sort('temp')
         self.pt.define_alias('m', ('x', 'y', 'z'))
+        self.pt.append_columns('mag', self.pt.magnitude('m'))
 
         # ## PTRM
-        var_index = np.array([(i, j) for i, v1 in enumerate(self.th['temp']) for j, v2 in enumerate(self.pt['temp'])
-                              if v1 == v2])
-
-        t = [self.pt['temp'][j] for i, j in var_index]
-        x = [self.pt['x'][j] - self.th['x'][i] for i, j in var_index]
-        y = [self.pt['y'][j] - self.th['y'][i] for i, j in var_index]
-        z = [self.pt['z'][j] - self.th['z'][i] for i, j in var_index]
-        m = [self.pt['moment'][j] - self.th['moment'][i] for i, j in var_index]
-        std_dev = [self.pt['std_dev'][j] + self.th['std_dev'][i] for i, j in var_index]
-        data = np.c_[t, x, y, z, m, std_dev]
-
-        data = data[data[:, 0].argsort()]
-
-        self.ptrm = rockpydata(column_names=['temp', 'x', 'y', 'z', 'moment', 'std_dev'], data=data)
+        self.ptrm = self.pt - self.th
         self.ptrm.define_alias('m', ( 'x', 'y', 'z'))
-        self.ptrm.append_columns('mag', self.ptrm.magnitude('m'))
+        self.ptrm['mag'] = self.ptrm.magnitude('m')
         # ## SUM
-        var_index = np.array([(i, j) for i, v1 in enumerate(self.th['temp']) for j, v2 in enumerate(self.ptrm['temp'])
-                              if v1 == v2])
-
-        t = [self.th['temp'][j] for i, j in var_index]
-        x = [self.ptrm['x'][j] + self.th['x'][i] for i, j in var_index]
-        y = [self.ptrm['y'][j] + self.th['y'][i] for i, j in var_index]
-        z = [self.ptrm['z'][j] + self.th['z'][i] for i, j in var_index]
-        m = [self.ptrm['moment'][j] + self.th['moment'][i] for i, j in var_index]
-        std_dev = [self.ptrm['x'][j] + self.th['std_dev'][i] for i, j in var_index]
-        data = np.c_[t, x, y, z, m, std_dev]
-        data = data[data[:, 0].argsort()]
-
-        self.sum = rockpydata(column_names=['temp', 'x', 'y', 'z', 'moment', 'std_dev'], data=data)
+        self.sum = self.th + self.ptrm
         self.sum.define_alias('m', ( 'x', 'y', 'z'))
-        self.sum.append_columns('mag', self.sum.magnitude('m'))
+        self.sum['mag'] = self.sum.magnitude('m')
 
         self.ac = self.all_data.filter_idx(np.where(self.raw_data['type'] == 'AC')[0])
         self.ck = self.all_data.filter_idx(np.where(self.raw_data['type'] == 'CK')[0])
@@ -357,12 +340,13 @@ class Thellier(base.Measurement):
         t_min = parameter.get('t_min', self.standard_parameters['x_dash']['t_min'])
         t_max = parameter.get('t_max', self.standard_parameters['x_dash']['t_max'])
         component = parameter.get('component', self.standard_parameters['x_dash']['component'])
+        self.log.info('CALCULATING\t << %s >> x_dash << t_min=%.1f , t_max=%.1f >>' % (component, t_min, t_max))
 
         idx = (self.th['temp'] <= t_max) & (t_min <= self.th['temp'])  # filtering for t_min/t_max
-        x = self.th.filter(idx)
+        y = self.th.filter(idx)
 
         idx = (self.ptrm['temp'] <= t_max) & (t_min <= self.ptrm['temp'])
-        y = self.ptrm.filter(idx)
+        x = self.ptrm.filter(idx)
 
         idx = np.array([(ix, iy) for iy, v1 in enumerate(self.ptrm['temp'])
                         for ix, v2 in enumerate(self.th['temp'])
@@ -373,3 +357,41 @@ class Thellier(base.Measurement):
 
         x_dash = 0.5 * (x[component] + ((y[component] - self.y_int) / self.slope))
         return x_dash
+
+    def calculate_y_dash(self, **parameter):
+        '''
+        :math:`x_0 and :math:`y_0` the x and y points on the Arai plot projected on to the best-ﬁt line. These are
+        used to
+        calculate the NRM fraction and the length of the best-ﬁt line among other parameters. There are
+        multiple ways of calculating :math:`x_0 and :math:`y_0`, below is one example.
+
+        ..math:
+
+           y_i' = \frac{1}{2} \left( x_i + \frac{y_i - Y_{int}}{b}
+
+
+        :param parameter:
+        :return:
+        '''
+
+        t_min = parameter.get('t_min', self.standard_parameters['y_dash']['t_min'])
+        t_max = parameter.get('t_max', self.standard_parameters['y_dash']['t_max'])
+        component = parameter.get('component', self.standard_parameters['y_dash']['component'])
+        self.log.info('CALCULATING\t << %s >> y_dash << t_min=%.1f , t_max=%.1f >>' % (component, t_min, t_max))
+
+        idx = (self.th['temp'] <= t_max) & (t_min <= self.th['temp'])  # filtering for t_min/t_max
+        y = self.th.filter(idx)
+
+        idx = (self.ptrm['temp'] <= t_max) & (t_min <= self.ptrm['temp'])
+        x = self.ptrm.filter(idx)
+
+        idx = np.array([(ix, iy) for iy, v1 in enumerate(self.ptrm['temp'])
+                        for ix, v2 in enumerate(self.th['temp'])
+                        if v1 == v2])  # filtering for equal var
+
+        x = x.filter_idx(idx[:, 0])
+        y = y.filter_idx(idx[:, 1])
+
+        y_dash = 0.5 * ( y[component] + self.slope * x[component] + self.y_int)
+
+        return y_dash

@@ -2,7 +2,7 @@ __author__ = 'wack'
 
 import numpy as np
 from copy import deepcopy
-
+from prettytable import PrettyTable
 
 class rockpydata(object):
     # todo units
@@ -388,6 +388,27 @@ class rockpydata(object):
         rd2 = other.data[mridx[:, 1], :][:, mcidx[:, 1]]
 
         return result_c_names, results_variable, rd1, rd2
+
+    def __repr__(self):
+        '''
+        get useful representation for debugging
+        :return:
+        '''
+        return "rockpydata, %d rows in %d columns (%s)" % (self.row_count, self.column_count, ','.join(self.column_names))
+
+    def __str__(self):
+        '''
+        get readable representation of the data
+        :return:
+        '''
+
+        tab = PrettyTable(self.column_names)
+        for row in self.data:
+            tab.add_row(row)
+        # Change some column alignments; default was 'c'
+        #tab.align['column_one'] = 'r'
+
+        return tab.get_string()
 
 
     def magnitude(self, key='data'):

@@ -1,4 +1,4 @@
-from Structure.rockpydata import rockpydata
+from Structure.rockpydata import RockPyData
 from Structure.data import data
 
 __author__ = 'volk'
@@ -23,7 +23,7 @@ class Mass(Measurement):
 
         mass_conversion = convert2(unit, 'kg', 'mass')
 
-        self.data = rockpydata(column_names=['mass', 'time', 'std_dev'])
+        self.data = RockPyData(column_names=['mass', 'time', 'std_dev'])
         self.data['mass'] = value * mass_conversion
         self.data['time'] = time
         self.data['std_dev'] = std
@@ -39,7 +39,7 @@ class Length(Measurement):
     """
 
     def __init__(self, sample_obj,
-                 mtype, mfile=None, machine=None,
+                 mtype, mfile=None, machine='generic',
                  value=1.0, unit='m',
                  std=None, time=None,
                  **options):
@@ -50,7 +50,7 @@ class Length(Measurement):
         self.machine = machine
         length_conversion = convert2(unit, 'm', 'length')
 
-        self.data = rockpydata(column_names=[mtype, 'time', 'std_dev'])
+        self.data = RockPyData(column_names=[mtype, 'time', 'std_dev'])
         self.data[mtype] = value * length_conversion
         self.data['time'] = time
         self.data['std_dev'] = std

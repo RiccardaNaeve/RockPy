@@ -1,4 +1,4 @@
-from Structure.rockpydata import rockpydata
+from Structure.rockpydata import RockPyData
 
 __author__ = 'volk'
 import base
@@ -16,9 +16,9 @@ class Irm(base.Measurement):
 
     def format_vftb(self):
         data = self.machine_data.out_irm()
-        header = self.machine_data.header()
+        header = self.machine_data.header
         self.log.debug('FORMATTING << %s >> raw_data for << VFTB >> data structure' % ('IRM'))
-        self.remanence = rockpydata(column_names=header, data=data[0])
+        self.remanence = RockPyData(column_names=header, data=data[0])
 
     def format_vsm(self):
         raise NotImplemented

@@ -1,4 +1,4 @@
-from Structure.rockpydata import rockpydata
+from Structure.rockpydata import RockPyData
 
 __author__ = 'volk'
 import base
@@ -16,9 +16,9 @@ class Hysteresis(base.Measurement):
 
     # ## formatting functions
     def format_vftb(self):
-        data = self.raw_data_hys()
-        header = self.machine_data.header()
-        self.induced = rockpydata(column_names=header, data=data[0])
+        data = self.machine_data.out_hys()
+        header = self.machine_data.header
+        self.induced = RockPyData(column_names=header, data=data[0])
         dfield = np.diff(self.induced['field'])
 
         idx = [i for i in range(len(dfield)) if dfield[i] < 0]
@@ -37,7 +37,7 @@ class Hysteresis(base.Measurement):
         data = self.machine_data.out_hys()
         header = self.machine_data.header
 
-        self.raw_data = rockpydata(column_names=header, data=data)
+        self.raw_data = RockPyData(column_names=header, data=data)
         dfield = np.diff(self.raw_data['raw_applied_field_for_plot_'])
         down_field_idx = [i for i in range(len(dfield)) if dfield[i] < 0]
         up_field_idx = [i for i in range(len(dfield)) if dfield[i] > 0]
@@ -263,7 +263,7 @@ class Hysteresis(base.Measurement):
         # color=std.get_color(),
         # zorder=1)
         # plt.plot(self.up_field_interp()[0], self.up_field_interp()[1], '--',
-        #          color=std.get_color(),
+        # color=std.get_color(),
         #          zorder=1)
 
         if not self.virgin is None:

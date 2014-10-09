@@ -1,4 +1,4 @@
-from Structure.rockpydata import rockpydata
+from Structure.rockpydata import RockPyData
 
 __author__ = 'volk'
 import base
@@ -32,8 +32,8 @@ class Backfield(base.Measurement):
         :return:
         '''
         data = self.machine_data.out_backfield()
-        header = self.machine_data.header()
-        self.remanence = rockpydata(column_names=header, data=data[0])
+        header = self.machine_data.header
+        self.remanence = RockPyData(column_names=header, data=data[0])
         self.induced = None
 
     @property

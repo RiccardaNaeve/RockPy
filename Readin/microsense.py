@@ -1,6 +1,6 @@
 __author__ = 'mike'
 import base
-from Structure.rockpydata import rockpydata
+from Structure.rockpydata import RockPyData
 import numpy as np
 
 
@@ -12,7 +12,8 @@ class MicroSense(base.Machine):
 
         self.data_start_idx = [i + 2 for i in range(len(self.raw_data)) if self.raw_data[i].startswith('@@Final')][0]
         self.data_end_idx = [i - 2 for i in range(len(self.raw_data)) if self.raw_data[i].startswith('@@END Data')][-1]
-        self.header_idx = [i + 1 for i in range(len(self.raw_data)) if self.raw_data[i].startswith('@@End of Header')][0]
+        self.header_idx = [i + 1 for i in range(len(self.raw_data)) if self.raw_data[i].startswith('@@End of Header')][
+            0]
         d = np.array([i.split() for i in self.raw_data[self.data_start_idx:self.data_end_idx]])
         # print self.data_start_idx, self.data_end_idx
         self.data = d.astype(float)

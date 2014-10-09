@@ -6,7 +6,7 @@ import Readin.machines as machines
 from Readin import vftb, microsense, generic
 
 import Readin.base
-from Structure.rockpydata import rockpydata
+from Structure.rockpydata import RockPyData
 import inspect
 
 class Measurement(object):
@@ -35,12 +35,12 @@ class Measurement(object):
         self.initial_state = None
 
         if machine in self.implemented:
+            self.machine = machine.lower()
             if mtype.lower() in self.implemented[machine]:
                 self.log.debug('FOUND\t measurement type: << %s >>' % mtype.lower())
                 self.mtype = mtype.lower()
                 self.sample_obj = sample_obj
                 self.mfile = mfile
-                self.machine = machine.lower()
 
                 if self.machine and self.mfile:
                     self.import_data()
@@ -54,7 +54,7 @@ class Measurement(object):
         # dynamic data formatting
         # checks is format_'machine_name' exists. If exists it formats self.raw_data according to format_'machine_name'
         if callable(getattr(self, 'format_' + machine)):
-            self.log.debug('FORMATTING raw data from << %s >>' % self.machine)
+            self.log.debug('FORMATTING raw data from << %s >>' % machine)
             getattr(self, 'format_' + machine)()
         else:
             self.log.error(
@@ -64,7 +64,7 @@ class Measurement(object):
         # calculation_* methods are not creating columns -> if a result is calculated a result_* method
         # has to be written
         self.result_methods = [i[7:] for i in dir(self) if i.startswith('result_') if not i.endswith('generic')]  # search for implemented results methods
-        self.results = rockpydata(
+        self.results = RockPyData(
             column_names=self.result_methods)  # dynamic entry creation for all available result methods
 
         # ## warning with calculation of results:
@@ -79,8 +79,8 @@ class Measurement(object):
 
         # dynamically generating the calculation and standard parameters for each calculation method.
         # This just sets the values to non, the values have to be specified in the class itself
-        self.calculation_parameters = {i[10:]: None for i in dir(self) if i.startswith('calculate_') if
-                                       not i.endswith('generic')}
+        self.calculation_methods = [i for i in dir(self) if i.startswith('calculate_') if not i.endswith('generic')]
+        self.calculation_parameters = {i[10:]: None for i in self.calculation_methods}
         self.standard_parameters = {i[10:]: None for i in dir(self) if i.startswith('calculate_') if
                                     not i.endswith('generic')}
 
@@ -189,7 +189,10 @@ class Measurement(object):
             parameter = self.compare_parameters(caller, parameter)  # checks for None and replaces it with standard
             if self.results[caller] is None or self.results[
                 caller] == 0.000 or recalc:  # if results dont exist or force recalc
-                self.log.debug('CANNOT find result << %s >> -> calculating' % (caller))
+                if recalc:
+                    self.log.debug('FORCED recalculation of << %s >>' % (caller))
+                else:
+                    self.log.debug('CANNOT find result << %s >> -> calculating' % (caller))
                 getattr(self, 'calculate_' + caller)(**parameter)  # calling calculation method
             else:
                 self.log.debug('FOUND previous << %s >> parameters' % (caller))

@@ -1,4 +1,4 @@
-from Structure.rockpydata import rockpydata
+from Structure.rockpydata import RockPyData
 
 __author__ = 'wack'
 
@@ -17,7 +17,7 @@ testdata = ( (1, 2, 3, 4),
              (9, 10, 11, 12))
 
 # create a rockpydata object with named columns and filled with testdata
-d = rockpydata(column_names=( 'F', 'Mx', 'My', 'Mz'), data = testdata)
+d = RockPyData(column_names=( 'F', 'Mx', 'My', 'Mz'), data=testdata)
 
 # define as many aliases as you want
 d.define_alias('M', ( 'Mx', 'My', 'Mz'))
@@ -70,7 +70,7 @@ print filtered_d['Mx']
 
 
 # arithmetic operations
-e = deepcopy( d)
+e = deepcopy(d)
 # mutlipy one column with value
 e['Mx'] *= 2
 # calculate difference of two rockpydata objects

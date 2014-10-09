@@ -4,9 +4,11 @@ import numpy as np
 from copy import deepcopy
 from prettytable import PrettyTable
 
-class rockpydata(object):
+
+class RockPyData(object):
     # todo units
-    '''
+    # todo append rockpydata object rpd(('a','b','c'), (1,2,3)).append(rpd(('a','b'), (1,2)) -> rpd(('a','b','c'), ((1,2,3), (1,2,np.nan))
+    """
     class to manage specific numeric data based on a numpy array
     e.g. d = rockpydata( column_names=( 'F','Mx', 'My', 'Mz'))
 
@@ -14,12 +16,12 @@ class rockpydata(object):
        key: can be column_name and alias
        column_name: only used for single columns
        alias: only used for alias
-    '''
+    """
 
     def __init__(self, column_names, units=None, data=None):
-        '''
+        """
             * columns: sequence of strings naming individual columns
-        '''
+        """
 
         if type(column_names) is str:  # if we got a single string, convert it to tuple with one entry
             column_names = (column_names,)
@@ -38,13 +40,13 @@ class rockpydata(object):
         self['all'] = data
 
     def _update_column_dictionary(self, column_names=None):
-        '''
+        """
         update internal _column_dict to assign single column names and aliases to column indices
         * if column_names == None, populate _column_dict with all columns, aliases will be lost
         * if column_names is list of column names (which must already exist in self._column_names), add or update
         those in _column_dict
         e.g. {'Mx': (0,),'My': (1,), 'Mz': (2,), 'Mx': (0,1,2))
-        '''
+        """
 
         if type(column_names) is str:  # if we got a single string, convert it to tuple with one entry
             column_names = (column_names,)
@@ -60,7 +62,6 @@ class rockpydata(object):
                     raise IndexError('column %s does not exist' % n)
             for n in column_names:  # add or update each column to _column_dict
                 self._column_dict[n] = (self._column_names.index(n),)
-
 
     def _update_all_alias(self):  #
         self._column_dict['all'] = tuple(range(self.column_count))
@@ -91,9 +92,9 @@ class rockpydata(object):
 
     @data.setter
     def data(self, data):
-        '''
+        """
         set data and check if it fits the number of columns
-        '''
+        """
         if data is None:
             self._data = None  # clear existing data
             return
@@ -108,10 +109,10 @@ class rockpydata(object):
         self._data = np.array(data)
 
     def define_alias(self, alias_name, column_names):
-        '''
+        """
         define an alias for a sequence of existing columns
         e.g. d.definealias( 'M', ('Mx', 'My', 'Mz'))
-        '''
+        """
         if type(column_names) is str:  # if we got a single string, convert it to tuple with one entry
             column_names = (column_names,)
 
@@ -126,9 +127,9 @@ class rockpydata(object):
         self._define_alias_indices(alias_name, tuple(self._column_dict[cn][0] for cn in column_names))
 
     def _define_alias_indices(self, alias_name, column_indices):
-        '''
+        """
         define an alias as a sequence of numeric column indices
-        '''
+        """
         # todo check if column_indices is integer array?
         # check if column indices are in valid range
         if max(column_indices) > self.column_count or min(column_indices) < 0:
@@ -136,10 +137,11 @@ class rockpydata(object):
         self._column_dict[alias_name] = tuple(column_indices)
 
     def append_columns(self, column_names, data=None):
-        '''
+        """
         add data columns to data object
-        column_names: list of strings
-        '''
+        :param column_names: list(str)
+        :param data: 
+        """
         if type(column_names) is str:  # if we got a single string, convert it to tuple with one entry
             column_names = (column_names,)
 
@@ -169,42 +171,42 @@ class rockpydata(object):
         self._update_all_alias()
 
     def key_exists(self, key):
-        '''
+        """
         returns true when key is valid
-        '''
+        """
         return key in self._column_dict
 
     def column_exists(self, column_name):
-        '''
+        """
         returns true if named column exists
-        '''
+        """
         return column_name in self._column_names
 
     def column_indices_to_names(self, c_indices):
-        '''
+        """
         get column names for given indices
 
-        :param indices: list of indices
+        :param c_indices: list of indices
 
         :return list of strings
-        '''
+        """
         return [self.column_names[i] for i in c_indices]
 
     def column_names_from_key(self, key):
-        '''
+        """
         get column names for given key
 
         :param key: string
 
         :return list of strings
-        '''
+        """
         return self.column_indices_to_names(self.column_dict[key])
 
     def __getitem__(self, key):
-        '''
+        """
         allows access to data columns by index (names)
         e.g. data['mass']
-        '''
+        """
         # check if key is valid
         if not self.key_exists(key):
             raise KeyError('key %s is not a valid column name or alias' % key)
@@ -220,10 +222,10 @@ class rockpydata(object):
         return d
 
     def __setitem__(self, key, data):
-        '''
+        """
         allows access to data columns by index (names)
         e.g. data['Mx'] = (1,2,3)
-        '''
+        """
 
         if data is None:
             return
@@ -236,7 +238,7 @@ class rockpydata(object):
             data = np.array(data)
 
         # if we have no data, initialize everything to zero with number of lines matching the new data
-        if self._data == None:
+        if self._data is None:
             try:
                 data.shape[0]
             except IndexError:
@@ -251,7 +253,7 @@ class rockpydata(object):
         self._data[:, self._column_dict[key]] = data
 
     def __sub__(self, other):
-        '''
+        """
         subtract operator
         subtracts other rockpydata object
 
@@ -260,7 +262,7 @@ class rockpydata(object):
            A = B - C
 
         :param other: rockpydata
-        '''
+        """
 
         # build and return a new rockpydata object containing the variable columns and matching remaining columns with
         # the calculated data
@@ -269,10 +271,10 @@ class rockpydata(object):
 
         results_data = np.append(results_variable, rd1 - rd2, axis=1)  # variable columns + calculated data columns
 
-        return rockpydata(column_names=result_c_names, data=results_data)
+        return RockPyData(column_names=result_c_names, data=results_data)
 
     def __add__(self, other):
-        '''
+        """
         addition operator
         add other rockpydata object
 
@@ -281,7 +283,7 @@ class rockpydata(object):
            A = B + C
 
         :param other: rockpydata
-        '''
+        """
 
         # build and return a new rockpydata object containing the variable columns and matching remaining columns with
         # the calculated data
@@ -290,10 +292,10 @@ class rockpydata(object):
 
         results_data = np.append(results_variable, rd1 + rd2, axis=1)  # variable columns + calculated data columns
 
-        return rockpydata(column_names=result_c_names, data=results_data)
+        return RockPyData(column_names=result_c_names, data=results_data)
 
     def __mul__(self, other):
-        '''
+        """
         subtract operator
         subtracts other rockpydata object
 
@@ -302,7 +304,7 @@ class rockpydata(object):
            A = B - C
 
         :param other: rockpydata
-        '''
+        """
 
         # build and return a new rockpydata object containing the variable columns and matching remaining columns with
         # the calculated data
@@ -311,10 +313,10 @@ class rockpydata(object):
 
         results_data = np.append(results_variable, rd1 * rd2, axis=1)  # variable columns + calculated data columns
 
-        return rockpydata(column_names=result_c_names, data=results_data)
+        return RockPyData(column_names=result_c_names, data=results_data)
 
     def __div__(self, other):
-        '''
+        """
         subtract operator
         subtracts other rockpydata object
 
@@ -323,7 +325,7 @@ class rockpydata(object):
            A = B - C
 
         :param other: rockpydata
-        '''
+        """
 
         # build and return a new rockpydata object containing the variable columns and matching remaining columns with
         # the calculated data
@@ -332,20 +334,20 @@ class rockpydata(object):
 
         results_data = np.append(results_variable, rd1 / rd2, axis=1)  # variable columns + calculated data columns
 
-        return rockpydata(column_names=result_c_names, data=results_data)
+        return RockPyData(column_names=result_c_names, data=results_data)
 
     def _get_arithmetic_data(self, other):
-        '''
+        """
         looks for matching entries in the 'variable' aliased columns and for matching data columns
         this is needed to prepare an arithmetic operation of two rockpydata objects
 
 
         :param other: rockpydata
         :return
-        '''
+        """
         # check if we have a proper rockpydata object for subtraction
 
-        if not isinstance(other, rockpydata):
+        if not isinstance(other, RockPyData):
             raise ArithmeticError('only rockpydata objects can be subtracted')
 
         # check if 'variable' columns match in both objects
@@ -366,7 +368,7 @@ class rockpydata(object):
         # get indices of matching column names
         mcidx = np.array([(self.column_names.index(n), other.column_names.index(n)) for n in matching_cnames])
 
-        #get indices of matching 'variable' values
+        # get indices of matching 'variable' values
         d1 = self['variable']
         # make sure d1 is 2 dim, even if there is only one column
         if d1.ndim == 1:
@@ -390,52 +392,58 @@ class rockpydata(object):
         return result_c_names, results_variable, rd1, rd2
 
     def __repr__(self):
-        '''
+        """
         get useful representation for debugging
         :return:
-        '''
-        return "rockpydata, %d rows in %d columns (%s)" % (self.row_count, self.column_count, ','.join(self.column_names))
+        """
+        return "rockpydata, %d rows in %d columns (%s)" % (
+            self.row_count, self.column_count, ','.join(self.column_names))
 
     def __str__(self):
-        '''
+        """
         get readable representation of the data
         :return:
-        '''
+        """
 
         tab = PrettyTable(self.column_names)
         for row in self.data:
             tab.add_row(row)
         # Change some column alignments; default was 'c'
-        #tab.align['column_one'] = 'r'
+        # tab.align['column_one'] = 'r'
 
         return tab.get_string()
 
+    """ METHODS returning ARRAYS """
 
     def magnitude(self, key='data'):
-        '''
+        """
         calculate magnitude of vector columns
         return
         * np.array of data
-        '''
+        """
 
         return np.sum(np.abs(self[key]) ** 2, axis=-1) ** (1. / 2)
 
     def normalize(self, column_name, value=1.0):
-        '''
+        """
         return column data normalized to given value
         e.g. d.normalize('X', 100)
-        '''
+        """
         if not self.column_exists(column_name):
             raise IndexError
         d = self[column_name]
         return d / np.max(d) * value
 
+    """ METHODS returning OBJECTS """
+
+    def running_ave(self):
+        pass
 
     def differentiate(self):
         raise NotImplemented
 
     def filter(self, tf_array):
-        '''
+        """
         Returns a copy of the data filtered according to a True_False array. False entries are not returned.
 
         tf_array = (d['Mx'] > 10) & (d['Mx'] < 20)
@@ -445,7 +453,7 @@ class rockpydata(object):
         :param tf_array: array_like
                        array with True/False values
         :return: rockpydata
-        '''
+        """
         self_copy = deepcopy(self)
 
         if not isinstance(tf_array, np.ndarray):
@@ -455,7 +463,7 @@ class rockpydata(object):
         return self_copy
 
     def filter_idx(self, index_list):
-        '''
+        """
         Returns a copy of the data filtered according to indices specified in index_list
 
         :example:
@@ -471,7 +479,7 @@ class rockpydata(object):
         :param index_list:
         :return: rockpydata
                filtered data
-        '''
+        """
 
         tf_array = [True if x in index_list else False for x in range(len(self['data']))]
         return self.filter(tf_array)
@@ -481,7 +489,7 @@ class rockpydata(object):
         raise NotImplemented
 
     def sort(self, key='variable'):
-        '''
+        """
         sorting all data according to one column_name or alias
         e.g.
 
@@ -496,12 +504,12 @@ class rockpydata(object):
 
         :param key: str
                   column_name to be sorted for
-        '''
+        """
         idx = self.column_dict[key][0]
         self.data = self.data[self.data[:, idx].argsort()]
 
     def rename_column(self, old_key, new_key):
-        '''
+        """
         renames a column according to specified key
 
         .. code-block:: python
@@ -513,13 +521,13 @@ class rockpydata(object):
 
         :param old_key: str
         :param new_key: str
-        '''
+        """
         try:
             idx = self._column_names.index(old_key)
             self._column_names[idx] = new_key
             self._update_column_dictionary(self._column_names)
         except ValueError:
-            print 'Key << %s >> does not exist' % (old_key)
+            print 'Key << %s >> does not exist' % old_key
 
 
     def lin_regress(self, column_name_x, column_name_y):
@@ -535,34 +543,31 @@ class rockpydata(object):
         if len(x) < 2 or len(y) < 2:
             return None
 
-        ''' calculate averages '''
+        """ calculate averages """
         x_mean = np.mean(x)
         y_mean = np.mean(y)
 
-        ''' calculate differences '''
+        """ calculate differences """
         x_diff = x - x_mean
         y_diff = y - y_mean
 
-        ''' square differences '''
+        """ square differences """
         x_diff_sq = x_diff ** 2
         y_diff_sq = y_diff ** 2
 
-        ''' sum squared differences '''
+        """ sum squared differences """
         x_sum_diff_sq = np.sum(x_diff_sq)
         y_sum_diff_sq = np.sum(y_diff_sq)
 
         mixed_sum = np.sum(x_diff * y_diff)
-        ''' calculate slopes '''
-        N = len(x)
+        """ calculate slopes """
+        n = len(x)
 
         slope = np.sqrt(y_sum_diff_sq / x_sum_diff_sq) * np.sign(mixed_sum)
 
-        sigma = np.sqrt((2 * y_sum_diff_sq - 2 * slope * mixed_sum) / ((N - 2) * x_sum_diff_sq))
+        sigma = np.sqrt((2 * y_sum_diff_sq - 2 * slope * mixed_sum) / ((n - 2) * x_sum_diff_sq))
 
         y_intercept = y_mean + abs(slope * x_mean)
         x_intercept = - y_intercept / slope
 
         return slope, sigma, y_intercept, x_intercept
-
-    def minus_equal_var(self, other, variable):
-        self_copy = deepcopy(self)

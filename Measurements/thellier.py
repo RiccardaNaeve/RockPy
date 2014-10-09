@@ -1,6 +1,6 @@
 # coding=utf-8
 __author__ = 'volk'
-from Structure.rockpydata import rockpydata
+from Structure.rockpydata import RockPyData
 import base
 import numpy as np
 import scipy as sp
@@ -34,12 +34,16 @@ class Thellier(base.Measurement):
         '''
         steps = self.machine_data.steps
         data = self.machine_data.get_float_data()
-        self.all_data = rockpydata(column_names=self.machine_data.float_header, data=data)
+        self.all_data = RockPyData(column_names=self.machine_data.float_header, data=data)
         self.all_data.rename_column('step', 'temp')
+
+        nrm_idx = [i for i, v in enumerate(steps) if v == 'nrm']
 
         # generating the palint data for all steps
         for step in ['nrm', 'trm', 'th', 'pt', 'ac', 'tr', 'ck']:
             idx = [i for i, v in enumerate(steps) if v == step]
+            if step in ['th', 'pt']:
+                idx.append(nrm_idx[0])
             if len(idx) != 0:
                 self.__dict__[step] = self.all_data.filter_idx(idx)  # finding step_idx
                 self.__dict__[step].define_alias('m', ( 'x', 'y', 'z'))
@@ -142,6 +146,11 @@ class Thellier(base.Measurement):
         '''
         return self.result_vds()
 
+    def calc_all(self, **parameter):
+        parameter['recalc'] = True
+        for result_method in self.result_methods:
+            getattr(self, 'result_' + result_method)(**parameter)
+
     ''' RESULT SECTION '''
 
     def result_slope(self, t_min=None, t_max=None, component=None, recalc=False):
@@ -156,7 +165,7 @@ class Thellier(base.Measurement):
         self.calc_result(parameter, recalc)
         return self.results['slope']
 
-    def result_sigma(self, t_min=None, t_max=None, component=None, recalc=False):
+    def result_sigma(self, t_min=None, t_max=None, component=None, recalc=False, **options):
         parameter = {'t_min': t_min,
                      't_max': t_max,
                      'component': component,
@@ -165,7 +174,7 @@ class Thellier(base.Measurement):
         self.calc_result(parameter, recalc, force_caller='slope')
         return self.results['sigma']
 
-    def result_x_int(self, t_min=None, t_max=None, component=None, recalc=False):
+    def result_x_int(self, t_min=None, t_max=None, component=None, recalc=False, **options):
         parameter = {'t_min': t_min,
                      't_max': t_max,
                      'component': component,
@@ -174,7 +183,7 @@ class Thellier(base.Measurement):
         self.calc_result(parameter, recalc, force_caller='slope')
         return self.results['x_int']
 
-    def result_y_int(self, t_min=None, t_max=None, component=None, recalc=False):
+    def result_y_int(self, t_min=None, t_max=None, component=None, recalc=False, **options):
         parameter = {'t_min': t_min,
                      't_max': t_max,
                      'component': component,
@@ -183,7 +192,7 @@ class Thellier(base.Measurement):
         self.calc_result(parameter, recalc, force_caller='slope')
         return self.results['y_int']
 
-    def result_b_anc(self, t_min=None, t_max=None, component=None, b_lab=35.0, recalc=False):
+    def result_b_anc(self, t_min=None, t_max=None, component=None, b_lab=35.0, recalc=False, **options):
         parameter_a = {'t_min': t_min,
                        't_max': t_max,
                        'component': component,
@@ -195,7 +204,7 @@ class Thellier(base.Measurement):
         self.calc_result(parameter_b, recalc)
         return self.results['b_anc']
 
-    def result_sigma_b_anc(self, t_min=None, t_max=None, component=None, b_lab=35.0, recalc=False):
+    def result_sigma_b_anc(self, t_min=None, t_max=None, component=None, b_lab=35.0, recalc=False, **options):
         parameter_a = {'t_min': t_min,
                        't_max': t_max,
                        'component': component,
@@ -206,7 +215,7 @@ class Thellier(base.Measurement):
         self.calc_result(parameter_b, recalc)
         return self.results['sigma_b_anc']
 
-    def result_vds(self, t_min=None, t_max=None, recalc=False):
+    def result_vds(self, t_min=None, t_max=None, recalc=False, **options):
         parameter = {'t_min': t_min,
                      't_max': t_max,
         }
@@ -242,7 +251,7 @@ class Thellier(base.Measurement):
         th_data = th_data.filter_idx(th_idx)  # filtered data for equal t(th) & t(ptrm)
         ptrm_data = ptrm_data.filter_idx(ptrm_idx)  # filtered data for equal t(th) & t(ptrm)
 
-        data = rockpydata(['th', 'ptrm'])
+        data = RockPyData(['th', 'ptrm'])
 
         # setting the data
         data['th'] = th_data[component]

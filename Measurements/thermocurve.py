@@ -1,4 +1,4 @@
-from Structure.rockpydata import rockpydata
+from Structure.rockpydata import RockPyData
 import itertools
 
 __author__ = 'volk'
@@ -24,8 +24,8 @@ class ThermoCurve(base.Measurement):
         if len(data) > 2:
             self.log.warning('LENGTH of machine.out_thermocurve =! 2. Assuming data[0] = heating data[1] = cooling')
         if len(data) > 1:
-            self.up_temp = rockpydata(column_names=header, data=data[0])
-            self.down_temp = rockpydata(column_names=header, data=data[1])
+            self.up_temp = RockPyData(column_names=header, data=data[0])
+            self.down_temp = RockPyData(column_names=header, data=data[1])
         else:
             self.log.error('LENGTH of machine.out_thermocurve < 2.')
 

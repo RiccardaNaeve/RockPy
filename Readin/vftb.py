@@ -1,7 +1,7 @@
 __author__ = 'mike'
 import base
 import numpy as np
-from Structure.rockpydata import rockpydata
+from Structure.rockpydata import RockPyData
 
 
 class Vftb(base.Machine):

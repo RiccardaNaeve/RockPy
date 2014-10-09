@@ -52,11 +52,10 @@ d.append_columns('normM', d.normalize('magM', 100))
 d.append_columns(("T",), np.array((1, 2, 3)))
 
 # renaming a column
-d.rename_column('Tt', 'temp')
+d.rename_column('T', 'temp')
 
 # show all data again, now including magM and T as the last two columns
-print( d.column_names)
-print( 'all:\n%s' % d['all'])
+print d
 
 # do a plot of F vs magM
 # plt.plot(d['F'], d['magM'])
@@ -76,13 +75,15 @@ e = deepcopy( d)
 e['Mx'] *= 2
 # calculate difference of two rockpydata objects
 c = e - d
-print c['all']
+print c
 
 c = e + d
-print c['all']
+print c
 
 c = e / d
-print c['all']
+print c
 
 c = e * d
-print c['all']
+print c
+
+print repr( c)

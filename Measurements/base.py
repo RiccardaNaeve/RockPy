@@ -27,7 +27,7 @@ class Measurement(object):
         for cls in implemented_machines}
 
         ''' initialize parameters '''
-        self.raw_data = None # returned data from Readin.machines()
+        self.machine_data = None  # returned data from Readin.machines()
         self.treatment = None
 
         ''' initial state '''
@@ -85,7 +85,12 @@ class Measurement(object):
                                     not i.endswith('generic')}
 
     def import_data(self, rtn_raw_data=None, **options):
-
+        '''
+        Importing the data from dfile and machine
+        :param rtn_raw_data:
+        :param options:
+        :return:
+        '''
 
         self.log.info(' IMPORTING << %s , %s >> data' % (self.machine, self.mtype))
 
@@ -101,7 +106,7 @@ class Measurement(object):
                 self.log.info(' RETURNING raw_data for << %s , %s >> data' % (machine, mtype))
                 return raw_data
             else:
-                self.raw_data = raw_data
+                self.machine_data = raw_data
 
 
     def set_initial_state(self,

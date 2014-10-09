@@ -19,15 +19,16 @@ class ThermoCurve(base.Measurement):
 
 
     def format_vftb(self):
-        tdiff = np.diff(self.raw_data[:, 2])
+        data = self.machine_data.out_thermocurve()
+        header = self.machine_data.header()
+        if len(data) > 2:
+            self.log.warning('LENGTH of machine.out_thermocurve =! 2. Assuming data[0] = heating data[1] = cooling')
+        if len(data) > 1:
+            self.up_temp = rockpydata(column_names=header, data=data[0])
+            self.down_temp = rockpydata(column_names=header, data=data[1])
+        else:
+            self.log.error('LENGTH of machine.out_thermocurve < 2.')
 
-        dt = tdiff < 0
-        ut = tdiff > 0
-
-        self.up_temp = rockpydata(column_names=('field', 'moment', 'temperature', 'time',
-                                                'std_dev', 'susceptibility'), data=self.raw_data[dt])
-        self.down_temp = rockpydata(column_names=('field', 'moment', 'temperature', 'time',
-                                                  'std_dev', 'susceptibility'), data=self.raw_data[ut])
 
     @property
     def ut(self):

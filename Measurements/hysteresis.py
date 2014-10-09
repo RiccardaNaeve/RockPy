@@ -23,7 +23,7 @@ class Hysteresis(base.Measurement):
     # ## formatting functions
     def format_vftb(self):
         self.data = rockpydata(column_names=('field', 'moment', 'temperature', 'time',
-                                             'std_dev', 'susceptibility'), data=self.raw_data)
+                                             'std_dev', 'susceptibility'), data=self.machine_data)
         dfield = np.diff(self.data['field'])
 
         idx = [i for i in range(len(dfield)) if dfield[i] < 0]
@@ -36,20 +36,20 @@ class Hysteresis(base.Measurement):
         self.up_field = self.data.filter_idx(up_field_idx)
 
     def format_vsm(self):
-        print self.raw_data.out
+        print self.machine_data.out
 
     def format_microsense(self):
 
-        dfield = np.diff(self.raw_data.out['raw_applied_field_for_plot_'])
+        dfield = np.diff(self.machine_data.out['raw_applied_field_for_plot_'])
         down_field_idx = [i for i in range(len(dfield)) if dfield[i] < 0]
         up_field_idx = [i for i in range(len(dfield)) if dfield[i] > 0]
 
-        self.down_field = self.raw_data.out.filter_idx(down_field_idx)
+        self.down_field = self.machine_data.out.filter_idx(down_field_idx)
         self.down_field.define_alias('field', 'raw_applied_field_for_plot_')
         self.down_field.define_alias('moment', 'raw_signal_mx')
         self.down_field['field'] *= 0.1 * 1e-3  # conversion Oe to Tesla
 
-        self.up_field = self.raw_data.out.filter_idx(up_field_idx)
+        self.up_field = self.machine_data.out.filter_idx(up_field_idx)
         self.up_field.define_alias('field', 'raw_applied_field_for_plot_')
         self.up_field.define_alias('moment', 'raw_signal_mx')
         self.up_field['field'] *= 0.1 * 1e-3  # conversion Oe to Tesla
@@ -261,7 +261,7 @@ class Hysteresis(base.Measurement):
         # plotting interpolated data
         # plt.plot(self.down_field_interp()[0], self.down_field_interp()[1], '--',
         # color=std.get_color(),
-        #          zorder=1)
+        # zorder=1)
         # plt.plot(self.up_field_interp()[0], self.up_field_interp()[1], '--',
         #          color=std.get_color(),
         #          zorder=1)

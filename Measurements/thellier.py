@@ -35,17 +35,17 @@ class Thellier(base.Measurement):
 
         self.all_data = rockpydata(column_names=['temp', 'x', 'y', 'z', 'moment', 'time', 'std_dev'])
         # self.all_data.
-        self.all_data['temp'] = self.raw_data['step']
-        self.all_data['x'] = self.raw_data['x']
-        self.all_data['y'] = self.raw_data['y']
-        self.all_data['z'] = self.raw_data['z']
-        self.all_data['moment'] = self.raw_data['m']
-        self.all_data['std_dev'] = self.raw_data['sm']
+        self.all_data['temp'] = self.machine_data['step']
+        self.all_data['x'] = self.machine_data['x']
+        self.all_data['y'] = self.machine_data['y']
+        self.all_data['z'] = self.machine_data['z']
+        self.all_data['moment'] = self.machine_data['m']
+        self.all_data['std_dev'] = self.machine_data['sm']
 
-        TH_idx = np.where(self.raw_data['type'] == 'TH')[0]
-        PT_idx = np.where(self.raw_data['type'] == 'PT')[0]
-        NRM_idx = np.where(self.raw_data['type'] == 'NRM')[0]
-        TRM_idx = np.where(self.raw_data['type'] == 'TRM')[0]
+        TH_idx = np.where(self.machine_data['type'] == 'TH')[0]
+        PT_idx = np.where(self.machine_data['type'] == 'PT')[0]
+        NRM_idx = np.where(self.machine_data['type'] == 'NRM')[0]
+        TRM_idx = np.where(self.machine_data['type'] == 'TRM')[0]
 
         self.nrm = self.all_data.filter_idx(NRM_idx)
         self.nrm.define_alias('m', ( 'x', 'y', 'z'))
@@ -74,9 +74,9 @@ class Thellier(base.Measurement):
         self.sum.define_alias('m', ( 'x', 'y', 'z'))
         self.sum['mag'] = self.sum.magnitude('m')
 
-        self.ac = self.all_data.filter_idx(np.where(self.raw_data['type'] == 'AC')[0])
-        self.ck = self.all_data.filter_idx(np.where(self.raw_data['type'] == 'CK')[0])
-        self.tr = self.all_data.filter_idx(np.where(self.raw_data['type'] == 'TR')[0])
+        self.ac = self.all_data.filter_idx(np.where(self.machine_data['type'] == 'AC')[0])
+        self.ck = self.all_data.filter_idx(np.where(self.machine_data['type'] == 'CK')[0])
+        self.tr = self.all_data.filter_idx(np.where(self.machine_data['type'] == 'TR')[0])
 
 
     def format_sushibar(self):

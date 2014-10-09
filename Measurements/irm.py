@@ -20,7 +20,7 @@ class Irm(base.Measurement):
     def format_vftb(self):
         self.log.debug('FORMATTING << %s >> raw_data for << VFTB >> data structure' % ('IRM'))
         self.remanence = rockpydata(column_names=('field', 'moment', 'temperature', 'time',
-                                             'std_dev', 'susceptibility'), data=self.raw_data)
+                                                  'std_dev', 'susceptibility'), data=self.machine_data)
 
     def format_vsm(self):
         raise NotImplemented

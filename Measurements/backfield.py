@@ -7,6 +7,7 @@ import Structure.rockpydata
 import matplotlib.pyplot as plt
 import numpy as np
 
+
 class Backfield(base.Measurement):
     '''
     A Backfield Curve can give information on:
@@ -19,6 +20,7 @@ class Backfield(base.Measurement):
     :math:`M_{rs}` and the magnetization at 300mT :math:`M_{300mT} is determined by linear interpolation of measured
     data.
     '''
+
     def __init__(self, sample_obj,
                  mtype, mfile, machine,
                  **options):
@@ -26,10 +28,9 @@ class Backfield(base.Measurement):
 
 
 
-        ### initialize
+        # ## initialize
         self.remanence = None
         self.induced = None
-
 
 
     def format_vftb(self):
@@ -38,7 +39,7 @@ class Backfield(base.Measurement):
         :return:
         '''
         self.remanence = rockpydata(column_names=('field', 'moment', 'temperature', 'time',
-                                                                  'std_dev', 'susceptibility'), data= self.raw_data)
+                                                  'std_dev', 'susceptibility'), data=self.machine_data)
 
     @property
     def bcr(self):
@@ -134,7 +135,7 @@ class Backfield(base.Measurement):
         plt.axhline(0, color='#808080')
         plt.axvline(0, color='#808080')
         plt.grid()
-        plt.title('Backfield %s' %(self.sample_obj.name))
-        plt.xlabel('Field [%s]' %('T')) #todo replace with data unit
-        plt.ylabel('Moment [%s]' %('Am^2')) #todo replace with data unit
+        plt.title('Backfield %s' % (self.sample_obj.name))
+        plt.xlabel('Field [%s]' % ('T'))  # todo replace with data unit
+        plt.ylabel('Moment [%s]' % ('Am^2'))  # todo replace with data unit
         plt.show()

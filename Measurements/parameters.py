@@ -28,12 +28,10 @@ class Mass(Measurement):
         self.data['time'] = time
         self.data['std_dev'] = std
 
-        # self.data = data(variable=np.array(0.0), measurement=np.array(value * mass_conversion),
-        # var_unit='idx', measure_unit='kg',
-        #                  time=time, std_dev=std)
 
     def format_generic(self):
         pass
+
 
 class Length(Measurement):
     """

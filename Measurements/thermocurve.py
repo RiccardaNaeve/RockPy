@@ -20,7 +20,7 @@ class ThermoCurve(base.Measurement):
 
     def format_vftb(self):
         data = self.machine_data.out_thermocurve()
-        header = self.machine_data.header()
+        header = self.machine_data.header
         if len(data) > 2:
             self.log.warning('LENGTH of machine.out_thermocurve =! 2. Assuming data[0] = heating data[1] = cooling')
         if len(data) > 1:
@@ -42,8 +42,8 @@ class ThermoCurve(base.Measurement):
     def plt_thermocurve(self):
         fig = plt.figure()
         ax = fig.add_subplot(111)
-        ax.plot(self.ut['temperature'], self.ut['moment'], '-', color='red')
-        ax.plot(self.dt['temperature'], self.dt['moment'], '-', color='blue')
+        ax.plot(self.ut['temp'], self.ut['mag'], '-', color='red')
+        ax.plot(self.dt['temp'], self.dt['mag'], '-', color='blue')
         ax.grid()
         ax.axhline(0, color='#808080')
         ax.axvline(0, color='#808080')

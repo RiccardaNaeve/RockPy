@@ -32,38 +32,21 @@ class Thellier(base.Measurement):
 
         :return:
         '''
+        steps = self.machine_data.steps
+        data = self.machine_data.get_float_data()
+        self.all_data = rockpydata(column_names=self.machine_data.float_header, data=data)
+        self.all_data.rename_column('step', 'temp')
 
-        self.all_data = rockpydata(column_names=['temp', 'x', 'y', 'z', 'moment', 'time', 'std_dev'])
-        # self.all_data.
-        self.all_data['temp'] = self.machine_data['step']
-        self.all_data['x'] = self.machine_data['x']
-        self.all_data['y'] = self.machine_data['y']
-        self.all_data['z'] = self.machine_data['z']
-        self.all_data['moment'] = self.machine_data['m']
-        self.all_data['std_dev'] = self.machine_data['sm']
-
-        TH_idx = np.where(self.machine_data['type'] == 'TH')[0]
-        PT_idx = np.where(self.machine_data['type'] == 'PT')[0]
-        NRM_idx = np.where(self.machine_data['type'] == 'NRM')[0]
-        TRM_idx = np.where(self.machine_data['type'] == 'TRM')[0]
-
-        self.nrm = self.all_data.filter_idx(NRM_idx)
-        self.nrm.define_alias('m', ( 'x', 'y', 'z'))
-        self.nrm.append_columns('mag', self.nrm.magnitude('m'))
-
-        self.trm = self.all_data.filter_idx(TRM_idx)
-        self.trm.define_alias('m', ( 'x', 'y', 'z'))
-        self.trm.append_columns('mag', self.trm.magnitude('m'))
-
-        self.th = self.all_data.filter_idx(np.append(NRM_idx, TH_idx))
-        self.th.sort('temp')
-        self.th.define_alias('m', ( 'x', 'y', 'z'))
-        self.th.append_columns('mag', self.th.magnitude('m'))
-
-        self.pt = self.all_data.filter_idx(np.append(NRM_idx, PT_idx))
-        self.pt.sort('temp')
-        self.pt.define_alias('m', ('x', 'y', 'z'))
-        self.pt.append_columns('mag', self.pt.magnitude('m'))
+        # generating the palint data for all steps
+        for step in ['nrm', 'trm', 'th', 'pt', 'ac', 'tr', 'ck']:
+            idx = [i for i, v in enumerate(steps) if v == step]
+            if len(idx) != 0:
+                self.__dict__[step] = self.all_data.filter_idx(idx)  # finding step_idx
+                self.__dict__[step].define_alias('m', ( 'x', 'y', 'z'))
+                self.__dict__[step].append_columns('mag', self.__dict__[step].magnitude('m'))
+                self.__dict__[step].sort('temp')
+            else:
+                self.__dict__[step] = None
 
         # ## PTRM
         self.ptrm = self.pt - self.th
@@ -74,21 +57,16 @@ class Thellier(base.Measurement):
         self.sum.define_alias('m', ( 'x', 'y', 'z'))
         self.sum['mag'] = self.sum.magnitude('m')
 
-        self.ac = self.all_data.filter_idx(np.where(self.machine_data['type'] == 'AC')[0])
-        self.ck = self.all_data.filter_idx(np.where(self.machine_data['type'] == 'CK')[0])
-        self.tr = self.all_data.filter_idx(np.where(self.machine_data['type'] == 'TR')[0])
-
-
     def format_sushibar(self):
         raise NotImplementedError
 
     # ## plotting functions
     def plt_dunlop(self):
-        plt.plot(self.th['temp'], self.th['moment'], '.-', zorder=1)
+        plt.plot(self.th['temp'], self.th['mag'], '.-', zorder=1)
         # plt.plot(self.ptrm['temp'], self.ptrm['moment'], '.-', zorder=1)
         plt.plot(self.ptrm['temp'], self.ptrm['mag'], '.-', zorder=1)
         plt.plot(self.sum['temp'], self.sum['mag'], '.--', zorder=1)
-        plt.plot(self.tr['temp'], self.tr['moment'], 's')
+        plt.plot(self.tr['temp'], self.tr['mag'], 's')
         plt.grid()
         plt.title('Dunlop Plot %s' % (self.sample_obj.name))
         plt.xlabel('Temperature [%s]' % ('C'))
@@ -100,7 +78,7 @@ class Thellier(base.Measurement):
         equal = set(self.th['temp']) & set(self.ptrm['temp'])
         idx = [i for i, v in enumerate(self.th['temp']) if v in equal]
         th = self.th.filter_idx(idx)
-        plt.plot(self.ptrm['moment'], th['moment'], '.-', zorder=1)
+        plt.plot(self.ptrm['mag'], th['mag'], '.-', zorder=1)
         plt.grid()
         plt.title('Arai Diagram %s' % (self.sample_obj.name))
         plt.xlabel('NRM remaining [%s]' % ('C'))

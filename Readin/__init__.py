@@ -1,5 +1,5 @@
 __author__ = 'volk'
 import Functions.general
-import microsense, cryo_mag
+import microsense, cryomag
 
 Functions.general.create_logger('RockPy.READIN')

@@ -5,6 +5,8 @@ import logging
 class Machine(object):
     def __init__(self, dfile, sample_obj):
         self.log = logging.getLogger('RockPy.READIN.' + type(self).__name__)
+        self.log.info('IMPORTING << %s >> file: << %s >>' % (type(self).__name__, dfile))
+
         self.sample_obj = sample_obj
         self.reader_object = open(dfile)
 
@@ -19,7 +21,3 @@ class Machine(object):
     def float_list(self):
         list = ['x', 'y', 'z', 'm']
         return float
-
-    @property
-    def out(self):
-        return self.data

@@ -16,12 +16,15 @@ class Vftb(base.Machine):
         idx.append(len(self.raw_data))
         self.set_idx = [(idx[i], idx[i + 1]) for i in range(len(idx) - 1)]
 
-    def header(self):
+        self.units = self.get_units()
+        self.header = self.get_header()
+
+    def get_header(self):
         header = self.raw_data[self.set_idx[0][0] + 1]
         header = ['_'.join(i.split(' / ')[0].split()) for i in header]  # only getting the columnname without the unit
         return header
 
-    def units(self):
+    def get_units(self):
         units = self.raw_data[self.set_idx[0][0] + 1]
         units = ['/'.join(i.split(' / ')[1:]) for i in units]  # only getting the columnname without the unit
         return units
@@ -30,6 +33,7 @@ class Vftb(base.Machine):
         data = np.array([np.array(self.raw_data[i[0] + 2:i[1] - 1]) for i in self.set_idx])
         data = [self.replace_na(i) for i in data]
         data = np.array([i.astype(float) for i in data])
+        self.convert_to_T(data)
         return data
 
     def out_hys(self):
@@ -52,3 +56,8 @@ class Vftb(base.Machine):
         out = [['0.' if j == 'n/a' else j for j in i] for i in data]
         out = np.array(out)
         return out
+
+    def convert_to_T(self, data):
+        for i in data:
+            i[:, 0] /= 10000
+        self.units[0] = 'T'

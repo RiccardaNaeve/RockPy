@@ -26,20 +26,17 @@ class Backfield(base.Measurement):
                  **options):
         super(Backfield, self).__init__(sample_obj, mtype, mfile, machine)
 
-
-
-        # ## initialize
-        self.remanence = None
-        self.induced = None
-
+        print self.remanence
 
     def format_vftb(self):
         '''
         formats the output from vftb to measurement. data
         :return:
         '''
-        self.remanence = rockpydata(column_names=('field', 'moment', 'temperature', 'time',
-                                                  'std_dev', 'susceptibility'), data=self.machine_data)
+        data = self.machine_data.out_backfield()
+        header = self.machine_data.header()
+        self.remanence = rockpydata(column_names=header, data=data[0])
+        self.induced = None
 
     @property
     def bcr(self):
@@ -70,7 +67,7 @@ class Backfield(base.Measurement):
 
     def calculate_bcr(self):
         '''
-        calculates Bcr from linear interpolation between two points closest to moment = o
+        calculates Bcr from linear interpolation between two points closest to mag = o
 
         Bcr is the field needed to demagnetize the saturation remanence
 
@@ -80,9 +77,9 @@ class Backfield(base.Measurement):
         self.log.info('CALCULATING << Bcr >> parameter from linear interpolation')
         self.log.info('               ---    If sample is not saturated, value could be too low')
 
-        idx = np.argmin(np.abs(self.remanence['moment']))  # index of closest to 0
+        idx = np.argmin(np.abs(self.remanence['mag']))  # index of closest to 0
 
-        if self.remanence['moment'][idx] < 0:
+        if self.remanence['mag'][idx] < 0:
             idx1 = idx
             idx2 = idx - 1
         else:
@@ -90,9 +87,9 @@ class Backfield(base.Measurement):
             idx2 = idx
 
         i = [idx1, idx2]
-        tf_array = [True if x in i else False for x in range(len(self.remanence['moment']))]
+        tf_array = [True if x in i else False for x in range(len(self.remanence['mag']))]
         d = self.remanence.filter(tf_array=tf_array)
-        slope, sigma, y_intercept, x_intercept = d.lin_regress('field', 'moment')
+        slope, sigma, y_intercept, x_intercept = d.lin_regress('field', 'mag')
         bcr = - y_intercept / slope
         self.results['bcr'] = bcr
 
@@ -113,24 +110,24 @@ class Backfield(base.Measurement):
             idx2 = idx - 1
 
         i = [idx1, idx2]
-        tf_array = [True if x in i else False for x in range(len(self.remanence['moment']))]
+        tf_array = [True if x in i else False for x in range(len(self.remanence['mag']))]
 
         d = self.remanence.filter(tf_array=tf_array)
-        slope, sigma, y_intercept, x_intercept = d.lin_regress('field', 'moment')
+        slope, sigma, y_intercept, x_intercept = d.lin_regress('field', 'mag')
 
         m300 = y_intercept + (slope * 0.3)
-        mrs = self.remanence['moment'][0]
+        mrs = self.remanence['mag'][0]
 
         s300 = (1 - ( m300 / mrs)) / 2
 
         return s300
 
     def plt_backfield(self):
-        plt.plot(self.remanence['field'], self.remanence['moment'], '.-', zorder=1)
+        plt.plot(self.remanence['field'], self.remanence['mag'], '.-', zorder=1)
         plt.plot(self.bcr, 0.0, 'x', color='k')
 
         if self.induced:
-            plt.plot(self.induced['field'], self.induced['moment'], zorder=1)
+            plt.plot(self.induced['field'], self.induced['mag'], zorder=1)
 
         plt.axhline(0, color='#808080')
         plt.axvline(0, color='#808080')

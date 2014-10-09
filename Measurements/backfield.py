@@ -26,8 +26,6 @@ class Backfield(base.Measurement):
                  **options):
         super(Backfield, self).__init__(sample_obj, mtype, mfile, machine)
 
-        print self.remanence
-
     def format_vftb(self):
         '''
         formats the output from vftb to measurement. data

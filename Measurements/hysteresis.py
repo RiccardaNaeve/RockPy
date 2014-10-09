@@ -16,7 +16,7 @@ class Hysteresis(base.Measurement):
 
     # ## formatting functions
     def format_vftb(self):
-        data = self.machine_data.out_hys()
+        data = self.raw_data_hys()
         header = self.machine_data.header()
         self.induced = rockpydata(column_names=header, data=data[0])
         dfield = np.diff(self.induced['field'])
@@ -31,24 +31,29 @@ class Hysteresis(base.Measurement):
         self.up_field = self.induced.filter_idx(up_field_idx)
 
     def format_vsm(self):
-        print self.machine_data.out
+        pass
 
     def format_microsense(self):
+        data = self.machine_data.out_hys()
+        header = self.machine_data.header
 
-        dfield = np.diff(self.machine_data.out['raw_applied_field_for_plot_'])
+        self.raw_data = rockpydata(column_names=header, data=data)
+        dfield = np.diff(self.raw_data['raw_applied_field_for_plot_'])
         down_field_idx = [i for i in range(len(dfield)) if dfield[i] < 0]
         up_field_idx = [i for i in range(len(dfield)) if dfield[i] > 0]
 
-        self.down_field = self.machine_data.out.filter_idx(down_field_idx)
+        self.down_field = self.raw_data.filter_idx(down_field_idx)
         self.down_field.define_alias('field', 'raw_applied_field_for_plot_')
         self.down_field.define_alias('mag', 'raw_signal_mx')
         self.down_field['field'] *= 0.1 * 1e-3  # conversion Oe to Tesla
 
-        self.up_field = self.machine_data.out.filter_idx(up_field_idx)
+        self.up_field = self.raw_data.filter_idx(up_field_idx)
         self.up_field.define_alias('field', 'raw_applied_field_for_plot_')
         self.up_field.define_alias('mag', 'raw_signal_mx')
         self.up_field['field'] *= 0.1 * 1e-3  # conversion Oe to Tesla
 
+        self.virgin = None
+        self.msi = None
 
     # ## parameters
     @property

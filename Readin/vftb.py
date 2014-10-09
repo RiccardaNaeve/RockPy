@@ -32,7 +32,7 @@ class Vftb(base.Machine):
         data = np.array([i.astype(float) for i in data])
         return data
 
-    def out_hysteresis(self):
+    def out_hys(self):
         data = self.get_data()
         return data
 

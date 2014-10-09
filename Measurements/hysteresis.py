@@ -13,27 +13,22 @@ class Hysteresis(base.Measurement):
                  **options):
         super(Hysteresis, self).__init__(sample_obj, mtype, mfile, machine)
 
-        # ## initialize
-        self.virgin = None
-        self.msi = None
-        self.up_field = None
-        self.down_field = None
-
 
     # ## formatting functions
     def format_vftb(self):
-        self.data = rockpydata(column_names=('field', 'moment', 'temperature', 'time',
-                                             'std_dev', 'susceptibility'), data=self.machine_data)
-        dfield = np.diff(self.data['field'])
+        data = self.machine_data.out_hys()
+        header = self.machine_data.header()
+        self.induced = rockpydata(column_names=header, data=data[0])
+        dfield = np.diff(self.induced['field'])
 
         idx = [i for i in range(len(dfield)) if dfield[i] < 0]
         virgin_idx = range(0, idx[0])
         down_field_idx = idx
         up_field_idx = range(idx[-1], len(dfield) + 1)
 
-        self.virgin = self.data.filter_idx(virgin_idx)
-        self.down_field = self.data.filter_idx(down_field_idx)
-        self.up_field = self.data.filter_idx(up_field_idx)
+        self.virgin = self.induced.filter_idx(virgin_idx)
+        self.down_field = self.induced.filter_idx(down_field_idx)
+        self.up_field = self.induced.filter_idx(up_field_idx)
 
     def format_vsm(self):
         print self.machine_data.out
@@ -46,12 +41,12 @@ class Hysteresis(base.Measurement):
 
         self.down_field = self.machine_data.out.filter_idx(down_field_idx)
         self.down_field.define_alias('field', 'raw_applied_field_for_plot_')
-        self.down_field.define_alias('moment', 'raw_signal_mx')
+        self.down_field.define_alias('mag', 'raw_signal_mx')
         self.down_field['field'] *= 0.1 * 1e-3  # conversion Oe to Tesla
 
         self.up_field = self.machine_data.out.filter_idx(up_field_idx)
         self.up_field.define_alias('field', 'raw_applied_field_for_plot_')
-        self.up_field.define_alias('moment', 'raw_signal_mx')
+        self.up_field.define_alias('mag', 'raw_signal_mx')
         self.up_field['field'] *= 0.1 * 1e-3  # conversion Oe to Tesla
 
 
@@ -169,17 +164,17 @@ class Hysteresis(base.Measurement):
 
         def calc(direction):
             d = getattr(self, direction)
-            idx = np.argmin(abs(d['moment']))  # index of closest to 0
+            idx = np.argmin(abs(d['mag']))  # index of closest to 0
 
-            if d['moment'][idx] < 0:
-                if d['moment'][idx + 1] < 0:
+            if d['mag'][idx] < 0:
+                if d['mag'][idx + 1] < 0:
                     idx1 = idx
                     idx2 = idx - 1
                 else:
                     idx1 = idx + 1
                     idx2 = idx
             else:
-                if d['moment'][idx + 1] < 0:
+                if d['mag'][idx + 1] < 0:
                     idx1 = idx + 1
                     idx2 = idx
                 else:
@@ -189,10 +184,10 @@ class Hysteresis(base.Measurement):
             i = [idx1, idx2]
             d = d.filter_idx(i)
 
-            dy = d['moment'][1] - d['moment'][0]
+            dy = d['mag'][1] - d['mag'][0]
             dx = d['field'][1] - d['field'][0]
             m = dy / dx
-            b = d['moment'][1] - d['field'][1] * m
+            b = d['mag'][1] - d['field'][1] * m
             bc = abs(b / m)
 
             return bc
@@ -216,7 +211,7 @@ class Hysteresis(base.Measurement):
         from scipy import interpolate
 
         x = self.down_field['field']
-        y = self.down_field['moment']
+        y = self.down_field['mag']
 
         if np.all(np.diff(x) > 0):
             f = interpolate.interp1d(x, y, kind='slinear')
@@ -233,7 +228,7 @@ class Hysteresis(base.Measurement):
         from scipy import interpolate
 
         x = self.up_field['field']
-        y = self.up_field['moment']
+        y = self.up_field['mag']
 
         if np.all(np.diff(x) > 0):
             f = interpolate.interp1d(x, y, kind='slinear')
@@ -253,8 +248,8 @@ class Hysteresis(base.Measurement):
         :return:
         '''
 
-        std, = plt.plot(self.down_field['field'], self.down_field['moment'], '.', zorder=1)
-        plt.plot(self.up_field['field'], self.up_field['moment'], '.',
+        std, = plt.plot(self.down_field['field'], self.down_field['mag'], '.-', zorder=1)
+        plt.plot(self.up_field['field'], self.up_field['mag'], '.-',
                  color=std.get_color(),
                  zorder=1)
 
@@ -267,7 +262,7 @@ class Hysteresis(base.Measurement):
         #          zorder=1)
 
         if not self.virgin is None:
-            plt.plot(self.virgin['field'], self.virgin['moment'], color=std.get_color(), zorder=1)
+            plt.plot(self.virgin['field'], self.virgin['mag'], color=std.get_color(), zorder=1)
 
         # ## plotting pc as crosses
         plt.plot([-(self.bc + (self.bc_diff / 2)), self.bc - (self.bc_diff / 2)], [0, 0], 'xr')

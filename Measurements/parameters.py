@@ -1,10 +1,8 @@
 from Structure.rockpydata import RockPyData
-from Structure.data import data
 
 __author__ = 'volk'
 from base import Measurement
 from Functions.convert import convert2
-import numpy as np
 
 
 class Mass(Measurement):

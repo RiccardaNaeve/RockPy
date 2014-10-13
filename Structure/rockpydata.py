@@ -1,7 +1,8 @@
 __author__ = 'wack'
 
-import numpy as np
 from copy import deepcopy
+
+import numpy as np
 from prettytable import PrettyTable
 
 
@@ -158,9 +159,10 @@ class RockPyData(object):
 
         if data == None:
             # if there is no data, create zeros
-            data = np.zeros((self.rowcount, len(column_names)))
+            data = np.zeros((self.row_count, len(column_names)))
 
         # make sure data is 2 dim, even if there is only one column
+        # todo BUGFIX!!! if adding a single column with float:     ERROR:: if data.ndim == 1: \\ AttributeError: 'float' object has no attribute 'ndim'
         if data.ndim == 1:
             data = data.reshape(data.shape[0], 1)
 

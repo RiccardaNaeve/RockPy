@@ -15,11 +15,20 @@ class Irm(base.Measurement):
     def format_vftb(self):
         data = self.machine_data.out_irm()
         header = self.machine_data.header
-        self.log.debug('FORMATTING << %s >> raw_data for << VFTB >> data structure' % ('IRM'))
+        self.log.debug('FORMATTING << %s >> raw_data for << VFTB >> data structure' % (self.mtype))
         self.remanence = RockPyData(column_names=header, data=data[0])
 
     def format_vsm(self):
         raise NotImplemented
+
+    def format_cryomag(self):
+        self.log.debug('FORMATTING << %s >> raw_data for << cryomag >> data structure' % (self.mtype))
+
+        data = self.machine_data.out_trm()
+        header = self.machine_data.float_header
+        self.data = RockPyData(column_names=header, data=data)
+        self.remanence = self.data
+        self.induced = None
 
 
     def plt_irm(self):

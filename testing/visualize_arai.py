@@ -5,7 +5,7 @@ from Visualize.arai import Arai
 cryomag_file = 'test_data/NLCRY_Thellier_test.TT'
 
 # creating a sample
-sample = Sample(name='1a')
+sample = Sample(name='1a', mass='1.0', mass_unit='mg')
 sample2 = Sample(name='1b')
 
 # adding the measurement to the sample

@@ -79,7 +79,7 @@ class Thellier(base.Measurement):
         plt.xlim([min(self.th['temp']), max(self.th['temp'])])
         plt.show()
 
-    def plt_arai(self):
+    def plt_arai(self, **options):
         equal = set(self.th['temp']) & set(self.ptrm['temp'])
         idx = [i for i, v in enumerate(self.th['temp']) if v in equal]
         th = self.th.filter_idx(idx)
@@ -92,9 +92,15 @@ class Thellier(base.Measurement):
 
     def delete_temp(self, temp):
         for step in self.steps:
+            o_len = len(getattr(self, step)['temp'])
             idx = [i for i, v in enumerate(getattr(self, step)['temp']) if v != temp]
-            print idx
-            self.__dict__[step] = getattr(self, step).filter_idx(idx)
+            if o_len - len(idx) != 0:
+                self.log.info(
+                    'DELETING << %i, %s >> entries for << %.2f >> temperature' % (o_len - len(idx), step, temp))
+                self.__dict__[step] = getattr(self, step).filter_idx(idx)
+            else:
+                self.log.debug('UNABLE to find entriy for << %s, %.2f >> temperature' % (step, temp))
+
 
     @property
     def slope(self):

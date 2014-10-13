@@ -1,6 +1,7 @@
 __author__ = 'mike'
-import base
 import numpy as np
+
+import base
 
 
 class CryoMag(base.Machine):
@@ -40,6 +41,10 @@ class CryoMag(base.Machine):
         return comments
 
     def out_thellier(self):
+        data = self.get_float_data()
+        return data
+
+    def out_trm(self):
         data = self.get_float_data()
         return data
 

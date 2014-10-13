@@ -11,7 +11,7 @@ class Sample():
     general.create_logger('RockPy.SAMPLE')
 
     def __init__(self, name,
-                 mass=1.0, mass_unit='kg', mass_machine='generic',
+                 mass=None, mass_unit='kg', mass_machine='generic',
                  height=None, diameter=None, length_unit=None, length_machine='generic',
                  **options):
         """
@@ -28,16 +28,15 @@ class Sample():
         self.log.info('CREATING\t new sample << %s >>' % self.name)
 
         self.measurements = []
-
         if mass is not None:
             self.add_measurement(mtype='mass', mfile=None, machine=mass_machine,
-                                 value=mass, unit=mass_unit)
+                                 value=float(mass), unit=mass_unit)
         if diameter is not None:
             self.add_measurement(mtype='diameter', mfile=None, machine=length_machine,
-                                 value=diameter, unit=length_unit)
+                                 value=float(diameter), unit=length_unit)
         if height is not None:
             self.add_measurement(mtype='height', mfile=None, machine=length_machine,
-                                 value=height, unit=length_unit)
+                                 value=float(height), unit=length_unit)
 
     def __repr__(self):
         return '<< %s - Structure.sample.Sample >>' % self.name

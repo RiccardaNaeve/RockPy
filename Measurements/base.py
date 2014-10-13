@@ -2,11 +2,10 @@ __author__ = 'volk'
 import logging
 import inspect
 
-import numpy as np
-
 import Functions.general
 import Readin.base
 from Structure.rockpydata import RockPyData
+from Treatments.base import Generic
 
 
 class Measurement(object):
@@ -22,23 +21,22 @@ class Measurement(object):
         # looking for all subclasses of Readin.base.Machine
         # generating a dictionary of implemented machines : {implemented out_* method : machine_class}
         implemented_machines = [cls for cls in Readin.base.Machine.__subclasses__()]
-
         self.implemented = {
             cls.__name__.lower(): {'_'.join(i.split('_')[1:]).lower(): cls for i in dir(cls) if i.startswith('out_')}
             for cls in implemented_machines}
 
         ''' initialize parameters '''
         self.machine_data = None  # returned data from Readin.machines()
-        self.treatment = None
+        self.treatments = []
 
         ''' initial state '''
-        self.is_raw_data = None  # returned data from Readin.machines()
+        self.is_machine_data = None  # returned data from Readin.machines()
         self.initial_state = None
 
         if machine in self.implemented:
             self.machine = machine.lower()
             if mtype.lower() in self.implemented[machine]:
-                self.log.debug('FOUND\t measurement type: << %s >>' % mtype.lower())
+                # self.log.debug('FOUND\t measurement type: << %s >>' % mtype.lower())
                 self.mtype = mtype.lower()
                 self.sample_obj = sample_obj
                 self.mfile = mfile
@@ -114,15 +112,26 @@ class Measurement(object):
     def set_initial_state(self,
                           mtype, mfile, machine,  # standard
                           **options):
+        """
+        creates a new measurement as initial state of measurement
 
-        initial_state = options.get('initial_variable', 0.0)
-        self.log.info(' ADDING  initial state to measurement << %s >> data' % self.mtype)
-        self.is_raw_data = self.import_data(machine=machine, mfile=mfile, mtype=mtype, rtn_raw_data=True)
-        components = ['x', 'y', 'z', 'm']
-        self.initial_state = np.array([self.is_raw_data[i] for i in components]).T
-        self.initial_state = np.c_[initial_state, self.initial_state]
-        self.__dict__.update({mtype: self.initial_state})
+        :param mtype: measurement type
+        :param mfile:  measurement data file
+        :param machine: measurement machine
+        :param options:
+        :return:
+        """
+        self.log.info('CREATING << %s >> initial state measurement << %s >> data' % (mtype, self.mtype))
+        implemented_measurements = ({i.__name__.lower(): i for i in Measurement.__subclasses__()})
+        if mtype in implemented_measurements:
+            self.initial_state = implemented_measurements[mtype](self.sample_obj, mtype, mfile, machine)
+            # self.initial_state = self.initial_state_obj.data
+        else:
+            self.log.error('UNABLE to find measurement << %s >>' % (mtype))
 
+    def add_treatment(self, ttype, tvalue, comment=''):
+        treatment = Generic(ttype=ttype, value=tvalue, comment=comment)
+        self.treatments.append(treatment)
     @property
     def generic(self):
         '''

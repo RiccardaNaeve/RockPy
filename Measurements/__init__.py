@@ -1,3 +1,3 @@
 __author__ = 'volk'
 import parameters
-import hysteresis
+import backfield, forc, hysteresis, irm, thellier, thermocurve, trm

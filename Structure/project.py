@@ -1,12 +1,9 @@
 # coding=utf-8
 __author__ = 'Michael Volk'
 # for all project related classes
-from Functions import convert, general
 import logging
-import numpy as np
-import scipy as sp
-import matplotlib.pyplot as plt
-import csv
+
+from Functions import general
 from Measurements import parameters, hysteresis, backfield, thermocurve, irm, thellier
 
 
@@ -110,7 +107,12 @@ class Sample():
 
     ''' FIND FUNCTIONS '''
 
-    def find_measurement(self, mtype):
+    def get_measurements(self, mtype):
+        """
+        Returns a list of measurements of type = mtype
+        :param mtype:
+        :return:
+        """
         self.log.debug('SEARCHING\t measurements with mtype << %s >>' % (mtype.lower()))
         out = [m for m in self.measurements if m.mtype == mtype.lower()]
         if len(out) != 0:

@@ -1,10 +1,9 @@
-from Structure.rockpydata import RockPyData
-
 __author__ = 'volk'
-import base
 import numpy as np
-import Structure.data
 import matplotlib.pyplot as plt
+
+import base
+from Structure.rockpydata import RockPyData
 
 
 class Hysteresis(base.Measurement):
@@ -264,7 +263,7 @@ class Hysteresis(base.Measurement):
         # zorder=1)
         # plt.plot(self.up_field_interp()[0], self.up_field_interp()[1], '--',
         # color=std.get_color(),
-        #          zorder=1)
+        # zorder=1)
 
         if not self.virgin is None:
             plt.plot(self.virgin['field'], self.virgin['mag'], color=std.get_color(), zorder=1)

@@ -1,14 +1,10 @@
 # coding=utf-8
 __author__ = 'volk'
+import numpy as np
+import matplotlib.pyplot as plt
+
 from Structure.rockpydata import RockPyData
 import base
-import numpy as np
-import scipy as sp
-import Structure.data
-import matplotlib.pyplot as plt
-from matplotlib.lines import Line2D
-import sys
-import copy
 
 
 class Thellier(base.Measurement):
@@ -19,6 +15,7 @@ class Thellier(base.Measurement):
 
         # # ## initialize data
         self.standard_parameters['slope'] = {'t_min': 20, 't_max': 700, 'component': 'mag'}
+        self.steps = ['th', 'pt', 'ac', 'tr', 'ck', 'ptrm', 'sum', 'difference']
 
         for i in self.standard_parameters:
             if self.standard_parameters[i] is None:
@@ -60,6 +57,10 @@ class Thellier(base.Measurement):
         self.sum = self.th + self.ptrm
         self.sum.define_alias('m', ( 'x', 'y', 'z'))
         self.sum['mag'] = self.sum.magnitude('m')
+        # ## DIFFERENCE
+        self.difference = self.th - self.ptrm
+        self.difference.define_alias('m', ( 'x', 'y', 'z'))
+        self.difference['mag'] = self.sum.magnitude('m')
 
     def format_sushibar(self):
         raise NotImplementedError
@@ -89,6 +90,11 @@ class Thellier(base.Measurement):
         plt.ylabel('pTRM gained [%s]' % ('Am^2'))
         plt.show()
 
+    def delete_temp(self, temp):
+        for step in self.steps:
+            idx = [i for i, v in enumerate(getattr(self, step)['temp']) if v != temp]
+            print idx
+            self.__dict__[step] = getattr(self, step).filter_idx(idx)
 
     @property
     def slope(self):
@@ -579,7 +585,6 @@ class Thellier(base.Measurement):
         gap = self.result_g(**parameter)
 
         self.results['q'] = (f * gap) / beta
-
 
     def calculate_w(self, **parameter):
         """

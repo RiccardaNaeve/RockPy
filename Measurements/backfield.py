@@ -1,11 +1,9 @@
-from Structure.rockpydata import RockPyData
-
 __author__ = 'volk'
-import base
-import Structure.data
-import Structure.rockpydata
 import matplotlib.pyplot as plt
 import numpy as np
+
+import base
+from Structure.rockpydata import RockPyData
 
 
 class Backfield(base.Measurement):

@@ -1,16 +1,17 @@
 __author__ = 'volk'
 import logging
-import numpy as np
-import Functions.general
-import Readin.machines as machines
-from Readin import vftb, microsense, generic
+import inspect
 
+import numpy as np
+
+import Functions.general
 import Readin.base
 from Structure.rockpydata import RockPyData
-import inspect
+
 
 class Measurement(object):
     Functions.general.create_logger('RockPy.MEASUREMENT')
+
     def __init__(self, sample_obj,
                  mtype, mfile, machine,
                  **options):
@@ -23,15 +24,15 @@ class Measurement(object):
         implemented_machines = [cls for cls in Readin.base.Machine.__subclasses__()]
 
         self.implemented = {
-        cls.__name__.lower(): {'_'.join(i.split('_')[1:]).lower(): cls for i in dir(cls) if i.startswith('out_')}
-        for cls in implemented_machines}
+            cls.__name__.lower(): {'_'.join(i.split('_')[1:]).lower(): cls for i in dir(cls) if i.startswith('out_')}
+            for cls in implemented_machines}
 
         ''' initialize parameters '''
         self.machine_data = None  # returned data from Readin.machines()
         self.treatment = None
 
         ''' initial state '''
-        self.is_raw_data = None # returned data from Readin.machines()
+        self.is_raw_data = None  # returned data from Readin.machines()
         self.initial_state = None
 
         if machine in self.implemented:
@@ -63,7 +64,8 @@ class Measurement(object):
         # dynamical creation of entries in results data. One column for each results_* method.
         # calculation_* methods are not creating columns -> if a result is calculated a result_* method
         # has to be written
-        self.result_methods = [i[7:] for i in dir(self) if i.startswith('result_') if not i.endswith('generic')]  # search for implemented results methods
+        self.result_methods = [i[7:] for i in dir(self) if i.startswith('result_') if
+                               not i.endswith('generic')]  # search for implemented results methods
         self.results = RockPyData(
             column_names=self.result_methods)  # dynamic entry creation for all available result methods
 

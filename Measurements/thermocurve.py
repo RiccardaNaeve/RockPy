@@ -1,11 +1,9 @@
-from Structure.rockpydata import RockPyData
-import itertools
-
 __author__ = 'volk'
-import base
-import Structure.data
 import matplotlib.pyplot as plt
 import numpy as np
+
+import base
+from Structure.rockpydata import RockPyData
 
 
 class ThermoCurve(base.Measurement):

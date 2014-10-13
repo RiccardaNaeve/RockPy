@@ -1,10 +1,8 @@
-from Structure.rockpydata import RockPyData
-
 __author__ = 'volk'
-import base
-import numpy as np
-import Structure.data
 import matplotlib.pyplot as plt
+
+import base
+from Structure.rockpydata import RockPyData
 
 
 class Irm(base.Measurement):

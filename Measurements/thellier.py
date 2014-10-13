@@ -152,7 +152,6 @@ class Thellier(base.Measurement):
             getattr(self, 'result_' + result_method)(**parameter)
 
     ''' RESULT SECTION '''
-
     def result_slope(self, t_min=None, t_max=None, component=None, recalc=False):
         '''
         Gives result for calculate_slope(t_min, t_max), returns slope value if not calculated already
@@ -164,6 +163,18 @@ class Thellier(base.Measurement):
 
         self.calc_result(parameter, recalc)
         return self.results['slope']
+
+    def result_n(self, t_min=None, t_max=None, component=None, recalc=False):
+        '''
+        Gives result for calculate_slope(t_min, t_max), returns slope value if not calculated already
+        '''
+        parameter = {'t_min': t_min,
+                     't_max': t_max,
+                     'component': component,
+        }
+
+        self.calc_result(parameter, recalc, force_caller='slope')
+        return self.results['n']
 
     def result_sigma(self, t_min=None, t_max=None, component=None, recalc=False, **options):
         parameter = {'t_min': t_min,
@@ -222,6 +233,61 @@ class Thellier(base.Measurement):
         self.calc_result(parameter, recalc)
         return self.results['vds']
 
+    def result_f(self, t_min=None, t_max=None, recalc=False, **options):
+        parameter = {'t_min': t_min,
+                     't_max': t_max,
+        }
+        self.calc_result(parameter, recalc)
+        return self.results['f']
+
+    def result_f_vds(self, t_min=None, t_max=None, recalc=False, **options):
+        parameter = {'t_min': t_min,
+                     't_max': t_max,
+        }
+        self.calc_result(parameter, recalc)
+        return self.results['f_vds']
+
+    def result_frac(self, t_min=None, t_max=None, recalc=False, **options):
+        parameter = {'t_min': t_min,
+                     't_max': t_max,
+        }
+        self.calc_result(parameter, recalc)
+        return self.results['frac']
+
+    def result_beta(self, t_min=None, t_max=None, recalc=False, **options):
+        parameter = {'t_min': t_min,
+                     't_max': t_max,
+        }
+        self.calc_result(parameter, recalc)
+        return self.results['beta']
+
+    def result_g(self, t_min=None, t_max=None, recalc=False, **options):
+        parameter = {'t_min': t_min,
+                     't_max': t_max,
+        }
+        self.calc_result(parameter, recalc)
+        return self.results['g']
+
+    def result_gap_max(self, t_min=None, t_max=None, recalc=False, **options):
+        parameter = {'t_min': t_min,
+                     't_max': t_max,
+        }
+        self.calc_result(parameter, recalc)
+        return self.results['gap_max']
+
+    def result_q(self, t_min=None, t_max=None, recalc=False, **options):
+        parameter = {'t_min': t_min,
+                     't_max': t_max,
+        }
+        self.calc_result(parameter, recalc)
+        return self.results['q']
+
+    def result_w(self, t_min=None, t_max=None, recalc=False, **options):
+        parameter = {'t_min': t_min,
+                     't_max': t_max,
+        }
+        self.calc_result(parameter, recalc)
+        return self.results['w']
 
     ''' CALCULATE SECTION '''
 
@@ -233,7 +299,7 @@ class Thellier(base.Measurement):
         """
         t_min = parameter.get('t_min', self.standard_parameters['slope']['t_min'])
         t_max = parameter.get('t_max', self.standard_parameters['slope']['t_max'])
-        component = parameter.get('component', 'mag')
+        component = parameter.get('component', self.standard_parameters['slope']['component'])
 
         self.log.info('CALCULATING\t << %s >> arai line fit << t_min=%.1f , t_max=%.1f >>' % (component, t_min, t_max))
 
@@ -263,6 +329,7 @@ class Thellier(base.Measurement):
         self.results['sigma'] = sigma
         self.results['y_int'] = y_int
         self.results['x_int'] = x_int
+        self.results['n'] = len(th_data[component])
 
         self.calculation_parameters['slope'] = {'t_min': t_min, 't_max': t_max, 'component': component}
 
@@ -360,10 +427,10 @@ class Thellier(base.Measurement):
         :param parameter:
         :return:
         '''
-
         t_min = parameter.get('t_min', self.standard_parameters['y_dash']['t_min'])
         t_max = parameter.get('t_max', self.standard_parameters['y_dash']['t_max'])
         component = parameter.get('component', self.standard_parameters['y_dash']['component'])
+
         self.log.info('CALCULATING\t << %s >> y_dash << t_min=%.1f , t_max=%.1f >>' % (component, t_min, t_max))
 
         idx = (self.th['temp'] <= t_max) & (t_min <= self.th['temp'])  # filtering for t_min/t_max
@@ -380,5 +447,163 @@ class Thellier(base.Measurement):
         y = y.filter_idx(idx[:, 1])
 
         y_dash = 0.5 * ( y[component] + self.slope * x[component] + self.y_int)
-
         return y_dash
+
+    def calculate_delta_x_dash(self, **parameter):
+        '''
+        ∆x0 and ∆y0 are TRM and NRM lengths of the best-ﬁt line on the Arai plot, respectively (Figure 1).
+        '''
+        x_dash = self.calculate_x_dash(**parameter)
+        out = abs(np.max(x_dash)) - np.min(x_dash)
+        return out
+
+    def calculate_delta_y_dash(self, **parameter):
+        '''
+        ∆x0 and ∆y0 are TRM and NRM lengths of the best-ﬁt line on the Arai plot, respectively (Figure 1).
+        '''
+        y_dash = self.calculate_y_dash(**parameter)
+        out = abs(np.max(y_dash)) - np.min(y_dash)
+        return out
+
+    def calculate_f(self, **parameter):
+        """
+        The remanence fraction, f, was defined by Coe et al. (1978) as:
+
+        .. math::
+
+           f =  \\frac{\\Delta y^T}{y_0}
+
+        where :math:`\Delta y^T` is the length of the NRM/TRM segment used in the slope calculation.
+
+
+        :param parameter:
+        :return:
+        """
+
+        self.log.debug('CALCULATING\t f parameter')
+        delta_y_dash = self.calculate_delta_y_dash(**parameter)
+        y_int = self.results['y_int']
+        self.results['f'] = delta_y_dash / abs(y_int)
+
+    def calculate_f_vds(self, **parameter):
+        """
+        NRM fraction used for the best-fit on an Arai diagram calculated as a vector difference sum (Tauxe and Staudigel, 2004).
+
+        .. math::
+
+           f_{VDS}=\frac{\Delta{y'}}{VDS}
+
+        :param parameter:
+        :return:
+        """
+        delta_y = self.calculate_delta_y_dash(**parameter)
+        VDS = self.result_vds(**parameter)
+        self.results['f_vds'] = delta_y / VDS
+
+    def calculate_frac(self, **parameter):
+        """
+        NRM fraction used for the best-fit on an Arai diagram determined entirely by vector difference sum
+        calculation (Shaar and Tauxe, 2013).
+
+        .. math::
+
+            FRAC=\frac{\sum\limits_{i=start}^{end-1}{ \left|\mathbf{NRM}_{i+1}-\mathbf{NRM}_{i}\right| }}{VDS}
+        :param parameter:
+        :return:
+        """
+
+        NRM_sum = np.sum(np.fabs(self.calculate_vd(**parameter)))
+        VDS = self.result_vds(**parameter)
+        self.results['frac'] = NRM_sum / VDS
+
+    def calculate_beta(self, **parameter):
+        """
+        :math`\beta` is a measure of the relative data scatter around the best-fit line and is the ratio of the
+        standard error of the slope to the absolute value of the slope (Coe et al., 1978)
+
+        .. math:
+
+           \beta = \frac{\sigma_b}{|b|}
+
+        :param parameters:
+        :return:
+        """
+
+        slope = self.result_slope(**parameter)
+        sigma = self.result_sigma(**parameter)
+        self.results['beta'] = sigma / abs(slope)
+
+    def calculate_g(self, **parameter):
+        """
+        Gap factor: A measure of the gap between the points in the chosen segment of the Arai plot and the least-squares
+        line. ‘g’ approaches (n-2)/(n-1) (close to unity) as the points are evenly distributed.
+        """
+        y_dash = self.calculate_y_dash(**parameter)
+        delta_y_dash = self.calculate_delta_y_dash(**parameter)
+        y_dash_diff = [(y_dash[i + 1] - y_dash[i]) ** 2 for i in range(len(y_dash) - 1)]
+        y_sum_dash_diff_sq = np.sum(y_dash_diff, axis=0)
+
+        self.results['g'] = 1 - y_sum_dash_diff_sq / delta_y_dash ** 2
+
+    def calculate_gap_max(self, **parameter):
+        """
+        The gap factor defined above is measure of the average Arai plot point spacing and may not represent extremes
+        of spacing. To account for this Shaar and Tauxe (2013)) proposed :math:`GAP\textrm{-}MAX`, which is the maximum
+        gap between two points determined by vector arithmetic.
+
+        .. math::
+           GAP\textrm{-}MAX=\frac{\max{\{\left|\mathbf{NRM}_{i+1}-\mathbf{NRM}_{i}\right|\}}_{i=start, \ldots, end-1}}{\sum\limits_{i=start}^{end-1}{\left|\mathbf{NRM}_{i+1}-\mathbf{NRM}_{i}\right|}} \]
+
+        :return:
+        """
+        vd = self.calculate_vd(**parameter)
+        max_vd = np.max(vd)
+        sum_vd = np.sum(vd)
+        self.results['gap_max'] = max_vd / sum_vd
+
+    def calculate_q(self, **parameter):
+        """
+        The quality factor (:math:`q`) is a measure of the overall quality of the paleointensity estimate and combines
+        the relative scatter of the best-fit line, the NRM fraction and the gap factor (Coe et al., 1978).
+
+        .. math::
+           q=\frac{\left|b\right|fg}{\sigma_b}=\frac{fg}{\beta}
+
+        :param parameter:
+        :return:
+        """
+        self.log.debug('CALCULATING\t quality parameter')
+
+        beta = self.result_beta(**parameter)
+        f = self.result_f(**parameter)
+        gap = self.result_g(**parameter)
+
+        self.results['q'] = (f * gap) / beta
+
+
+    def calculate_w(self, **parameter):
+        """
+        Weighting factor of Prévot et al. (1985). It is calculated by:
+
+        .. math::
+
+           w=\fac{q}{\sqrt{n-2}}
+
+        Originally it is :math:`w=\frac{fg}{s}`, where :math:`s^2` is given by:
+
+        .. math::
+
+           s^2=2+\frac{2\sum\limits_{i=start}^{end}{(x_i-\bar{x})(y_i-\bar{y})}}{\left( \sum\limits_{i=start}^{end}{(x_i-\bar{x})^{\frac{1}{2}}} \sum\limits_{i=start}^{end}{(y_i-\bar{y})^2} \right)^2}
+
+        It can be noted, however, that :math:`w` can be more readily calculated as:
+
+        .. math::
+
+           w=\fac{q}{\sqrt{n-2}}
+
+        :param parameter:
+        :return:
+        """
+        q = self.result_q(**parameter)
+        n = self.result_n(**parameter)
+        self.results['w'] = q / np.sqrt((n - 2))

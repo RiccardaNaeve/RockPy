@@ -186,9 +186,10 @@ class Measurement(object):
             caller = '_'.join(inspect.stack()[1][3].split('_')[1:])
 
         if callable(getattr(self, 'calculate_' + caller)):  # check if calculation function exists
-            parameter = self.compare_parameters(caller, parameter)  # checks for None and replaces it with standard
+            parameter = self.compare_parameters(caller, parameter,
+                                                recalc)  # checks for None and replaces it with standard
             if self.results[caller] is None or self.results[
-                caller] == 0.000 or recalc:  # if results dont exist or force recalc
+                caller] == 0.000 or recalc:  # if results dont exist or force recalc #todo exchange 0.000 with np.nan
                 if recalc:
                     self.log.debug('FORCED recalculation of << %s >>' % (caller))
                 else:
@@ -205,21 +206,28 @@ class Measurement(object):
             self.log.error(
                 'CALCULATION of << %s >> not possible, probably not implemented, yet.' % caller)
 
-    def compare_parameters(self, caller, parameter):
-        '''
-        checks if given parameter[key] is None and replaces it with standard parameter
+    def compare_parameters(self, caller, parameter, recalc):
+        """
+        checks if given parameter[key] is None and replaces it with standard parameter or calculation_parameters.
+
+        e.g. calculation_generic(A=1, B=2)
+             calculation_generic() # will calculate with A=1, B=2
+             calculation_generic(A=3) # will calculate with A=3, B=2
+             calculation_generic(A=2, recalc=True) # will calculate with A=2 B=standard_parameter['B']
 
         :param caller: str
-                     name of calling function ('result_generic' should be given as 'result')
+                     name of calling function ('result_generic' should be given as 'generic')
         :param parameter:
+                        Parameters to check
+        :param recalc: Boolean
+                     True if forced recalculation, False if not
         :return:
-        '''
-
+        """
         # caller = inspect.stack()[1][3].split('_')[-1]
 
         for i, v in parameter.iteritems():
             if v is None:
-                if self.calculation_parameters[caller]:
+                if self.calculation_parameters[caller] and not recalc:
                     parameter[i] = self.calculation_parameters[caller][i]
                 else:
                     parameter[i] = self.standard_parameters[caller][i]

@@ -9,6 +9,7 @@ from prettytable import PrettyTable
 class RockPyData(object):
     # todo units
     # todo append rockpydata object rpd(('a','b','c'), (1,2,3)).append(rpd(('a','b'), (1,2)) -> rpd(('a','b','c'), ((1,2,3), (1,2,np.nan))
+    # todo make columns not computable rpd(('a','b','c'), (1,2,3)).not_computable('b') + rpd(('a','b','c'), (4,5,6)) = a=5,b=2,c=9 ??? normalizing a95 for example does not make much sense, right?
     """
     class to manage specific numeric data based on a numpy array
     e.g. d = rockpydata( column_names=( 'F','Mx', 'My', 'Mz'))

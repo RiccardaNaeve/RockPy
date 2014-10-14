@@ -325,7 +325,7 @@ class RockPyData(object):
 
         .. code-block:: python
 
-           A = B - C
+           A = B/C
 
         :param other: rockpydata
         """
@@ -348,10 +348,10 @@ class RockPyData(object):
         :param other: rockpydata
         :return
         """
-        # check if we have a proper rockpydata object for subtraction
+        # check if we have a proper rockpydata object for arithmetic operation
 
-        if not isinstance(other, RockPyData):
-            raise ArithmeticError('only rockpydata objects can be subtracted')
+        if not isinstance(other, RockPyData):  # todo implement for floats
+            raise ArithmeticError('only rockpydata objects can be computed')
 
         # check if 'variable' columns match in both objects
         if not (self.key_exists('variable') and other.key_exists('variable')):

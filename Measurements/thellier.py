@@ -102,62 +102,6 @@ class Thellier(base.Measurement):
                 self.log.debug('UNABLE to find entriy for << %s, %.2f >> temperature' % (step, temp))
 
 
-    @property
-    def slope(self):
-        '''
-        helper function that returns the value for slope of arai line fit. If result not available will calculate
-        it with standard parameters
-        '''
-        return self.result_slope()
-
-    @property
-    def sigma(self):
-        '''
-        helper function that returns the value for slope of arai line fit. If result not available will calculate
-        it with standard parameters
-        '''
-        return self.result_sigma()
-
-    @property
-    def x_int(self):
-        '''
-        helper function that returns the value for slope of arai line fit. If result not available will calculate
-        it with standard parameters
-        '''
-        return self.result_x_int()
-
-    @property
-    def y_int(self):
-        '''
-        helper function that returns the value for slope of arai line fit. If result not available will calculate
-        it with standard parameters
-        '''
-        return self.result_y_int()
-
-    @property
-    def intensity(self):
-        '''
-        helper function that returns the value for slope of arai line fit. If result not available will calculate
-        it with standard parameters
-        '''
-        return self.result_b_anc()
-
-    @property
-    def sigma_int(self):
-        '''
-        helper function that returns the value for slope of arai line fit. If result not available will calculate
-        it with standard parameters
-        '''
-        return self.result_sigma_b_anc()
-
-    @property
-    def vds(self):
-        '''
-        helper function that returns the value for slope of arai line fit. If result not available will calculate
-        it with standard parameters
-        '''
-        return self.result_vds()
-
     def calc_all(self, **parameter):
         parameter['recalc'] = True
         for result_method in self.result_methods:

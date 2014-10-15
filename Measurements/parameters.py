@@ -33,7 +33,7 @@ class Mass(Measurement):
 
 class Length(Measurement):
     """
-    simple 1d measurement for mass
+    simple 1d measurement for Length
     """
 
     def __init__(self, sample_obj,
@@ -52,6 +52,39 @@ class Length(Measurement):
         self.data[mtype] = value * length_conversion
         self.data['time'] = time
         self.data['std_dev'] = std
+
+    def format_generic(self):
+        pass
+
+
+class Diameter(Length):
+    """
+    simple 1d measurement for Length
+    """
+
+    def __init__(self, sample_obj,
+                 mtype, mfile=None, machine='generic',
+                 value=1.0, unit='m',
+                 std=None, time=None,
+                 **options):
+        super(Diameter, self).__init__(sample_obj=sample_obj,
+                                       mtype=mtype, mfile=mfile, machine=machine,
+                                       **options)
+
+    def format_generic(self):
+        pass
+
+
+class Height(Length):
+    def __init__(self, sample_obj,
+                 mtype, mfile=None, machine='generic',
+                 value=1.0, unit='m',
+                 std=None, time=None,
+                 **options):
+        super(Height, self).__init__(sample_obj=sample_obj,
+                                     mtype=mtype, mfile=mfile, machine=machine,
+                                     **options)
+
 
     def format_generic(self):
         pass

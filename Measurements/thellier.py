@@ -11,7 +11,7 @@ class Thellier(base.Measurement):
     def __init__(self, sample_obj,
                  mtype, mfile, machine,
                  **options):
-        super(Thellier, self).__init__(sample_obj, mtype, mfile, machine)
+        super(Thellier, self).__init__(sample_obj, mtype, mfile, machine, **options)
 
         # # ## initialize data
         self.standard_parameters['slope'] = {'t_min': 20, 't_max': 700, 'component': 'mag'}
@@ -108,6 +108,7 @@ class Thellier(base.Measurement):
             getattr(self, 'result_' + result_method)(**parameter)
 
     ''' RESULT SECTION '''
+
     def result_slope(self, t_min=None, t_max=None, component=None, recalc=False):
         '''
         Gives result for calculate_slope(t_min, t_max), returns slope value if not calculated already
@@ -365,7 +366,8 @@ class Thellier(base.Measurement):
         x = x.filter_idx(idx[:, 0])
         y = y.filter_idx(idx[:, 1])
 
-        x_dash = 0.5 * (x[component] + ((y[component] - self.y_int) / self.slope))
+        x_dash = 0.5 * (
+            x[component] + ((y[component] - self.result_y_int(**parameter)) / self.result_slope(**parameter)))
         return x_dash
 
     def calculate_y_dash(self, **parameter):
@@ -402,7 +404,7 @@ class Thellier(base.Measurement):
         x = x.filter_idx(idx[:, 0])
         y = y.filter_idx(idx[:, 1])
 
-        y_dash = 0.5 * ( y[component] + self.slope * x[component] + self.y_int)
+        y_dash = 0.5 * ( y[component] + self.result_slope(**parameter) * x[component] + self.result_y_int(**parameter))
         return y_dash
 
     def calculate_delta_x_dash(self, **parameter):

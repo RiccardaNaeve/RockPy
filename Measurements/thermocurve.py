@@ -27,6 +27,35 @@ class ThermoCurve(base.Measurement):
         else:
             self.log.error('LENGTH of machine.out_thermocurve < 2.')
 
+    def format_vsm(self):
+        data = self.machine_data.out_thermocurve()
+        header = self.machine_data.header
+        segments = self.machine_data.segment_info
+        print segments
+        ut = [i for i, v in enumerate(segments['initial temperature'])
+              if segments['initial temperature'][i] < segments['final temperature'][i]]
+        dt = [i for i, v in enumerate(segments['initial temperature'])
+              if segments['initial temperature'][i] > segments['final temperature'][i]]
+        # up_data = []
+        # for i in ut:
+        # up_data.extend(data[i])
+        #
+        # down_data = []
+        # for i in dt:
+        # down_data.extend(data[i])
+        up_data = np.array([data[i] for i in ut])
+        up_data = [j for i in up_data for j in i]
+        down_data = [data[i] for i in dt]
+        down_data = [j for i in down_data for j in i]
+
+        self.up_temp = RockPyData(column_names=header, data=up_data)
+        self.up_temp.rename_column('temperature', 'temp')
+        self.up_temp.rename_column('moment', 'mag')
+
+        self.down_temp = RockPyData(column_names=header, data=down_data)
+        self.down_temp.rename_column('temperature', 'temp')
+        self.down_temp.rename_column('moment', 'mag')
+
 
     @property
     def ut(self):
@@ -43,8 +72,8 @@ class ThermoCurve(base.Measurement):
         ax.plot(self.ut['temp'], self.ut['mag'], '-', color='red')
         ax.plot(self.dt['temp'], self.dt['mag'], '-', color='blue')
         ax.grid()
-        ax.axhline(0, color='#808080')
-        ax.axvline(0, color='#808080')
+        # ax.axhline(0, color='#808080')
+        # ax.axvline(0, color='#808080')
         ax.text(0.01, 1.01, 'mean field: %.3f %s' % (np.mean(self.ut['field']), 'T'),  # replace with data.unit
                 verticalalignment='bottom', horizontalalignment='left',
                 transform=ax.transAxes,

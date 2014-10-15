@@ -54,3 +54,9 @@ class CryoMag(base.Machine):
         steps = np.array(map(str.lower, steps))
         steps = steps[self.results_idx]
         return steps
+
+    def _check_data_exists(self):
+        if len(self.sample_idx) != 0:
+            return True
+        else:
+            return False

@@ -4,7 +4,7 @@ __author__ = 'Michael Volk'
 import logging
 
 from Functions import general
-from Measurements import parameters, hysteresis, backfield, thermocurve, irm, thellier
+import Measurements.base
 
 
 class Sample():
@@ -59,38 +59,32 @@ class Sample():
 
         - mass
         '''
+        mtype = mtype.lower()
 
-        implemented = {
-            'mass': parameters.Mass,
-            'diameter': parameters.Length,
-            'height': parameters.Length,
-            'hys': hysteresis.Hysteresis,
-            'backfield': backfield.Backfield,
-            'thermocurve': thermocurve.ThermoCurve,
-            'irm': irm.Irm,
-            'thellier': thellier.Thellier,
-        }
-
-        if mtype.lower() in implemented:
+        implemented = {i.__name__.lower(): i for i in Measurements.base.Measurement.inheritors()}
+        if mtype in implemented:
             self.log.info(' ADDING\t << measurement >> %s' % mtype)
-            measurement = implemented[mtype.lower()](self,
-                                                     mtype=mtype, mfile=mfile, machine=machine,
-                                                     **options)
-            self.measurements.append(measurement)
-            return measurement
+            measurement = implemented[mtype](self,
+                                             mtype=mtype, mfile=mfile, machine=machine,
+                                             **options)
+            if measurement.has_data:
+                self.measurements.append(measurement)
+                return measurement
+            else:
+                return None
         else:
             self.log.error(' << %s >> not implemented, yet' % mtype)
 
     @property
     def mass_kg(self):
-        measurement = self.find_measurement(mtype='mass')
+        measurement = self.get_measurements(mtype='mass')
         if len(measurement) > 1:
             self.log.info('FOUND more than 1 << mass >> measurement. Returning first')
         return measurement[0].data['mass'][0]
 
     @property
     def height_m(self):
-        measurement = self.find_measurement(mtype='height')
+        measurement = self.get_measurements(mtype='height')
         if len(measurement) > 1:
             self.log.info('FOUND more than 1 << height >> measurement. Returning first')
         return measurement[0].data['height'][0]
@@ -98,7 +92,7 @@ class Sample():
 
     @property
     def diameter_m(self):
-        measurement = self.find_measurement(mtype='diameter')
+        measurement = self.get_measurements(mtype='diameter')
         if len(measurement) > 1:
             self.log.info('FOUND more than 1 << diameter >> measurement. Returning first')
         return measurement[0].data['diameter'][0]

@@ -1,12 +1,12 @@
 __author__ = 'mike'
-import base
-from Structure.rockpydata import RockPyData
 import numpy as np
+
+import base
 
 
 class MicroSense(base.Machine):
-    def __init__(self, dfile, sample_obj):
-        super(MicroSense, self).__init__(dfile, sample_obj)
+    def __init__(self, dfile, sample_name):
+        super(MicroSense, self).__init__(dfile, sample_name)
 
         self.raw_data = [i for i in self.reader_object]
 

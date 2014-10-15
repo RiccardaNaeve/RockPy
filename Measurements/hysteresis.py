@@ -10,12 +10,12 @@ class Hysteresis(base.Measurement):
     def __init__(self, sample_obj,
                  mtype, mfile, machine,
                  **options):
-        super(Hysteresis, self).__init__(sample_obj, mtype, mfile, machine)
+        super(Hysteresis, self).__init__(sample_obj, mtype, mfile, machine, **options)
 
 
     # ## formatting functions
     def format_vftb(self):
-        data = self.machine_data.out_hys()
+        data = self.machine_data.out_hysteresis()
         header = self.machine_data.header
         self.induced = RockPyData(column_names=header, data=data[0])
         dfield = np.diff(self.induced['field'])
@@ -275,7 +275,7 @@ class Hysteresis(base.Measurement):
         plt.grid()
         plt.title('Hysteresis %s' % (self.sample_obj.name))
         plt.xlabel('Field [%s]' % ('T'))  # todo replace with data unit
-        plt.ylabel('Moment [%s]' % ('Am^2'))  #todo replace with data unit
+        plt.ylabel('Moment [%s]' % ('Am^2'))  # todo replace with data unit
         plt.show()
 
     def plt_hysteresis(self):

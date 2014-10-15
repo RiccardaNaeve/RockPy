@@ -18,3 +18,5 @@ print M.th
 print M.initial_state.data
 
 print M.th / M.initial_state.data
+print M.initial_state.data['m'][0]
+print M.th / M.initial_state.data['m'][0]

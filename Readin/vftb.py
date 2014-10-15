@@ -1,12 +1,12 @@
 __author__ = 'mike'
-import base
 import numpy as np
-from Structure.rockpydata import RockPyData
+
+import base
 
 
 class Vftb(base.Machine):
-    def __init__(self, dfile, sample_obj):
-        super(Vftb, self).__init__(dfile, sample_obj)
+    def __init__(self, dfile, sample_name):
+        super(Vftb, self).__init__(dfile, sample_name)
         self.raw_data = [i.strip('\r\n').split('\t') for i in self.reader_object.readlines()]
 
         self.mass = float(self.raw_data[0][1].split()[1])
@@ -36,7 +36,7 @@ class Vftb(base.Machine):
         self.convert_to_T(data)
         return data
 
-    def out_hys(self):
+    def out_hysteresis(self):
         data = self.get_data()
         return data
 

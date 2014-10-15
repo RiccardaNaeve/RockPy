@@ -6,6 +6,7 @@ import Functions.general
 import Readin.base
 from Structure.rockpydata import RockPyData
 from Treatments.base import Generic
+from Readin import *
 
 
 class Measurement(object):
@@ -14,8 +15,18 @@ class Measurement(object):
     def __init__(self, sample_obj,
                  mtype, mfile, machine,
                  **options):
+        """
 
+        :param sample_obj:
+        :param mtype:
+        :param mfile:
+        :param machine:
+        :param suffix: str
+        :param options:
+        :return:
+        """
         self.log = logging.getLogger('RockPy.MEASUREMENT.' + type(self).__name__)
+        self.has_data = True
 
         # setting implemented machines
         # looking for all subclasses of Readin.base.Machine
@@ -24,9 +35,9 @@ class Measurement(object):
         self.implemented = {
             cls.__name__.lower(): {'_'.join(i.split('_')[1:]).lower(): cls for i in dir(cls) if i.startswith('out_')}
             for cls in implemented_machines}
-
         ''' initialize parameters '''
         self.machine_data = None  # returned data from Readin.machines()
+        self.suffix = options.get('suffix', '')
         self.treatments = []
 
         ''' initial state '''
@@ -43,6 +54,7 @@ class Measurement(object):
 
                 if self.machine and self.mfile:
                     self.import_data()
+                    self.has_data = self.machine_data.has_data
                 else:
                     self.log.debug('NO machine or mfile passed -> no raw_data will be generated')
             else:
@@ -52,7 +64,7 @@ class Measurement(object):
 
         # dynamic data formatting
         # checks is format_'machine_name' exists. If exists it formats self.raw_data according to format_'machine_name'
-        if callable(getattr(self, 'format_' + machine)):
+        if callable(getattr(self, 'format_' + machine)) and self.has_data:
             self.log.debug('FORMATTING raw data from << %s >>' % machine)
             getattr(self, 'format_' + machine)()
         else:
@@ -122,7 +134,7 @@ class Measurement(object):
         :return:
         """
         self.log.info('CREATING << %s >> initial state measurement << %s >> data' % (mtype, self.mtype))
-        implemented_measurements = ({i.__name__.lower(): i for i in Measurement.__subclasses__()})
+        implemented = {i.__name__.lower(): i for i in Measurement.inheritors()}
         if mtype in implemented_measurements:
             self.initial_state = implemented_measurements[mtype](self.sample_obj, mtype, mfile, machine)
             # self.initial_state = self.initial_state_obj.data
@@ -132,6 +144,7 @@ class Measurement(object):
     def add_treatment(self, ttype, tvalue, comment=''):
         treatment = Generic(ttype=ttype, value=tvalue, comment=comment)
         self.treatments.append(treatment)
+
     @property
     def generic(self):
         '''
@@ -217,6 +230,11 @@ class Measurement(object):
             self.log.error(
                 'CALCULATION of << %s >> not possible, probably not implemented, yet.' % caller)
 
+    def calc_all(self, **parameter):
+        parameter['recalc'] = True
+        for result_method in self.result_methods:
+            getattr(self, 'result_' + result_method)(**parameter)
+
     def compare_parameters(self, caller, parameter, recalc):
         """
         checks if given parameter[key] is None and replaces it with standard parameter or calculation_parameters.
@@ -263,3 +281,16 @@ class Measurement(object):
                 return False
         else:
             return True
+
+
+    @classmethod
+    def inheritors(cls):
+        subclasses = set()
+        work = [cls]
+        while work:
+            parent = work.pop()
+            for child in parent.__subclasses__():
+                if child not in subclasses:
+                    subclasses.add(child)
+                    work.append(child)
+        return subclasses

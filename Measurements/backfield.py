@@ -22,7 +22,9 @@ class Backfield(base.Measurement):
     def __init__(self, sample_obj,
                  mtype, mfile, machine,
                  **options):
-        super(Backfield, self).__init__(sample_obj, mtype, mfile, machine)
+        super(Backfield, self).__init__(sample_obj,
+                                        mtype, mfile, machine,
+                                        **options)
 
     def format_vftb(self):
         '''

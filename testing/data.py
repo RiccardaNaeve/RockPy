@@ -17,7 +17,7 @@ testdata = ( (1, 2, 3, 4),
              (9, 10, 11, 12))
 
 # create a rockpydata object with named columns and filled with testdata
-d = RockPyData(column_names=( 'F', 'Mx', 'My', 'Mz'), data=testdata)
+d = RockPyData(column_names=( 'F', 'Mx', 'My', 'Mz'), row_names=('1.Zeile','2.Zeile','3.Zeile'), data=testdata)
 
 # define as many aliases as you want
 d.define_alias('M', ( 'Mx', 'My', 'Mz'))

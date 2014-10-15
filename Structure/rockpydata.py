@@ -20,7 +20,7 @@ class RockPyData(object):
        alias: only used for alias
     """
 
-    def __init__(self, column_names, units=None, data=None):
+    def __init__(self, column_names, row_names = None, units=None, data=None):
         """
             * columns: sequence of strings naming individual columns
         """
@@ -28,8 +28,12 @@ class RockPyData(object):
         if type(column_names) is str:  # if we got a single string, convert it to tuple with one entry
             column_names = (column_names,)
 
+        if type(row_names) is str:  # if we got a single string, convert it to tuple with one entry
+            row_names = (row_names,)
+
         # initialize member variables
         self._column_names = list(column_names)
+
         self._data = None
 
         self._update_column_dictionary()
@@ -40,6 +44,15 @@ class RockPyData(object):
         self._column_dict['data'] = tuple(range(self.column_count)[1:])
 
         self['all'] = data
+
+        if row_names is None:
+            self._row_names = None # don't use row names
+        else:
+            # make sure that number of row names matches number of lines in data
+            if len(row_names) == self.row_count:
+                self._row_names = list(row_names)
+            else:
+                raise RuntimeError('number of entries in row_names (%d) does not match number of lines in data (%d)'%(len(row_names),self.row_count))
 
     def _update_column_dictionary(self, column_names=None):
         """
@@ -72,6 +85,10 @@ class RockPyData(object):
     def column_names(self):
         return self._column_names
 
+    @property
+    def row_names(self):
+        return self._row_names
+
 
     @property
     def column_count(self):
@@ -79,7 +96,7 @@ class RockPyData(object):
 
     @property
     def row_count(self):
-        if self.data == None:
+        if self.data is None:
             return 0
         else:
             return self.data.shape[0]
@@ -158,7 +175,7 @@ class RockPyData(object):
         # update internal column dictionary
         self._update_column_dictionary(column_names)
 
-        if data == None:
+        if data is None:
             # if there is no data, create zeros
             data = np.zeros((self.row_count, len(column_names)))
 
@@ -274,7 +291,7 @@ class RockPyData(object):
 
         results_data = np.append(results_variable, rd1 - rd2, axis=1)  # variable columns + calculated data columns
 
-        return RockPyData(column_names=result_c_names, data=results_data)
+        return RockPyData(column_names=result_c_names, row_names=self.row_names, data=results_data)
 
     def __add__(self, other):
         """
@@ -295,7 +312,7 @@ class RockPyData(object):
 
         results_data = np.append(results_variable, rd1 + rd2, axis=1)  # variable columns + calculated data columns
 
-        return RockPyData(column_names=result_c_names, data=results_data)
+        return RockPyData(column_names=result_c_names, row_names=self.row_names, data=results_data)
 
     def __mul__(self, other):
         """
@@ -316,7 +333,7 @@ class RockPyData(object):
 
         results_data = np.append(results_variable, rd1 * rd2, axis=1)  # variable columns + calculated data columns
 
-        return RockPyData(column_names=result_c_names, data=results_data)
+        return RockPyData(column_names=result_c_names, row_names=self.row_names, data=results_data)
 
     def __div__(self, other):
         """
@@ -337,7 +354,7 @@ class RockPyData(object):
 
         results_data = np.append(results_variable, rd1 / rd2, axis=1)  # variable columns + calculated data columns
 
-        return RockPyData(column_names=result_c_names, data=results_data)
+        return RockPyData(column_names=result_c_names, row_names=self.row_names, data=results_data)
 
     def _get_arithmetic_data(self, other):
         """
@@ -408,11 +425,13 @@ class RockPyData(object):
         :return:
         """
 
-        tab = PrettyTable(self.column_names)
-        for row in self.data:
-            tab.add_row(row)
-        # Change some column alignments; default was 'c'
-        # tab.align['column_one'] = 'r'
+        tab = PrettyTable(('row_name',)+tuple(self.column_names))
+        for i in range(self.row_count):
+            if self.row_names is None:
+                l = (i,) + tuple(self.data[i]) # if there are no row labels, put numeric index in first column
+            else:
+                l = (self.row_names[i],) + tuple(self.data[i]) # otherwise put row label in first column
+            tab.add_row(l)
 
         return tab.get_string()
 
@@ -463,6 +482,8 @@ class RockPyData(object):
             tf_array = np.array(tf_array).T
 
         self_copy._data = self_copy._data[tf_array]
+        if self_copy._row_names is not None:
+            self_copy._row_names = list(np.array(self_copy._row_names, dtype=object)[tf_array]) # filter row names with same true/false array
         return self_copy
 
     def filter_idx(self, index_list):

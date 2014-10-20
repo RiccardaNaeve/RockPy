@@ -31,20 +31,27 @@ class Generic(object):
                              'xtick.labelsize': 10,
                              'ytick.labelsize': 10}}
 
+        self.log = logging.getLogger('RockPy.VISUALIZE.' + type(self).__name__)
+
         plt.rcParams.update(params[style])
         self.style = style
         self.plt_opt = plt_opt
 
+        # ## initialize
+        self.fig = None
+        self.ax = None
+
+        ### labels and titles
         self.x_label = None
         self.y_label = None
 
         self.plot = plot
 
-        self.log = logging.getLogger('RockPy.VISUALIZE.' + type(self).__name__)
 
         if type(sample_list) is not list:
             self.log.debug('CONVERTING Sample Instance to Samples List')
             sample_list = [sample_list]
+
         self.name = name
 
         if folder is None:
@@ -58,14 +65,12 @@ class Generic(object):
         self.samples = [i for i in sample_list]
         self.sample_list = sample_list
 
+
+        # check if a figure is provided, this way multiple plots can be combined into one figure
+
         self.fig = options.get('fig', plt.figure(figsize=(8, 6), dpi=100))
 
-        self.ax = plt.subplot2grid((1, 1), (0, 0), colspan=1, rowspan=1)
-        self.plot_data = []
-        self.ax.xaxis.major.formatter._useMathText = True
-        self.ax.yaxis.major.formatter._useMathText = True
-        self.ax.ticklabel_format(style='sci', scilimits=(1, 4), axis='both')
-
+        self.ax = options.get('ax', plt.subplot2grid((1, 1), (0, 0), colspan=1, rowspan=1))
 
     def out(self, *args):
         if not '.pdf' in self.name:
@@ -73,7 +78,8 @@ class Generic(object):
 
         out_options = {'show': plt.show,
                        'rtn': self.get_fig,
-                       'save': self.save_fig}
+                       'save': self.save_fig,
+                       'None': self.close_plot}
 
         if self.plot in ['show', 'save']:
             if not 'nolable' in args:
@@ -110,7 +116,7 @@ class Generic(object):
             'm': {'marker': '<', 'dash': [5, 2, 5, 2, 5, 10]},
             'y': {'marker': '>', 'dash': [5, 3, 1, 2, 1, 10]},
             'k': {'marker': 'o', 'dash': (None, None)},  # [1,2,1,10]}
-            '#808080': {'marker': '.', 'dash': (None, None)}  #[1,2,1,10]}
+            '#808080': {'marker': '.', 'dash': (None, None)}  # [1,2,1,10]}
         }
 
         for line in ax.get_lines():  # + ax.get_legend().get_lines():
@@ -127,3 +133,6 @@ class Generic(object):
         """
         for ax in self.fig.get_axes():
             self.setAxLinesBW(ax)
+
+    def close_plot(self):
+        plt.close()

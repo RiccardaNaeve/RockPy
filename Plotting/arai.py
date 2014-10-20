@@ -7,7 +7,7 @@ def arai(ax, thellier_obj, parameter, **plt_opt):
     idx = np.array([[i, j]
                     for i, v1 in enumerate(thellier_obj.ptrm['temp'])
                     for j, v2 in enumerate(thellier_obj.th['temp']) if v1 == v2])
-    ax.plot(thellier_obj.ptrm[component][idx[:, 0]], thellier_obj.th[component][idx[:, 1]])
+    ax.plot(thellier_obj.ptrm[component][idx[:, 0]], thellier_obj.th[component][idx[:, 1]], '.-')
 
 
 def arai_line(ax, thellier_obj, parameter, **plt_opt):

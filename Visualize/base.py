@@ -12,6 +12,7 @@ class Generic(object):
     def __init__(self, sample_list, norm=None,
                  plot='show', folder=None, name='output.pdf',
                  plt_opt={}, style='screen',
+                 create_fig=True, create_ax=True,
                  **options):
         if plt_opt is None: plt_opt = {}
         params = {'publication': {'backend': 'ps',
@@ -67,10 +68,10 @@ class Generic(object):
 
 
         # check if a figure is provided, this way multiple plots can be combined into one figure
-
-        self.fig = options.get('fig', plt.figure(figsize=(8, 6), dpi=100))
-
-        self.ax = options.get('ax', plt.subplot2grid((1, 1), (0, 0), colspan=1, rowspan=1))
+        if create_fig:
+            self.fig = options.get('fig', plt.figure(figsize=(8, 6), dpi=100))
+        if create_ax:
+            self.ax = options.get('ax', plt.subplot2grid((2, 2), (0, 0), colspan=1, rowspan=1))
 
     def out(self, *args):
         if not '.pdf' in self.name:
@@ -79,7 +80,8 @@ class Generic(object):
         out_options = {'show': plt.show,
                        'rtn': self.get_fig,
                        'save': self.save_fig,
-                       'None': self.close_plot}
+                       'None': self.close_plot,
+                       'get_ax': self.get_ax}
 
         if self.plot in ['show', 'save']:
             if not 'nolable' in args:
@@ -90,6 +92,7 @@ class Generic(object):
         out_options[self.plot]()
 
     def get_ax(self):
+        plt.close()
         return self.ax
 
     def get_fig(self):

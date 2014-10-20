@@ -486,9 +486,9 @@ class RockPyData(object):
             self_copy._row_names = list(np.array(self_copy._row_names, dtype=object)[tf_array]) # filter row names with same true/false array
         return self_copy
 
-    def filter_idx(self, index_list):
+    def filter_idx(self, index_list, invert=False):
         """
-        Returns a copy of the data filtered according to indices specified in index_list
+        Returns a copy of the data filtered according to indices specified in index_list.
 
         :example:
 
@@ -500,12 +500,25 @@ class RockPyData(object):
            filtered_data['testdata']
            array([ 3.,  5.,  7.,  8.])
 
+        if invert is True, the specified index will be deleted
+
+        .. code-block:: python
+
+           idx_list = [3,5,7,8]
+           data = rp.rockpydata(column_names=['testdata'], data=[0,1,2,3,4,5,6,7,8,9,10])
+           filtered_data = data.filter_idx(idx_list)
+           filtered_data['testdata']
+           array([ 1.,  2.,  3.,  4.,  6.,  9.,  10.])
+
         :param index_list:
         :return: rockpydata
                filtered data
         """
+        if invert:
+            tf_array = [False if x in index_list else True for x in range(len(self['data']))]
+        else:
+            tf_array = [True if x in index_list else False for x in range(len(self['data']))]
 
-        tf_array = [True if x in index_list else False for x in range(len(self['data']))]
         return self.filter(tf_array)
 
     def check_duplicate(self):

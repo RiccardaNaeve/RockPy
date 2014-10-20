@@ -10,7 +10,7 @@ class SampleGroup(object):
     Functions.general.create_logger('RockPy.SAMPLEGROUP')
 
 
-    def __init__(self):
+    def __init__(self, sample_file=None, **options):
         self.log = logging.getLogger('RockPy.SAMPLEGROUP.' + type(self).__name__)
         self.log.info('CRATING new << samplegroup >>')
 
@@ -18,7 +18,10 @@ class SampleGroup(object):
         self.samples = {}
         self.sample_list = []
 
-    def import_multiple_samples(self, sample_file, length_unit='mm', mass_unit='mg'):
+        if sample_file:
+            self.import_multiple_samples(sample_file, **options)
+
+    def import_multiple_samples(self, sample_file, length_unit='mm', mass_unit='mg', **options):
         """
         imports a csv file with sample_names masses and dimansions and creates the sample_objects
         :param sample_file:

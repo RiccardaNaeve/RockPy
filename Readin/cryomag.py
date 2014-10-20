@@ -1,5 +1,8 @@
 __author__ = 'mike'
+import datetime
+
 import numpy as np
+import matplotlib.dates
 
 import base
 
@@ -10,6 +13,7 @@ class CryoMag(base.Machine):
         self.raw_data = [i.strip('\n\r').split('\t') for i in self.reader_object.readlines()]
         d = np.array(self.raw_data[2:])
         self.float_data_idx = [7, 1, 2, 3, 4, 5, 6, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+        self.time_idx = 10
         self.sample_idx = [i for i, v in enumerate(d[:, 0]) if
                            v == sample_name or sample_name in d[i, 9]]
         self.results_idx = [i for i, v in enumerate(d[:, 11]) if v == 'results' and i in self.sample_idx]
@@ -30,7 +34,13 @@ class CryoMag(base.Machine):
         data = np.array(self.raw_data[2:])[self.results_idx]
         data = data[:, self.float_data_idx]
         data = data.astype(float)
-        return data
+        return np.array(data)
+
+    def get_time_data(self):
+        data = np.array(self.raw_data[2:])[self.results_idx]
+        data = data[:, self.time_idx]
+        data = map(self.convert_time, data)
+        return np.array(data)
 
     def samples(self):
         samples = np.array(self.raw_data[2:])[:, 0]
@@ -39,14 +49,6 @@ class CryoMag(base.Machine):
     def comments(self):
         comments = np.array(self.raw_data[2:])[:, 9]
         return comments
-
-    def out_thellier(self):
-        data = self.get_float_data()
-        return data
-
-    def out_trm(self):
-        data = self.get_float_data()
-        return data
 
     @property
     def steps(self):
@@ -60,3 +62,22 @@ class CryoMag(base.Machine):
             return True
         else:
             return False
+
+
+    def out_thellier(self):
+        data = self.get_float_data()
+        return data
+
+    def out_trm(self):
+        data = self.get_float_data()
+        return data
+
+    def convert_time(self, time):
+        '''
+        converts a time string of the format : 14-02-13 17:12:25 into seconds
+        :param time:
+        :return:
+        '''
+        aux = datetime.datetime.strptime(time, "%y-%m-%d %H:%M:%S")
+        out = matplotlib.dates.date2num(aux)
+        return out

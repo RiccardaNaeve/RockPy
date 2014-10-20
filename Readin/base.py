@@ -7,7 +7,7 @@ class Machine(object):
         self.log = logging.getLogger('RockPy.READIN.' + type(self).__name__)
         self.log.info('IMPORTING << %s , %s >> file: << %s >>' % (sample_name, type(self).__name__, dfile))
 
-        self.sample_obj = sample_name
+        self.sample_name = sample_name
         self.reader_object = open(dfile)
 
         # ## initialize
@@ -30,6 +30,12 @@ class Machine(object):
             return False
 
     def _check_data_exists(self):
+        """
+        Needed as a check for data import in Sample.add_measurement. if it returns False, the measurement will not be created.
+
+
+        :return: bool
+        """
         if self.data:
             return True
         else:

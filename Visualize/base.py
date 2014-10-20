@@ -42,12 +42,11 @@ class Generic(object):
         self.fig = None
         self.ax = None
 
-        ### labels and titles
+        # ## labels and titles
         self.x_label = None
         self.y_label = None
 
         self.plot = plot
-
 
         if type(sample_list) is not list:
             self.log.debug('CONVERTING Sample Instance to Samples List')
@@ -71,7 +70,7 @@ class Generic(object):
         if create_fig:
             self.fig = options.get('fig', plt.figure(figsize=(8, 6), dpi=100))
         if create_ax:
-            self.ax = options.get('ax', plt.subplot2grid((2, 2), (0, 0), colspan=1, rowspan=1))
+            self.ax = options.get('ax', plt.subplot2grid((1, 1), (0, 0), colspan=1, rowspan=1))
 
     def out(self, *args):
         if not '.pdf' in self.name:

@@ -17,6 +17,8 @@ class CryoMag(base.Machine):
         self.sample_idx = [i for i, v in enumerate(d[:, 0]) if
                            v == sample_name or sample_name in d[i, 9]]
         self.results_idx = [i for i, v in enumerate(d[:, 11]) if v == 'results' and i in self.sample_idx]
+        self.data = np.array(
+            [v for i, v in enumerate(d) if v[0] == sample_name or sample_name in v[9] if v[11] == 'results'])
         self.header = self.get_header()
 
     def get_header(self):
@@ -31,8 +33,8 @@ class CryoMag(base.Machine):
         return self.header[self.float_data_idx]
 
     def get_float_data(self):
-        data = np.array(self.raw_data[2:])[self.results_idx]
-        data = data[:, self.float_data_idx]
+        # data = np.array(self.raw_data[2:])[self.results_idx]
+        data = self.data[:, self.float_data_idx]
         data = data.astype(float)
         return np.array(data)
 

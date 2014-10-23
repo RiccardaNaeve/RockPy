@@ -8,16 +8,15 @@ class Vftb(base.Machine):
     def __init__(self, dfile, sample_name):
         super(Vftb, self).__init__(dfile, sample_name)
         self.raw_data = [i.strip('\r\n').split('\t') for i in self.reader_object.readlines()]
-
         self.mass = float(self.raw_data[0][1].split()[1])
         # finding set indices
         idx = [j for j, v2 in enumerate(self.raw_data) for i, v in enumerate(v2) if v.startswith('Set')]
         # appending length of measurement (-1 because of empty last line
         idx.append(len(self.raw_data))
         self.set_idx = [(idx[i], idx[i + 1]) for i in range(len(idx) - 1)]
-
         self.units = self.get_units()
         self.header = self.get_header()
+        self.data = self.get_data()
 
     def get_header(self):
         header = self.raw_data[self.set_idx[0][0] + 1]
@@ -33,7 +32,7 @@ class Vftb(base.Machine):
         data = np.array([np.array(self.raw_data[i[0] + 2:i[1] - 1]) for i in self.set_idx])
         data = [self.replace_na(i) for i in data]
         data = np.array([i.astype(float) for i in data])
-        self.convert_to_T(data)
+        data = self.convert_to_T(data)
         return data
 
     def out_hysteresis(self):
@@ -61,3 +60,10 @@ class Vftb(base.Machine):
         for i in data:
             i[:, 0] /= 10000
         self.units[0] = 'T'
+        return data
+
+    def _check_data_exists(self):
+        if self.data is not None:
+            return True
+        else:
+            return False

@@ -1,6 +1,7 @@
 __author__ = 'volk'
 import logging
 
+import numpy as np
 import matplotlib.pyplot as plt
 
 import Functions
@@ -15,6 +16,7 @@ class Generic(object):
                  create_fig=True, create_ax=True,
                  **options):
         if plt_opt is None: plt_opt = {}
+
         params = {'publication': {'backend': 'ps',
                                   'text.latex.preamble': [r"\usepackage{upgreek}",
                                                           r"\usepackage[nice]{units}"],
@@ -31,6 +33,12 @@ class Generic(object):
                              'legend.fontsize': 8,
                              'xtick.labelsize': 10,
                              'ytick.labelsize': 10}}
+
+        self.colors = np.tile(['b', 'g', 'r', 'c', 'm', 'y', 'k'], 10)
+        self.linestyles = np.tile(['-', '--', ':', '-.'], 10)
+        self.markers = np.tile(['.', ',', 'o', 'v', '^', '<', '>', '1', '2', '3', '4', '8', 's', 'p', '*', 'h',
+                                'H', '+', 'x', 'D', 'd', '|', '_'], 10)
+        self.markersizes = np.tile([10, 3, 3, 3, 3], 10)
 
         self.log = logging.getLogger('RockPy.VISUALIZE.' + type(self).__name__)
 
@@ -64,6 +72,7 @@ class Generic(object):
         self.norm = norm
         self.samples = [i for i in sample_list]
         self.sample_list = sample_list
+        self.sample_names = [i.name for i in sample_list]
 
 
         # check if a figure is provided, this way multiple plots can be combined into one figure
@@ -135,6 +144,29 @@ class Generic(object):
         """
         for ax in self.fig.get_axes():
             self.setAxLinesBW(ax)
+
+    @property
+    def nr_samples(self):
+        return len(self.sample_list)
+
+    def get_measurement_dict(self, mtype):
+        measure_dict = {sample: [i for i in sample.get_measurements(mtype=mtype)] for sample in self.sample_list}
+        return measure_dict
+
+    def get_plt_opt(self, sample, measurements, measurement):
+        label = ''
+
+        if self.nr_samples > 1:
+            label += sample.name
+        if len(measurements) > 1:
+            label += ' ' + measurement.suffix
+
+        plt_opt = {'marker': self.markers[self.sample_list.index(sample)],
+                   'markersize': self.markersizes[self.sample_list.index(sample)],
+                   'color': self.colors[self.sample_list.index(sample)],
+                   'linestyle': self.linestyles[measurements.index(measurement)],
+                   'label': label}
+        return plt_opt
 
     def close_plot(self):
         plt.close()

@@ -41,6 +41,7 @@ class SampleGroup(object):
                        length_unit=length_unit)
             self.samples.update({sample: S})
             self.sample_list.append(S)
+        self.sample_list = sorted(self.sample_list)
 
     def get_results(self, mtype, **parameter):
         i = 0

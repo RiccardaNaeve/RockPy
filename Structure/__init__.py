@@ -1,1 +1,4 @@
-__author__ = 'volk'
+__author__ = 'wack'
+
+from pint import UnitRegistry
+ureg = UnitRegistry()

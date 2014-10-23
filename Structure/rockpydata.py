@@ -5,6 +5,7 @@ from copy import deepcopy
 import numpy as np
 from prettytable import PrettyTable
 
+from Structure import ureg
 
 class RockPyData(object):
     # todo units
@@ -20,9 +21,12 @@ class RockPyData(object):
        alias: only used for alias
     """
 
-    def __init__(self, column_names, row_names = None, units=None, data=None):
+    def __init__(self, column_names, row_names=None, units=None, data=None):
         """
-            * columns: sequence of strings naming individual columns
+            :param column_names: sequence of strings naming individual columns
+            :param row_names: optional sequence of strings niming individual rows
+            :param units:
+            :param data
         """
 
         if type(column_names) is str:  # if we got a single string, convert it to tuple with one entry
@@ -33,6 +37,19 @@ class RockPyData(object):
 
         # initialize member variables
         self._column_names = list(column_names)
+
+        #  todo: check for right dimension of units
+        if units is None:
+            self._units = None
+        elif isinstance(units, basestring): # single string
+            self._units = [ureg(units),]
+        elif all(isinstance(u, basestring) for u in units): # list of strings
+            self._units = [ureg(u) for u in units]
+        else:
+            raise RuntimeError('unknown data type for units: %s' % units.__class__)
+
+
+
 
         self._data = None
 
@@ -104,6 +121,10 @@ class RockPyData(object):
     @property
     def column_dict(self):
         return self._column_dict
+
+    @property
+    def units(self):
+        return self._units
 
     @property
     def data(self):
@@ -291,7 +312,7 @@ class RockPyData(object):
 
         results_data = np.append(results_variable, rd1 - rd2, axis=1)  # variable columns + calculated data columns
 
-        return RockPyData(column_names=result_c_names, row_names=self.row_names, data=results_data)
+        return RockPyData(column_names=result_c_names, row_names=self.row_names, units=None, data=results_data)
 
     def __add__(self, other):
         """
@@ -545,7 +566,7 @@ class RockPyData(object):
         idx = self.column_dict[key][0]
         self.data = self.data[self.data[:, idx].argsort()]
 
-    def rename_column(self, old_key, new_key):
+    def rename_column(self, old_cname, new_cname):
         """
         renames a column according to specified key
 
@@ -559,12 +580,15 @@ class RockPyData(object):
         :param old_key: str
         :param new_key: str
         """
-        try:
-            idx = self._column_names.index(old_key)
-            self._column_names[idx] = new_key
-            self._update_column_dictionary(self._column_names)
-        except ValueError:
-            print 'Key << %s >> does not exist' % old_key
+
+        if self.column_exists(new_cname):
+            raise KeyError('Column %s already exists.' % new_cname)
+        if not self.column_exists(old_cname):
+            raise KeyError('Column %s does not exist.' % old_cname)
+
+        idx = self._column_names.index(old_cname)
+        self._column_names[idx] = new_cname
+        self._update_column_dictionary(self._column_names)
 
 
     def lin_regress(self, column_name_x, column_name_y):

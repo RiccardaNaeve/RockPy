@@ -1,7 +1,6 @@
 RockPy.Functions package
 ========================
-.. toctree::
-   :maxdepth: 1
+
 
 RockPy.Functions.convert module
 -------------------------------

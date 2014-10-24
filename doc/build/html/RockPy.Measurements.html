@@ -69,7 +69,6 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="RockPy.Functions.html">RockPy.Functions package</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="RockPy.Functions.html#submodules">Submodules</a></li>
 <li class="toctree-l2"><a class="reference internal" href="RockPy.Functions.html#module-RockPy.Functions.convert">RockPy.Functions.convert module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="RockPy.Functions.html#module-RockPy.Functions.general">RockPy.Functions.general module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="RockPy.Functions.html#module-RockPy.Functions">Module contents</a></li>
@@ -135,6 +134,12 @@
 <li class="toctree-l2"><a class="reference internal" href="RockPy.Plotting.html#module-RockPy.Plotting.backfield">RockPy.Plotting.backfield module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="RockPy.Plotting.html#module-RockPy.Plotting.dunlop">RockPy.Plotting.dunlop module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="RockPy.Plotting.html#module-RockPy.Plotting">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="guidlines.html">Programming Guidlines:</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="guidlines.html#adding-a-measurement">Adding a measurement</a></li>
+<li class="toctree-l2"><a class="reference internal" href="guidlines.html#adding-a-machine">Adding a machine</a></li>
+<li class="toctree-l2"><a class="reference internal" href="guidlines.html#adding-a-visualization">Adding a Visualization</a></li>
 </ul>
 </li>
 </ul>
@@ -287,14 +292,7 @@ calculated bcr value</td>
 <dd><p>calculates <span class="math">\(B_{cr}\)</span>
 :param recalc:
 :return:</p>
-<div class="highlight-python"><div class="highlight"><pre>vftb_file = &#39;test_data/MUCVFTB_test2.coe&#39;
-sample = Sample(name=&#39;vftb_test_sample&#39;)
-M = sample.add_measurement(mtype=&#39;backfield&#39;, mfile=vftb_file, machine=&#39;vftb&#39;)
-
-M.calculate_bcr()
-print M.bcr
-
-&gt;&gt;&gt; -0.0202307972682
+<div class="highlight-python"><div class="highlight"><pre>
 </pre></div>
 </div>
 </dd></dl>

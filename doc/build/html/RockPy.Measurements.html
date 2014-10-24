@@ -67,17 +67,17 @@
 </li>
 <li class="toctree-l1 current"><a class="current reference internal" href="">RockPy.Measurements package</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#submodules">Submodules</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#module-RockPy.Measurements.af_demag">RockPy.Measurements.af_demag module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#module-RockPy.Measurements.backfield">RockPy.Measurements.backfield module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#module-RockPy.Measurements.base">RockPy.Measurements.base module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#module-RockPy.Measurements.forc">RockPy.Measurements.forc module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#module-RockPy.Measurements.hysteresis">RockPy.Measurements.hysteresis module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#module-RockPy.Measurements.irm">RockPy.Measurements.irm module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#module-RockPy.Measurements.nrm">RockPy.Measurements.nrm module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#module-RockPy.Measurements.parameters">RockPy.Measurements.parameters module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#module-RockPy.Measurements.thellier">RockPy.Measurements.thellier module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#module-RockPy.Measurements.thermocurve">RockPy.Measurements.thermocurve module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#module-RockPy.Measurements.trm">RockPy.Measurements.trm module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-RockPy.Measurements.af_demag">AF-Demagnetization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-RockPy.Measurements.backfield">Backfield</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-RockPy.Measurements.base">RockPy.Measurements.base</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-RockPy.Measurements.forc">FORC</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-RockPy.Measurements.hysteresis">Hysteresis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-RockPy.Measurements.irm">Isothermal Remanent Magnetization [IRM]</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-RockPy.Measurements.nrm">Natural Remanent Magnetization [NRM]</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-RockPy.Measurements.parameters">Parameters [Mass, Height, ... ]</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-RockPy.Measurements.thellier">Thellier-Thellier</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-RockPy.Measurements.thermocurve">Thermocurve</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-RockPy.Measurements.trm">Thermal Remanent Magnetization [TRM]</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-RockPy.Measurements">Module contents</a></li>
 </ul>
 </li>
@@ -168,7 +168,7 @@
 <h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
 </div>
 <div class="section" id="module-RockPy.Measurements.af_demag">
-<span id="rockpy-measurements-af-demag-module"></span><h2>RockPy.Measurements.af_demag module<a class="headerlink" href="#module-RockPy.Measurements.af_demag" title="Permalink to this headline">¶</a></h2>
+<span id="af-demagnetization"></span><h2>AF-Demagnetization<a class="headerlink" href="#module-RockPy.Measurements.af_demag" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="RockPy.Measurements.af_demag.AfDemag">
 <em class="property">class </em><tt class="descclassname">RockPy.Measurements.af_demag.</tt><tt class="descname">AfDemag</tt><big>(</big><em>sample_obj</em>, <em>mtype</em>, <em>mfile</em>, <em>machine</em>, <em>**options</em><big>)</big><a class="headerlink" href="#RockPy.Measurements.af_demag.AfDemag" title="Permalink to this definition">¶</a></dt>
@@ -201,7 +201,7 @@
 
 </div>
 <div class="section" id="module-RockPy.Measurements.backfield">
-<span id="rockpy-measurements-backfield-module"></span><h2>RockPy.Measurements.backfield module<a class="headerlink" href="#module-RockPy.Measurements.backfield" title="Permalink to this headline">¶</a></h2>
+<span id="backfield"></span><h2>Backfield<a class="headerlink" href="#module-RockPy.Measurements.backfield" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="RockPy.Measurements.backfield.Backfield">
 <em class="property">class </em><tt class="descclassname">RockPy.Measurements.backfield.</tt><tt class="descname">Backfield</tt><big>(</big><em>sample_obj</em>, <em>mtype</em>, <em>mfile</em>, <em>machine</em>, <em>**options</em><big>)</big><a class="headerlink" href="#RockPy.Measurements.backfield.Backfield" title="Permalink to this definition">¶</a></dt>
@@ -217,6 +217,11 @@ representing zero-magnetization.
 For the calculation of S300, the initial magnetization is used as an approximation of the saturation remanence
 <span class="math">\(M_{rs}\)</span> and the magnetization at 300mT <span class="math">\(M_{300mT}\)</span> is determined by linear interpolation of measured
 data.</p>
+<p>Possible data structure:</p>
+<div class="highlight-python"><div class="highlight"><pre>self.remanence: the remanence measurement after the field was applied (normal measurement mode for e.g. VFTB or VSM)
+self.induced: the induced moment measurement while the field is applied (only VSM)
+</pre></div>
+</div>
 <dl class="attribute">
 <dt id="RockPy.Measurements.backfield.Backfield.bcr">
 <tt class="descname">bcr</tt><a class="headerlink" href="#RockPy.Measurements.backfield.Backfield.bcr" title="Permalink to this definition">¶</a></dt>
@@ -244,7 +249,7 @@ calculated bcr value</td>
 <dl class="method">
 <dt id="RockPy.Measurements.backfield.Backfield.calculate_s300">
 <tt class="descname">calculate_s300</tt><big>(</big><big>)</big><a class="headerlink" href="#RockPy.Measurements.backfield.Backfield.calculate_s300" title="Permalink to this definition">¶</a></dt>
-<dd><p>S300: :math:<a href="#id1"><span class="problematic" id="id2">`</span></a>(1 - (M_{300mT} /M_{rs})) / 2</p>
+<dd><p>S300: <span class="math">\((1 - (M_{300mT} /M_{rs})) / 2\)</span></p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -258,7 +263,7 @@ calculated bcr value</td>
 <dl class="method">
 <dt id="RockPy.Measurements.backfield.Backfield.format_vftb">
 <tt class="descname">format_vftb</tt><big>(</big><big>)</big><a class="headerlink" href="#RockPy.Measurements.backfield.Backfield.format_vftb" title="Permalink to this definition">¶</a></dt>
-<dd><p>formats the output from vftb to measurement. data
+<dd><p>formats the output from vftb to measurement.data
 :return:</p>
 </dd></dl>
 
@@ -299,7 +304,7 @@ print M.bcr
 
 </div>
 <div class="section" id="module-RockPy.Measurements.base">
-<span id="rockpy-measurements-base-module"></span><h2>RockPy.Measurements.base module<a class="headerlink" href="#module-RockPy.Measurements.base" title="Permalink to this headline">¶</a></h2>
+<span id="rockpy-measurements-base"></span><h2>RockPy.Measurements.base<a class="headerlink" href="#module-RockPy.Measurements.base" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="RockPy.Measurements.base.Measurement">
 <em class="property">class </em><tt class="descclassname">RockPy.Measurements.base.</tt><tt class="descname">Measurement</tt><big>(</big><em>sample_obj</em>, <em>mtype</em>, <em>mfile</em>, <em>machine</em>, <em>**options</em><big>)</big><a class="headerlink" href="#RockPy.Measurements.base.Measurement" title="Permalink to this definition">¶</a></dt>
@@ -338,13 +343,14 @@ Calls any calculate_* function, but checks first:</p>
 <div><ol class="arabic">
 <li><p class="first">does this calculation method exist</p>
 </li>
-<li><p class="first">has it been calculated before
-<a href="#id3"><span class="problematic" id="id4">|</span></a>- NO : calculate the result
-<a href="#id5"><span class="problematic" id="id6">|</span></a>- YES: are given parameters equal to previous calculation parameters</p>
-<blockquote>
-<div><p><a href="#id7"><span class="problematic" id="id8">|</span></a>- NO : calculate result with new parameters
-<a href="#id9"><span class="problematic" id="id10">|</span></a>- YES: return previous result</p>
-</div></blockquote>
+<li><p class="first">has it been calculated before</p>
+<p>NO : calculate the result</p>
+<p>YES: are given parameters equal to previous calculation parameters</p>
+<p>if YES:</p>
+<div class="highlight-python"><div class="highlight"><pre>NO : calculate result with new parameters
+YES: return previous result
+</pre></div>
+</div>
 </li>
 </ol>
 </div></blockquote>
@@ -355,7 +361,7 @@ Calls any calculate_* function, but checks first:</p>
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>parameter</strong> &#8211; dict
 dictionary with parameters needed for calculation</li>
-<li><strong>caller</strong> &#8211; calling function name without <a href="#id17"><span class="problematic" id="id18">calculate_</span></a></li>
+<li><strong>caller</strong> &#8211; calling function name without &#8220;calculate&#8221;</li>
 <li><strong>force_caller</strong> &#8211; not dynamically retrieved caller name.</li>
 </ul>
 </td>
@@ -385,17 +391,20 @@ dictionary with parameters needed for calculation</li>
 <dt id="RockPy.Measurements.base.Measurement.check_parameters">
 <tt class="descname">check_parameters</tt><big>(</big><em>caller</em>, <em>parameter</em><big>)</big><a class="headerlink" href="#RockPy.Measurements.base.Measurement.check_parameters" title="Permalink to this definition">¶</a></dt>
 <dd><p>Checks if previous calculation used the same parameters, if yes returns the previous calculation
-if no calculates with new parameters
-:param caller: str</p>
-<blockquote>
-<div>name of calling function (&#8216;result_generic&#8217; should be given as &#8216;result&#8217;)</div></blockquote>
+if no calculates with new parameters</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>parameter</strong> &#8211; </td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>caller</strong> &#8211; str
+name of calling function (&#8216;result_generic&#8217; should be given as &#8216;result&#8217;)</li>
+<li><strong>parameter</strong> &#8211; </li>
+</ul>
+</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"></td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"></p>
+</td>
 </tr>
 </tbody>
 </table>
@@ -500,10 +509,10 @@ _calculate_result_(result_name).</p>
 
 </div>
 <div class="section" id="module-RockPy.Measurements.forc">
-<span id="rockpy-measurements-forc-module"></span><h2>RockPy.Measurements.forc module<a class="headerlink" href="#module-RockPy.Measurements.forc" title="Permalink to this headline">¶</a></h2>
+<span id="forc"></span><h2>FORC<a class="headerlink" href="#module-RockPy.Measurements.forc" title="Permalink to this headline">¶</a></h2>
 </div>
 <div class="section" id="module-RockPy.Measurements.hysteresis">
-<span id="rockpy-measurements-hysteresis-module"></span><h2>RockPy.Measurements.hysteresis module<a class="headerlink" href="#module-RockPy.Measurements.hysteresis" title="Permalink to this headline">¶</a></h2>
+<span id="hysteresis"></span><h2>Hysteresis<a class="headerlink" href="#module-RockPy.Measurements.hysteresis" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="RockPy.Measurements.hysteresis.Hysteresis">
 <em class="property">class </em><tt class="descclassname">RockPy.Measurements.hysteresis.</tt><tt class="descname">Hysteresis</tt><big>(</big><em>sample_obj</em>, <em>mtype</em>, <em>mfile</em>, <em>machine</em>, <em>**options</em><big>)</big><a class="headerlink" href="#RockPy.Measurements.hysteresis.Hysteresis" title="Permalink to this definition">¶</a></dt>
@@ -511,22 +520,36 @@ _calculate_result_(result_name).</p>
 <dl class="attribute">
 <dt id="RockPy.Measurements.hysteresis.Hysteresis.bc">
 <tt class="descname">bc</tt><a class="headerlink" href="#RockPy.Measurements.hysteresis.Hysteresis.bc" title="Permalink to this definition">¶</a></dt>
-<dd><p>returns the bc value if already calculated,
-calls calculate_bc if not yet calculated
-:return:</p>
+<dd><p>returns the <span class="math">\(B_{c}\)</span> value if already calculated,
+calls calculate_bc if not yet calculated</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="RockPy.Measurements.hysteresis.Hysteresis.bc_diff">
 <tt class="descname">bc_diff</tt><a class="headerlink" href="#RockPy.Measurements.hysteresis.Hysteresis.bc_diff" title="Permalink to this definition">¶</a></dt>
-<dd><p>returns the difference between down_field and up_field calculation of bc
-:return: float</p>
+<dd><p>returns the difference between down_field and up_field calculation of <span class="math">\(\Delta B_c\)</span></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">float</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="RockPy.Measurements.hysteresis.Hysteresis.brh">
 <tt class="descname">brh</tt><a class="headerlink" href="#RockPy.Measurements.hysteresis.Hysteresis.brh" title="Permalink to this definition">¶</a></dt>
-<dd><p>returns the brh value if already calculated,
+<dd><p>returns the <span class="math">\(B_{rh}\)</span> value if already calculated,
 calls calculate_brh if not yet calculated
 :return:</p>
 </dd></dl>
@@ -589,15 +612,22 @@ it with standard parameters</p>
 <dl class="attribute">
 <dt id="RockPy.Measurements.hysteresis.Hysteresis.mrs">
 <tt class="descname">mrs</tt><a class="headerlink" href="#RockPy.Measurements.hysteresis.Hysteresis.mrs" title="Permalink to this definition">¶</a></dt>
-<dd><p>returns the mrs value if already calculated,
-calls calculate_mrs if not yet calculated
-:return:</p>
+<dd><p>returns the <span class="math">\(M_{rs}\)</span> value if already calculated,
+calls calculate_mrs if not yet calculated</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="RockPy.Measurements.hysteresis.Hysteresis.ms">
 <tt class="descname">ms</tt><a class="headerlink" href="#RockPy.Measurements.hysteresis.Hysteresis.ms" title="Permalink to this definition">¶</a></dt>
-<dd><p>returns the ms value if already calculated,
+<dd><p>returns the <span class="math">\(M_{s}\)</span> value if already calculated,
 calls calculate_ms if not yet calculated
 :return:</p>
 </dd></dl>
@@ -677,7 +707,7 @@ _calculate_result_(result_name).</p>
 
 </div>
 <div class="section" id="module-RockPy.Measurements.irm">
-<span id="rockpy-measurements-irm-module"></span><h2>RockPy.Measurements.irm module<a class="headerlink" href="#module-RockPy.Measurements.irm" title="Permalink to this headline">¶</a></h2>
+<span id="isothermal-remanent-magnetization-irm"></span><h2>Isothermal Remanent Magnetization [IRM]<a class="headerlink" href="#module-RockPy.Measurements.irm" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="RockPy.Measurements.irm.Irm">
 <em class="property">class </em><tt class="descclassname">RockPy.Measurements.irm.</tt><tt class="descname">Irm</tt><big>(</big><em>sample_obj</em>, <em>mtype</em>, <em>mfile</em>, <em>machine</em>, <em>**options</em><big>)</big><a class="headerlink" href="#RockPy.Measurements.irm.Irm" title="Permalink to this definition">¶</a></dt>
@@ -706,7 +736,7 @@ _calculate_result_(result_name).</p>
 
 </div>
 <div class="section" id="module-RockPy.Measurements.nrm">
-<span id="rockpy-measurements-nrm-module"></span><h2>RockPy.Measurements.nrm module<a class="headerlink" href="#module-RockPy.Measurements.nrm" title="Permalink to this headline">¶</a></h2>
+<span id="natural-remanent-magnetization-nrm"></span><h2>Natural Remanent Magnetization [NRM]<a class="headerlink" href="#module-RockPy.Measurements.nrm" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="RockPy.Measurements.nrm.Nrm">
 <em class="property">class </em><tt class="descclassname">RockPy.Measurements.nrm.</tt><tt class="descname">Nrm</tt><big>(</big><em>sample_obj</em>, <em>mtype</em>, <em>mfile</em>, <em>machine</em>, <em>**options</em><big>)</big><a class="headerlink" href="#RockPy.Measurements.nrm.Nrm" title="Permalink to this definition">¶</a></dt>
@@ -720,7 +750,7 @@ _calculate_result_(result_name).</p>
 
 </div>
 <div class="section" id="module-RockPy.Measurements.parameters">
-<span id="rockpy-measurements-parameters-module"></span><h2>RockPy.Measurements.parameters module<a class="headerlink" href="#module-RockPy.Measurements.parameters" title="Permalink to this headline">¶</a></h2>
+<span id="parameters-mass-height"></span><h2>Parameters [Mass, Height, ... ]<a class="headerlink" href="#module-RockPy.Measurements.parameters" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="RockPy.Measurements.parameters.Diameter">
 <em class="property">class </em><tt class="descclassname">RockPy.Measurements.parameters.</tt><tt class="descname">Diameter</tt><big>(</big><em>sample_obj</em>, <em>mtype</em>, <em>mfile=None</em>, <em>machine='generic'</em>, <em>value=1.0</em>, <em>unit='m'</em>, <em>std=None</em>, <em>time=None</em>, <em>**options</em><big>)</big><a class="headerlink" href="#RockPy.Measurements.parameters.Diameter" title="Permalink to this definition">¶</a></dt>
@@ -770,7 +800,7 @@ _calculate_result_(result_name).</p>
 
 </div>
 <div class="section" id="module-RockPy.Measurements.thellier">
-<span id="rockpy-measurements-thellier-module"></span><h2>RockPy.Measurements.thellier module<a class="headerlink" href="#module-RockPy.Measurements.thellier" title="Permalink to this headline">¶</a></h2>
+<span id="thellier-thellier"></span><h2>Thellier-Thellier<a class="headerlink" href="#module-RockPy.Measurements.thellier" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="RockPy.Measurements.thellier.Thellier">
 <em class="property">class </em><tt class="descclassname">RockPy.Measurements.thellier.</tt><tt class="descname">Thellier</tt><big>(</big><em>sample_obj</em>, <em>mtype</em>, <em>mfile</em>, <em>machine</em>, <em>**options</em><big>)</big><a class="headerlink" href="#RockPy.Measurements.thellier.Thellier" title="Permalink to this definition">¶</a></dt>
@@ -783,40 +813,46 @@ _calculate_result_(result_name).</p>
 <dl class="method">
 <dt id="RockPy.Measurements.thellier.Thellier.calculate_b_anc">
 <tt class="descname">calculate_b_anc</tt><big>(</big><em>**parameter</em><big>)</big><a class="headerlink" href="#RockPy.Measurements.thellier.Thellier.calculate_b_anc" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>calculates the <span class="math">\(B_{anc}\)</span> value for a given lab field in the specified temperature interval.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>parameter</strong> &#8211; </td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 <dl class="method">
 <dt id="RockPy.Measurements.thellier.Thellier.calculate_beta">
 <tt class="descname">calculate_beta</tt><big>(</big><em>**parameter</em><big>)</big><a class="headerlink" href="#RockPy.Measurements.thellier.Thellier.calculate_beta" title="Permalink to this definition">¶</a></dt>
-<dd><blockquote>
-<div>:math`eta` is a measure of the relative data scatter around the best-fit line and is the ratio of the
-standard error of the slope to the absolute value of the slope (Coe et al., 1978)</div></blockquote>
-<p>rac{sigma_b}{<a href="#id15"><span class="problematic" id="id16">|b|</span></a>}</p>
-<blockquote>
-<div><table class="docutils field-list" frame="void" rules="none">
+<dd><p>:math`eta` is a measure of the relative data scatter around the best-fit line and is the ratio of the
+standard error of the slope to the absolute value of the slope (Coe et al., 1978)</p>
+<div class="math">
+\[\beta = \frac{\sigma_b}{|b|}\]</div>
+<table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name" colspan="2">param parameters:</th></tr>
-<tr class="field-odd field"><td>&nbsp;</td><td class="field-body"></td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>parameters</strong> &#8211; </td>
 </tr>
-<tr class="field-even field"><th class="field-name">return:</th><td class="field-body"></td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"></td>
 </tr>
 </tbody>
 </table>
-</div></blockquote>
 </dd></dl>
 
 <dl class="method">
 <dt id="RockPy.Measurements.thellier.Thellier.calculate_delta_x_dash">
 <tt class="descname">calculate_delta_x_dash</tt><big>(</big><em>**parameter</em><big>)</big><a class="headerlink" href="#RockPy.Measurements.thellier.Thellier.calculate_delta_x_dash" title="Permalink to this definition">¶</a></dt>
-<dd><p>∆x0 and ∆y0 are TRM and NRM lengths of the best-ﬁt line on the Arai plot, respectively (Figure 1).</p>
+<dd><p>∆x0 and ∆y0 are TRM and NRM lengths of the best-ﬁt line on the Arai plot, respectively.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="RockPy.Measurements.thellier.Thellier.calculate_delta_y_dash">
 <tt class="descname">calculate_delta_y_dash</tt><big>(</big><em>**parameter</em><big>)</big><a class="headerlink" href="#RockPy.Measurements.thellier.Thellier.calculate_delta_y_dash" title="Permalink to this definition">¶</a></dt>
-<dd><p>∆x0 and ∆y0 are TRM and NRM lengths of the best-ﬁt line on the Arai plot, respectively (Figure 1).</p>
+<dd><p>∆x0 and ∆y0 are TRM and NRM lengths of the best-ﬁt line on the Arai plot, respectively.</p>
 </dd></dl>
 
 <dl class="method">
@@ -841,116 +877,98 @@ standard error of the slope to the absolute value of the slope (Coe et al., 1978
 <dl class="method">
 <dt id="RockPy.Measurements.thellier.Thellier.calculate_f_vds">
 <tt class="descname">calculate_f_vds</tt><big>(</big><em>**parameter</em><big>)</big><a class="headerlink" href="#RockPy.Measurements.thellier.Thellier.calculate_f_vds" title="Permalink to this definition">¶</a></dt>
-<dd><blockquote>
-<div><p>NRM fraction used for the best-fit on an Arai diagram calculated as a vector difference sum (Tauxe and Staudigel, 2004).</p>
+<dd><p>NRM fraction used for the best-fit on an Arai diagram calculated as a vector difference sum (Tauxe and Staudigel, 2004).</p>
 <div class="math">
-\[f_{VDS}=\]</div>
-</div></blockquote>
-<p>rac{Delta{y&#8217;}}{VDS}</p>
-<blockquote>
-<div><table class="docutils field-list" frame="void" rules="none">
+\[f_{VDS}=\frac{\Delta{y'}}{VDS}\]</div>
+<table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name" colspan="2">param parameter:</th></tr>
-<tr class="field-odd field"><td>&nbsp;</td><td class="field-body"></td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>parameter</strong> &#8211; </td>
 </tr>
-<tr class="field-even field"><th class="field-name">return:</th><td class="field-body"></td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"></td>
 </tr>
 </tbody>
 </table>
-</div></blockquote>
 </dd></dl>
 
 <dl class="method">
 <dt id="RockPy.Measurements.thellier.Thellier.calculate_frac">
 <tt class="descname">calculate_frac</tt><big>(</big><em>**parameter</em><big>)</big><a class="headerlink" href="#RockPy.Measurements.thellier.Thellier.calculate_frac" title="Permalink to this definition">¶</a></dt>
-<dd><blockquote>
-<div><p>NRM fraction used for the best-fit on an Arai diagram determined entirely by vector difference sum
+<dd><p>NRM fraction used for the best-fit on an Arai diagram determined entirely by vector difference sum
 calculation (Shaar and Tauxe, 2013).</p>
 <div class="math">
-\[FRAC=\]</div>
-</div></blockquote>
-<p>rac{sumlimits_{i=start}^{end-1}{ left|mathbf{NRM}_{i+1}-mathbf{NRM}_{i}
-ight| }}{VDS}</p>
-<blockquote>
-<div><table class="docutils field-list" frame="void" rules="none">
+\[FRAC=\frac{\sum\limits_{i=start}^{end-1}{ \left|\mathbf{NRM}_{i+1}-\mathbf{NRM}_{i}\right| }}{VDS}\]</div>
+<table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name" colspan="2">param parameter:</th></tr>
-<tr class="field-odd field"><td>&nbsp;</td><td class="field-body"></td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>parameter</strong> &#8211; </td>
 </tr>
-<tr class="field-even field"><th class="field-name">return:</th><td class="field-body"></td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"></td>
 </tr>
 </tbody>
 </table>
-</div></blockquote>
 </dd></dl>
 
 <dl class="method">
 <dt id="RockPy.Measurements.thellier.Thellier.calculate_g">
 <tt class="descname">calculate_g</tt><big>(</big><em>**parameter</em><big>)</big><a class="headerlink" href="#RockPy.Measurements.thellier.Thellier.calculate_g" title="Permalink to this definition">¶</a></dt>
 <dd><p>Gap factor: A measure of the gap between the points in the chosen segment of the Arai plot and the least-squares
-line. ‘g’ approaches (n-2)/(n-1) (close to unity) as the points are evenly distributed.</p>
+line. <span class="math">\(g\)</span> approaches <span class="math">\((n-2)/(n-1)\)</span> (close to unity) as the points are evenly distributed.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="RockPy.Measurements.thellier.Thellier.calculate_gap_max">
 <tt class="descname">calculate_gap_max</tt><big>(</big><em>**parameter</em><big>)</big><a class="headerlink" href="#RockPy.Measurements.thellier.Thellier.calculate_gap_max" title="Permalink to this definition">¶</a></dt>
-<dd><blockquote>
-<div><p>The gap factor defined above is measure of the average Arai plot point spacing and may not represent extremes
-of spacing. To account for this Shaar and Tauxe (2013)) proposed <span class="math">\(GAP     extrm{-}MAX\)</span>, which is the maximum
+<dd><p>The gap factor defined above is measure of the average Arai plot point spacing and may not represent extremes
+of spacing. To account for this Shaar and Tauxe (2013)) proposed <span class="math">\(GAP_{   ext{MAX}}\)</span>, which is the maximum
 gap between two points determined by vector arithmetic.</p>
 <div class="math">
-\[GAP  extrm{-}MAX=\]</div>
-</div></blockquote>
-<p>rac{max{{left|mathbf{NRM}_{i+1}-mathbf{NRM}_{i}
-ight|}}_{i=start, ldots, end-1}}{sumlimits_{i=start}^{end-1}{left|mathbf{NRM}_{i+1}-mathbf{NRM}_{i}
-ight|}} ]</p>
-<blockquote>
-<div><table class="docutils field-list" frame="void" rules="none">
+\[GAP_{\text{MAX}}=\frac{\max{\{\left|\mathbf{NRM}_{i+1}-\mathbf{NRM}_{i}\right|\}}_{i=start, \ldots, end-1}}
+{\sum\limits_{i=start}^{end-1}{\left|\mathbf{NRM}_{i+1}-\mathbf{NRM}_{i}\right|}}\]</div>
+<table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">return:</th><td class="field-body"></td>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"></td>
 </tr>
 </tbody>
 </table>
-</div></blockquote>
 </dd></dl>
 
 <dl class="method">
 <dt id="RockPy.Measurements.thellier.Thellier.calculate_q">
 <tt class="descname">calculate_q</tt><big>(</big><em>**parameter</em><big>)</big><a class="headerlink" href="#RockPy.Measurements.thellier.Thellier.calculate_q" title="Permalink to this definition">¶</a></dt>
-<dd><blockquote>
-<div><p>The quality factor (<span class="math">\(q\)</span>) is a measure of the overall quality of the paleointensity estimate and combines
+<dd><p>The quality factor (<span class="math">\(q\)</span>) is a measure of the overall quality of the paleointensity estimate and combines
 the relative scatter of the best-fit line, the NRM fraction and the gap factor (Coe et al., 1978).</p>
 <div class="math">
-\[q=\]</div>
-</div></blockquote>
-<p>rac{left|b
-ight|fg}{sigma_b}=
-rac{fg}{eta}</p>
-<blockquote>
-<div><table class="docutils field-list" frame="void" rules="none">
+\[q=\frac{\left|b\right|fg}{\sigma_b}=\frac{fg}{\beta}\]</div>
+<table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name" colspan="2">param parameter:</th></tr>
-<tr class="field-odd field"><td>&nbsp;</td><td class="field-body"></td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>parameter</strong> &#8211; </td>
 </tr>
-<tr class="field-even field"><th class="field-name">return:</th><td class="field-body"></td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"></td>
 </tr>
 </tbody>
 </table>
-</div></blockquote>
 </dd></dl>
 
 <dl class="method">
 <dt id="RockPy.Measurements.thellier.Thellier.calculate_sigma_b_anc">
 <tt class="descname">calculate_sigma_b_anc</tt><big>(</big><em>**parameter</em><big>)</big><a class="headerlink" href="#RockPy.Measurements.thellier.Thellier.calculate_sigma_b_anc" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>calculates the standard deviation of the least squares slope for the specified temperature interval</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>parameter</strong> &#8211; </td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 <dl class="method">
 <dt id="RockPy.Measurements.thellier.Thellier.calculate_slope">
@@ -969,135 +987,104 @@ rac{fg}{eta}</p>
 <dl class="method">
 <dt id="RockPy.Measurements.thellier.Thellier.calculate_vd">
 <tt class="descname">calculate_vd</tt><big>(</big><em>**parameter</em><big>)</big><a class="headerlink" href="#RockPy.Measurements.thellier.Thellier.calculate_vd" title="Permalink to this definition">¶</a></dt>
-<dd><p>Vector differences
-:param parameter:
-:return:</p>
+<dd><p>Vector differences</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>parameter</strong> &#8211; </td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="RockPy.Measurements.thellier.Thellier.calculate_vds">
 <tt class="descname">calculate_vds</tt><big>(</big><em>**parameter</em><big>)</big><a class="headerlink" href="#RockPy.Measurements.thellier.Thellier.calculate_vds" title="Permalink to this definition">¶</a></dt>
-<dd><blockquote>
-<div><p>The vector difference sum of the entire NRM vector <span class="math">\(($$\mathbf{NRM}$$)\)</span>.</p>
+<dd><p>The vector difference sum of the entire NRM vector <span class="math">\(\mathbf{NRM}\)</span>.</p>
 <div class="math">
-\[[ VDS=\left|\mathbf{NRM}_{n_{max}}\]</div>
-</div></blockquote>
-<p>ight|+sumlimits_{i=1}^{n_{max}-1}{left|mathbf{NRM}_{i+1}-mathbf{NRM}_{i}
-ight|}</p>
-<blockquote>
-<div>where :math:<a href="#id11"><span class="problematic" id="id12">`</span></a>left|mathbf{NRM}_{i}</div></blockquote>
-<p>ight|` denotes the length of the NRM vector at the <span class="math">\(i^{th}\)</span> step.</p>
-<blockquote>
-<div><table class="docutils field-list" frame="void" rules="none">
+\[VDS=\left|\mathbf{NRM}_{n_{max}}\right|+\sum\limits_{i=1}^{n_{max}-1}{\left|\mathbf{NRM}_{i+1}-\mathbf{NRM}_{i}\right|}\]</div>
+<p>where <span class="math">\(\left|\mathbf{NRM}_{i}\right|\)</span> denotes the length of the NRM vector at the <span class="math">\(i^{th}\)</span> step.</p>
+<table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name" colspan="2">param parameter:</th></tr>
-<tr class="field-odd field"><td>&nbsp;</td><td class="field-body"></td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>parameter</strong> &#8211; </td>
 </tr>
-<tr class="field-even field"><th class="field-name">return:</th><td class="field-body"></td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"></td>
 </tr>
 </tbody>
 </table>
-</div></blockquote>
 </dd></dl>
 
 <dl class="method">
 <dt id="RockPy.Measurements.thellier.Thellier.calculate_w">
 <tt class="descname">calculate_w</tt><big>(</big><em>**parameter</em><big>)</big><a class="headerlink" href="#RockPy.Measurements.thellier.Thellier.calculate_w" title="Permalink to this definition">¶</a></dt>
-<dd><blockquote>
-<div><p>Weighting factor of Prévot et al. (1985). It is calculated by:</p>
+<dd><p>Weighting factor of Prévot et al. (1985). It is calculated by</p>
 <div class="math">
-\[w=\]</div>
-</div></blockquote>
-<p>ac{q}{sqrt{n-2}}</p>
-<blockquote>
-<div>Originally it is :math:<a href="#id13"><span class="problematic" id="id14">`</span></a>w=</div></blockquote>
-<p>rac{fg}{s}`, where <span class="math">\(s^2\)</span> is given by:</p>
-<blockquote>
-<div><div class="math">
-\[s^2=2+\]</div>
-</div></blockquote>
-<p>rac{2sumlimits_{i=start}^{end}{(x_i-ar{x})(y_i-ar{y})}}{left( sumlimits_{i=start}^{end}{(x_i-ar{x})^{
-rac{1}{2}}} sumlimits_{i=start}^{end}{(y_i-ar{y})^2} 
-ight)^2}</p>
-<blockquote>
-<div><p>It can be noted, however, that <span class="math">\(w\)</span> can be more readily calculated as:</p>
+\[w=\fac{q}{\sqrt{n-2}}\]</div>
+<p>Originally it is <span class="math">\(w=\frac{fg}{s}\)</span>, where <span class="math">\(s^2\)</span> is given by</p>
 <div class="math">
-\[w=\]</div>
-</div></blockquote>
-<p>ac{q}{sqrt{n-2}}</p>
-<blockquote>
-<div><table class="docutils field-list" frame="void" rules="none">
+\[s^2 = 2+\frac{2\sum\limits_{i=start}^{end}{(x_i-\bar{x})(y_i-\bar{y})}}
+   {\left( \sum\limits_{i=start}^{end}{(x_i- \bar{x})^{\frac{1}{2}}}
+   \sum\limits_{i=start}^{end}{(y_i-\bar{y})^2} \right)^2}\]</div>
+<p>It can be noted, however, that <span class="math">\(w\)</span> can be more readily calculated as:</p>
+<div class="math">
+\[w=\frac{q}{\sqrt{n-2}}\]</div>
+<table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name" colspan="2">param parameter:</th></tr>
-<tr class="field-odd field"><td>&nbsp;</td><td class="field-body"></td>
-</tr>
-<tr class="field-even field"><th class="field-name">return:</th><td class="field-body"></td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>parameter</strong> &#8211; </td>
 </tr>
 </tbody>
 </table>
-</div></blockquote>
 </dd></dl>
 
 <dl class="method">
 <dt id="RockPy.Measurements.thellier.Thellier.calculate_x_dash">
 <tt class="descname">calculate_x_dash</tt><big>(</big><em>**parameter</em><big>)</big><a class="headerlink" href="#RockPy.Measurements.thellier.Thellier.calculate_x_dash" title="Permalink to this definition">¶</a></dt>
-<dd><blockquote>
-<div><p><span class="math">\(x_0 and :math:`y_0\)</span> the x and y points on the Arai plot projected on to the best-ﬁt line. These are
+<dd><p><span class="math">\(x_0 and :math:`y_0\)</span> the x and y points on the Arai plot projected on to the best-ﬁt line. These are
 used to
 calculate the NRM fraction and the length of the best-ﬁt line among other parameters. There are
 multiple ways of calculating <span class="math">\(x_0 and :math:`y_0\)</span>, below is one example.</p>
 <p>..math:</p>
 <blockquote>
-<div>x_i&#8217; =</div></blockquote>
-</div></blockquote>
-<p>rac{1}{2} left( x_i + 
-rac{y_i - Y_{int}}{b}</p>
-<blockquote>
-<div><table class="docutils field-list" frame="void" rules="none">
+<div>x_i&#8217; = frac{1}{2} left( x_i + frac{y_i - Y_{int}}{b}</div></blockquote>
+<table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name" colspan="2">param parameter:</th></tr>
-<tr class="field-odd field"><td>&nbsp;</td><td class="field-body"></td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>parameter</strong> &#8211; </td>
 </tr>
-<tr class="field-even field"><th class="field-name">return:</th><td class="field-body"></td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"></td>
 </tr>
 </tbody>
 </table>
-</div></blockquote>
 </dd></dl>
 
 <dl class="method">
 <dt id="RockPy.Measurements.thellier.Thellier.calculate_y_dash">
 <tt class="descname">calculate_y_dash</tt><big>(</big><em>**parameter</em><big>)</big><a class="headerlink" href="#RockPy.Measurements.thellier.Thellier.calculate_y_dash" title="Permalink to this definition">¶</a></dt>
-<dd><blockquote>
-<div><p><span class="math">\(x_0 and :math:`y_0\)</span> the x and y points on the Arai plot projected on to the best-ﬁt line. These are
+<dd><p><span class="math">\(x_0 and :math:`y_0\)</span> the x and y points on the Arai plot projected on to the best-ﬁt line. These are
 used to
 calculate the NRM fraction and the length of the best-ﬁt line among other parameters. There are
 multiple ways of calculating <span class="math">\(x_0 and :math:`y_0\)</span>, below is one example.</p>
 <p>..math:</p>
 <blockquote>
-<div>y_i&#8217; =</div></blockquote>
-</div></blockquote>
-<p>rac{1}{2} left( x_i + 
-rac{y_i - Y_{int}}{b}</p>
-<blockquote>
-<div><table class="docutils field-list" frame="void" rules="none">
+<div>y_i&#8217; = frac{1}{2} left( x_i + frac{y_i - Y_{int}}{b}</div></blockquote>
+<table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name" colspan="2">param parameter:</th></tr>
-<tr class="field-odd field"><td>&nbsp;</td><td class="field-body"></td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>parameter</strong> &#8211; </td>
 </tr>
-<tr class="field-even field"><th class="field-name">return:</th><td class="field-body"></td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"></td>
 </tr>
 </tbody>
 </table>
-</div></blockquote>
 </dd></dl>
 
 <dl class="method">
@@ -1227,7 +1214,7 @@ rac{y_i - Y_{int}}{b}</p>
 
 </div>
 <div class="section" id="module-RockPy.Measurements.thermocurve">
-<span id="rockpy-measurements-thermocurve-module"></span><h2>RockPy.Measurements.thermocurve module<a class="headerlink" href="#module-RockPy.Measurements.thermocurve" title="Permalink to this headline">¶</a></h2>
+<span id="thermocurve"></span><h2>Thermocurve<a class="headerlink" href="#module-RockPy.Measurements.thermocurve" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="RockPy.Measurements.thermocurve.ThermoCurve">
 <em class="property">class </em><tt class="descclassname">RockPy.Measurements.thermocurve.</tt><tt class="descname">ThermoCurve</tt><big>(</big><em>sample_obj</em>, <em>mtype</em>, <em>mfile</em>, <em>machine</em>, <em>**options</em><big>)</big><a class="headerlink" href="#RockPy.Measurements.thermocurve.ThermoCurve" title="Permalink to this definition">¶</a></dt>
@@ -1261,7 +1248,7 @@ rac{y_i - Y_{int}}{b}</p>
 
 </div>
 <div class="section" id="module-RockPy.Measurements.trm">
-<span id="rockpy-measurements-trm-module"></span><h2>RockPy.Measurements.trm module<a class="headerlink" href="#module-RockPy.Measurements.trm" title="Permalink to this headline">¶</a></h2>
+<span id="thermal-remanent-magnetization-trm"></span><h2>Thermal Remanent Magnetization [TRM]<a class="headerlink" href="#module-RockPy.Measurements.trm" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="RockPy.Measurements.trm.Trm">
 <em class="property">class </em><tt class="descclassname">RockPy.Measurements.trm.</tt><tt class="descname">Trm</tt><big>(</big><em>sample_obj</em>, <em>mtype</em>, <em>mfile</em>, <em>machine</em>, <em>**options</em><big>)</big><a class="headerlink" href="#RockPy.Measurements.trm.Trm" title="Permalink to this definition">¶</a></dt>

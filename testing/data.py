@@ -87,5 +87,5 @@ def test():
 
     print repr(c)
 
-if __name__ is '__main__':
+if __name__ == '__main__':
     test()

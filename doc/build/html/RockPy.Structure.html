@@ -1,150 +1,167 @@
+
+
 <!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>RockPy.Structure package &mdash; RockPy pyrite documentation</title>
+  
 
+  
+  
 
-<html xmlns="http://www.w3.org/1999/xhtml">
-  <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  
+  <link href='https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700' rel='stylesheet' type='text/css'>
+
+  
+  
     
-    <title>RockPy.Structure package &mdash; RockPy pyrite documentation</title>
-    
-    <link rel="stylesheet" href="_static/basic.css" type="text/css" />
-    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <link rel="stylesheet" href="_static/bootstrap-3.1.0/css/bootstrap.min.css" type="text/css" />
-    <link rel="stylesheet" href="_static/bootstrap-3.1.0/css/bootstrap-theme.min.css" type="text/css" />
-    <link rel="stylesheet" href="_static/bootstrap-sphinx.css" type="text/css" />
-    
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    './',
-        VERSION:     'pyrite',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
-      };
-    </script>
-    <script type="text/javascript" src="_static/jquery.js"></script>
-    <script type="text/javascript" src="_static/underscore.js"></script>
-    <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <script type="text/javascript" src="_static/js/jquery-1.11.0.min.js"></script>
-    <script type="text/javascript" src="_static/js/jquery-fix.js"></script>
-    <script type="text/javascript" src="_static/bootstrap-3.1.0/js/bootstrap.min.js"></script>
-    <script type="text/javascript" src="_static/bootstrap-sphinx.js"></script>
-    <link rel="top" title="RockPy pyrite documentation" href="index.html" />
-    <link rel="next" title="RockPy.Treatments package" href="RockPy.Treatments.html" />
-    <link rel="prev" title="RockPy.Readin package" href="RockPy.Readin.html" />
-<meta charset='utf-8'>
-<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
-<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
-<meta name="apple-mobile-web-app-capable" content="yes">
 
-  </head>
-  <body>
+  
 
-  <div id="navbar" class="navbar navbar-default navbar-fixed-top">
-    <div class="container">
-      <div class="navbar-header">
-        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
-        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
-          <span class="icon-bar"></span>
-          <span class="icon-bar"></span>
-          <span class="icon-bar"></span>
-        </button>
-        <a class="navbar-brand" href="index.html">
-          RockPy</a>
-        <span class="navbar-text navbar-version pull-left"><b>0.1</b></span>
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+    <link rel="top" title="RockPy pyrite documentation" href="index.html"/>
+        <link rel="next" title="RockPy.Treatments package" href="RockPy.Treatments.html"/>
+        <link rel="prev" title="RockPy.Readin package" href="RockPy.Readin.html"/> 
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.6.2/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-nav-search">
+        <a href="index.html" class="fa fa-home"> RockPy</a>
+        <div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
       </div>
 
-        <div class="collapse navbar-collapse nav-collapse">
-          <ul class="nav navbar-nav">
-            <li class="divider-vertical"></li>
-            
-            
-              <li class="dropdown globaltoc-container">
-  <a role="button"
-     id="dLabelGlobalToc"
-     data-toggle="dropdown"
-     data-target="#"
-     href="index.html">Site <b class="caret"></b></a>
-  <ul class="dropdown-menu globaltoc"
-      role="menu"
-      aria-labelledby="dLabelGlobalToc"><ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="RockPy.Functions.html">RockPy.Functions package</a></li>
-<li class="toctree-l1"><a class="reference internal" href="RockPy.Measurements.html">RockPy.Measurements package</a></li>
-<li class="toctree-l1"><a class="reference internal" href="RockPy.Readin.html">RockPy.Readin package</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="">RockPy.Structure package</a></li>
-<li class="toctree-l1"><a class="reference internal" href="RockPy.Treatments.html">RockPy.Treatments package</a></li>
-<li class="toctree-l1"><a class="reference internal" href="RockPy.Visualize.html">RockPy.Visualize package</a></li>
-<li class="toctree-l1"><a class="reference internal" href="RockPy.Plotting.html">RockPy.Plotting package</a></li>
-</ul>
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+        
+        
+            <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="RockPy.Functions.html">RockPy.Functions package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Functions.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Functions.html#module-RockPy.Functions.convert">RockPy.Functions.convert module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Functions.html#module-RockPy.Functions.general">RockPy.Functions.general module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Functions.html#module-RockPy.Functions">Module contents</a></li>
 </ul>
 </li>
-              
-                <li class="dropdown">
-  <a role="button"
-     id="dLabelLocalToc"
-     data-toggle="dropdown"
-     data-target="#"
-     href="#">Page <b class="caret"></b></a>
-  <ul class="dropdown-menu localtoc"
-      role="menu"
-      aria-labelledby="dLabelLocalToc"><ul>
-<li><a class="reference internal" href="#">RockPy.Structure package</a><ul>
-<li><a class="reference internal" href="#submodules">Submodules</a></li>
-<li><a class="reference internal" href="#module-RockPy.Structure.data">RockPy.Structure.data module</a></li>
-<li><a class="reference internal" href="#module-RockPy.Structure.project">RockPy.Structure.project module</a></li>
-<li><a class="reference internal" href="#module-RockPy.Structure.rockpydata">RockPy.Structure.rockpydata module</a></li>
-<li><a class="reference internal" href="#module-RockPy.Structure.samplegroup">RockPy.Structure.samplegroup module</a></li>
-<li><a class="reference internal" href="#module-RockPy.Structure">Module contents</a></li>
+<li class="toctree-l1"><a class="reference internal" href="RockPy.Measurements.html">RockPy.Measurements package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Measurements.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Measurements.html#module-RockPy.Measurements.af_demag">RockPy.Measurements.af_demag module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Measurements.html#module-RockPy.Measurements.backfield">RockPy.Measurements.backfield module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Measurements.html#module-RockPy.Measurements.base">RockPy.Measurements.base module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Measurements.html#module-RockPy.Measurements.forc">RockPy.Measurements.forc module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Measurements.html#module-RockPy.Measurements.hysteresis">RockPy.Measurements.hysteresis module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Measurements.html#module-RockPy.Measurements.irm">RockPy.Measurements.irm module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Measurements.html#module-RockPy.Measurements.nrm">RockPy.Measurements.nrm module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Measurements.html#module-RockPy.Measurements.parameters">RockPy.Measurements.parameters module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Measurements.html#module-RockPy.Measurements.thellier">RockPy.Measurements.thellier module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Measurements.html#module-RockPy.Measurements.thermocurve">RockPy.Measurements.thermocurve module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Measurements.html#module-RockPy.Measurements.trm">RockPy.Measurements.trm module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Measurements.html#module-RockPy.Measurements">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="RockPy.Readin.html">RockPy.Readin package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Readin.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Readin.html#module-RockPy.Readin.base">RockPy.Readin.base module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Readin.html#module-RockPy.Readin.cryomag">RockPy.Readin.cryomag module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Readin.html#module-RockPy.Readin.generic">RockPy.Readin.generic module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Readin.html#module-RockPy.Readin.machines">RockPy.Readin.machines module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Readin.html#module-RockPy.Readin.microsense">RockPy.Readin.microsense module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Readin.html#module-RockPy.Readin.spinner">RockPy.Readin.spinner module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Readin.html#module-RockPy.Readin.vftb">RockPy.Readin.vftb module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Readin.html#module-RockPy.Readin.vsm">RockPy.Readin.vsm module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Readin.html#module-RockPy.Readin">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="current reference internal" href="">RockPy.Structure package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-RockPy.Structure.data">RockPy.Structure.data module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-RockPy.Structure.project">RockPy.Structure.project module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-RockPy.Structure.rockpydata">RockPy.Structure.rockpydata module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-RockPy.Structure.samplegroup">RockPy.Structure.samplegroup module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-RockPy.Structure">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="RockPy.Treatments.html">RockPy.Treatments package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Treatments.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Treatments.html#module-RockPy.Treatments.base">RockPy.Treatments.base module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Treatments.html#module-RockPy.Treatments">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="RockPy.Visualize.html">RockPy.Visualize package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Visualize.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Visualize.html#module-RockPy.Visualize.arai">RockPy.Visualize.arai module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Visualize.html#module-RockPy.Visualize.backfield">RockPy.Visualize.backfield module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Visualize.html#module-RockPy.Visualize.base">RockPy.Visualize.base module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Visualize.html#module-RockPy.Visualize.demag">RockPy.Visualize.demag module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Visualize.html#module-RockPy.Visualize.thellier">RockPy.Visualize.thellier module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Visualize.html#module-RockPy.Visualize">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="RockPy.Plotting.html">RockPy.Plotting package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Plotting.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Plotting.html#module-RockPy.Plotting.af_demag">RockPy.Plotting.af_demag module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Plotting.html#module-RockPy.Plotting.arai">RockPy.Plotting.arai module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Plotting.html#module-RockPy.Plotting.backfield">RockPy.Plotting.backfield module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Plotting.html#module-RockPy.Plotting.dunlop">RockPy.Plotting.dunlop module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Plotting.html#module-RockPy.Plotting">Module contents</a></li>
 </ul>
 </li>
 </ul>
-</ul>
-</li>
-              
-            
-            
-              
-                
-  <li>
-    <a href="RockPy.Readin.html" title="Previous Chapter: RockPy.Readin package"><span class="glyphicon glyphicon-chevron-left visible-sm"></span><span class="hidden-sm">&laquo; RockPy.Readin pa...</span>
-    </a>
-  </li>
-  <li>
-    <a href="RockPy.Treatments.html" title="Next Chapter: RockPy.Treatments package"><span class="glyphicon glyphicon-chevron-right visible-sm"></span><span class="hidden-sm">RockPy.Treatment... &raquo;</span>
-    </a>
-  </li>
-              
-            
-            
-            
-            
-              <li class="hidden-sm">
-<div id="sourcelink">
-  <a href="_sources/RockPy.Structure.txt"
-     rel="nofollow">Source</a>
-</div></li>
-            
-          </ul>
 
-          
-            
-<form class="navbar-form navbar-right" action="search.html" method="get">
- <div class="form-group">
-  <input type="text" name="q" class="form-control" placeholder="Search" />
- </div>
-  <input type="hidden" name="check_keywords" value="yes" />
-  <input type="hidden" name="area" value="default" />
-</form>
-          
-        </div>
-    </div>
-  </div>
+        
+      </div>
+      &nbsp;
+    </nav>
 
-<div class="container">
-  <div class="row">
-    <div class="col-md-12">
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
       
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">RockPy</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+    <li>RockPy.Structure package</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          <a href="_sources/RockPy.Structure.txt" rel="nofollow"> View page source</a>
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main">
+            
   <div class="section" id="rockpy-structure-package">
 <h1>RockPy.Structure package<a class="headerlink" href="#rockpy-structure-package" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="submodules">
@@ -152,132 +169,539 @@
 </div>
 <div class="section" id="module-RockPy.Structure.data">
 <span id="rockpy-structure-data-module"></span><h2>RockPy.Structure.data module<a class="headerlink" href="#module-RockPy.Structure.data" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="RockPy.Structure.data.data">
+<em class="property">class </em><tt class="descclassname">RockPy.Structure.data.</tt><tt class="descname">data</tt><big>(</big><em>variable</em>, <em>measurement</em>, <em>var_unit</em>, <em>measure_unit</em>, <em>std_dev=None</em>, <em>time=None</em>, <em>aux=None</em>, <em>aux_unit=None</em>, <em>**options</em><big>)</big><a class="headerlink" href="#RockPy.Structure.data.data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<dl class="attribute">
+<dt id="RockPy.Structure.data.data.data">
+<tt class="descname">data</tt><a class="headerlink" href="#RockPy.Structure.data.data.data" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="RockPy.Structure.data.data.m_utype">
+<tt class="descname">m_utype</tt><a class="headerlink" href="#RockPy.Structure.data.data.m_utype" title="Permalink to this definition">¶</a></dt>
+<dd><p>lookup table for unit type: e.g. mg -&gt; mass
+:return: str</p>
+<blockquote>
+<div>unit type for measurement</div></blockquote>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="RockPy.Structure.data.data_old">
+<em class="property">class </em><tt class="descclassname">RockPy.Structure.data.</tt><tt class="descname">data_old</tt><big>(</big><em>variable</em>, <em>measurement</em>, <em>var_unit</em>, <em>measure_unit</em>, <em>std_dev=None</em>, <em>time=None</em>, <em>**options</em><big>)</big><a class="headerlink" href="#RockPy.Structure.data.data_old" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<dl class="method">
+<dt id="RockPy.Structure.data.data_old.append">
+<tt class="descname">append</tt><big>(</big><em>idx</em><big>)</big><a class="headerlink" href="#RockPy.Structure.data.data_old.append" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="RockPy.Structure.data.data_old.d">
+<tt class="descname">d</tt><a class="headerlink" href="#RockPy.Structure.data.data_old.d" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="RockPy.Structure.data.data_old.data">
+<tt class="descname">data</tt><a class="headerlink" href="#RockPy.Structure.data.data_old.data" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="RockPy.Structure.data.data_old.diff">
+<tt class="descname">diff</tt><big>(</big><em>strength=1</em><big>)</big><a class="headerlink" href="#RockPy.Structure.data.data_old.diff" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="RockPy.Structure.data.data_old.dim">
+<tt class="descname">dim</tt><a class="headerlink" href="#RockPy.Structure.data.data_old.dim" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="RockPy.Structure.data.data_old.equal_var">
+<tt class="descname">equal_var</tt><big>(</big><em>other</em><big>)</big><a class="headerlink" href="#RockPy.Structure.data.data_old.equal_var" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns data object that has only the same variables as the other data_obj</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="RockPy.Structure.data.data_old.i">
+<tt class="descname">i</tt><a class="headerlink" href="#RockPy.Structure.data.data_old.i" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="RockPy.Structure.data.data_old.len">
+<tt class="descname">len</tt><a class="headerlink" href="#RockPy.Structure.data.data_old.len" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="RockPy.Structure.data.data_old.m">
+<tt class="descname">m</tt><a class="headerlink" href="#RockPy.Structure.data.data_old.m" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="RockPy.Structure.data.data_old.max">
+<tt class="descname">max</tt><big>(</big><em>component='m'</em><big>)</big><a class="headerlink" href="#RockPy.Structure.data.data_old.max" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="RockPy.Structure.data.data_old.min">
+<tt class="descname">min</tt><big>(</big><em>component='m'</em><big>)</big><a class="headerlink" href="#RockPy.Structure.data.data_old.min" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="RockPy.Structure.data.data_old.retrieve">
+<tt class="descname">retrieve</tt><big>(</big><em>idx</em><big>)</big><a class="headerlink" href="#RockPy.Structure.data.data_old.retrieve" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="RockPy.Structure.data.data_old.slice_range">
+<tt class="descname">slice_range</tt><big>(</big><em>low_lim=None</em>, <em>up_lim=None</em><big>)</big><a class="headerlink" href="#RockPy.Structure.data.data_old.slice_range" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates a copy of data with data within the specified range of variables (inclusive)</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">members:</th><td class="field-body"><table class="first last docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">undoc-members:</th><td class="field-body"></td>
-</tr>
-<tr class="field-even field"><th class="field-name" colspan="2">show-inheritance:</th></tr>
-<tr class="field-even field"><td>&nbsp;</td><td class="field-body"></td>
-</tr>
-</tbody>
-</table>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>low_lim</strong> &#8211; </li>
+<li><strong>up_lim</strong> &#8211; </li>
+</ul>
 </td>
 </tr>
 </tbody>
 </table>
+<p>:rtype : data_obj</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="RockPy.Structure.data.data_old.x">
+<tt class="descname">x</tt><a class="headerlink" href="#RockPy.Structure.data.data_old.x" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="RockPy.Structure.data.data_old.y">
+<tt class="descname">y</tt><a class="headerlink" href="#RockPy.Structure.data.data_old.y" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="RockPy.Structure.data.data_old.z">
+<tt class="descname">z</tt><a class="headerlink" href="#RockPy.Structure.data.data_old.z" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
 </div>
 <div class="section" id="module-RockPy.Structure.project">
 <span id="rockpy-structure-project-module"></span><h2>RockPy.Structure.project module<a class="headerlink" href="#module-RockPy.Structure.project" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="RockPy.Structure.project.Sample">
+<em class="property">class </em><tt class="descclassname">RockPy.Structure.project.</tt><tt class="descname">Sample</tt><big>(</big><em>name</em>, <em>mass=None</em>, <em>mass_unit='kg'</em>, <em>mass_machine='generic'</em>, <em>height=None</em>, <em>diameter=None</em>, <em>length_unit=None</em>, <em>length_machine='generic'</em>, <em>**options</em><big>)</big><a class="headerlink" href="#RockPy.Structure.project.Sample" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="RockPy.Structure.project.Sample.add_measurement">
+<tt class="descname">add_measurement</tt><big>(</big><em>mtype=None</em>, <em>mfile=None</em>, <em>machine='generic'</em>, <em>**options</em><big>)</big><a class="headerlink" href="#RockPy.Structure.project.Sample.add_measurement" title="Permalink to this definition">¶</a></dt>
+<dd><p>All measurements have to be added here</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">members:</th><td class="field-body"><table class="first last docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">undoc-members:</th><td class="field-body"></td>
-</tr>
-<tr class="field-even field"><th class="field-name" colspan="2">show-inheritance:</th></tr>
-<tr class="field-even field"><td>&nbsp;</td><td class="field-body"></td>
-</tr>
-</tbody>
-</table>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>mtype</strong> &#8211; str - the type of measurement</li>
+<li><strong>mfile</strong> &#8211; str -  the measurement file</li>
+<li><strong>machine</strong> &#8211; str - the machine from which the file is output</li>
+<li><strong>mag_method</strong> &#8211; str - only used for af-demag</li>
+</ul>
 </td>
 </tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">RockPyV3.measurement object</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Mtypes:</th><td class="field-body"></td>
+</tr>
 </tbody>
 </table>
+<ul class="simple">
+<li>mass</li>
+</ul>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="RockPy.Structure.project.Sample.diameter_m">
+<tt class="descname">diameter_m</tt><a class="headerlink" href="#RockPy.Structure.project.Sample.diameter_m" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="RockPy.Structure.project.Sample.get_measurements">
+<tt class="descname">get_measurements</tt><big>(</big><em>mtype</em><big>)</big><a class="headerlink" href="#RockPy.Structure.project.Sample.get_measurements" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a list of measurements of type = mtype
+:param mtype:
+:return:</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="RockPy.Structure.project.Sample.height_m">
+<tt class="descname">height_m</tt><a class="headerlink" href="#RockPy.Structure.project.Sample.height_m" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="RockPy.Structure.project.Sample.mass_kg">
+<tt class="descname">mass_kg</tt><a class="headerlink" href="#RockPy.Structure.project.Sample.mass_kg" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
 </div>
 <div class="section" id="module-RockPy.Structure.rockpydata">
 <span id="rockpy-structure-rockpydata-module"></span><h2>RockPy.Structure.rockpydata module<a class="headerlink" href="#module-RockPy.Structure.rockpydata" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="RockPy.Structure.rockpydata.RockPyData">
+<em class="property">class </em><tt class="descclassname">RockPy.Structure.rockpydata.</tt><tt class="descname">RockPyData</tt><big>(</big><em>column_names</em>, <em>row_names=None</em>, <em>units=None</em>, <em>data=None</em><big>)</big><a class="headerlink" href="#RockPy.Structure.rockpydata.RockPyData" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<p>class to manage specific numeric data based on a numpy array
+e.g. d = rockpydata( column_names=( &#8216;F&#8217;,&#8217;Mx&#8217;, &#8216;My&#8217;, &#8216;Mz&#8217;))</p>
+<dl class="docutils">
+<dt>variable naming guidelines:</dt>
+<dd>key: can be column_name and alias
+column_name: only used for single columns
+alias: only used for alias</dd>
+</dl>
+<dl class="method">
+<dt id="RockPy.Structure.rockpydata.RockPyData.append_columns">
+<tt class="descname">append_columns</tt><big>(</big><em>column_names</em>, <em>data=None</em><big>)</big><a class="headerlink" href="#RockPy.Structure.rockpydata.RockPyData.append_columns" title="Permalink to this definition">¶</a></dt>
+<dd><p>add data columns to data object
+:param column_names: list(str)
+:param data:</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="RockPy.Structure.rockpydata.RockPyData.check_duplicate">
+<tt class="descname">check_duplicate</tt><big>(</big><big>)</big><a class="headerlink" href="#RockPy.Structure.rockpydata.RockPyData.check_duplicate" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="RockPy.Structure.rockpydata.RockPyData.column_count">
+<tt class="descname">column_count</tt><a class="headerlink" href="#RockPy.Structure.rockpydata.RockPyData.column_count" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="RockPy.Structure.rockpydata.RockPyData.column_dict">
+<tt class="descname">column_dict</tt><a class="headerlink" href="#RockPy.Structure.rockpydata.RockPyData.column_dict" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="RockPy.Structure.rockpydata.RockPyData.column_exists">
+<tt class="descname">column_exists</tt><big>(</big><em>column_name</em><big>)</big><a class="headerlink" href="#RockPy.Structure.rockpydata.RockPyData.column_exists" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns true if named column exists</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="RockPy.Structure.rockpydata.RockPyData.column_indices_to_names">
+<tt class="descname">column_indices_to_names</tt><big>(</big><em>c_indices</em><big>)</big><a class="headerlink" href="#RockPy.Structure.rockpydata.RockPyData.column_indices_to_names" title="Permalink to this definition">¶</a></dt>
+<dd><p>get column names for given indices</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">members:</th><td class="field-body"><table class="first last docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">undoc-members:</th><td class="field-body"></td>
-</tr>
-<tr class="field-even field"><th class="field-name" colspan="2">show-inheritance:</th></tr>
-<tr class="field-even field"><td>&nbsp;</td><td class="field-body"></td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>c_indices</strong> &#8211; list of indices</td>
 </tr>
 </tbody>
 </table>
+<p>:return list of strings</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="RockPy.Structure.rockpydata.RockPyData.column_names">
+<tt class="descname">column_names</tt><a class="headerlink" href="#RockPy.Structure.rockpydata.RockPyData.column_names" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="RockPy.Structure.rockpydata.RockPyData.column_names_from_key">
+<tt class="descname">column_names_from_key</tt><big>(</big><em>key</em><big>)</big><a class="headerlink" href="#RockPy.Structure.rockpydata.RockPyData.column_names_from_key" title="Permalink to this definition">¶</a></dt>
+<dd><p>get column names for given key</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>key</strong> &#8211; string</td>
+</tr>
+</tbody>
+</table>
+<p>:return list of strings</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="RockPy.Structure.rockpydata.RockPyData.data">
+<tt class="descname">data</tt><a class="headerlink" href="#RockPy.Structure.rockpydata.RockPyData.data" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="RockPy.Structure.rockpydata.RockPyData.define_alias">
+<tt class="descname">define_alias</tt><big>(</big><em>alias_name</em>, <em>column_names</em><big>)</big><a class="headerlink" href="#RockPy.Structure.rockpydata.RockPyData.define_alias" title="Permalink to this definition">¶</a></dt>
+<dd><p>define an alias for a sequence of existing columns
+e.g. d.definealias( &#8216;M&#8217;, (&#8216;Mx&#8217;, &#8216;My&#8217;, &#8216;Mz&#8217;))</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="RockPy.Structure.rockpydata.RockPyData.differentiate">
+<tt class="descname">differentiate</tt><big>(</big><big>)</big><a class="headerlink" href="#RockPy.Structure.rockpydata.RockPyData.differentiate" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="RockPy.Structure.rockpydata.RockPyData.filter">
+<tt class="descname">filter</tt><big>(</big><em>tf_array</em><big>)</big><a class="headerlink" href="#RockPy.Structure.rockpydata.RockPyData.filter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a copy of the data filtered according to a True_False array. False entries are not returned.</p>
+<p>tf_array = (d[&#8216;Mx&#8217;] &gt; 10) &amp; (d[&#8216;Mx&#8217;] &lt; 20)
+filtered_d = d.filter(tf_array)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>column_name</strong> &#8211; </li>
+<li><strong>tf_array</strong> &#8211; array_like
+array with True/False values</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">rockpydata</p>
 </td>
 </tr>
 </tbody>
 </table>
+</dd></dl>
+
+<dl class="method">
+<dt id="RockPy.Structure.rockpydata.RockPyData.filter_idx">
+<tt class="descname">filter_idx</tt><big>(</big><em>index_list</em>, <em>invert=False</em><big>)</big><a class="headerlink" href="#RockPy.Structure.rockpydata.RockPyData.filter_idx" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a copy of the data filtered according to indices specified in index_list.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Example:</th><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">idx_list</span> <span class="o">=</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="mi">8</span><span class="p">]</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">rp</span><span class="o">.</span><span class="n">rockpydata</span><span class="p">(</span><span class="n">column_names</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;testdata&#39;</span><span class="p">],</span> <span class="n">data</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="mi">8</span><span class="p">,</span><span class="mi">9</span><span class="p">,</span><span class="mi">10</span><span class="p">])</span>
+<span class="n">filtered_data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">filter_idx</span><span class="p">(</span><span class="n">idx_list</span><span class="p">)</span>
+<span class="n">filtered_data</span><span class="p">[</span><span class="s">&#39;testdata&#39;</span><span class="p">]</span>
+<span class="n">array</span><span class="p">([</span> <span class="mf">3.</span><span class="p">,</span>  <span class="mf">5.</span><span class="p">,</span>  <span class="mf">7.</span><span class="p">,</span>  <span class="mf">8.</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>if invert is True, the specified index will be deleted</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">idx_list</span> <span class="o">=</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="mi">8</span><span class="p">]</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">rp</span><span class="o">.</span><span class="n">rockpydata</span><span class="p">(</span><span class="n">column_names</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;testdata&#39;</span><span class="p">],</span> <span class="n">data</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="mi">8</span><span class="p">,</span><span class="mi">9</span><span class="p">,</span><span class="mi">10</span><span class="p">])</span>
+<span class="n">filtered_data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">filter_idx</span><span class="p">(</span><span class="n">idx_list</span><span class="p">)</span>
+<span class="n">filtered_data</span><span class="p">[</span><span class="s">&#39;testdata&#39;</span><span class="p">]</span>
+<span class="n">array</span><span class="p">([</span> <span class="mf">1.</span><span class="p">,</span>  <span class="mf">2.</span><span class="p">,</span>  <span class="mf">3.</span><span class="p">,</span>  <span class="mf">4.</span><span class="p">,</span>  <span class="mf">6.</span><span class="p">,</span>  <span class="mf">9.</span><span class="p">,</span>  <span class="mf">10.</span><span class="p">])</span>
+</pre></div>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>index_list</strong> &#8211; </td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">rockpydata
+filtered data</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="RockPy.Structure.rockpydata.RockPyData.key_exists">
+<tt class="descname">key_exists</tt><big>(</big><em>key</em><big>)</big><a class="headerlink" href="#RockPy.Structure.rockpydata.RockPyData.key_exists" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns true when key is valid</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="RockPy.Structure.rockpydata.RockPyData.lin_regress">
+<tt class="descname">lin_regress</tt><big>(</big><em>column_name_x</em>, <em>column_name_y</em><big>)</big><a class="headerlink" href="#RockPy.Structure.rockpydata.RockPyData.lin_regress" title="Permalink to this definition">¶</a></dt>
+<dd><p>calculates a least squares linear regression for given x/y data
+:param column_name_x:
+:param column_name_y:</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="RockPy.Structure.rockpydata.RockPyData.magnitude">
+<tt class="descname">magnitude</tt><big>(</big><em>key='data'</em><big>)</big><a class="headerlink" href="#RockPy.Structure.rockpydata.RockPyData.magnitude" title="Permalink to this definition">¶</a></dt>
+<dd><p>calculate magnitude of vector columns
+return
+* np.array of data</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="RockPy.Structure.rockpydata.RockPyData.normalize">
+<tt class="descname">normalize</tt><big>(</big><em>column_name</em>, <em>value=1.0</em><big>)</big><a class="headerlink" href="#RockPy.Structure.rockpydata.RockPyData.normalize" title="Permalink to this definition">¶</a></dt>
+<dd><p>return column data normalized to given value
+e.g. d.normalize(&#8216;X&#8217;, 100)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="RockPy.Structure.rockpydata.RockPyData.rename_column">
+<tt class="descname">rename_column</tt><big>(</big><em>old_cname</em>, <em>new_cname</em><big>)</big><a class="headerlink" href="#RockPy.Structure.rockpydata.RockPyData.rename_column" title="Permalink to this definition">¶</a></dt>
+<dd><p>renames a column according to specified key</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">d</span> <span class="o">=</span> <span class="n">data</span><span class="p">(</span><span class="n">column_names</span><span class="o">=</span><span class="p">(</span><span class="s">&#39;Temp&#39;</span><span class="p">,</span><span class="s">&#39;M&#39;</span><span class="p">),</span> <span class="n">data</span><span class="o">=</span><span class="p">[[</span><span class="mi">10</span><span class="p">,</span> <span class="mf">1.3</span><span class="p">],[</span><span class="mi">30</span><span class="p">,</span> <span class="mf">2.2</span><span class="p">],[</span><span class="mi">20</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">]])</span>
+<span class="n">d</span><span class="o">.</span><span class="n">rename_column</span><span class="p">(</span><span class="s">&#39;Temp&#39;</span><span class="p">,</span> <span class="s">&#39;t&#39;</span><span class="p">)</span>
+<span class="n">d</span><span class="o">.</span><span class="n">column_names</span>
+<span class="p">[</span><span class="s">&#39;t&#39;</span><span class="p">,</span> <span class="s">&#39;M&#39;</span><span class="p">]</span>
+</pre></div>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>old_key</strong> &#8211; str</li>
+<li><strong>new_key</strong> &#8211; str</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="RockPy.Structure.rockpydata.RockPyData.row_count">
+<tt class="descname">row_count</tt><a class="headerlink" href="#RockPy.Structure.rockpydata.RockPyData.row_count" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="RockPy.Structure.rockpydata.RockPyData.row_names">
+<tt class="descname">row_names</tt><a class="headerlink" href="#RockPy.Structure.rockpydata.RockPyData.row_names" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="RockPy.Structure.rockpydata.RockPyData.running_ave">
+<tt class="descname">running_ave</tt><big>(</big><big>)</big><a class="headerlink" href="#RockPy.Structure.rockpydata.RockPyData.running_ave" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="RockPy.Structure.rockpydata.RockPyData.sort">
+<tt class="descname">sort</tt><big>(</big><em>key='variable'</em><big>)</big><a class="headerlink" href="#RockPy.Structure.rockpydata.RockPyData.sort" title="Permalink to this definition">¶</a></dt>
+<dd><p>sorting all data according to one column_name or alias
+e.g.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">d</span> <span class="o">=</span> <span class="n">data</span><span class="p">(</span><span class="n">column_names</span><span class="o">=</span><span class="p">(</span><span class="s">&#39;Temp&#39;</span><span class="p">,</span><span class="s">&#39;M&#39;</span><span class="p">),</span> <span class="n">data</span><span class="o">=</span><span class="p">[[</span><span class="mi">10</span><span class="p">,</span> <span class="mf">1.3</span><span class="p">],[</span><span class="mi">30</span><span class="p">,</span> <span class="mf">2.2</span><span class="p">],[</span><span class="mi">20</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">]])</span>
+<span class="n">d</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="s">&#39;Temp&#39;</span><span class="p">)</span>
+<span class="n">d</span><span class="o">.</span><span class="n">data</span>
+<span class="n">array</span><span class="p">([[</span> <span class="mf">10.</span> <span class="p">,</span>   <span class="mf">1.3</span><span class="p">],</span>
+<span class="p">[</span> <span class="mf">20.</span> <span class="p">,</span>   <span class="mf">1.5</span><span class="p">],</span>
+<span class="p">[</span> <span class="mf">30.</span> <span class="p">,</span>   <span class="mf">2.2</span><span class="p">]])</span>
+</pre></div>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>key</strong> &#8211; str
+column_name to be sorted for</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="RockPy.Structure.rockpydata.RockPyData.units">
+<tt class="descname">units</tt><a class="headerlink" href="#RockPy.Structure.rockpydata.RockPyData.units" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
 </div>
 <div class="section" id="module-RockPy.Structure.samplegroup">
 <span id="rockpy-structure-samplegroup-module"></span><h2>RockPy.Structure.samplegroup module<a class="headerlink" href="#module-RockPy.Structure.samplegroup" title="Permalink to this headline">¶</a></h2>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">members:</th><td class="field-body"><table class="first last docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">undoc-members:</th><td class="field-body"></td>
-</tr>
-<tr class="field-even field"><th class="field-name" colspan="2">show-inheritance:</th></tr>
-<tr class="field-even field"><td>&nbsp;</td><td class="field-body"></td>
-</tr>
-</tbody>
-</table>
-</td>
-</tr>
-</tbody>
-</table>
+<dl class="class">
+<dt id="RockPy.Structure.samplegroup.SampleGroup">
+<em class="property">class </em><tt class="descclassname">RockPy.Structure.samplegroup.</tt><tt class="descname">SampleGroup</tt><big>(</big><em>sample_file=None</em>, <em>**options</em><big>)</big><a class="headerlink" href="#RockPy.Structure.samplegroup.SampleGroup" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<dl class="method">
+<dt id="RockPy.Structure.samplegroup.SampleGroup.get_results">
+<tt class="descname">get_results</tt><big>(</big><em>mtype</em>, <em>**parameter</em><big>)</big><a class="headerlink" href="#RockPy.Structure.samplegroup.SampleGroup.get_results" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="RockPy.Structure.samplegroup.SampleGroup.import_multiple_samples">
+<tt class="descname">import_multiple_samples</tt><big>(</big><em>sample_file</em>, <em>length_unit='mm'</em>, <em>mass_unit='mg'</em>, <em>**options</em><big>)</big><a class="headerlink" href="#RockPy.Structure.samplegroup.SampleGroup.import_multiple_samples" title="Permalink to this definition">¶</a></dt>
+<dd><p>imports a csv file with sample_names masses and dimansions and creates the sample_objects
+:param sample_file:
+:param length_unit:
+:param mass_unit:
+:return:</p>
+</dd></dl>
+
+</dd></dl>
+
 </div>
 <div class="section" id="module-RockPy.Structure">
 <span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-RockPy.Structure" title="Permalink to this headline">¶</a></h2>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">members:</th><td class="field-body"><table class="first last docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">undoc-members:</th><td class="field-body"></td>
-</tr>
-<tr class="field-even field"><th class="field-name" colspan="2">show-inheritance:</th></tr>
-<tr class="field-even field"><td>&nbsp;</td><td class="field-body"></td>
-</tr>
-</tbody>
-</table>
-</td>
-</tr>
-</tbody>
-</table>
 </div>
 </div>
 
 
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="RockPy.Treatments.html" class="btn btn-neutral float-right" title="RockPy.Treatments package"/>Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="RockPy.Readin.html" class="btn btn-neutral" title="RockPy.Readin package"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
     </div>
-      
-  </div>
-</div>
-<footer class="footer">
-  <div class="container">
-    <p class="pull-right">
-      <a href="#">Back to top</a>
-      
-    </p>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
     <p>
-        &copy; Copyright 2014, Michael Volk, Michael Wack.<br/>
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.2.2.<br/>
+        &copy; Copyright 2014, Michael Volk, Michael Wack.
     </p>
   </div>
+
+  <a href="https://github.com/snide/sphinx_rtd_theme">Sphinx theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>
 </footer>
-  </body>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'pyrite',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+      <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
 </html>

@@ -139,8 +139,8 @@ class Measurement(object):
         """
         self.log.info('CREATING << %s >> initial state measurement << %s >> data' % (mtype, self.mtype))
         implemented = {i.__name__.lower(): i for i in Measurement.inheritors()}
-        if mtype in implemented_measurements:
-            self.initial_state = implemented_measurements[mtype](self.sample_obj, mtype, mfile, machine)
+        if mtype in implemented:
+            self.initial_state = implemented[mtype](self.sample_obj, mtype, mfile, machine)
             # self.initial_state = self.initial_state_obj.data
         else:
             self.log.error('UNABLE to find measurement << %s >>' % (mtype))

@@ -10,12 +10,13 @@ class Backfield(base.Measurement):
     """
     A Backfield Curve can give information on:
        Bcr: the remanence coercivity
+
        S300: :math:`(1 - (M_{300mT} /M_{rs})) / 2`
 
     Bcr is determined by finding the intersection of the linear interpolated measurement data with the axis
     representing zero-magnetization.
     For the calculation of S300, the initial magnetization is used as an approximation of the saturation remanence
-    :math:`M_{rs}` and the magnetization at 300mT :math:`M_{300mT} is determined by linear interpolation of measured
+    :math:`M_{rs}` and the magnetization at 300mT :math:`M_{300mT}` is determined by linear interpolation of measured
     data.
     """
 
@@ -115,7 +116,8 @@ class Backfield(base.Measurement):
     def calculate_s300(self):
         '''
         S300: :math:`(1 - (M_{300mT} /M_{rs})) / 2
-        :return:
+
+        :return: result
         '''
         self.log.info('CALCULATING << S300 >> parameter, assuming measurement started in saturation remanence')
         idx = np.argmin(np.abs(self.remanence['field'] + 0.300))

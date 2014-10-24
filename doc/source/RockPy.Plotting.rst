@@ -1,46 +1,43 @@
-RockPy.Plotting package
-=======================
+Plotting Package
+================
 
-Submodules
-----------
+:mod:`Plotting` Package
+-----------------------
 
-RockPy.Plotting.af_demag module
--------------------------------
+.. automodule:: RockPy.Plotting
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+:mod:`af_demag` Module
+----------------------
 
 .. automodule:: RockPy.Plotting.af_demag
     :members:
     :undoc-members:
     :show-inheritance:
 
-RockPy.Plotting.arai module
----------------------------
+:mod:`arai` Module
+------------------
 
 .. automodule:: RockPy.Plotting.arai
     :members:
     :undoc-members:
     :show-inheritance:
 
-RockPy.Plotting.backfield module
---------------------------------
+:mod:`backfield` Module
+-----------------------
 
 .. automodule:: RockPy.Plotting.backfield
     :members:
     :undoc-members:
     :show-inheritance:
 
-RockPy.Plotting.dunlop module
------------------------------
+:mod:`dunlop` Module
+--------------------
 
 .. automodule:: RockPy.Plotting.dunlop
     :members:
     :undoc-members:
     :show-inheritance:
 
-
-Module contents
----------------
-
-.. automodule:: RockPy.Plotting
-    :members:
-    :undoc-members:
-    :show-inheritance:

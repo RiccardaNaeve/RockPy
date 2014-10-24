@@ -1,22 +1,19 @@
-RockPy.Treatments package
-=========================
+Treatments Package
+==================
 
-Submodules
-----------
+:mod:`Treatments` Package
+-------------------------
 
-RockPy.Treatments.base module
------------------------------
+.. automodule:: RockPy.Treatments
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+:mod:`base` Module
+------------------
 
 .. automodule:: RockPy.Treatments.base
     :members:
     :undoc-members:
     :show-inheritance:
 
-
-Module contents
----------------
-
-.. automodule:: RockPy.Treatments
-    :members:
-    :undoc-members:
-    :show-inheritance:

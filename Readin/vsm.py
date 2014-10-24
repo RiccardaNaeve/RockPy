@@ -12,6 +12,7 @@ class Vsm(base.Machine):
         reader_object = file.readlines()
         self.measurement_header = self.readMicroMagHeader(reader_object)  # get header
         self.raw_out = [i for i in reader_object][self.measurement_header['meta']['numberoflines']:]  # without header
+        self.header_idx = {v:i for i,v in enumerate(self.header)}
 
     @property
     def header(self):
@@ -64,37 +65,28 @@ class Vsm(base.Machine):
         # ### header part
         data_header = [i.split('\n')[0] for i in self.raw_out if
                        not i.startswith('+') and not i.startswith('-') and not i.split() == []][:-1]
+        # getting first data line
 
-        aux = [i for i in data_header[-3:]]
-        h_len = len(aux[0]) / len(aux[-1].split()) + 1
+        data_start_idx = [i for i, v in enumerate(self.raw_out) if
+                          v.strip().lower().startswith('+') or v.strip().lower().startswith(
+                              '-')][0]  # first idx of all indices with + or - (data)
+        # setting up all data indices
+        data_indices = [data_start_idx] + list(map(int, self.segment_info['final index'])) + [len(self.raw_out[data_start_idx:])]
+        data = [self.raw_out[data_indices[i]:data_indices[i+1]] for i in range(len(data_indices)-1)]
+        data = [[j.strip('\n').split(',') for j in i if not j == '\n'] for i in data]
+        data = [np.array([map(float, j) for j in i]) for i in data]
 
-        splits = np.array([[i[x:x + h_len] for x in range(0, len(i), h_len)] for i in aux]).T
-        splits = ["".join(i) for i in splits]
-        splits = [' '.join(j.split()) for j in splits]
+        # reformating to T / Am^2 / Celsius
+        if self.measurement_header['INSTRUMENT']['Units of measure'] == 'cgs':
+            for i in range(len(data)):
+                data[i][:,1] *= 1e-3 # emu to Am^2
+                data[i][:,self.header_idx['field']] *= 1e-4 # oe to T
 
-        out = [i for i in self.raw_out if i.startswith('+') or i.startswith('-') or i.split() == []]
-        out_data = []
-        aux = []
-        for i in out:
-            if len(i) != 1:
-                if i.strip() != '':
-                    d = i.strip('\n').split(',')
-                    try:
-                        d = [float(i) for i in d]
-                        aux.append(d)
-                    except:
-                        self.log.debug('%s' % d)
-                        if 'Adjusted' in d[0].split():
-                            adj = True
-                        pass
-            else:
-                out_data.append(np.array(aux))
-                aux = []
-        # out_data = np.array(out_data)
-        # out = {splits[i]: np.array([j[:, i] for j in out_data]) for i in range(len(splits))}
-        # log.info('RETURNING data << %s >> ' %(' - '.join(out.keys())))
-        # out.update(header)
-        return out_data[1:]
+        if self.measurement_header['INSTRUMENT']['Temperature in'] == 'Kelvin':
+            for i in range(len(data)):
+                data[i][:,] *= 1e-3 # emu to Am^2
+                data[i][:,self.header_idx['temperature']] -= 273.15 # K to C
+        return data
 
     def readMicroMagHeader(self, lines):
         sectionstart = False

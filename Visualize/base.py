@@ -11,7 +11,7 @@ class Generic(object):
     Functions.general.create_logger('RockPy.VISUALIZE')
 
     def __init__(self, sample_list, norm=None,
-                 plot='show', folder=None, name='output.pdf',
+                 plot='show', folder=None, name=None,
                  plt_opt={}, style='screen',
                  create_fig=True, create_ax=True,
                  **options):
@@ -56,12 +56,14 @@ class Generic(object):
 
         self.plot = plot
 
+        self.log = logging.getLogger('RockPy.VISUALIZE.' + type(self).__name__)
+
         if type(sample_list) is not list:
             self.log.debug('CONVERTING Sample Instance to Samples List')
             sample_list = [sample_list]
 
         self.name = name
-
+        self.samples_in_plot = []
         if folder is None:
             from os.path import expanduser
 
@@ -92,6 +94,10 @@ class Generic(object):
             self.ax.set_ylim(ylim)
             
     def out(self, *args):
+        if not self.name:
+            self.name = ' '.join(self.samples_in_plot)
+            self.name += '_'+ type(self).__name__
+
         if not '.pdf' in self.name:
             self.name += '.pdf'
 

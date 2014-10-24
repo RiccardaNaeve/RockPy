@@ -1,5 +1,6 @@
 __author__ = 'mike'
 import base
+import Plotting.backfield
 
 
 class Backfield(base.Generic):
@@ -19,6 +20,16 @@ class Backfield(base.Generic):
         if style == 'publication':
             self.setFigLinesBW()
 
+        self.set_xlim(**options)
+        self.set_ylim(**options)
         self.out()
 
     def show(self):
+        mdict = self.get_measurement_dict(mtype='backfield')
+
+        for sample, measurements in mdict.iteritems():
+            for measurement in measurements:
+                plt_opt = self.get_plt_opt(sample, measurements, measurement)
+                Plotting.backfield.zero_line(self.ax, linestyle='-', linewidth=0.6, zorder=0)
+                Plotting.backfield.backfield(self.ax, measurement, **plt_opt)
+                self.ax.grid(True)

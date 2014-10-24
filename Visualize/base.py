@@ -81,6 +81,16 @@ class Generic(object):
         if create_ax:
             self.ax = options.get('ax', plt.subplot2grid((1, 1), (0, 0), colspan=1, rowspan=1))
 
+    def set_xlim(self, **options):
+        xlim = options.get('xlim', None)
+        if xlim is not None:
+            self.ax.set_xlim(xlim)
+
+    def set_ylim(self, **options):
+        ylim = options.get('ylim', None)
+        if ylim is not None:
+            self.ax.set_ylim(ylim)
+            
     def out(self, *args):
         if not '.pdf' in self.name:
             self.name += '.pdf'
@@ -158,12 +168,13 @@ class Generic(object):
 
         if self.nr_samples > 1:
             label += sample.name
+            colorchange = 'measurements'
         if len(measurements) > 1:
             label += ' ' + measurement.suffix
 
-        plt_opt = {'marker': self.markers[self.sample_list.index(sample)],
-                   'markersize': self.markersizes[self.sample_list.index(sample)],
-                   'color': self.colors[self.sample_list.index(sample)],
+        plt_opt = {'marker': '.',  # self.markers[self.sample_list.index(sample)],
+                   # 'markersize': self.markersizes[self.sample_list.index(sample)],
+                   # 'color': self.colors[self.sample_list.index(sample)],
                    'linestyle': self.linestyles[measurements.index(measurement)],
                    'label': label}
         return plt_opt

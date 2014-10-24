@@ -10,7 +10,7 @@ class Generic(object):
     Functions.general.create_logger('RockPy.VISUALIZE')
 
     def __init__(self, sample_list, norm=None,
-                 plot='show', folder=None, name='output.pdf',
+                 plot='show', folder=None, name=None,
                  plt_opt={}, style='screen',
                  **options):
         if plt_opt is None: plt_opt = {}
@@ -31,6 +31,7 @@ class Generic(object):
                              'xtick.labelsize': 10,
                              'ytick.labelsize': 10}}
 
+
         plt.rcParams.update(params[style])
         self.style = style
         self.plt_opt = plt_opt
@@ -42,11 +43,13 @@ class Generic(object):
 
         self.log = logging.getLogger('RockPy.VISUALIZE.' + type(self).__name__)
 
+
+
         if type(sample_list) is not list:
             self.log.debug('CONVERTING Sample Instance to Samples List')
             sample_list = [sample_list]
         self.name = name
-
+        self.samples_in_plot = []
         if folder is None:
             from os.path import expanduser
 
@@ -68,6 +71,10 @@ class Generic(object):
 
 
     def out(self, *args):
+        if not self.name:
+            self.name = ' '.join(self.samples_in_plot)
+            self.name += '_'+ type(self).__name__
+
         if not '.pdf' in self.name:
             self.name += '.pdf'
 

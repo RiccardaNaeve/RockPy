@@ -14,10 +14,13 @@ class Machine(object):
         self.raw_data = None
         self.data = None
 
-    def header(self):
+
+    @property
+    def file_header(self):
         header = []
         return header
 
+    @property
     def float_list(self):
         list = ['x', 'y', 'z', 'm']
         return float

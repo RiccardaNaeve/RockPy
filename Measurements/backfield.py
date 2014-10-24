@@ -53,15 +53,18 @@ class Backfield(base.Measurement):
             self.results['s300'] = self.calculate_s300()
         return self.results['s300'][0]
 
-    def result_bcr(self):
-        if self.results['bcr'] is None:
-            self.calculate_bcr()
+
+    def result_bcr(self, recalc=False):
+        parameter = {}
+        self.calc_result(parameter, recalc)
+
         return self.results['bcr']
 
-    def result_s300(self):
-        if self.results['s300'] is None:
-            self.calculate_s300()
+    def result_s300(self, recalc=False):
+        parameter = {}
+        self.calc_result(parameter, recalc)
         return self.results['s300']
+
 
     def calculate_bcr(self):
         '''

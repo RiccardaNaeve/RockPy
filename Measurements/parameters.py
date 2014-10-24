@@ -1,4 +1,4 @@
-from Structure.rockpydata import RockPyData
+from Structure.data import RockPyData
 
 __author__ = 'volk'
 from base import Measurement

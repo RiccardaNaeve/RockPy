@@ -2,7 +2,7 @@ __author__ = 'volk'
 import matplotlib.pyplot as plt
 
 import base
-from Structure.rockpydata import RockPyData
+from Structure.data import RockPyData
 
 
 class Irm(base.Measurement):

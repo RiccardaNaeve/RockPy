@@ -3,7 +3,7 @@ __author__ = 'volk'
 import numpy as np
 import matplotlib.pyplot as plt
 
-from Structure.rockpydata import RockPyData
+from Structure.data import RockPyData
 import base
 
 

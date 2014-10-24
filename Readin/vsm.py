@@ -2,7 +2,7 @@ __author__ = 'mike'
 import numpy as np
 
 import base
-from Structure.rockpydata import RockPyData
+from Structure.data import RockPyData
 
 
 class Vsm(base.Machine):

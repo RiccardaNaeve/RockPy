@@ -1,6 +1,6 @@
 __author__ = 'mike'
 import base
-from Structure.rockpydata import RockPyData
+from Structure.data import RockPyData
 
 
 class Trm(base.Measurement):

@@ -4,7 +4,7 @@ import inspect
 
 import Functions.general
 import Readin.base
-from Structure.rockpydata import RockPyData
+from Structure.data import RockPyData
 from Treatments.base import Generic
 from Readin import *
 

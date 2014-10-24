@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 import base
-from Structure.rockpydata import RockPyData
+from Structure.data import RockPyData
 
 
 class AfDemag(base.Measurement):

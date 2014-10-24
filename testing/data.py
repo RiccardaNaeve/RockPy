@@ -1,6 +1,6 @@
 __author__ = 'wack'
 
-from Structure.rockpydata import RockPyData
+from Structure.data import RockPyData
 
 # script to test data objects
 

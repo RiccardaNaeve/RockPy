@@ -2,7 +2,7 @@ __author__ = 'mike'
 import logging
 
 import Functions.general
-from Structure.rockpydata import RockPyData
+from Structure.data import RockPyData
 
 
 class Generic(object):

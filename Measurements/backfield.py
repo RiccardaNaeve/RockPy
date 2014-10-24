@@ -18,6 +18,12 @@ class Backfield(base.Measurement):
     For the calculation of S300, the initial magnetization is used as an approximation of the saturation remanence
     :math:`M_{rs}` and the magnetization at 300mT :math:`M_{300mT}` is determined by linear interpolation of measured
     data.
+
+    Possible data structure::
+
+       self.remanence: the remanence measurement after the field was applied (normal measurement mode for e.g. VFTB or VSM)
+       self.induced: the induced moment measurement while the field is applied (only VSM)
+
     """
 
     def __init__(self, sample_obj,
@@ -29,7 +35,7 @@ class Backfield(base.Measurement):
 
     def format_vftb(self):
         '''
-        formats the output from vftb to measurement. data
+        formats the output from vftb to measurement.data
         :return:
         '''
         data = self.machine_data.out_backfield()
@@ -115,7 +121,7 @@ class Backfield(base.Measurement):
 
     def calculate_s300(self):
         '''
-        S300: :math:`(1 - (M_{300mT} /M_{rs})) / 2
+        S300: :math:`(1 - (M_{300mT} /M_{rs})) / 2`
 
         :return: result
         '''

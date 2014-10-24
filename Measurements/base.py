@@ -195,16 +195,24 @@ class Measurement(object):
         '''
         Helper function:
         Calls any calculate_* function, but checks first:
+
             1. does this calculation method exist
             2. has it been calculated before
-               |- NO : calculate the result
-               |- YES: are given parameters equal to previous calculation parameters
-                  |- NO : calculate result with new parameters
-                  |- YES: return previous result
+
+               NO : calculate the result
+
+               YES: are given parameters equal to previous calculation parameters
+
+               if YES::
+
+                  NO : calculate result with new parameters
+                  YES: return previous result
+
         :param parameter: dict
                         dictionary with parameters needed for calculation
-        :param caller: calling function name without calculate_
+        :param caller: calling function name without "calculate"
         :param force_caller: not dynamically retrieved caller name.
+
         :return:
         '''
 
@@ -270,8 +278,9 @@ class Measurement(object):
         '''
         Checks if previous calculation used the same parameters, if yes returns the previous calculation
         if no calculates with new parameters
+
         :param caller: str
-                     name of calling function ('result_generic' should be given as 'result')
+           name of calling function ('result_generic' should be given as 'result')
         :param parameter:
         :return:
         '''

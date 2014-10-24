@@ -278,6 +278,7 @@ class Thellier(base.Measurement):
         calculates the least squares slope for the specified temperature interval
 
         :param parameter:
+
         """
         t_min = parameter.get('t_min', self.standard_parameters['slope']['t_min'])
         t_max = parameter.get('t_max', self.standard_parameters['slope']['t_max'])
@@ -316,28 +317,43 @@ class Thellier(base.Measurement):
         self.calculation_parameters['slope'] = {'t_min': t_min, 't_max': t_max, 'component': component}
 
     def calculate_b_anc(self, **parameter):
+        """
+        calculates the :math:`B_{anc}` value for a given lab field in the specified temperature interval.
+
+        :param parameter:
+
+        """
+
         b_lab = parameter.get('b_lab')
         self.results['b_anc'] = b_lab * abs(self.results['slope'])
         self.calculation_parameters['b_anc'] = {'b_lab': b_lab}
 
     def calculate_sigma_b_anc(self, **parameter):
+        """
+        calculates the standard deviation of the least squares slope for the specified temperature interval
+
+        :param parameter:
+
+        """
+
         b_lab = parameter.get('b_lab')
         self.results['sigma_b_anc'] = b_lab * abs(self.results['sigma'])
         self.calculation_parameters['sigma_b_anc'] = {'b_lab': b_lab}
 
     def calculate_vds(self, **parameter):  # todo move in rockpydata?
         '''
-        The vector difference sum of the entire NRM vector :math:`($$\mathbf{NRM}$$)`.
+        The vector difference sum of the entire NRM vector :math:`\\mathbf{NRM}`.
 
         .. math::
 
-           [ VDS=\left|\mathbf{NRM}_{n_{max}}\right|+\sum\limits_{i=1}^{n_{max}-1}{\left|\mathbf{NRM}_{i+1}-\mathbf{NRM}_{i}\right|}
+           VDS=\\left|\\mathbf{NRM}_{n_{max}}\\right|+\\sum\\limits_{i=1}^{n_{max}-1}{\\left|\\mathbf{NRM}_{i+1}-\\mathbf{NRM}_{i}\\right|}
 
-        where :math:`\left|\mathbf{NRM}_{i}\right|` denotes the length of the NRM vector at the :math:`i^{th}` step.
+        where :math:`\\left|\\mathbf{NRM}_{i}\\right|` denotes the length of the NRM vector at the :math:`i^{th}` step.
 
 
         :param parameter:
         :return:
+
         '''
         NRM_t_max = self.th['mag'][-1]
         NRM_sum = np.sum(self.calculate_vd(**parameter))
@@ -346,8 +362,10 @@ class Thellier(base.Measurement):
     def calculate_vd(self, **parameter):  # todo move in rockpydata?
         '''
         Vector differences
+
         :param parameter:
         :return:
+
         '''
         t_min = parameter.get('t_min', self.standard_parameters['vd']['t_min'])
         t_max = parameter.get('t_max', self.standard_parameters['vd']['t_max'])
@@ -359,6 +377,7 @@ class Thellier(base.Measurement):
 
     def calculate_x_dash(self, **parameter):
         '''
+
         :math:`x_0 and :math:`y_0` the x and y points on the Arai plot projected on to the best-ﬁt line. These are
         used to
         calculate the NRM fraction and the length of the best-ﬁt line among other parameters. There are
@@ -366,11 +385,12 @@ class Thellier(base.Measurement):
 
         ..math:
 
-          x_i' = \frac{1}{2} \left( x_i + \frac{y_i - Y_{int}}{b}
+          x_i' = \\frac{1}{2} \\left( x_i + \\frac{y_i - Y_{int}}{b}
 
 
         :param parameter:
         :return:
+
         '''
 
         t_min = parameter.get('t_min', self.standard_parameters['x_dash']['t_min'])
@@ -397,6 +417,7 @@ class Thellier(base.Measurement):
 
     def calculate_y_dash(self, **parameter):
         '''
+
         :math:`x_0 and :math:`y_0` the x and y points on the Arai plot projected on to the best-ﬁt line. These are
         used to
         calculate the NRM fraction and the length of the best-ﬁt line among other parameters. There are
@@ -404,11 +425,12 @@ class Thellier(base.Measurement):
 
         ..math:
 
-           y_i' = \frac{1}{2} \left( x_i + \frac{y_i - Y_{int}}{b}
+           y_i' = \\frac{1}{2} \\left( x_i + \\frac{y_i - Y_{int}}{b}
 
 
         :param parameter:
         :return:
+
         '''
         t_min = parameter.get('t_min', self.standard_parameters['y_dash']['t_min'])
         t_max = parameter.get('t_max', self.standard_parameters['y_dash']['t_max'])
@@ -434,7 +456,9 @@ class Thellier(base.Measurement):
 
     def calculate_delta_x_dash(self, **parameter):
         '''
-        ∆x0 and ∆y0 are TRM and NRM lengths of the best-ﬁt line on the Arai plot, respectively (Figure 1).
+
+        ∆x0 and ∆y0 are TRM and NRM lengths of the best-ﬁt line on the Arai plot, respectively.
+
         '''
         x_dash = self.calculate_x_dash(**parameter)
         out = abs(np.max(x_dash)) - np.min(x_dash)
@@ -442,7 +466,9 @@ class Thellier(base.Measurement):
 
     def calculate_delta_y_dash(self, **parameter):
         '''
-        ∆x0 and ∆y0 are TRM and NRM lengths of the best-ﬁt line on the Arai plot, respectively (Figure 1).
+
+        ∆x0 and ∆y0 are TRM and NRM lengths of the best-ﬁt line on the Arai plot, respectively.
+
         '''
         y_dash = self.calculate_y_dash(**parameter)
         out = abs(np.max(y_dash)) - np.min(y_dash)
@@ -450,6 +476,7 @@ class Thellier(base.Measurement):
 
     def calculate_f(self, **parameter):
         """
+
         The remanence fraction, f, was defined by Coe et al. (1978) as:
 
         .. math::
@@ -461,6 +488,7 @@ class Thellier(base.Measurement):
 
         :param parameter:
         :return:
+
         """
 
         self.log.debug('CALCULATING\t f parameter')
@@ -470,14 +498,16 @@ class Thellier(base.Measurement):
 
     def calculate_f_vds(self, **parameter):
         """
+
         NRM fraction used for the best-fit on an Arai diagram calculated as a vector difference sum (Tauxe and Staudigel, 2004).
 
         .. math::
 
-           f_{VDS}=\frac{\Delta{y'}}{VDS}
+           f_{VDS}=\\frac{\Delta{y'}}{VDS}
 
         :param parameter:
         :return:
+
         """
         delta_y = self.calculate_delta_y_dash(**parameter)
         VDS = self.result_vds(**parameter)
@@ -485,14 +515,17 @@ class Thellier(base.Measurement):
 
     def calculate_frac(self, **parameter):
         """
+
         NRM fraction used for the best-fit on an Arai diagram determined entirely by vector difference sum
         calculation (Shaar and Tauxe, 2013).
 
         .. math::
 
-            FRAC=\frac{\sum\limits_{i=start}^{end-1}{ \left|\mathbf{NRM}_{i+1}-\mathbf{NRM}_{i}\right| }}{VDS}
+            FRAC=\\frac{\sum\limits_{i=start}^{end-1}{ \left|\\mathbf{NRM}_{i+1}-\\mathbf{NRM}_{i}\\right| }}{VDS}
+
         :param parameter:
         :return:
+
         """
 
         NRM_sum = np.sum(np.fabs(self.calculate_vd(**parameter)))
@@ -501,15 +534,18 @@ class Thellier(base.Measurement):
 
     def calculate_beta(self, **parameter):
         """
+
         :math`\beta` is a measure of the relative data scatter around the best-fit line and is the ratio of the
         standard error of the slope to the absolute value of the slope (Coe et al., 1978)
 
-        .. math:
+        .. math::
 
-           \beta = \frac{\sigma_b}{|b|}
+           \\beta = \\frac{\sigma_b}{|b|}
+
 
         :param parameters:
         :return:
+
         """
 
         slope = self.result_slope(**parameter)
@@ -518,8 +554,10 @@ class Thellier(base.Measurement):
 
     def calculate_g(self, **parameter):
         """
+
         Gap factor: A measure of the gap between the points in the chosen segment of the Arai plot and the least-squares
-        line. ‘g’ approaches (n-2)/(n-1) (close to unity) as the points are evenly distributed.
+        line. :math:`g` approaches :math:`(n-2)/(n-1)` (close to unity) as the points are evenly distributed.
+
         """
         y_dash = self.calculate_y_dash(**parameter)
         delta_y_dash = self.calculate_delta_y_dash(**parameter)
@@ -530,14 +568,17 @@ class Thellier(base.Measurement):
 
     def calculate_gap_max(self, **parameter):
         """
+
         The gap factor defined above is measure of the average Arai plot point spacing and may not represent extremes
-        of spacing. To account for this Shaar and Tauxe (2013)) proposed :math:`GAP\textrm{-}MAX`, which is the maximum
+        of spacing. To account for this Shaar and Tauxe (2013)) proposed :math:`GAP_{\text{MAX}}`, which is the maximum
         gap between two points determined by vector arithmetic.
 
         .. math::
-           GAP\textrm{-}MAX=\frac{\max{\{\left|\mathbf{NRM}_{i+1}-\mathbf{NRM}_{i}\right|\}}_{i=start, \ldots, end-1}}{\sum\limits_{i=start}^{end-1}{\left|\mathbf{NRM}_{i+1}-\mathbf{NRM}_{i}\right|}} \]
+           GAP_{\\text{MAX}}=\\frac{\\max{\{\\left|\\mathbf{NRM}_{i+1}-\\mathbf{NRM}_{i}\\right|\}}_{i=start, \\ldots, end-1}}
+           {\\sum\\limits_{i=start}^{end-1}{\\left|\\mathbf{NRM}_{i+1}-\\mathbf{NRM}_{i}\\right|}}
 
         :return:
+
         """
         vd = self.calculate_vd(**parameter)
         max_vd = np.max(vd)
@@ -546,14 +587,16 @@ class Thellier(base.Measurement):
 
     def calculate_q(self, **parameter):
         """
+
         The quality factor (:math:`q`) is a measure of the overall quality of the paleointensity estimate and combines
         the relative scatter of the best-fit line, the NRM fraction and the gap factor (Coe et al., 1978).
 
         .. math::
-           q=\frac{\left|b\right|fg}{\sigma_b}=\frac{fg}{\beta}
+           q=\\frac{\\left|b\\right|fg}{\\sigma_b}=\\frac{fg}{\\beta}
 
         :param parameter:
         :return:
+
         """
         self.log.debug('CALCULATING\t quality parameter')
 
@@ -565,26 +608,27 @@ class Thellier(base.Measurement):
 
     def calculate_w(self, **parameter):
         """
-        Weighting factor of Prévot et al. (1985). It is calculated by:
+        Weighting factor of Prévot et al. (1985). It is calculated by
 
         .. math::
 
-           w=\fac{q}{\sqrt{n-2}}
+           w=\\fac{q}{\\sqrt{n-2}}
 
-        Originally it is :math:`w=\frac{fg}{s}`, where :math:`s^2` is given by:
+        Originally it is :math:`w=\\frac{fg}{s}`, where :math:`s^2` is given by
 
         .. math::
 
-           s^2=2+\frac{2\sum\limits_{i=start}^{end}{(x_i-\bar{x})(y_i-\bar{y})}}{\left( \sum\limits_{i=start}^{end}{(x_i-\bar{x})^{\frac{1}{2}}} \sum\limits_{i=start}^{end}{(y_i-\bar{y})^2} \right)^2}
+           s^2 = 2+\\frac{2\\sum\\limits_{i=start}^{end}{(x_i-\\bar{x})(y_i-\\bar{y})}}
+              {\\left( \\sum\\limits_{i=start}^{end}{(x_i- \\bar{x})^{\\frac{1}{2}}}
+              \\sum\\limits_{i=start}^{end}{(y_i-\\bar{y})^2} \\right)^2}
 
         It can be noted, however, that :math:`w` can be more readily calculated as:
 
         .. math::
 
-           w=\fac{q}{\sqrt{n-2}}
+           w=\\frac{q}{\\sqrt{n-2}}
 
         :param parameter:
-        :return:
         """
         q = self.result_q(**parameter)
         n = self.result_n(**parameter)

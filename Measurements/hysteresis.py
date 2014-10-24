@@ -7,6 +7,17 @@ from Structure.rockpydata import RockPyData
 
 
 class Hysteresis(base.Measurement):
+    """
+
+    .. testsetup:: *
+
+       >>> from Structure.project import Sample
+       >>> vftb_file = '../testing/test_data/MUCVFTB_test.hys'
+       >>> sample = Sample(name='vftb_test_sample')
+       >>> M = sample.add_measurement(mtype='hysteresis', mfile=vftb_file, machine='vftb')
+
+
+    """
     def __init__(self, sample_obj,
                  mtype, mfile, machine,
                  **options):
@@ -58,7 +69,7 @@ class Hysteresis(base.Measurement):
     @property
     def ms(self):
         '''
-        returns the ms value if already calculated,
+        returns the :math:`M_{s}` value if already calculated,
         calls calculate_ms if not yet calculated
         :return:
         '''
@@ -69,8 +80,10 @@ class Hysteresis(base.Measurement):
     @property
     def mrs(self):
         '''
-        returns the mrs value if already calculated,
+
+        returns the :math:`M_{rs}` value if already calculated,
         calls calculate_mrs if not yet calculated
+
         :return:
         '''
         if self.results['mrs'] is None:
@@ -80,8 +93,10 @@ class Hysteresis(base.Measurement):
     @property
     def bc(self):
         '''
-        returns the bc value if already calculated,
+
+        returns the :math:`B_{c}` value if already calculated,
         calls calculate_bc if not yet calculated
+
         :return:
         '''
         if self.results['bc'] is None:
@@ -91,7 +106,9 @@ class Hysteresis(base.Measurement):
     @property
     def bc_diff(self):
         '''
-        returns the difference between down_field and up_field calculation of bc
+
+        returns the difference between down_field and up_field calculation of :math:`\Delta B_c`
+
         :return: float
         '''
         if self.results['bc'] is None:
@@ -101,7 +118,7 @@ class Hysteresis(base.Measurement):
     @property
     def brh(self):
         '''
-        returns the brh value if already calculated,
+        returns the :math:`B_{rh}` value if already calculated,
         calls calculate_brh if not yet calculated
         :return:
         '''

@@ -1,6 +1,7 @@
 __author__ = 'volk'
 import logging
 
+import numpy as np
 import matplotlib.pyplot as plt
 
 import Functions
@@ -12,8 +13,10 @@ class Generic(object):
     def __init__(self, sample_list, norm=None,
                  plot='show', folder=None, name=None,
                  plt_opt={}, style='screen',
+                 create_fig=True, create_ax=True,
                  **options):
         if plt_opt is None: plt_opt = {}
+
         params = {'publication': {'backend': 'ps',
                                   'text.latex.preamble': [r"\usepackage{upgreek}",
                                                           r"\usepackage[nice]{units}"],
@@ -31,11 +34,23 @@ class Generic(object):
                              'xtick.labelsize': 10,
                              'ytick.labelsize': 10}}
 
+        self.colors = np.tile(['b', 'g', 'r', 'c', 'm', 'y', 'k'], 10)
+        self.linestyles = np.tile(['-', '--', ':', '-.'], 10)
+        self.markers = np.tile(['.', ',', 'o', 'v', '^', '<', '>', '1', '2', '3', '4', '8', 's', 'p', '*', 'h',
+                                'H', '+', 'x', 'D', 'd', '|', '_'], 10)
+        self.markersizes = np.tile([10, 3, 3, 3, 3], 10)
+
+        self.log = logging.getLogger('RockPy.VISUALIZE.' + type(self).__name__)
 
         plt.rcParams.update(params[style])
         self.style = style
         self.plt_opt = plt_opt
 
+        # ## initialize
+        self.fig = None
+        self.ax = None
+
+        # ## labels and titles
         self.x_label = None
         self.y_label = None
 
@@ -43,11 +58,10 @@ class Generic(object):
 
         self.log = logging.getLogger('RockPy.VISUALIZE.' + type(self).__name__)
 
-
-
         if type(sample_list) is not list:
             self.log.debug('CONVERTING Sample Instance to Samples List')
             sample_list = [sample_list]
+
         self.name = name
         self.samples_in_plot = []
         if folder is None:
@@ -60,15 +74,14 @@ class Generic(object):
         self.norm = norm
         self.samples = [i for i in sample_list]
         self.sample_list = sample_list
+        self.sample_names = [i.name for i in sample_list]
 
-        self.fig = options.get('fig', plt.figure(figsize=(8, 6), dpi=100))
 
-        self.ax = plt.subplot2grid((1, 1), (0, 0), colspan=1, rowspan=1)
-        self.plot_data = []
-        self.ax.xaxis.major.formatter._useMathText = True
-        self.ax.yaxis.major.formatter._useMathText = True
-        self.ax.ticklabel_format(style='sci', scilimits=(1, 4), axis='both')
-
+        # check if a figure is provided, this way multiple plots can be combined into one figure
+        if create_fig:
+            self.fig = options.get('fig', plt.figure(figsize=(8, 6), dpi=100))
+        if create_ax:
+            self.ax = options.get('ax', plt.subplot2grid((1, 1), (0, 0), colspan=1, rowspan=1))
 
     def out(self, *args):
         if not self.name:
@@ -80,7 +93,9 @@ class Generic(object):
 
         out_options = {'show': plt.show,
                        'rtn': self.get_fig,
-                       'save': self.save_fig}
+                       'save': self.save_fig,
+                       'None': self.close_plot,
+                       'get_ax': self.get_ax}
 
         if self.plot in ['show', 'save']:
             if not 'nolable' in args:
@@ -91,6 +106,7 @@ class Generic(object):
         out_options[self.plot]()
 
     def get_ax(self):
+        plt.close()
         return self.ax
 
     def get_fig(self):
@@ -117,7 +133,7 @@ class Generic(object):
             'm': {'marker': '<', 'dash': [5, 2, 5, 2, 5, 10]},
             'y': {'marker': '>', 'dash': [5, 3, 1, 2, 1, 10]},
             'k': {'marker': 'o', 'dash': (None, None)},  # [1,2,1,10]}
-            '#808080': {'marker': '.', 'dash': (None, None)}  #[1,2,1,10]}
+            '#808080': {'marker': '.', 'dash': (None, None)}  # [1,2,1,10]}
         }
 
         for line in ax.get_lines():  # + ax.get_legend().get_lines():
@@ -134,3 +150,29 @@ class Generic(object):
         """
         for ax in self.fig.get_axes():
             self.setAxLinesBW(ax)
+
+    @property
+    def nr_samples(self):
+        return len(self.sample_list)
+
+    def get_measurement_dict(self, mtype):
+        measure_dict = {sample: [i for i in sample.get_measurements(mtype=mtype)] for sample in self.sample_list}
+        return measure_dict
+
+    def get_plt_opt(self, sample, measurements, measurement):
+        label = ''
+
+        if self.nr_samples > 1:
+            label += sample.name
+        if len(measurements) > 1:
+            label += ' ' + measurement.suffix
+
+        plt_opt = {'marker': self.markers[self.sample_list.index(sample)],
+                   'markersize': self.markersizes[self.sample_list.index(sample)],
+                   'color': self.colors[self.sample_list.index(sample)],
+                   'linestyle': self.linestyles[measurements.index(measurement)],
+                   'label': label}
+        return plt_opt
+
+    def close_plot(self):
+        plt.close()

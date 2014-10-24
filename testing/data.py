@@ -1,12 +1,13 @@
-from Structure.rockpydata import RockPyData
-
 __author__ = 'wack'
+
+from Structure.rockpydata import RockPyData
 
 # script to test data objects
 
 import Structure.data
 import numpy as np
 import matplotlib.pyplot as plt
+from Structure import ureg
 
 from copy import deepcopy
 
@@ -17,29 +18,30 @@ testdata = ( (1, 2, 3, 4),
              (9, 10, 11, 12))
 
 # create a rockpydata object with named columns and filled with testdata
-d = RockPyData(column_names=( 'F', 'Mx', 'My', 'Mz'), row_names=('1.Zeile','2.Zeile','3.Zeile'), data=testdata)
+d = RockPyData(column_names=('F', 'Mx', 'My', 'Mz'), row_names=('1.Zeile','2.Zeile','3.Zeile'), units=('T', 'mT', 'fT', 'pT'), data=testdata)
 
+print d.units
 # define as many aliases as you want
-d.define_alias('M', ( 'Mx', 'My', 'Mz'))
-d.define_alias('Mzx', ( 'Mz', 'Mx'))
+d.define_alias('M', ('Mx', 'My', 'Mz'))
+d.define_alias('Mzx', ('Mz', 'Mx'))
 
 # show some data
 # aliases 'all', 'variable' and 'measurement are predefined
-print( 'all:\n%s' % d['all'])
-print( 'Mzx:\n%s' % d['Mzx'])
+print('all:\n%s' % d['all'])
+print('Mzx:\n%s' % d['Mzx'])
 
 # lets alter some data
 d['Mx'] = np.array((13, 24, 35))
 
 # show M with modified Mx component
-print( 'M:\n%s' % d['M'])
+print('M:\n%s' % d['M'])
 # show Mx
-print( 'Mx:\n%s' % d['Mx'])
+print('Mx:\n%s' % d['Mx'])
 # we can also alter several columns at once
 d['M'] = ((2, 3, 4),
           (18, 88, 98),
           (39, 89, 99))
-print( 'M:\n%s' % d['M'])
+print('M:\n%s' % d['M'])
 
 # some math fun
 # calculate magnitude of vector 'M' and save it as new column 'magM'

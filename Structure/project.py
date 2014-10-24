@@ -80,7 +80,10 @@ class Sample():
         measurement = self.get_measurements(mtype='mass')
         if len(measurement) > 1:
             self.log.info('FOUND more than 1 << mass >> measurement. Returning first')
-        return measurement[0].data['mass'][0]
+        try:
+            return measurement[0].data['mass'][0]
+        except IndexError:  # todo fix
+            return 1
 
     @property
     def height_m(self):

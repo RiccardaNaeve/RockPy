@@ -15,6 +15,7 @@ class Arai(base.Generic):
                                    plot=plot, folder=folder, name=name,
                                    plt_opt=plt_opt, style=style,
                                    **options)
+
         self.parameter = {'t_min': t_min,
                           't_max': t_max,
                           'component': component}

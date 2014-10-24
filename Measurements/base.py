@@ -64,9 +64,13 @@ class Measurement(object):
 
         # dynamic data formatting
         # checks is format_'machine_name' exists. If exists it formats self.raw_data according to format_'machine_name'
-        if callable(getattr(self, 'format_' + machine)) and self.has_data:
-            self.log.debug('FORMATTING raw data from << %s >>' % machine)
-            getattr(self, 'format_' + machine)()
+        if callable(getattr(self, 'format_' + machine)):
+            if self.has_data:
+                self.log.debug('FORMATTING raw data from << %s >>' % machine)
+                getattr(self, 'format_' + machine)()
+            else:
+                self.log.debug('NO raw data transfered << %s >>' % machine)
+
         else:
             self.log.error(
                 'FORMATTING raw data from << %s >> not possible, probably not implemented, yet.' % self.machine)

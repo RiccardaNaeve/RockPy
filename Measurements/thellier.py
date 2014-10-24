@@ -33,9 +33,9 @@ class Thellier(base.Measurement):
         data = self.machine_data.get_float_data()
         self.all_data = RockPyData(column_names=self.machine_data.float_header, data=data)
         self.all_data.rename_column('step', 'temp')
-
+        self.all_data.append_columns('time', self.machine_data.get_time_data())
         nrm_idx = [i for i, v in enumerate(steps) if v == 'nrm']
-
+        self.machine_data.get_time_data()
         # generating the palint data for all steps
         for step in ['nrm', 'trm', 'th', 'pt', 'ac', 'tr', 'ck']:
             idx = [i for i, v in enumerate(steps) if v == step]
@@ -43,6 +43,7 @@ class Thellier(base.Measurement):
                 idx.append(nrm_idx[0])
             if len(idx) != 0:
                 self.__dict__[step] = self.all_data.filter_idx(idx)  # finding step_idx
+                self.__dict__[step] = self.remove_duplicate_measurements(self.__dict__[step])
                 self.__dict__[step].define_alias('m', ( 'x', 'y', 'z'))
                 self.__dict__[step].append_columns('mag', self.__dict__[step].magnitude('m'))
                 self.__dict__[step].sort('temp')
@@ -64,6 +65,30 @@ class Thellier(base.Measurement):
 
     def format_sushibar(self):
         raise NotImplementedError
+
+    def remove_duplicate_measurements(self, data, handling='last'):
+        """
+        removes one measurement / rudimentary not finished
+        """
+        from collections import Counter
+
+        # idx_temp = np.unique(data['temp'], return_index=True, return_inverse=True)[1]
+        # find temperatures with more than one entry
+        duplicate_temps = [item for item, count in Counter(data['temp']).iteritems() if count > 1]
+        # get their indices
+        idx = [np.where(data['temp'] == i)[0] for i in duplicate_temps]
+
+        # duplicate handling:
+        if handling == 'last':  # last one is kept
+            dup_idx = [i[0] for i in idx]  # idx for deletion
+        if handling == 'first':  # first is kept
+            dup_idx = [i[-1] for i in idx]  # idx for deletion
+
+        if len(idx) != 0:
+            return data.filter_idx(dup_idx, invert=True)
+        else:
+            return data
+
 
     # ## plotting functions
     def plt_dunlop(self):

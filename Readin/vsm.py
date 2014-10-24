@@ -130,6 +130,12 @@ class Vsm(base.Machine):
     def out_thermocurve(self):
         return self.out
 
+    def out_hysteresis(self):
+        return self.out
+
+    def out_backfield(self):
+        pass
+
     def _check_data_exists(self):
         if self.raw_out:
             return True

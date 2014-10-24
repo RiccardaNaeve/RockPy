@@ -31,7 +31,7 @@ class ThermoCurve(base.Measurement):
         data = self.machine_data.out_thermocurve()
         header = self.machine_data.header
         segments = self.machine_data.segment_info
-        print segments
+
         ut = [i for i, v in enumerate(segments['initial temperature'])
               if segments['initial temperature'][i] < segments['final temperature'][i]]
         dt = [i for i, v in enumerate(segments['initial temperature'])
@@ -50,7 +50,6 @@ class ThermoCurve(base.Measurement):
         self.down_temp = RockPyData(column_names=header, data=down_data)
         self.down_temp.rename_column('temperature', 'temp')
         self.down_temp.rename_column('moment', 'mag')
-
 
     @property
     def ut(self):

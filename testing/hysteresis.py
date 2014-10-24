@@ -9,8 +9,10 @@ def test():
     sample2 = Sample(name='vsm_test_sample')
 
     M = sample.add_measurement(mtype='hysteresis', mfile=vftb_file, machine='vftb')
-    M.calc_all()
-    print M.results
+    M = sample.add_measurement(mtype='hysteresis', mfile=vsm_file, machine='vsm')
+    # M.calc_all()
+    # print M.results
+    M.plt_hys()
 
-if __name__ is '__main__':
+if __name__ == '__main__':
     test()

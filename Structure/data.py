@@ -634,3 +634,27 @@ class RockPyData(object):
         x_intercept = - y_intercept / slope
 
         return slope, sigma, y_intercept, x_intercept
+
+    def derivative(self, independent_var='variable', smoothing=1):
+        """
+
+        :return:
+        """
+
+        aux = [
+            [self.x[i], (self.y[i - strength] - self.y[i + strength]) / (self.x[i - strength] - self.x[i + strength])]
+            for i in
+            range(strength, len(self.x) - strength)]
+
+        aux = np.array(aux)
+
+        out.x = aux[:, 0]
+        if 'abs' in args:
+            out.y = np.fabs(aux[:, 1])
+        else:
+            out.y = aux[:, 1]
+        out.xy = aux
+        out.recalc_idx()
+        return out
+
+        pass

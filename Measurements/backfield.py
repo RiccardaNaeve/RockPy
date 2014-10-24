@@ -68,16 +68,13 @@ class Backfield(base.Measurement):
         :return:
 
         .. doctest::
-           from Structure.project import Sample
-
-           vftb_file = 'test_data/MUCVFTB_test2.coe'
-           sample = Sample(name='vftb_test_sample')
-           M = sample.add_measurement(mtype='backfield', mfile=vftb_file, machine='vftb')
-
-           M.calculate_bcr()
-           print M.bcr
-
-           >>> -0.0202307972682
+           >>> from Structure.project import Sample
+           >>> vftb_file = 'testing/test_data/MUCVFTB_test2.coe'
+           >>> sample = Sample(name='vftb_test_sample')
+           >>> M = sample.add_measurement(mtype='backfield', mfile=vftb_file, machine='vftb')
+           >>> M.calculate_bcr()
+           >>> print M.bcr
+           0.0202307972682
         """
         parameter = {}
         self.calc_result(parameter, recalc)
@@ -116,7 +113,7 @@ class Backfield(base.Measurement):
         d = self.remanence.filter(tf_array=tf_array)
         slope, sigma, y_intercept, x_intercept = d.lin_regress('field', 'mag')
         bcr = - y_intercept / slope
-        self.results['bcr'] = bcr
+        self.results['bcr'] = abs(bcr)
 
 
     def calculate_s300(self):
@@ -127,6 +124,10 @@ class Backfield(base.Measurement):
         '''
         self.log.info('CALCULATING << S300 >> parameter, assuming measurement started in saturation remanence')
         idx = np.argmin(np.abs(self.remanence['field'] + 0.300))
+
+        if self.remanence['field'].all() < 0.300:
+            self.results['s300'] = np.nan
+            return
 
         if abs(self.remanence['field'][idx]) < 0.300:
             idx2 = idx
@@ -146,7 +147,7 @@ class Backfield(base.Measurement):
 
         s300 = (1 - ( m300 / mrs)) / 2
 
-        return s300
+        self.results['s300'] = s300
 
     def plt_backfield(self):
         plt.plot(self.remanence['field'], self.remanence['mag'], '.-', zorder=1)

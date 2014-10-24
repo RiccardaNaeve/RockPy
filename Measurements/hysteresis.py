@@ -41,7 +41,31 @@ class Hysteresis(base.Measurement):
         self.up_field = self.induced.filter_idx(up_field_idx)
 
     def format_vsm(self):
-        pass
+        header = self.machine_data.header
+        print header
+        segments = self.machine_data.segment_info
+        if 'adjusted field' in header:
+            header[header.index('adjusted field')] = 'field'
+            header[header.index('field')] = 'uncorrected field'
+
+        if 'adjusted moment' in header:
+            header[header.index('moment')] = 'uncorrected moment'
+            header[header.index('adjusted moment')] = 'moment'
+
+        if len(segments['segment number']) == 3:
+            self.virgin = RockPyData(column_names=header, data=self.machine_data.out_hysteresis()[0])
+            self.down_field = RockPyData(column_names=header, data=self.machine_data.out_hysteresis()[1])
+            self.up_field = RockPyData(column_names=header, data=self.machine_data.out_hysteresis()[2])
+
+        if len(segments['segment number']) == 2:
+            self.virgin = None
+            self.down_field = RockPyData(column_names=header, data=self.machine_data.out_hysteresis()[0])
+            self.up_field = RockPyData(column_names=header, data=self.machine_data.out_hysteresis()[1])
+
+        self.virgin.rename_column('moment', 'mag')
+        self.up_field.rename_column('moment', 'mag')
+        self.down_field.rename_column('moment', 'mag')
+
 
     def format_microsense(self):
         data = self.machine_data.out_hys()
@@ -111,9 +135,7 @@ class Hysteresis(base.Measurement):
 
         :return: float
         '''
-        if self.results['bc'] is None:
-            self.calculate_bc()
-        return self.results['bc'][0] - self.results['bc'][1]
+        return self.results['sigma_bc']
 
     @property
     def brh(self):

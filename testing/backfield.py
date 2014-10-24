@@ -13,9 +13,9 @@ M = sample.add_measurement(mtype='backfield', mfile=vftb_file, machine='vftb')
 # get bcr
 M.calculate_bcr()  # prints the linear interpolation of the value (internal calculation)
 print M.bcr  # returns the calculated value
-print M.s300  # returns the S300 value
+# print M.s300  # returns the S300 value
 
 M.calc_all()  # calculates all possible results using standard parameters
-print M.results  # returns the calculated value
+# print M.results  # returns the calculated value
 # rudimentary plot
-M.plt_backfield()
+# M.plt_backfield()

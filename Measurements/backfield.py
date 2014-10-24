@@ -7,17 +7,17 @@ from Structure.rockpydata import RockPyData
 
 
 class Backfield(base.Measurement):
-    '''
+    """
     A Backfield Curve can give information on:
        Bcr: the remanence coercivity
-       S300: :math:`(1 - (M_{300mT} /M_{rs})) / 2
+       S300: :math:`(1 - (M_{300mT} /M_{rs})) / 2`
 
     Bcr is determined by finding the intersection of the linear interpolated measurement data with the axis
     representing zero-magnetization.
     For the calculation of S300, the initial magnetization is used as an approximation of the saturation remanence
     :math:`M_{rs}` and the magnetization at 300mT :math:`M_{300mT} is determined by linear interpolation of measured
     data.
-    '''
+    """
 
     def __init__(self, sample_obj,
                  mtype, mfile, machine,
@@ -55,6 +55,23 @@ class Backfield(base.Measurement):
 
 
     def result_bcr(self, recalc=False):
+        """
+        calculates :math:`B_{cr}`
+        :param recalc:
+        :return:
+
+        .. doctest::
+           from Structure.project import Sample
+
+           vftb_file = 'test_data/MUCVFTB_test2.coe'
+           sample = Sample(name='vftb_test_sample')
+           M = sample.add_measurement(mtype='backfield', mfile=vftb_file, machine='vftb')
+
+           M.calculate_bcr()
+           print M.bcr
+
+           >>> -0.0202307972682
+        """
         parameter = {}
         self.calc_result(parameter, recalc)
 

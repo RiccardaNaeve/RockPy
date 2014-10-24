@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>RockPy.Readin package &mdash; RockPy pyrite documentation</title>
+    
+    <link rel="stylesheet" href="_static/basic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="_static/bootstrap-3.1.0/css/bootstrap.min.css" type="text/css" />
+    <link rel="stylesheet" href="_static/bootstrap-3.1.0/css/bootstrap-theme.min.css" type="text/css" />
+    <link rel="stylesheet" href="_static/bootstrap-sphinx.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     'pyrite',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="_static/js/jquery-1.11.0.min.js"></script>
+    <script type="text/javascript" src="_static/js/jquery-fix.js"></script>
+    <script type="text/javascript" src="_static/bootstrap-3.1.0/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="_static/bootstrap-sphinx.js"></script>
+    <link rel="top" title="RockPy pyrite documentation" href="index.html" />
+    <link rel="next" title="RockPy.Structure package" href="RockPy.Structure.html" />
+    <link rel="prev" title="RockPy.Measurements package" href="RockPy.Measurements.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+
+  </head>
+  <body>
+
+  <div id="navbar" class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="index.html">
+          RockPy</a>
+        <span class="navbar-text navbar-version pull-left"><b>0.1</b></span>
+      </div>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
+            <li class="divider-vertical"></li>
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="index.html">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"><ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="RockPy.Functions.html">RockPy.Functions package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="RockPy.Measurements.html">RockPy.Measurements package</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="">RockPy.Readin package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="RockPy.Structure.html">RockPy.Structure package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="RockPy.Treatments.html">RockPy.Treatments package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="RockPy.Visualize.html">RockPy.Visualize package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="RockPy.Plotting.html">RockPy.Plotting package</a></li>
+</ul>
+</ul>
+</li>
+              
+                <li class="dropdown">
+  <a role="button"
+     id="dLabelLocalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="#">Page <b class="caret"></b></a>
+  <ul class="dropdown-menu localtoc"
+      role="menu"
+      aria-labelledby="dLabelLocalToc"><ul>
+<li><a class="reference internal" href="#">RockPy.Readin package</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-RockPy.Readin.base">RockPy.Readin.base module</a></li>
+<li><a class="reference internal" href="#module-RockPy.Readin.cryomag">RockPy.Readin.cryomag module</a></li>
+<li><a class="reference internal" href="#module-RockPy.Readin.generic">RockPy.Readin.generic module</a></li>
+<li><a class="reference internal" href="#module-RockPy.Readin.machines">RockPy.Readin.machines module</a></li>
+<li><a class="reference internal" href="#module-RockPy.Readin.microsense">RockPy.Readin.microsense module</a></li>
+<li><a class="reference internal" href="#module-RockPy.Readin.spinner">RockPy.Readin.spinner module</a></li>
+<li><a class="reference internal" href="#module-RockPy.Readin.vftb">RockPy.Readin.vftb module</a></li>
+<li><a class="reference internal" href="#module-RockPy.Readin.vsm">RockPy.Readin.vsm module</a></li>
+<li><a class="reference internal" href="#module-RockPy.Readin">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</ul>
+</li>
+              
+            
+            
+              
+                
+  <li>
+    <a href="RockPy.Measurements.html" title="Previous Chapter: RockPy.Measurements package"><span class="glyphicon glyphicon-chevron-left visible-sm"></span><span class="hidden-sm">&laquo; RockPy.Measureme...</span>
+    </a>
+  </li>
+  <li>
+    <a href="RockPy.Structure.html" title="Next Chapter: RockPy.Structure package"><span class="glyphicon glyphicon-chevron-right visible-sm"></span><span class="hidden-sm">RockPy.Structure... &raquo;</span>
+    </a>
+  </li>
+              
+            
+            
+            
+            
+              <li class="hidden-sm">
+<div id="sourcelink">
+  <a href="_sources/RockPy.Readin.txt"
+     rel="nofollow">Source</a>
+</div></li>
+            
+          </ul>
+
+          
+            
+<form class="navbar-form navbar-right" action="search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+          
+        </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+    <div class="col-md-12">
+      
+  <div class="section" id="rockpy-readin-package">
+<h1>RockPy.Readin package<a class="headerlink" href="#rockpy-readin-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-RockPy.Readin.base">
+<span id="rockpy-readin-base-module"></span><h2>RockPy.Readin.base module<a class="headerlink" href="#module-RockPy.Readin.base" title="Permalink to this headline">¶</a></h2>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">members:</th><td class="field-body"><table class="first last docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">undoc-members:</th><td class="field-body"></td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">show-inheritance:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="module-RockPy.Readin.cryomag">
+<span id="rockpy-readin-cryomag-module"></span><h2>RockPy.Readin.cryomag module<a class="headerlink" href="#module-RockPy.Readin.cryomag" title="Permalink to this headline">¶</a></h2>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">members:</th><td class="field-body"><table class="first last docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">undoc-members:</th><td class="field-body"></td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">show-inheritance:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="module-RockPy.Readin.generic">
+<span id="rockpy-readin-generic-module"></span><h2>RockPy.Readin.generic module<a class="headerlink" href="#module-RockPy.Readin.generic" title="Permalink to this headline">¶</a></h2>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">members:</th><td class="field-body"><table class="first last docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">undoc-members:</th><td class="field-body"></td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">show-inheritance:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="module-RockPy.Readin.machines">
+<span id="rockpy-readin-machines-module"></span><h2>RockPy.Readin.machines module<a class="headerlink" href="#module-RockPy.Readin.machines" title="Permalink to this headline">¶</a></h2>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">members:</th><td class="field-body"><table class="first last docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">undoc-members:</th><td class="field-body"></td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">show-inheritance:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="module-RockPy.Readin.microsense">
+<span id="rockpy-readin-microsense-module"></span><h2>RockPy.Readin.microsense module<a class="headerlink" href="#module-RockPy.Readin.microsense" title="Permalink to this headline">¶</a></h2>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">members:</th><td class="field-body"><table class="first last docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">undoc-members:</th><td class="field-body"></td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">show-inheritance:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="module-RockPy.Readin.spinner">
+<span id="rockpy-readin-spinner-module"></span><h2>RockPy.Readin.spinner module<a class="headerlink" href="#module-RockPy.Readin.spinner" title="Permalink to this headline">¶</a></h2>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">members:</th><td class="field-body"><table class="first last docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">undoc-members:</th><td class="field-body"></td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">show-inheritance:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="module-RockPy.Readin.vftb">
+<span id="rockpy-readin-vftb-module"></span><h2>RockPy.Readin.vftb module<a class="headerlink" href="#module-RockPy.Readin.vftb" title="Permalink to this headline">¶</a></h2>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">members:</th><td class="field-body"><table class="first last docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">undoc-members:</th><td class="field-body"></td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">show-inheritance:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="module-RockPy.Readin.vsm">
+<span id="rockpy-readin-vsm-module"></span><h2>RockPy.Readin.vsm module<a class="headerlink" href="#module-RockPy.Readin.vsm" title="Permalink to this headline">¶</a></h2>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">members:</th><td class="field-body"><table class="first last docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">undoc-members:</th><td class="field-body"></td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">show-inheritance:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="module-RockPy.Readin">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-RockPy.Readin" title="Permalink to this headline">¶</a></h2>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">members:</th><td class="field-body"><table class="first last docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">undoc-members:</th><td class="field-body"></td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">show-inheritance:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+
+
+    </div>
+      
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+    </p>
+    <p>
+        &copy; Copyright 2014, Michael Volk, Michael Wack.<br/>
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.2.2.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>

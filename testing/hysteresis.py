@@ -8,5 +8,4 @@ sample = Sample(name='vftb_test_sample')
 sample2 = Sample(name='vsm_test_sample')
 
 M = sample.add_measurement(mtype='hysteresis', mfile=vftb_file, machine='vftb')
-M.plt_hysteresis()
-# M2 = sample2.add_measurement(mtype='hys', mfile=vsm_file, machine='vsm')
+M.result_bc()

@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>RockPy.Measurements package &mdash; RockPy pyrite documentation</title>
+    
+    <link rel="stylesheet" href="_static/basic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="_static/bootstrap-3.1.0/css/bootstrap.min.css" type="text/css" />
+    <link rel="stylesheet" href="_static/bootstrap-3.1.0/css/bootstrap-theme.min.css" type="text/css" />
+    <link rel="stylesheet" href="_static/bootstrap-sphinx.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     'pyrite',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="_static/js/jquery-1.11.0.min.js"></script>
+    <script type="text/javascript" src="_static/js/jquery-fix.js"></script>
+    <script type="text/javascript" src="_static/bootstrap-3.1.0/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="_static/bootstrap-sphinx.js"></script>
+    <link rel="top" title="RockPy pyrite documentation" href="index.html" />
+    <link rel="next" title="RockPy.Readin package" href="RockPy.Readin.html" />
+    <link rel="prev" title="RockPy.Functions package" href="RockPy.Functions.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+
+  </head>
+  <body>
+
+  <div id="navbar" class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="index.html">
+          RockPy</a>
+        <span class="navbar-text navbar-version pull-left"><b>0.1</b></span>
+      </div>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
+            <li class="divider-vertical"></li>
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="index.html">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"><ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="RockPy.Functions.html">RockPy.Functions package</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="">RockPy.Measurements package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="RockPy.Readin.html">RockPy.Readin package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="RockPy.Structure.html">RockPy.Structure package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="RockPy.Treatments.html">RockPy.Treatments package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="RockPy.Visualize.html">RockPy.Visualize package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="RockPy.Plotting.html">RockPy.Plotting package</a></li>
+</ul>
+</ul>
+</li>
+              
+                <li class="dropdown">
+  <a role="button"
+     id="dLabelLocalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="#">Page <b class="caret"></b></a>
+  <ul class="dropdown-menu localtoc"
+      role="menu"
+      aria-labelledby="dLabelLocalToc"><ul>
+<li><a class="reference internal" href="#">RockPy.Measurements package</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-RockPy.Measurements.af_demag">RockPy.Measurements.af_demag module</a></li>
+<li><a class="reference internal" href="#module-RockPy.Measurements.backfield">RockPy.Measurements.backfield module</a></li>
+<li><a class="reference internal" href="#module-RockPy.Measurements.base">RockPy.Measurements.base module</a></li>
+<li><a class="reference internal" href="#module-RockPy.Measurements.forc">RockPy.Measurements.forc module</a></li>
+<li><a class="reference internal" href="#module-RockPy.Measurements.hysteresis">RockPy.Measurements.hysteresis module</a></li>
+<li><a class="reference internal" href="#module-RockPy.Measurements.irm">RockPy.Measurements.irm module</a></li>
+<li><a class="reference internal" href="#module-RockPy.Measurements.nrm">RockPy.Measurements.nrm module</a></li>
+<li><a class="reference internal" href="#module-RockPy.Measurements.parameters">RockPy.Measurements.parameters module</a></li>
+<li><a class="reference internal" href="#module-RockPy.Measurements.thellier">RockPy.Measurements.thellier module</a></li>
+<li><a class="reference internal" href="#module-RockPy.Measurements.thermocurve">RockPy.Measurements.thermocurve module</a></li>
+<li><a class="reference internal" href="#module-RockPy.Measurements.trm">RockPy.Measurements.trm module</a></li>
+<li><a class="reference internal" href="#module-RockPy.Measurements">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</ul>
+</li>
+              
+            
+            
+              
+                
+  <li>
+    <a href="RockPy.Functions.html" title="Previous Chapter: RockPy.Functions package"><span class="glyphicon glyphicon-chevron-left visible-sm"></span><span class="hidden-sm">&laquo; RockPy.Functions...</span>
+    </a>
+  </li>
+  <li>
+    <a href="RockPy.Readin.html" title="Next Chapter: RockPy.Readin package"><span class="glyphicon glyphicon-chevron-right visible-sm"></span><span class="hidden-sm">RockPy.Readin pa... &raquo;</span>
+    </a>
+  </li>
+              
+            
+            
+            
+            
+              <li class="hidden-sm">
+<div id="sourcelink">
+  <a href="_sources/RockPy.Measurements.txt"
+     rel="nofollow">Source</a>
+</div></li>
+            
+          </ul>
+
+          
+            
+<form class="navbar-form navbar-right" action="search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+          
+        </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+    <div class="col-md-12">
+      
+  <div class="section" id="rockpy-measurements-package">
+<h1>RockPy.Measurements package<a class="headerlink" href="#rockpy-measurements-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-RockPy.Measurements.af_demag">
+<span id="rockpy-measurements-af-demag-module"></span><h2>RockPy.Measurements.af_demag module<a class="headerlink" href="#module-RockPy.Measurements.af_demag" title="Permalink to this headline">¶</a></h2>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">members:</th><td class="field-body"><table class="first last docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">undoc-members:</th><td class="field-body"></td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">show-inheritance:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="module-RockPy.Measurements.backfield">
+<span id="rockpy-measurements-backfield-module"></span><h2>RockPy.Measurements.backfield module<a class="headerlink" href="#module-RockPy.Measurements.backfield" title="Permalink to this headline">¶</a></h2>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">members:</th><td class="field-body"><table class="first last docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">undoc-members:</th><td class="field-body"></td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">show-inheritance:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="module-RockPy.Measurements.base">
+<span id="rockpy-measurements-base-module"></span><h2>RockPy.Measurements.base module<a class="headerlink" href="#module-RockPy.Measurements.base" title="Permalink to this headline">¶</a></h2>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">members:</th><td class="field-body"><table class="first last docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">undoc-members:</th><td class="field-body"></td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">show-inheritance:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="module-RockPy.Measurements.forc">
+<span id="rockpy-measurements-forc-module"></span><h2>RockPy.Measurements.forc module<a class="headerlink" href="#module-RockPy.Measurements.forc" title="Permalink to this headline">¶</a></h2>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">members:</th><td class="field-body"><table class="first last docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">undoc-members:</th><td class="field-body"></td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">show-inheritance:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="module-RockPy.Measurements.hysteresis">
+<span id="rockpy-measurements-hysteresis-module"></span><h2>RockPy.Measurements.hysteresis module<a class="headerlink" href="#module-RockPy.Measurements.hysteresis" title="Permalink to this headline">¶</a></h2>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">members:</th><td class="field-body"><table class="first last docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">undoc-members:</th><td class="field-body"></td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">show-inheritance:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="module-RockPy.Measurements.irm">
+<span id="rockpy-measurements-irm-module"></span><h2>RockPy.Measurements.irm module<a class="headerlink" href="#module-RockPy.Measurements.irm" title="Permalink to this headline">¶</a></h2>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">members:</th><td class="field-body"><table class="first last docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">undoc-members:</th><td class="field-body"></td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">show-inheritance:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="module-RockPy.Measurements.nrm">
+<span id="rockpy-measurements-nrm-module"></span><h2>RockPy.Measurements.nrm module<a class="headerlink" href="#module-RockPy.Measurements.nrm" title="Permalink to this headline">¶</a></h2>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">members:</th><td class="field-body"><table class="first last docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">undoc-members:</th><td class="field-body"></td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">show-inheritance:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="module-RockPy.Measurements.parameters">
+<span id="rockpy-measurements-parameters-module"></span><h2>RockPy.Measurements.parameters module<a class="headerlink" href="#module-RockPy.Measurements.parameters" title="Permalink to this headline">¶</a></h2>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">members:</th><td class="field-body"><table class="first last docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">undoc-members:</th><td class="field-body"></td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">show-inheritance:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="module-RockPy.Measurements.thellier">
+<span id="rockpy-measurements-thellier-module"></span><h2>RockPy.Measurements.thellier module<a class="headerlink" href="#module-RockPy.Measurements.thellier" title="Permalink to this headline">¶</a></h2>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">members:</th><td class="field-body"><table class="first last docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">undoc-members:</th><td class="field-body"></td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">show-inheritance:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="module-RockPy.Measurements.thermocurve">
+<span id="rockpy-measurements-thermocurve-module"></span><h2>RockPy.Measurements.thermocurve module<a class="headerlink" href="#module-RockPy.Measurements.thermocurve" title="Permalink to this headline">¶</a></h2>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">members:</th><td class="field-body"><table class="first last docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">undoc-members:</th><td class="field-body"></td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">show-inheritance:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="module-RockPy.Measurements.trm">
+<span id="rockpy-measurements-trm-module"></span><h2>RockPy.Measurements.trm module<a class="headerlink" href="#module-RockPy.Measurements.trm" title="Permalink to this headline">¶</a></h2>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">members:</th><td class="field-body"><table class="first last docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">undoc-members:</th><td class="field-body"></td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">show-inheritance:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="module-RockPy.Measurements">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-RockPy.Measurements" title="Permalink to this headline">¶</a></h2>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">members:</th><td class="field-body"><table class="first last docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">undoc-members:</th><td class="field-body"></td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">show-inheritance:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+
+
+    </div>
+      
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+    </p>
+    <p>
+        &copy; Copyright 2014, Michael Volk, Michael Wack.<br/>
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.2.2.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>

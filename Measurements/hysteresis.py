@@ -119,7 +119,7 @@ class Hysteresis(base.Measurement):
 
     # ## results
 
-    def result_generic(self, parameters='standard'):
+    def result_generic(self, parameters='standard', recalc=False):
         '''
         Generic for for result implementation. Every calculation of result should be in the self.results data structure
         before calculation.
@@ -127,37 +127,53 @@ class Hysteresis(base.Measurement):
         _calculate_result_(result_name).
 
         '''
-        if self.results['generic'] is None:
-            self.calculate_generic(parameters)
+        self.calc_result(parameters, recalc)
         return self.results['generic']
 
-    def result_ms(self):
-        if self.results['ms'] is None:
-            self.calculate_generic()
+    def result_ms(self, recalc=False):
+        self.calc_result(dict(), recalc)
         return self.results['ms']
 
-    def result_mrs(self):
-        if self.results['mrs'] is None:
-            self.calculate_generic()
+    def result_mrs(self, recalc=False):
+        self.calc_result(dict(), recalc)
         return self.results['mrs']
 
-    def result_bc(self):
-        if self.results['bc'] is None:
-            self.calculate_generic()
+    def result_bc(self, recalc=False, **options):
+        """
+        Calculates :math:`B_c` using a linear interpolation between the points closest to zero.
+
+        :param recalc: bool
+                     Force recalculation if already calculated
+
+        .. doctest::
+           from Structure.project import Sample
+
+           vftb_file = 'test_data/MUCVFTB_test.hys'
+           sample = Sample(name='vftb_test_sample')
+           M = sample.add_measurement(mtype='hysteresis', mfile=vftb_file, machine='vftb')
+           M.result_bc()
+
+           >>> 0.00647949
+        """
+        self.calc_result(dict(), recalc)
         return self.results['bc']
 
-    def result_brh(self):
-        if self.results['brh'] is None:
-            self.calculate_generic()
+    def result_sigma_bc(self, recalc=False):
+        self.calc_result(dict(), recalc, force_caller='bc')
+        return self.results['bc']
+
+
+    def result_brh(self, recalc=False):
+        self.calc_result(dict(), recalc)
         return self.results['brh']
 
     # ## calculations
 
     def calculate_ms(self):
-        raise NotImplemented
+        pass  # todo implement
 
     def calculate_mrs(self):
-        raise NotImplemented
+        pass  #todo implement
 
     def calculate_bc(self):
         '''
@@ -198,18 +214,12 @@ class Hysteresis(base.Measurement):
 
         df = calc('down_field')
         uf = calc('up_field')
-        self.results['bc'] = [df, uf]
+        self.results['bc'] = np.mean([df, uf])
+        self.results['sigma_bc'] = np.std([df, uf])
 
     def calculate_brh(self):
-        raise NotImplemented
+        pass  #todo implement
 
-    def calculate_generic(self, parameters):
-        '''
-        actual calculation of the result
-
-        :return:
-        '''
-        self.results['generic'] = 0
 
     def down_field_interp(self):
         from scipy import interpolate

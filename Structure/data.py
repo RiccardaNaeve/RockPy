@@ -21,12 +21,13 @@ class RockPyData(object):
        alias: only used for alias
     """
 
-    def __init__(self, column_names, row_names=None, units=None, data=None):
+    def __init__(self, column_names, row_names=None, units=None, data=None, errors=None):
         """
             :param column_names: sequence of strings naming individual columns
             :param row_names: optional sequence of strings niming individual rows
             :param units:
-            :param data
+            :param data: numpy array with data
+            :param errors: numpy array with error estimates
         """
 
         if type(column_names) is str:  # if we got a single string, convert it to tuple with one entry
@@ -47,9 +48,6 @@ class RockPyData(object):
             self._units = [ureg(u) for u in units]
         else:
             raise RuntimeError('unknown data type for units: %s' % units.__class__)
-
-
-
 
         self._data = None
 
@@ -198,7 +196,8 @@ class RockPyData(object):
 
         if data is None:
             # if there is no data, create zeros
-            data = np.zeros((self.row_count, len(column_names)))
+            data = np.empty((self.row_count, len(column_names)))
+            data[:] = np.NAN
 
         # make sure data is 2 dim, even if there is only one column
         # todo BUGFIX!!! if adding a single column with float:     ERROR:: if data.ndim == 1: \\ AttributeError: 'float' object has no attribute 'ndim'
@@ -210,6 +209,32 @@ class RockPyData(object):
 
         # update "all" alias to comprise also the new columns
         self._update_all_alias()
+
+
+    def rename_column(self, old_cname, new_cname):
+        """
+        renames a column according to specified key
+
+        .. code-block:: python
+
+           d = data(column_names=('Temp','M'), data=[[10, 1.3],[30, 2.2],[20, 1.5]])
+           d.rename_column('Temp', 't')
+           d.column_names
+           ['t', 'M']
+
+        :param old_key: str
+        :param new_key: str
+        """
+
+        if self.column_exists(new_cname):
+            raise KeyError('Column %s already exists.' % new_cname)
+        if not self.column_exists(old_cname):
+            raise KeyError('Column %s does not exist.' % old_cname)
+
+        idx = self._column_names.index(old_cname)
+        self._column_names[idx] = new_cname
+        self._update_column_dictionary(self._column_names)
+
 
     def key_exists(self, key):
         """
@@ -288,7 +313,8 @@ class RockPyData(object):
             except IndexError:
                 data = data.reshape((1,))
 
-            self._data = np.zeros((data.shape[0], self.column_count))
+            self._data = np.empty((data.shape[0], self.column_count))
+            self._data[:] = np.NAN
 
         # make sure data is 2 dim, even if there is only one column
         if data.ndim == 1:
@@ -483,7 +509,7 @@ class RockPyData(object):
     """ METHODS returning OBJECTS """
 
     def running_ave(self):
-        pass
+        raise NotImplemented
 
     def differentiate(self):
         raise NotImplemented
@@ -568,29 +594,7 @@ class RockPyData(object):
         idx = self.column_dict[key][0]
         self.data = self.data[self.data[:, idx].argsort()]
 
-    def rename_column(self, old_cname, new_cname):
-        """
-        renames a column according to specified key
 
-        .. code-block:: python
-
-           d = data(column_names=('Temp','M'), data=[[10, 1.3],[30, 2.2],[20, 1.5]])
-           d.rename_column('Temp', 't')
-           d.column_names
-           ['t', 'M']
-
-        :param old_key: str
-        :param new_key: str
-        """
-
-        if self.column_exists(new_cname):
-            raise KeyError('Column %s already exists.' % new_cname)
-        if not self.column_exists(old_cname):
-            raise KeyError('Column %s does not exist.' % old_cname)
-
-        idx = self._column_names.index(old_cname)
-        self._column_names[idx] = new_cname
-        self._update_column_dictionary(self._column_names)
 
 
     def lin_regress(self, column_name_x, column_name_y):

@@ -50,6 +50,9 @@ def test():
     # we can also add arbitrary data in a new column
     d.append_columns(("T",), np.array((1, 2, 3)))
 
+    # we can also add an empty column
+    d.append_columns(("empty",))
+
     # renaming a column
     d.rename_column('T', 'temp')
 

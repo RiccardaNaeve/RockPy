@@ -214,6 +214,9 @@ class RockPyData(object):
     def key_exists(self, key):
         """
         returns true when key is valid
+
+        >>> a = RockPyData(('A','B')); a.key_exists('A'), a.key_exists('B'), a.key_exists('C')
+        (True, True, False)
         """
         return key in self._column_dict
 
@@ -635,6 +638,10 @@ class RockPyData(object):
 
         return slope, sigma, y_intercept, x_intercept
 
+
+#if __name__ == "__main__":
+#    import doctest
+#    doctest.testmod()
     def derivative(self, independent_var='variable', smoothing=1):
         """
 

@@ -1,102 +1,99 @@
-RockPy.Measurements package
-===========================
+Measurements Package
+====================
 
-Submodules
-----------
+:mod:`Measurements` Package
+---------------------------
 
-RockPy.Measurements.af_demag module
------------------------------------
+.. automodule:: RockPy.Measurements
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+:mod:`af_demag` Module
+----------------------
 
 .. automodule:: RockPy.Measurements.af_demag
     :members:
     :undoc-members:
     :show-inheritance:
 
-RockPy.Measurements.backfield module
-------------------------------------
+:mod:`backfield` Module
+-----------------------
 
 .. automodule:: RockPy.Measurements.backfield
     :members:
     :undoc-members:
     :show-inheritance:
 
-RockPy.Measurements.base module
--------------------------------
+:mod:`base` Module
+------------------
 
 .. automodule:: RockPy.Measurements.base
     :members:
     :undoc-members:
     :show-inheritance:
 
-RockPy.Measurements.forc module
--------------------------------
+:mod:`forc` Module
+------------------
 
 .. automodule:: RockPy.Measurements.forc
     :members:
     :undoc-members:
     :show-inheritance:
 
-RockPy.Measurements.hysteresis module
--------------------------------------
+:mod:`hysteresis` Module
+------------------------
 
 .. automodule:: RockPy.Measurements.hysteresis
     :members:
     :undoc-members:
     :show-inheritance:
 
-RockPy.Measurements.irm module
-------------------------------
+:mod:`irm` Module
+-----------------
 
 .. automodule:: RockPy.Measurements.irm
     :members:
     :undoc-members:
     :show-inheritance:
 
-RockPy.Measurements.nrm module
-------------------------------
+:mod:`nrm` Module
+-----------------
 
 .. automodule:: RockPy.Measurements.nrm
     :members:
     :undoc-members:
     :show-inheritance:
 
-RockPy.Measurements.parameters module
--------------------------------------
+:mod:`parameters` Module
+------------------------
 
 .. automodule:: RockPy.Measurements.parameters
     :members:
     :undoc-members:
     :show-inheritance:
 
-RockPy.Measurements.thellier module
------------------------------------
+:mod:`thellier` Module
+----------------------
 
 .. automodule:: RockPy.Measurements.thellier
     :members:
     :undoc-members:
     :show-inheritance:
 
-RockPy.Measurements.thermocurve module
---------------------------------------
+:mod:`thermocurve` Module
+-------------------------
 
 .. automodule:: RockPy.Measurements.thermocurve
     :members:
     :undoc-members:
     :show-inheritance:
 
-RockPy.Measurements.trm module
-------------------------------
+:mod:`trm` Module
+-----------------
 
 .. automodule:: RockPy.Measurements.trm
     :members:
     :undoc-members:
     :show-inheritance:
 
-
-Module contents
----------------
-
-.. automodule:: RockPy.Measurements
-    :members:
-    :undoc-members:
-    :show-inheritance:

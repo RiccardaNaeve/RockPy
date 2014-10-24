@@ -539,7 +539,6 @@ class RockPyData(object):
             tf_array = [False if x in index_list else True for x in range(len(self['data']))]
         else:
             tf_array = [True if x in index_list else False for x in range(len(self['data']))]
-
         return self.filter(tf_array)
 
     def check_duplicate(self):
@@ -626,7 +625,10 @@ class RockPyData(object):
 
         slope = np.sqrt(y_sum_diff_sq / x_sum_diff_sq) * np.sign(mixed_sum)
 
-        sigma = np.sqrt((2 * y_sum_diff_sq - 2 * slope * mixed_sum) / ((n - 2) * x_sum_diff_sq))
+        if n <= 2: # stdev not valid for two points
+            sigma = np.nan
+        else:
+            sigma = np.sqrt((2 * y_sum_diff_sq - 2 * slope * mixed_sum) / ((n - 2) * x_sum_diff_sq))
 
         y_intercept = y_mean + abs(slope * x_mean)
         x_intercept = - y_intercept / slope

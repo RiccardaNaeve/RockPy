@@ -158,7 +158,7 @@ class Measurement(object):
         return self.result_generic()
 
 
-    def result_generic(self, **parameter):
+    def result_generic(self, recalc=False):
         '''
         Generic for for result implementation. Every calculation of result should be in the self.results data structure
         before calculation.
@@ -166,9 +166,9 @@ class Measurement(object):
         _calculate_result_(result_name).
 
         '''
-        # NAMING! no '_' allowed after result
-        if self.results['generic'] is None:
-            self.calculate_generic(**parameter)
+        parameter = {}
+
+        self.calc_result(parameter, recalc)
         return self.results['generic']
 
 
@@ -191,7 +191,7 @@ class Measurement(object):
 
         self.results['generic'] = 0
 
-    def calc_result(self, parameter, recalc, force_caller=None):
+    def calc_result(self, parameter={}, recalc=False, force_caller=None):
         '''
         Helper function:
         Calls any calculate_* function, but checks first:

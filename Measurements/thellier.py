@@ -612,7 +612,7 @@ class Thellier(base.Measurement):
 
         .. math::
 
-           w=\\fac{q}{\\sqrt{n-2}}
+           w=\\frac{q}{\\sqrt{n-2}}
 
         Originally it is :math:`w=\\frac{fg}{s}`, where :math:`s^2` is given by
 

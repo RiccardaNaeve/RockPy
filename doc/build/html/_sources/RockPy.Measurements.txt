@@ -4,88 +4,88 @@ RockPy.Measurements package
 Submodules
 ----------
 
-AF-Demagnetization
-------------------
+RockPy.Measurements.af_demag module
+-----------------------------------
 
 .. automodule:: RockPy.Measurements.af_demag
     :members:
     :undoc-members:
     :show-inheritance:
 
-Backfield
----------
+RockPy.Measurements.backfield module
+------------------------------------
 
 .. automodule:: RockPy.Measurements.backfield
     :members:
     :undoc-members:
     :show-inheritance:
 
-RockPy.Measurements.base
-------------------------
+RockPy.Measurements.base module
+-------------------------------
 
 .. automodule:: RockPy.Measurements.base
     :members:
     :undoc-members:
     :show-inheritance:
 
-FORC
-----
+RockPy.Measurements.forc module
+-------------------------------
 
 .. automodule:: RockPy.Measurements.forc
     :members:
     :undoc-members:
     :show-inheritance:
 
-Hysteresis
-----------
+RockPy.Measurements.hysteresis module
+-------------------------------------
 
 .. automodule:: RockPy.Measurements.hysteresis
     :members:
     :undoc-members:
     :show-inheritance:
 
-Isothermal Remanent Magnetization [IRM]
----------------------------------------
+RockPy.Measurements.irm module
+------------------------------
 
 .. automodule:: RockPy.Measurements.irm
     :members:
     :undoc-members:
     :show-inheritance:
 
-Natural Remanent Magnetization [NRM]
-------------------------------------
+RockPy.Measurements.nrm module
+------------------------------
 
 .. automodule:: RockPy.Measurements.nrm
     :members:
     :undoc-members:
     :show-inheritance:
 
-Parameters [Mass, Height, ... ]
----------------------------------------
+RockPy.Measurements.parameters module
+-------------------------------------
 
 .. automodule:: RockPy.Measurements.parameters
     :members:
     :undoc-members:
     :show-inheritance:
 
-Thellier-Thellier
------------------
+RockPy.Measurements.thellier module
+-----------------------------------
 
 .. automodule:: RockPy.Measurements.thellier
     :members:
     :undoc-members:
     :show-inheritance:
 
-Thermocurve
------------
+RockPy.Measurements.thermocurve module
+--------------------------------------
 
 .. automodule:: RockPy.Measurements.thermocurve
     :members:
     :undoc-members:
     :show-inheritance:
 
-Thermal Remanent Magnetization [TRM]
-------------------------------------
+RockPy.Measurements.trm module
+------------------------------
 
 .. automodule:: RockPy.Measurements.trm
     :members:

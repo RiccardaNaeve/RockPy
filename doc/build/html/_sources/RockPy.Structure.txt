@@ -20,14 +20,6 @@ RockPy.Structure.project module
     :undoc-members:
     :show-inheritance:
 
-RockPy.Structure.rockpydata module
-----------------------------------
-
-.. automodule:: RockPy.Structure.rockpydata
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 RockPy.Structure.samplegroup module
 -----------------------------------
 

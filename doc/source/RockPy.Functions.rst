@@ -1,8 +1,6 @@
 RockPy.Functions package
 ========================
 
-Submodules
-----------
 
 RockPy.Functions.convert module
 -------------------------------

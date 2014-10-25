@@ -90,5 +90,10 @@ def test():
 
     print repr(c)
 
+    # test single line object
+    l = RockPyData(column_names=('A', 'B', 'C', 'D'), row_names=('1.Zeile',), units=('T', 'mT', 'fT', 'pT'), values=((1,2,3,4),))
+    l.append_columns( 'X', 5)
+    print l
+
 if __name__ == '__main__':
     test()

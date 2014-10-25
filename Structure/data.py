@@ -267,9 +267,11 @@ class RockPyData(object):
         else:
             values = np.array( values, dtype=float)
 
-        # make sure values is 2 dim, even if there is only one column
-        # todo BUGFIX!!! if adding a single column with float:     ERROR:: if values.ndim == 1: \\ AttributeError: 'float' object has no attribute 'ndim'
-        if values.ndim == 1:
+        # make sure values is 2 dim, even if there is only one number or one column
+        if values.ndim == 0: # single number
+            values = values.reshape(1, 1)
+
+        if values.ndim == 1: # single column
             values = values.reshape(values.shape[0], 1)
 
         values = values[:,:,np.newaxis] # add extra dimension for uncertainties

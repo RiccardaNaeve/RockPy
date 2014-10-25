@@ -15,7 +15,7 @@ def test():
                  (9, 10, 11, 12))
 
     # create a rockpydata object with named columns and filled with testdata
-    d = RockPyData(column_names=('F', 'Mx', 'My', 'Mz'), row_names=('1.Zeile','2.Zeile','3.Zeile'), units=('T', 'mT', 'fT', 'pT'), data=testdata)
+    d = RockPyData(column_names=('F', 'Mx', 'My', 'Mz'), row_names=('1.Zeile','2.Zeile','3.Zeile'), units=('T', 'mT', 'fT', 'pT'), values=testdata)
 
     print d.units
     # define as many aliases as you want

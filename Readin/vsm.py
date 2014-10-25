@@ -57,7 +57,7 @@ class Vsm(base.Machine):
              j in segment_start_idx]).T
         segment_info = [' '.join(i) for i in segment_info]
         segment_info = np.array([' '.join(j.split()).lower() for j in segment_info])
-        out = RockPyData(column_names=segment_info, data=segment_data)
+        out = RockPyData(column_names=segment_info, values=segment_data)
         return out
 
     @property

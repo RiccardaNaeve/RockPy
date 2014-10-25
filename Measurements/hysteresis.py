@@ -28,7 +28,7 @@ class Hysteresis(base.Measurement):
     def format_vftb(self):
         data = self.machine_data.out_hysteresis()
         header = self.machine_data.header
-        self.induced = RockPyData(column_names=header, data=data[0])
+        self.induced = RockPyData(column_names=header, values=data[0])
         dfield = np.diff(self.induced['field'])
 
         idx = [i for i in range(len(dfield)) if dfield[i] < 0]
@@ -53,14 +53,14 @@ class Hysteresis(base.Measurement):
             header[header.index('adjusted moment')] = 'moment'
 
         if len(segments['segment number']) == 3:
-            self.virgin = RockPyData(column_names=header, data=self.machine_data.out_hysteresis()[0])
-            self.down_field = RockPyData(column_names=header, data=self.machine_data.out_hysteresis()[1])
-            self.up_field = RockPyData(column_names=header, data=self.machine_data.out_hysteresis()[2])
+            self.virgin = RockPyData(column_names=header, values=self.machine_data.out_hysteresis()[0])
+            self.down_field = RockPyData(column_names=header, values=self.machine_data.out_hysteresis()[1])
+            self.up_field = RockPyData(column_names=header, values=self.machine_data.out_hysteresis()[2])
 
         if len(segments['segment number']) == 2:
             self.virgin = None
-            self.down_field = RockPyData(column_names=header, data=self.machine_data.out_hysteresis()[0])
-            self.up_field = RockPyData(column_names=header, data=self.machine_data.out_hysteresis()[1])
+            self.down_field = RockPyData(column_names=header, values=self.machine_data.out_hysteresis()[0])
+            self.up_field = RockPyData(column_names=header, values=self.machine_data.out_hysteresis()[1])
 
         self.virgin.rename_column('moment', 'mag')
         self.up_field.rename_column('moment', 'mag')
@@ -71,7 +71,7 @@ class Hysteresis(base.Measurement):
         data = self.machine_data.out_hys()
         header = self.machine_data.header
 
-        self.raw_data = RockPyData(column_names=header, data=data)
+        self.raw_data = RockPyData(column_names=header, values=data)
         dfield = np.diff(self.raw_data['raw_applied_field_for_plot_'])
         down_field_idx = [i for i in range(len(dfield)) if dfield[i] < 0]
         up_field_idx = [i for i in range(len(dfield)) if dfield[i] > 0]

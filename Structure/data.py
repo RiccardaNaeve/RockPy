@@ -309,6 +309,9 @@ class RockPyData(object):
         self._column_names[idx] = new_cname
         self._update_column_dictionary(self._column_names)
 
+    def append_rows(self, column_names = None, data = None):
+        raise NotImplemented
+
 
     def key_exists(self, key):
         """
@@ -725,9 +728,6 @@ class RockPyData(object):
         return slope, sigma, y_intercept, x_intercept
 
 
-#if __name__ == "__main__":
-#    import doctest
-#    doctest.testmod()
     def derivative(self, independent_var='variable', smoothing=1):
         """
 
@@ -750,4 +750,7 @@ class RockPyData(object):
         out.recalc_idx()
         return out
 
-        pass
+
+#if __name__ == "__main__":
+#    import doctest
+#    doctest.testmod()

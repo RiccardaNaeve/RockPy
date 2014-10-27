@@ -16,7 +16,7 @@ class Irm(base.Measurement):
         data = self.machine_data.out_irm()
         header = self.machine_data.header
         self.log.debug('FORMATTING << %s >> raw_data for << VFTB >> data structure' % (self.mtype))
-        self.remanence = RockPyData(column_names=header, data=data[0])
+        self.remanence = RockPyData(column_names=header, values=data[0])
 
     def format_vsm(self):
         raise NotImplemented
@@ -26,7 +26,7 @@ class Irm(base.Measurement):
 
         data = self.machine_data.out_trm()
         header = self.machine_data.float_header
-        self.data = RockPyData(column_names=header, data=data)
+        self.data = RockPyData(column_names=header, values=data)
         self.remanence = self.data
         self.induced = None
 

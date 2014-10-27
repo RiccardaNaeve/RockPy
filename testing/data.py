@@ -15,7 +15,7 @@ def test():
                  (9, 10, 11, 12))
 
     # create a rockpydata object with named columns and filled with testdata
-    d = RockPyData(column_names=('F', 'Mx', 'My', 'Mz'), row_names=('1.Zeile','2.Zeile','3.Zeile'), units=('T', 'mT', 'fT', 'pT'), data=testdata)
+    d = RockPyData(column_names=('F', 'Mx', 'My', 'Mz'), row_names=('1.Zeile','2.Zeile','3.Zeile'), units=('T', 'mT', 'fT', 'pT'), values=testdata)
 
     print d.units
     # define as many aliases as you want
@@ -49,6 +49,9 @@ def test():
 
     # we can also add arbitrary data in a new column
     d.append_columns(("T",), np.array((1, 2, 3)))
+
+    # we can also add an empty column
+    d.append_columns(("empty",))
 
     # renaming a column
     d.rename_column('T', 'temp')
@@ -86,6 +89,11 @@ def test():
     print c
 
     print repr(c)
+
+    # test single line object
+    l = RockPyData(column_names=('A', 'B', 'C', 'D'), row_names=('1.Zeile',), units=('T', 'mT', 'fT', 'pT'), values=((1,2,3,4),))
+    l.append_columns( 'X', 5)
+    print l
 
 if __name__ == '__main__':
     test()

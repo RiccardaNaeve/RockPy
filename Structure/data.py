@@ -15,18 +15,27 @@ class RockPyData(object):
     class to manage specific numeric data based on a numpy array
     e.g. d = rockpydata( column_names=( 'F','Mx', 'My', 'Mz'))
 
-    variable naming guidelines:
+    internally numeric data is organized as a numpy array with dimensions row x col x 2
+    the last dimension holds pairs of value and error estimate
+
+    every column has a unique name and a unit can be assigned
+
+    rows can be labeled as well
+
+
+    variable naming scheme:
        key: can be column_name and alias
        column_name: only used for single columns
        alias: only used for alias
     """
 
-    def __init__(self, column_names, row_names=None, units=None, data=None):
+    def __init__(self, column_names, row_names=None, units=None, values=None, uncertainties=None):
         """
             :param column_names: sequence of strings naming individual columns
             :param row_names: optional sequence of strings niming individual rows
             :param units:
-            :param data
+            :param values: numpy array with values
+            :param errors: numpy array with error estimates
         """
 
         if type(column_names) is str:  # if we got a single string, convert it to tuple with one entry
@@ -46,10 +55,7 @@ class RockPyData(object):
         elif all(isinstance(u, basestring) for u in units): # list of strings
             self._units = [ureg(u) for u in units]
         else:
-            raise RuntimeError('unknown data type for units: %s' % units.__class__)
-
-
-
+            raise RuntimeError('unknown values type for units: %s' % units.__class__)
 
         self._data = None
 
@@ -58,18 +64,18 @@ class RockPyData(object):
         # define some default aliases
         self._update_all_alias()
         self._column_dict['variable'] = (0,)
-        self._column_dict['data'] = tuple(range(self.column_count)[1:])
+        self._column_dict['values'] = tuple(range(self.column_count)[1:])
 
-        self['all'] = data
+        self['all'] = values
 
         if row_names is None:
             self._row_names = None # don't use row names
         else:
-            # make sure that number of row names matches number of lines in data
+            # make sure that number of row names matches number of lines in values
             if len(row_names) == self.row_count:
                 self._row_names = list(row_names)
             else:
-                raise RuntimeError('number of entries in row_names (%d) does not match number of lines in data (%d)'%(len(row_names),self.row_count))
+                raise RuntimeError('number of entries in row_names (%d) does not match number of lines in values (%d)'%(len(row_names),self.row_count))
 
     def _update_column_dictionary(self, column_names=None):
         """
@@ -95,7 +101,7 @@ class RockPyData(object):
             for n in column_names:  # add or update each column to _column_dict
                 self._column_dict[n] = (self._column_names.index(n),)
 
-    def _update_all_alias(self):  #
+    def _update_all_alias(self):
         self._column_dict['all'] = tuple(range(self.column_count))
 
     @property
@@ -133,20 +139,78 @@ class RockPyData(object):
     @data.setter
     def data(self, data):
         """
-        set data and check if it fits the number of columns
+        set values and uncertainties and check if it fits the number of columns
         """
         if data is None:
             self._data = None  # clear existing data
             return
 
         d = np.array(data)
-        if d.ndim != 2:
+        if d.ndim != 3:
             raise TypeError('wrong data dimension')
 
         if d.shape[1] != self.column_count:
             raise TypeError('wrong number of columns in data')
 
-        self._data = np.array(data)
+        self._data = d
+
+    @property
+    def values(self):
+        """
+        :return: values
+        """
+        return self.data[:,:,0]
+
+    @values.setter
+    def values(self, values):
+        """
+        set values of data, set uncertainties to nan
+        checks whether number of data columns fits array shape
+
+        :param values:
+        :return:
+        """
+
+        if values is None:
+            self._data = None  # clear existing data
+            return
+
+        d = np.array(values)
+        if d.ndim != 2:
+            raise TypeError('wrong data dimension')
+
+        if d.shape[1] != self.column_count:
+            raise TypeError('%d columns instead of %d in values' % (d.shape[1], self.column_count))
+
+        self._data = d[:,:,np.newaxis]
+        self.uncertainties = None
+
+    @property
+    def uncertainties(self):
+        return self.data[:,:,1]
+
+
+    @uncertainties.setter
+    def uncertainties(self, uncertainties):
+        """
+        set uncertainties, shape of numpy array must match existing values
+        set all entries to np.NAN if uncertainties == None
+
+        :param uncertainties: numerical array of uncertainties
+        :return:
+        """
+
+        if uncertainties is None or uncertainties == np.NAN:
+            self._data[:,:,1] = np.NAN
+        else:
+            # todo: check type of uncertainties
+            d = np.array( uncertainties)
+
+            if d.shape != self.values.shape: # check if array shapes match
+                raise TypeError( 'uncertainties has wrong shape %s instead of %s' % (str( d.shape), str( self.values.shape)))
+
+            self._data[:,:,1] = uncertainties
+
 
     def define_alias(self, alias_name, column_names):
         """
@@ -176,11 +240,11 @@ class RockPyData(object):
             raise IndexError('column indices out of range')
         self._column_dict[alias_name] = tuple(column_indices)
 
-    def append_columns(self, column_names, data=None):
+    def append_columns(self, column_names, values=None):
         """
-        add data columns to data object
+        add values columns to values object
         :param column_names: list(str)
-        :param data: 
+        :param values:
         """
         if type(column_names) is str:  # if we got a single string, convert it to tuple with one entry
             column_names = (column_names,)
@@ -196,20 +260,58 @@ class RockPyData(object):
         # update internal column dictionary
         self._update_column_dictionary(column_names)
 
-        if data is None:
-            # if there is no data, create zeros
-            data = np.zeros((self.row_count, len(column_names)))
+        if values is None:
+            # if there is no values, create zeros
+            values = np.empty((self.row_count, len(column_names)))
+            values[:] = np.NAN
+        else:
+            values = np.array( values, dtype=float)
 
-        # make sure data is 2 dim, even if there is only one column
-        # todo BUGFIX!!! if adding a single column with float:     ERROR:: if data.ndim == 1: \\ AttributeError: 'float' object has no attribute 'ndim'
-        if data.ndim == 1:
-            data = data.reshape(data.shape[0], 1)
+        # make sure values is 2 dim, even if there is only one number or one column
+        if values.ndim == 0: # single number
+            values = values.reshape(1, 1)
 
-        # append new data
-        self._data = np.concatenate(( self._data, data), axis=1)
+        if values.ndim == 1: # single column
+            values = values.reshape(values.shape[0], 1)
+
+        values = values[:,:,np.newaxis] # add extra dimension for uncertainties
+        values = np.concatenate( (values, np.zeros_like( values)), axis=2) # add zeroes in 3rd dimension as uncertainties
+        values[:,:,1] = np.NAN # set uncertainties to NAN
+
+        # append new values
+        self._data = np.concatenate(( self._data, values), axis=1)
 
         # update "all" alias to comprise also the new columns
         self._update_all_alias()
+
+
+    def rename_column(self, old_cname, new_cname):
+        """
+        renames a column according to specified key
+
+        .. code-block:: python
+
+           d = data(column_names=('Temp','M'), data=[[10, 1.3],[30, 2.2],[20, 1.5]])
+           d.rename_column('Temp', 't')
+           d.column_names
+           ['t', 'M']
+
+        :param old_key: str
+        :param new_key: str
+        """
+
+        if self.column_exists(new_cname):
+            raise KeyError('Column %s already exists.' % new_cname)
+        if not self.column_exists(old_cname):
+            raise KeyError('Column %s does not exist.' % old_cname)
+
+        idx = self._column_names.index(old_cname)
+        self._column_names[idx] = new_cname
+        self._update_column_dictionary(self._column_names)
+
+    def append_rows(self, column_names = None, data = None):
+        raise NotImplemented
+
 
     def key_exists(self, key):
         """
@@ -260,41 +362,44 @@ class RockPyData(object):
             # todo: return multiple Nones corresponding to alias length
 
         # return appropriate columns from self.data numpy array
-        d = self._data[:, self._column_dict[key]]
+        d = self.values[:, self._column_dict[key]]
         if d.shape[1] == 1:
             d = d.T[0]
         return d
 
-    def __setitem__(self, key, data):
+    def __setitem__(self, key, values):
         """
         allows access to data columns by index (names)
         e.g. data['Mx'] = (1,2,3)
         """
 
-        if data is None:
+        if values is None:
             return
 
         # check if key is valid
         if key not in self._column_dict:
             raise KeyError('key %s is not a valid column name or alias' % key)
 
-        if not isinstance(data, np.ndarray):
-            data = np.array(data)
+        if not isinstance(values, np.ndarray):
+            values = np.array(values)
 
-        # if we have no data, initialize everything to zero with number of lines matching the new data
+        # if we have no data, initialize everything to np.NAN with number of lines matching the new data
         if self._data is None:
             try:
-                data.shape[0]
+                values.shape[0]
             except IndexError:
-                data = data.reshape((1,))
+                values = values.reshape((1,))
 
-            self._data = np.zeros((data.shape[0], self.column_count))
+            self._data = np.empty((values.shape[0], self.column_count, 2))
+            self._data[:] = np.NAN
 
         # make sure data is 2 dim, even if there is only one column
-        if data.ndim == 1:
-            data = data.reshape(data.shape[0], 1)
+        if values.ndim == 1:
+            values = values.reshape(values.shape[0], 1)
 
-        self._data[:, self._column_dict[key]] = data
+        self._data[:, self._column_dict[key],0] = values
+        self.uncertainties = None
+
 
     def __sub__(self, other):
         """
@@ -313,9 +418,12 @@ class RockPyData(object):
 
         result_c_names, results_variable, rd1, rd2 = self._get_arithmetic_data(other)
 
-        results_data = np.append(results_variable, rd1 - rd2, axis=1)  # variable columns + calculated data columns
+        #print '\nrcn', result_c_names, '\nrv', results_variable, '\nrd1', rd1[:,:,0], '\nrd1', rd2[:,:,0]
 
-        return RockPyData(column_names=result_c_names, row_names=self.row_names, units=None, data=results_data)
+        # todo: care about uncertainties
+        results_data = np.append(results_variable, rd1[:,:,0] - rd2[:,:,0], axis=1)  # variable columns + calculated data columns
+
+        return RockPyData(column_names=result_c_names, row_names=self.row_names, units=None, values=results_data)
 
     def __add__(self, other):
         """
@@ -334,9 +442,10 @@ class RockPyData(object):
 
         result_c_names, results_variable, rd1, rd2 = self._get_arithmetic_data(other)
 
-        results_data = np.append(results_variable, rd1 + rd2, axis=1)  # variable columns + calculated data columns
+        # todo: care about uncertainties
+        results_data = np.append(results_variable, rd1[:,:,0] + rd2[:,:,0], axis=1)  # variable columns + calculated data columns
 
-        return RockPyData(column_names=result_c_names, row_names=self.row_names, data=results_data)
+        return RockPyData(column_names=result_c_names, row_names=self.row_names, values=results_data)
 
     def __mul__(self, other):
         """
@@ -355,9 +464,10 @@ class RockPyData(object):
 
         result_c_names, results_variable, rd1, rd2 = self._get_arithmetic_data(other)
 
-        results_data = np.append(results_variable, rd1 * rd2, axis=1)  # variable columns + calculated data columns
+        # todo: care about uncertainties
+        results_data = np.append(results_variable, rd1[:,:,0] * rd2[:,:,0], axis=1)  # variable columns + calculated data columns
 
-        return RockPyData(column_names=result_c_names, row_names=self.row_names, data=results_data)
+        return RockPyData(column_names=result_c_names, row_names=self.row_names, values=results_data)
 
     def __div__(self, other):
         """
@@ -376,9 +486,10 @@ class RockPyData(object):
 
         result_c_names, results_variable, rd1, rd2 = self._get_arithmetic_data(other)
 
-        results_data = np.append(results_variable, rd1 / rd2, axis=1)  # variable columns + calculated data columns
+        # todo: care about uncertainties
+        results_data = np.append(results_variable, rd1[:,:,0] / rd2[:,:,0], axis=1)  # variable columns + calculated data columns
 
-        return RockPyData(column_names=result_c_names, row_names=self.row_names, data=results_data)
+        return RockPyData(column_names=result_c_names, row_names=self.row_names, values=results_data)
 
     def _get_arithmetic_data(self, other):
         """
@@ -426,8 +537,7 @@ class RockPyData(object):
         # todo: check if matching rows are unique !!!
 
         result_c_names = self.column_names_from_key('variable') + self.column_indices_to_names(mcidx[:, 0])
-        results_variable = d1[mridx[:, 0],
-                           :]  # all columns of variable but only those lines which match in both rockpydata objects
+        results_variable = d1[mridx[:, 0],:]  # all columns of variable but only those lines which match in both rockpydata objects
 
         # data for calculation of both objects with reordered columns according to mcidx
         rd1 = self.data[mridx[:, 0], :][:, mcidx[:, 0]]
@@ -451,10 +561,11 @@ class RockPyData(object):
 
         tab = PrettyTable(('row_name',)+tuple(self.column_names))
         for i in range(self.row_count):
+            linestrs = tuple( ['%s +- %s' % (str(v),str(u)) if not np.isnan( u) else str(v) for (v,u) in self.data[i]])
             if self.row_names is None:
-                l = (i,) + tuple(self.data[i]) # if there are no row labels, put numeric index in first column
+                l = (i,) + linestrs # if there are no row labels, put numeric index in first column
             else:
-                l = (self.row_names[i],) + tuple(self.data[i]) # otherwise put row label in first column
+                l = (self.row_names[i],) + linestrs # otherwise put row label in first column
             tab.add_row(l)
 
         return tab.get_string()
@@ -483,7 +594,7 @@ class RockPyData(object):
     """ METHODS returning OBJECTS """
 
     def running_ave(self):
-        pass
+        raise NotImplemented
 
     def differentiate(self):
         raise NotImplemented
@@ -568,29 +679,7 @@ class RockPyData(object):
         idx = self.column_dict[key][0]
         self.data = self.data[self.data[:, idx].argsort()]
 
-    def rename_column(self, old_cname, new_cname):
-        """
-        renames a column according to specified key
 
-        .. code-block:: python
-
-           d = data(column_names=('Temp','M'), data=[[10, 1.3],[30, 2.2],[20, 1.5]])
-           d.rename_column('Temp', 't')
-           d.column_names
-           ['t', 'M']
-
-        :param old_key: str
-        :param new_key: str
-        """
-
-        if self.column_exists(new_cname):
-            raise KeyError('Column %s already exists.' % new_cname)
-        if not self.column_exists(old_cname):
-            raise KeyError('Column %s does not exist.' % old_cname)
-
-        idx = self._column_names.index(old_cname)
-        self._column_names[idx] = new_cname
-        self._update_column_dictionary(self._column_names)
 
 
     def lin_regress(self, column_name_x, column_name_y):
@@ -639,9 +728,6 @@ class RockPyData(object):
         return slope, sigma, y_intercept, x_intercept
 
 
-#if __name__ == "__main__":
-#    import doctest
-#    doctest.testmod()
     def derivative(self, independent_var='variable', smoothing=1):
         """
 
@@ -664,4 +750,7 @@ class RockPyData(object):
         out.recalc_idx()
         return out
 
-        pass
+
+#if __name__ == "__main__":
+#    import doctest
+#    doctest.testmod()

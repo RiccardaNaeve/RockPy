@@ -17,7 +17,7 @@ class AfDemag(base.Measurement):
                                       **options)
 
     def format_jr6(self):
-        self.data = RockPyData(column_names=['field', 'x', 'y', 'z'], data=self.machine_data.out_afdemag())
+        self.data = RockPyData(column_names=['field', 'x', 'y', 'z'], values=self.machine_data.out_afdemag())
         self.data.define_alias('m', ( 'x', 'y', 'z'))
         self.data.append_columns('mag', self.data.magnitude('m'))
 

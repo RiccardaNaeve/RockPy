@@ -31,7 +31,7 @@ class Thellier(base.Measurement):
         '''
         steps = self.machine_data.steps
         data = self.machine_data.get_float_data()
-        self.all_data = RockPyData(column_names=self.machine_data.float_header, data=data)
+        self.all_data = RockPyData(column_names=self.machine_data.float_header, values=data)
         self.all_data.rename_column('step', 'temp')
         self.all_data.append_columns('time', self.machine_data.get_time_data())
         nrm_idx = [i for i, v in enumerate(steps) if v == 'nrm']

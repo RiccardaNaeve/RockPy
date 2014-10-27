@@ -40,7 +40,7 @@ class Backfield(base.Measurement):
         '''
         data = self.machine_data.out_backfield()
         header = self.machine_data.header
-        self.remanence = RockPyData(column_names=header, data=data[0])
+        self.remanence = RockPyData(column_names=header, values=data[0])
         self.induced = None
 
     @property

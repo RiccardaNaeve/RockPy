@@ -42,8 +42,9 @@ class Hysteresis(base.Measurement):
 
     def format_vsm(self):
         header = self.machine_data.header
-        print header
+
         segments = self.machine_data.segment_info
+
         if 'adjusted field' in header:
             header[header.index('adjusted field')] = 'field'
             header[header.index('field')] = 'uncorrected field'
@@ -66,7 +67,6 @@ class Hysteresis(base.Measurement):
         self.up_field.rename_column('moment', 'mag')
         self.down_field.rename_column('moment', 'mag')
 
-
     def format_microsense(self):
         data = self.machine_data.out_hys()
         header = self.machine_data.header
@@ -88,6 +88,13 @@ class Hysteresis(base.Measurement):
 
         self.virgin = None
         self.msi = None
+
+    # ## calculations
+
+    def irrev(self, **options):
+        irrev = self.down_field
+        irrev -= self.up_field
+        return irrev
 
     # ## parameters
     @property

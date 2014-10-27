@@ -65,13 +65,15 @@ class Vsm(base.Machine):
         # ### header part
         data_header = [i.split('\n')[0] for i in self.raw_out if
                        not i.startswith('+') and not i.startswith('-') and not i.split() == []][:-1]
-        # getting first data line
 
+        # getting first data line
         data_start_idx = [i for i, v in enumerate(self.raw_out) if
                           v.strip().lower().startswith('+') or v.strip().lower().startswith(
                               '-')][0]  # first idx of all indices with + or - (data)
+
         # setting up all data indices
-        data_indices = [data_start_idx] + list(map(int, self.segment_info['final index'])) + [len(self.raw_out[data_start_idx:])]
+        data_indices = [data_start_idx] + [data_start_idx + i for i in list(map(int, self.segment_info['final index']))] #+ [len(self.raw_out[data_start_idx:])]
+
         data = [self.raw_out[data_indices[i]:data_indices[i+1]] for i in range(len(data_indices)-1)]
         data = [[j.strip('\n').split(',') for j in i if not j == '\n'] for i in data]
         data = [np.array([map(float, j) for j in i]) for i in data]

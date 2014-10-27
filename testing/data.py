@@ -15,7 +15,8 @@ def test():
                  (9, 10, 11, 12))
 
     # create a rockpydata object with named columns and filled with testdata
-    d = RockPyData(column_names=('F', 'Mx', 'My', 'Mz'), row_names=('1.Zeile','2.Zeile','3.Zeile'), units=('T', 'mT', 'fT', 'pT'), values=testdata)
+    d = RockPyData(column_names=('F', 'Mx', 'My', 'Mz'), row_names=('1.Zeile','2.Zeile','3.Zeile'), units=('T', 'mT', 'fT', 'pT'), data=testdata)
+
 
     print d.units
     # define as many aliases as you want
@@ -45,7 +46,7 @@ def test():
     d.append_columns('magM', d.magnitude('M'))
 
     # calculate values of 'magM' normalized to 100
-    d.append_columns('normM', d.normalize('magM', 100))
+    #d.append_columns('normM', d.normalize('magM', 100))
 
     # we can also add arbitrary data in a new column
     d.append_columns(("T",), np.array((1, 2, 3)))
@@ -64,7 +65,7 @@ def test():
     # plt.show()
 
     # fancy filtering of data
-    tf_array = (d['Mx'] > 10) & (d['Mx'] < 20)
+    tf_array = (d['Mx'].v > 10) & (d['Mx'].v < 20)
     print 'filtering:'
     filtered_d = d.filter(tf_array)
     print filtered_d['Mx']
@@ -74,7 +75,7 @@ def test():
     # arithmetic operations
     e = deepcopy(d)
     # mutlipy one column with value
-    e['Mx'] *= 2
+    e['Mx'].v * 2
     # calculate difference of two rockpydata objects
     c = e - d
     print c
@@ -91,9 +92,11 @@ def test():
     print repr(c)
 
     # test single line object
-    l = RockPyData(column_names=('A', 'B', 'C', 'D'), row_names=('1.Zeile',), units=('T', 'mT', 'fT', 'pT'), values=((1,2,3,4),))
+    l = RockPyData(column_names=('A', 'B', 'C', 'D'), row_names=('1.Zeile',), units=('T', 'mT', 'fT', 'pT'), data=((1,2,3,4),))
     l.append_columns( 'X', 5)
     print l
+
+
 
 if __name__ == '__main__':
     test()

@@ -29,7 +29,7 @@ class RockPyData(object):
        alias: only used for alias
     """
 
-    def __init__(self, column_names, row_names=None, units=None, values=None, uncertainties=None):
+    def __init__(self, column_names, row_names=None, units=None, data=None):
         """
             :param column_names: sequence of strings naming individual columns
             :param row_names: optional sequence of strings niming individual rows
@@ -37,6 +37,7 @@ class RockPyData(object):
             :param values: numpy array with values
             :param errors: numpy array with error estimates
         """
+        # todo: check dimension of data and the treat as values or values+uncertainties
 
         if type(column_names) is str:  # if we got a single string, convert it to tuple with one entry
             column_names = (column_names,)
@@ -66,7 +67,12 @@ class RockPyData(object):
         self._column_dict['variable'] = (0,)
         self._column_dict['values'] = tuple(range(self.column_count)[1:])
 
-        self['all'] = values
+        #self['all'] = values
+        data = np.array( data)
+        if data.ndim == 2: # two dimension -> only vlaues
+            self.values = data
+        elif data.ndim == 3: # three dimensions -> values + uncertainties
+            self.data = data
 
         if row_names is None:
             self._row_names = None # don't use row names
@@ -136,6 +142,10 @@ class RockPyData(object):
     def data(self):
         return self._data
 
+    @property # alias for data
+    def d(self):
+        return self.data
+
     @data.setter
     def data(self, data):
         """
@@ -145,7 +155,7 @@ class RockPyData(object):
             self._data = None  # clear existing data
             return
 
-        d = np.array(data)
+        d = np.array(data, dtype=float)
         if d.ndim != 3:
             raise TypeError('wrong data dimension')
 
@@ -154,12 +164,21 @@ class RockPyData(object):
 
         self._data = d
 
+    @d.setter
+    def d(self, data): #alias for data
+        self.data = data
+
     @property
     def values(self):
         """
         :return: values
         """
-        return self.data[:,:,0]
+        return self.data[:,:,0].T[0] if self.data.shape[1] == 1 else self.data[:,:,0]
+
+    @property # alias for values
+    def v(self):
+        return self.values
+
 
     @values.setter
     def values(self, values):
@@ -175,19 +194,28 @@ class RockPyData(object):
             self._data = None  # clear existing data
             return
 
-        d = np.array(values)
+        d = np.array(values, dtype = float)
         if d.ndim != 2:
             raise TypeError('wrong data dimension')
 
         if d.shape[1] != self.column_count:
             raise TypeError('%d columns instead of %d in values' % (d.shape[1], self.column_count))
 
-        self._data = d[:,:,np.newaxis]
+        d = d[:,:,np.newaxis]
+        self._data = np.append( d, np.zeros_like( d), axis=2)
         self.uncertainties = None
+
+    @v.setter
+    def v(self, values): #alias for values
+        self.values = values
 
     @property
     def uncertainties(self):
         return self.data[:,:,1]
+
+    @property # alias for uncertainties
+    def u(self):
+        return self.uncertainties
 
 
     @uncertainties.setter
@@ -210,6 +238,10 @@ class RockPyData(object):
                 raise TypeError( 'uncertainties has wrong shape %s instead of %s' % (str( d.shape), str( self.values.shape)))
 
             self._data[:,:,1] = uncertainties
+
+    @u.setter
+    def u(self, uncertainties): #alias for uncertainties
+        self.uncertainties = uncertainties
 
 
     def define_alias(self, alias_name, column_names):
@@ -348,24 +380,63 @@ class RockPyData(object):
         """
         return self.column_indices_to_names(self.column_dict[key])
 
+    def _keyseq2colseq(self, key):
+        """
+        convert a given list of keys to a list of column indices
+
+        :param keys: can be single string or single int or sequence of those
+        :return: tuple of column indices
+        """
+
+        colidxs = []
+        # check type of key and convert to tuple of column indices
+        try:
+            if isinstance( key, basestring): # single string
+                colidxs.extend( self.column_dict[key])
+            elif isinstance( key, int): # single int
+                if key < self.column_count and key >= 0:
+                    colidxs.append(key)
+                else:
+                    raise KeyError( 'key is out of range')
+            elif all(isinstance(k, basestring) for k in key): # list of strings
+                for k in key:
+                    colidxs.extend(self.column_dict[k])
+            elif all(isinstance(k, int) for k in key): # list of ints
+                if max( key) < self.column_count and min(key) >= 0:
+                    colidxs = key
+                else:
+                    raise KeyError( 'at least one key is out of range')
+            else:
+                raise KeyError( 'invalid key %s' % str(key))
+        except TypeError:
+            raise KeyError( 'invalid key %s' % str(key))
+
+        return colidxs
+
+
     def __getitem__(self, key):
         """
         allows access to data columns by index (names)
+        accepts single column or sequence of columns
         e.g. data['mass']
         """
-        # check if key is valid
-        if not self.key_exists(key):
-            raise KeyError('key %s is not a valid column name or alias' % key)
 
         if self._data is None:
             return None
             # todo: return multiple Nones corresponding to alias length
 
+        colidxs = self._keyseq2colseq( key)
+
+        return RockPyData( column_names = self.column_indices_to_names( colidxs),
+                           row_names = self.row_names,
+                           units = None,
+                           data = self.data[:, colidxs])
+
         # return appropriate columns from self.data numpy array
-        d = self.values[:, self._column_dict[key]]
-        if d.shape[1] == 1:
-            d = d.T[0]
-        return d
+        #d = self.values[:, self._column_dict[key]]
+        #if d.shape[1] == 1:
+        #    d = d.T[0]
+        #return d
 
     def __setitem__(self, key, values):
         """
@@ -423,7 +494,7 @@ class RockPyData(object):
         # todo: care about uncertainties
         results_data = np.append(results_variable, rd1[:,:,0] - rd2[:,:,0], axis=1)  # variable columns + calculated data columns
 
-        return RockPyData(column_names=result_c_names, row_names=self.row_names, units=None, values=results_data)
+        return RockPyData(column_names=result_c_names, row_names=self.row_names, units=None, data=results_data)
 
     def __add__(self, other):
         """
@@ -445,7 +516,7 @@ class RockPyData(object):
         # todo: care about uncertainties
         results_data = np.append(results_variable, rd1[:,:,0] + rd2[:,:,0], axis=1)  # variable columns + calculated data columns
 
-        return RockPyData(column_names=result_c_names, row_names=self.row_names, values=results_data)
+        return RockPyData(column_names=result_c_names, row_names=self.row_names, data=results_data)
 
     def __mul__(self, other):
         """
@@ -467,7 +538,7 @@ class RockPyData(object):
         # todo: care about uncertainties
         results_data = np.append(results_variable, rd1[:,:,0] * rd2[:,:,0], axis=1)  # variable columns + calculated data columns
 
-        return RockPyData(column_names=result_c_names, row_names=self.row_names, values=results_data)
+        return RockPyData(column_names=result_c_names, row_names=self.row_names, data=results_data)
 
     def __div__(self, other):
         """
@@ -489,7 +560,7 @@ class RockPyData(object):
         # todo: care about uncertainties
         results_data = np.append(results_variable, rd1[:,:,0] / rd2[:,:,0], axis=1)  # variable columns + calculated data columns
 
-        return RockPyData(column_names=result_c_names, row_names=self.row_names, values=results_data)
+        return RockPyData(column_names=result_c_names, row_names=self.row_names, data=results_data)
 
     def _get_arithmetic_data(self, other):
         """
@@ -524,12 +595,12 @@ class RockPyData(object):
         mcidx = np.array([(self.column_names.index(n), other.column_names.index(n)) for n in matching_cnames])
 
         # get indices of matching 'variable' values
-        d1 = self['variable']
+        d1 = self['variable'].values
         # make sure d1 is 2 dim, even if there is only one column
         if d1.ndim == 1:
             d1 = d1.reshape(d1.shape[0], 1)
 
-        d2 = other['variable']
+        d2 = other['variable'].values
         # make sure d1 is 2 dim, even if there is only one column
         if d2.ndim == 1:
             d2 = d2.reshape(d2.shape[0], 1)
@@ -579,7 +650,7 @@ class RockPyData(object):
         * np.array of data
         """
 
-        return np.sum(np.abs(self[key]) ** 2, axis=-1) ** (1. / 2)
+        return np.sum(np.abs(self[key].values) ** 2, axis=-1) ** (1. / 2)
 
     def normalize(self, column_name, value=1.0):
         """

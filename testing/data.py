@@ -44,6 +44,8 @@ def test():
     # calculate magnitude of vector 'M' and save it as new column 'magM'
     d.append_columns('magM', d.magnitude('M'))
 
+    d.concat(d.magnitude(('Mx', 'My', 'Mz')))
+    d.derivative('field', ('Mx', 'My', 'Mz'))
     # calculate values of 'magM' normalized to 100
     d.append_columns('normM', d.normalize('magM', 100))
 
@@ -68,8 +70,6 @@ def test():
     print 'filtering:'
     filtered_d = d.filter(tf_array)
     print filtered_d['Mx']
-
-
 
     # arithmetic operations
     e = deepcopy(d)

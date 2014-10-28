@@ -42,7 +42,6 @@ class Hysteresis(base.Measurement):
 
     def format_vsm(self):
         header = self.machine_data.header
-
         segments = self.machine_data.segment_info
 
         if 'adjusted field' in header:

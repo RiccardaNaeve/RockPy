@@ -86,7 +86,7 @@ class Vsm(base.Machine):
 
         if self.measurement_header['INSTRUMENT']['Temperature in'] == 'Kelvin':
             for i in range(len(data)):
-                data[i][:,] *= 1e-3 # emu to Am^2
+                # data[i][:,] *= 1e-3 # emu to Am^2
                 data[i][:,self.header_idx['temperature']] -= 273.15 # K to C
         return data
 

@@ -477,16 +477,10 @@ class RockPyData(object):
 
     There are several cases to distinguish when doing math with RockPyData objects!
 
+    RockPyData objects can have several variable columns (defined via alias) and several data columns
     Depending on the content of the RockPyData objects arithmetic operations work differently
+    Units and errors are propagated when possible
 
-    States of RockPyDataObjects:
-
-    A) no variable column, one data column
-    B) no variable column, more than one data column
-    C) one or more variable columns, one data column
-    D) one or more variable columns, more than one data column
-
-    # = arithmetic operator (i.e. +,-,*,/)
 
     ROW MATCHING
     If both operands contain a variable (one or many columns) calculation is performed only on
@@ -495,13 +489,13 @@ class RockPyData(object):
 
 
     COLUMN MATCHING
-    If both operands contain more than one data column calculation is performed only on matching columns
-    If one operand contains only one data column, calculation is applied to all columns of other operand
+    If second operand contains more than one data column calculation is performed only on matching columns
+    If second operand contains only one data column, calculation is applied to all columns of first operand
 
 
     open questions
     * how are row labels handled?
-    * what if C / D ? one data column divided by multiple others?
+    * variable columns must be unique to make matching work, better row label matching?
     """
 
 

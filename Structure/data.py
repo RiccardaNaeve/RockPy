@@ -471,6 +471,39 @@ class RockPyData(object):
         self._data[:, self._column_dict[key],0] = values
         self.uncertainties = None
 
+    """
+    arithmetic operations
+    =====================
+
+    There are several cases to distinguish when doing math with RockPyData objects!
+
+    Depending on the content of the RockPyData objects arithmetic operations work differently
+
+    States of RockPyDataObjects:
+
+    A) no variable column, one data column
+    B) no variable column, more than one data column
+    C) one or more variable columns, one data column
+    D) one or more variable columns, more than one data column
+
+    # = arithmetic operator (i.e. +,-,*,/)
+
+    ROW MATCHING
+    If both operands contain a variable (one or many columns) calculation is performed only on
+    rows with matching variables. Only those rows are returned.
+    If at least one operand does not contain a variable, number of rows must match. Calculations are performed row by row.
+
+
+    COLUMN MATCHING
+    If both operands contain more than one data column calculation is performed only on matching columns
+    If one operand contains only one data column, calculation is applied to all columns of other operand
+
+
+    open questions
+    * how are row labels handled?
+    * what if C / D ? one data column divided by multiple others?
+    """
+
 
     def __sub__(self, other):
         """
@@ -566,7 +599,6 @@ class RockPyData(object):
         """
         looks for matching entries in the 'variable' aliased columns and for matching data columns
         this is needed to prepare an arithmetic operation of two rockpydata objects
-
 
         :param other: rockpydata
         :return

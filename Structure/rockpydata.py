@@ -51,9 +51,9 @@ class rockpydata(object):
 
         if column_names is None:
             # Python < 2.7
-            #self._column_dict = dict((name, (index,)) for (index, name) in enumerate(self._column_names))
+            # self._column_dict = dict((name, (index,)) for (index, name) in enumerate(self._column_names))
             # Python > 2.7
-            self._column_dict = { name: (index,) for (index, name) in enumerate(self._column_names)}
+            self._column_dict = {name: (index,) for (index, name) in enumerate(self._column_names)}
         else:
             for n in column_names:  # check if all column_names are valid, i.e. exist in self._column_names
                 if not self.column_exists(n):
@@ -297,7 +297,7 @@ class rockpydata(object):
         return self.filter(tf_array)
 
     def check_duplicate(self):
-        #todo look for duplicate entries e.g Temp
+        # todo look for duplicate entries e.g Temp
         raise NotImplemented
 
     def sort(self, key='variable'):
@@ -339,8 +339,7 @@ class rockpydata(object):
             self._column_names[idx] = new_key
             self._update_column_dictionary(self._column_names)
         except ValueError:
-            print 'Key << %s >> does not exist' %(old_key)
-
+            print 'Key << %s >> does not exist' % (old_key)
 
 
     def lin_regress(self, column_name_x, column_name_y):

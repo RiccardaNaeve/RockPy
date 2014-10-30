@@ -19,17 +19,6 @@ class Hysteresis(base.Measurement):
         self.up_field = None
         self.down_field = None
 
-        # data formatting
-        if callable(getattr(self, 'format_' + machine)):
-            getattr(self, 'format_' + machine)()
-
-        # ## calculation initialization
-        result_methods = [i[7:] for i in dir(self) if i.startswith('result_')]  # search for implemented results methods
-        self.results = rockpydata(
-            column_names=result_methods)  # dynamic entry creation for all available result methods
-        print self.results._column_names
-
-    # ## formatting functions
     def format_vftb(self):
         self.data = rockpydata(column_names=('field', 'moment', 'temperature', 'time',
                                              'std_dev', 'susceptibility'), data=self.raw_data)

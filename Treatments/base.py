@@ -1,18 +1,18 @@
 __author__ = 'mike'
 import logging
 
-import Functions.general
-from Structure.data import RockPyData
+from RockPy.Functions.general import create_logger
+from RockPy.Structure.data import RockPyData
 
 
 class Generic(object):
-    Functions.general.create_logger('RockPy.TREATMENT')
+    create_logger('RockPy.TREATMENT')
 
     def __init__(self, ttype, value, comment):
         self.log = logging.getLogger('RockPy.TREATMENT.' + type(self).__name__)
         self.log.info('CREATING treatment << %s >>' % ttype)
         self.ttype = ttype
-        self.data = RockPyData(column_names=ttype, values=value)
+        self.data = RockPyData(column_names=ttype, data=value)
         self.comment = comment
 
     def add_value(self, type, value, unit=None):

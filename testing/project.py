@@ -16,7 +16,7 @@ def test():
     S.add_measurement(mtype='hysteresis', mfile=mfile1, machine='vsm')
     S.add_measurement(mtype='backfield', mfile=mfile2, machine='vftb')
 
-    S.results()
+    # S.results() #todo print all results for a sample
 
 if __name__ == '__main__':
     test()

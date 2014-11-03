@@ -12,7 +12,7 @@ def test():
 
     # get bcr
     M.calculate_bcr()  # prints the linear interpolation of the value (internal calculation)
-    print M.bcr  # returns the calculated value
+    print 'bcr', M.bcr  # returns the calculated value
     # print M.s300  # returns the S300 value
 
     M.calc_all()  # calculates all possible results using standard parameters

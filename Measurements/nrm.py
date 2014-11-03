@@ -1,5 +1,5 @@
 import base
-from Structure.data import RockPyData
+from RockPy.Structure.data import RockPyData
 
 
 class Nrm(base.Measurement):

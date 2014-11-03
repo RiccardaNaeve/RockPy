@@ -23,5 +23,5 @@ def test():
     print M.initial_state.data['m'][0]
     print M.th / M.initial_state.data['m'][0]
 
-if __name__ is '__main__':
+if __name__ == '__main__':
     test()

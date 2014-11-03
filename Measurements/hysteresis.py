@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 import base
-from Structure.data import RockPyData
+from RockPy.Structure.data import RockPyData
 
 
 class Hysteresis(base.Measurement):
@@ -29,8 +29,8 @@ class Hysteresis(base.Measurement):
     def format_vftb(self):
         data = self.machine_data.out_hysteresis()
         header = self.machine_data.header
-        self.induced = RockPyData(column_names=header, values=data[0])
-        dfield = np.diff(self.induced['field'])
+        self.induced = RockPyData(column_names=header, data=data[0])
+        dfield = np.diff(self.induced['field'].v)
 
         idx = [i for i in range(len(dfield)) if dfield[i] < 0]
         virgin_idx = range(0, idx[0])

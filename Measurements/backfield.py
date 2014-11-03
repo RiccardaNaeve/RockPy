@@ -2,8 +2,8 @@ __author__ = 'volk'
 import matplotlib.pyplot as plt
 import numpy as np
 
+from RockPy.Structure.data import RockPyData
 import base
-from Structure.data import RockPyData
 
 
 class Backfield(base.Measurement):
@@ -32,6 +32,15 @@ class Backfield(base.Measurement):
         super(Backfield, self).__init__(sample_obj,
                                         mtype, mfile, machine,
                                         **options)
+    #todo dynamic properties
+    #     for i in self.result_methods:
+    #         setattr(self, i, property(self.get_property(i)))
+    #         # self.__dict__[i] = getattr(self, 'result_'+i)()[0]
+    #
+    # def get_property(self, property_name):
+    #     if self.results[property_name] is None or self.results[property_name] == np.nan:
+    #         getattr(self, 'calculate_'+property_name)()
+    #     return self.results[property_name][0]
 
     def format_vftb(self):
         '''
@@ -52,7 +61,7 @@ class Backfield(base.Measurement):
         '''
         if self.results['bcr'] is None or self.results['bcr'] == 0:
             self.calculate_bcr()
-        return self.results['bcr'][0]
+        return self.results['bcr']
 
     @property
     def s300(self):

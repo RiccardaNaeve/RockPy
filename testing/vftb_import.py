@@ -14,5 +14,5 @@ def test():
     # plt.show()
     # print M.up_field['field']
 
-if __name__ is '__main__':
+if __name__ == '__main__':
     test()

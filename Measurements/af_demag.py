@@ -1,8 +1,8 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
+from RockPy.Structure.data import RockPyData
 import base
-from Structure.data import RockPyData
 
 
 class AfDemag(base.Measurement):
@@ -22,7 +22,11 @@ class AfDemag(base.Measurement):
         self.data.append_columns('mag', self.data.magnitude('m'))
 
     def format_sushibar(self):
-        pass
+        self.data = RockPyData(column_names=['field', 'x', 'y', 'z'],
+                               data=self.machine_data.out_afdemag())  # , units=['mT', 'Am^2', 'Am^2', 'Am^2'])
+        self.data.define_alias('m', ( 'x', 'y', 'z'))
+        self.data.append_columns('mag', self.data.magnitude('m'))
+
 
     def result_mdf(self, component='mag', recalc=False):
         """
@@ -39,35 +43,40 @@ class AfDemag(base.Measurement):
         self.log.info('CALCULATING << MDF >> parameter from linear interpolation')
 
         component = parameter.get('component', 'mag')
-        data = self.data[component] / max(self.data[component])  # normalize data
-        idx = np.argmin(np.abs(data) - 0.5)  # index of closest to 0.5
+        data = self.data[component].v / max(self.data[component].v)  # normalize data
+        idx = np.argmin(np.abs(data - 0.5))  # index of closest to 0.5
 
-        if data.all() > 0.5:
+        if np.all(data > 0.5):
             self.log.warning('MDF not reached in measurement, mdf from extrapolated data')
             # getting indices from last two elements
             idx2 = len(data) - 1  # last index
             idx1 = idx2 - 1  # second to last idx
 
         else:
+            print data[idx - 1], data[idx], data[idx + 1]
             if data[idx] < 0.5:
-                idx1 = idx
-                idx2 = idx - 1
-            else:
-                idx1 = idx + 1
+                idx1 = idx - 1
                 idx2 = idx
+            else:
+                idx1 = idx
+                idx2 = idx + 1
 
         i = [idx1, idx2]
-
         d = self.data.filter_idx(index_list=i)
         slope, sigma, y_intercept, x_intercept = d.lin_regress('field', component)
-        mdf = abs((y_intercept * 0.5 ) / slope)
+        mdf = abs((0.5 *max(self.data[component].v) - y_intercept)/ slope)
         self.results['mdf'] = mdf
-
+        self.calculation_parameters['mdf'] = {'component': component}
 
     def plt_afdemag(self, norm=False):
         if norm:
             norm_factor = max(self.data['mag'])
         else:
             norm_factor = 1
-        plt.plot(self.data['field'], self.data['mag'] / norm_factor, '.-')
+
+        plt.title('%s' % self.sample_obj.name)
+        plt.plot(self.data['field'].v, self.data['mag'].v / norm_factor, '.-')
+        plt.xlabel('field [%s]' % 'mT')
+        plt.ylabel('Moment [%s]' % 'Am^2')
+        plt.grid()
         plt.show()

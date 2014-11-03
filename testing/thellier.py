@@ -1,5 +1,5 @@
 __author__ = 'volk'
-from Structure.project import Sample
+from RockPy.Structure.project import Sample
 # thellier output file from cryomag
 
 def test():
@@ -27,7 +27,8 @@ def test():
 
     print M.result_b_anc(t_min=300)
     print M.result_sigma_b_anc(t_min=300)
-
+    M.calc_all()
+    print M.results
     # print M.calculate_y_dash()
     # plotting dunlop plot
     # M.plt_dunlop()
@@ -36,5 +37,5 @@ def test():
     # M.plt_arai()
     # M.calc_all()
     # print M.results
-if __name__ is '__main__':
+if __name__ == '__main__':
     test()

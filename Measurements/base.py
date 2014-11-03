@@ -2,11 +2,14 @@ __author__ = 'volk'
 import logging
 import inspect
 
-import Functions.general
-import Readin.base
-from Structure.data import RockPyData
-from Treatments.base import Generic
-from Readin import *
+import numpy as np
+
+import RockPy
+import RockPy.Functions.general
+import RockPy.Readin.base
+from RockPy.Structure.data import RockPyData
+from RockPy.Treatments.base import Generic
+from RockPy.Readin import *
 
 
 class Measurement(object):
@@ -27,11 +30,11 @@ class Measurement(object):
         """
         self.log = logging.getLogger('RockPy.MEASUREMENT.' + type(self).__name__)
         self.has_data = True
-
+        machine = machine.lower() #for consistency incode
         # setting implemented machines
         # looking for all subclasses of Readin.base.Machine
         # generating a dictionary of implemented machines : {implemented out_* method : machine_class}
-        implemented_machines = [cls for cls in Readin.base.Machine.__subclasses__()]
+        implemented_machines = [cls for cls in RockPy.Readin.base.Machine.__subclasses__()]
         self.implemented = {
             cls.__name__.lower(): {'_'.join(i.split('_')[1:]).lower(): cls for i in dir(cls) if i.startswith('out_')}
             for cls in implemented_machines}
@@ -60,7 +63,7 @@ class Measurement(object):
             else:
                 self.log.error('UNKNOWN\t measurement type: << %s >>' % mtype)
         else:
-            self.log.error('UNKNOWN\t machine << %s >>' % self.machine)
+            self.log.error('UNKNOWN\t machine << %s >>' % machine)
 
         # dynamic data formatting
         # checks is format_'machine_name' exists. If exists it formats self.raw_data according to format_'machine_name'
@@ -73,7 +76,7 @@ class Measurement(object):
 
         else:
             self.log.error(
-                'FORMATTING raw data from << %s >> not possible, probably not implemented, yet.' % self.machine)
+                'FORMATTING raw data from << %s >> not possible, probably not implemented, yet.' % machine)
 
         # dynamical creation of entries in results data. One column for each results_* method.
         # calculation_* methods are not creating columns -> if a result is calculated a result_* method
@@ -225,7 +228,7 @@ class Measurement(object):
             parameter = self.compare_parameters(caller, parameter,
                                                 recalc)  # checks for None and replaces it with standard
             if self.results[caller] is None or self.results[
-                caller] == 0.000 or recalc:  # if results dont exist or force recalc #todo exchange 0.000 with np.nan
+                caller] == np.nan or recalc:  # if results dont exist or force recalc #todo exchange 0.000 with np.nan
                 if recalc:
                     self.log.debug('FORCED recalculation of << %s >>' % (caller))
                 else:

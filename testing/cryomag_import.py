@@ -15,5 +15,5 @@ def test():
     interm = time.clock() - start
     print interm
 
-if __name__ is '__main__':
+if __name__ == '__main__':
     test()

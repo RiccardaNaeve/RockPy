@@ -3,13 +3,12 @@ __author__ = 'Michael Volk'
 # for all project related classes
 import logging
 
-from Functions import general
-import Measurements.base
+from RockPy.Functions import general
+import RockPy.Measurements.base
 
 
 class Sample():
     general.create_logger('RockPy.SAMPLE')
-
     def __init__(self, name,
                  mass=None, mass_unit='kg', mass_machine='generic',
                  height=None, diameter=None, length_unit=None, length_machine='generic',
@@ -61,7 +60,7 @@ class Sample():
         '''
         mtype = mtype.lower()
 
-        implemented = {i.__name__.lower(): i for i in Measurements.base.Measurement.inheritors()}
+        implemented = {i.__name__.lower(): i for i in RockPy.Measurements.base.Measurement.inheritors()}
         if mtype in implemented:
             self.log.info(' ADDING\t << measurement >> %s' % mtype)
             measurement = implemented[mtype](self,

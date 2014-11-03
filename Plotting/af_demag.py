@@ -9,7 +9,15 @@ def field_mom(ax, afdemag_obj, component='mag', norm_factor=[1, 1],
             **plt_opt)
 
 
-def mdf_line(ax, norm_factor=[1, 1],
+def mdf_line(ax, afdemag_obj, component='mag', norm_factor=[1, 1],
              plt_idx=0,
              **plt_opt):
-    ax.axhline(0.5 * norm_factor[1], color='#808080')
+    mdf = afdemag_obj.result_mdf()
+    ax.axvline(mdf.v, linestyle='--', color='#808080')
+
+
+def mdf_txt(ax, afdemag_obj, component='mag', norm_factor=[1, 1],
+            plt_idx=0,
+            **plt_opt):
+    mdf = afdemag_obj.result_mdf()
+    ax.text(mdf.v, 0.5 * (max(afdemag_obj.data[component].v) / norm_factor[1]), '%.1f %s' % (mdf.v, 'mT'))  # todo units

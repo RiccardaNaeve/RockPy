@@ -5,7 +5,7 @@ from copy import deepcopy
 import numpy as np
 from prettytable import PrettyTable
 
-from Structure import ureg
+from RockPy.Structure import ureg
 
 class RockPyData(object):
     # todo units
@@ -747,9 +747,9 @@ class RockPyData(object):
                filtered data
         """
         if invert:
-            tf_array = [False if x in index_list else True for x in range(len(self['data']))]
+            tf_array = [False if x in index_list else True for x in range(len(self.data))]
         else:
-            tf_array = [True if x in index_list else False for x in range(len(self['data']))]
+            tf_array = [True if x in index_list else False for x in range(len(self.data))]
         return self.filter(tf_array)
 
     def check_duplicate(self):
@@ -774,7 +774,8 @@ class RockPyData(object):
                   column_name to be sorted for
         """
         idx = self.column_dict[key][0]
-        self.data = self.data[self.data[:, idx].argsort()]
+        print self.data
+        self.data = self.data[self.data[idx].argsort()]
 
 
 

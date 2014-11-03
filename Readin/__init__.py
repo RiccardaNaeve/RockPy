@@ -1,5 +1,6 @@
 __author__ = 'volk'
-import Functions.general
+import RockPy
+import RockPy.Functions.general
 import microsense
 import cryomag
 import generic
@@ -8,4 +9,4 @@ import vsm
 import spinner
 import sushibar
 
-Functions.general.create_logger('RockPy.READIN')
+RockPy.Functions.general.create_logger('RockPy.READIN')

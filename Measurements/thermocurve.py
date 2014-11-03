@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 import base
-from Structure.data import RockPyData
+from RockPy.Structure.data import RockPyData
 
 
 class ThermoCurve(base.Measurement):
@@ -22,8 +22,8 @@ class ThermoCurve(base.Measurement):
         if len(data) > 2:
             self.log.warning('LENGTH of machine.out_thermocurve =! 2. Assuming data[0] = heating data[1] = cooling')
         if len(data) > 1:
-            self.up_temp = RockPyData(column_names=header, values=data[0])
-            self.down_temp = RockPyData(column_names=header, values=data[1])
+            self.up_temp = RockPyData(column_names=header, data=data[0])
+            self.down_temp = RockPyData(column_names=header, data=data[1])
         else:
             self.log.error('LENGTH of machine.out_thermocurve < 2.')
 
@@ -43,11 +43,11 @@ class ThermoCurve(base.Measurement):
         down_data = [data[i] for i in dt]
         down_data = [j for i in down_data for j in i]
 
-        self.up_temp = RockPyData(column_names=header, values=up_data)
+        self.up_temp = RockPyData(column_names=header, data=up_data)
         self.up_temp.rename_column('temperature', 'temp')
         self.up_temp.rename_column('moment', 'mag')
 
-        self.down_temp = RockPyData(column_names=header, values=down_data)
+        self.down_temp = RockPyData(column_names=header, data=down_data)
         self.down_temp.rename_column('temperature', 'temp')
         self.down_temp.rename_column('moment', 'mag')
 
@@ -63,14 +63,14 @@ class ThermoCurve(base.Measurement):
     def plt_thermocurve(self):
         fig = plt.figure()
         ax = fig.add_subplot(111)
-        ax.plot(self.ut['temp'], self.ut['mag'], '-', color='red')
-        ax.plot(self.dt['temp'], self.dt['mag'], '-', color='blue')
+        ax.plot(self.ut['temp'].v, self.ut['mag'].v, '-', color='red')
+        ax.plot(self.dt['temp'].v, self.dt['mag'].v, '-', color='blue')
         ax.grid()
         # ax.axhline(0, color='#808080')
         # ax.axvline(0, color='#808080')
 
         unit = 'T'
-        field = np.mean(self.ut['field'])
+        field = np.mean(self.ut['field'].v)
 
         if field < 0.01:
             field *= 1000.

@@ -3,7 +3,7 @@ __author__ = 'volk'
 import numpy as np
 import matplotlib.pyplot as plt
 
-from Structure.data import RockPyData
+from RockPy.Structure.data import RockPyData
 import base
 
 
@@ -31,7 +31,7 @@ class Thellier(base.Measurement):
         '''
         steps = self.machine_data.steps
         data = self.machine_data.get_float_data()
-        self.all_data = RockPyData(column_names=self.machine_data.float_header, values=data)
+        self.all_data = RockPyData(column_names=self.machine_data.float_header, data=data)
         self.all_data.rename_column('step', 'temp')
         self.all_data.append_columns('time', self.machine_data.get_time_data())
         nrm_idx = [i for i, v in enumerate(steps) if v == 'nrm']
@@ -46,7 +46,7 @@ class Thellier(base.Measurement):
                 self.__dict__[step] = self.remove_duplicate_measurements(self.__dict__[step])
                 self.__dict__[step].define_alias('m', ( 'x', 'y', 'z'))
                 self.__dict__[step].append_columns('mag', self.__dict__[step].magnitude('m'))
-                self.__dict__[step].sort('temp')
+                # self.__dict__[step].sort('temp') # todo BUG
             else:
                 self.__dict__[step] = None
 
@@ -74,9 +74,9 @@ class Thellier(base.Measurement):
 
         # idx_temp = np.unique(data['temp'], return_index=True, return_inverse=True)[1]
         # find temperatures with more than one entry
-        duplicate_temps = [item for item, count in Counter(data['temp']).iteritems() if count > 1]
+        duplicate_temps = [item for item, count in Counter(data['temp'].v).iteritems() if count > 1]
         # get their indices
-        idx = [np.where(data['temp'] == i)[0] for i in duplicate_temps]
+        idx = [np.where(data['temp'].v == i)[0] for i in duplicate_temps]
 
         # duplicate handling:
         if handling == 'last':  # last one is kept
@@ -117,8 +117,8 @@ class Thellier(base.Measurement):
 
     def delete_temp(self, temp):
         for step in self.steps:
-            o_len = len(getattr(self, step)['temp'])
-            idx = [i for i, v in enumerate(getattr(self, step)['temp']) if v != temp]
+            o_len = len(getattr(self, step)['temp'].v)
+            idx = [i for i, v in enumerate(getattr(self, step)['temp'].v) if v != temp]
             if o_len - len(idx) != 0:
                 self.log.info(
                     'DELETING << %i, %s >> entries for << %.2f >> temperature' % (o_len - len(idx), step, temp))
@@ -286,16 +286,16 @@ class Thellier(base.Measurement):
 
         self.log.info('CALCULATING\t << %s >> arai line fit << t_min=%.1f , t_max=%.1f >>' % (component, t_min, t_max))
 
-        equal_steps = list(set(self.th['temp']) & set(self.ptrm['temp']))
-        th_steps = (t_min <= self.th['temp']) & (self.th['temp'] <= t_max)  # True if step between t_min, t_max
-        ptrm_steps = (t_min <= self.ptrm['temp']) & (self.ptrm['temp'] <= t_max)  # True if step between t_min, t_max
+        equal_steps = list(set(self.th['temp'].v) & set(self.ptrm['temp'].v))
+        th_steps = (t_min <= self.th['temp'].v) & (self.th['temp'].v <= t_max)  # True if step between t_min, t_max
+        ptrm_steps = (t_min <= self.ptrm['temp'].v) & (self.ptrm['temp'].v <= t_max)  # True if step between t_min, t_max
 
         th_data = self.th.filter(th_steps)  # filtered data for t_min t_max
         ptrm_data = self.ptrm.filter(ptrm_steps)  # filtered data for t_min t_max
 
         # filtering for equal variables
-        th_idx = [i for i, v in enumerate(th_data['temp']) if v in equal_steps]
-        ptrm_idx = [i for i, v in enumerate(ptrm_data['temp']) if v in equal_steps]
+        th_idx = [i for i, v in enumerate(th_data['temp'].v) if v in equal_steps]
+        ptrm_idx = [i for i, v in enumerate(ptrm_data['temp'].v) if v in equal_steps]
 
         th_data = th_data.filter_idx(th_idx)  # filtered data for equal t(th) & t(ptrm)
         ptrm_data = ptrm_data.filter_idx(ptrm_idx)  # filtered data for equal t(th) & t(ptrm)
@@ -303,8 +303,8 @@ class Thellier(base.Measurement):
         data = RockPyData(['th', 'ptrm'])
 
         # setting the data
-        data['th'] = th_data[component]
-        data['ptrm'] = ptrm_data[component]
+        data['th'] = th_data[component].v
+        data['ptrm'] = ptrm_data[component].v
 
         slope, sigma, y_int, x_int = data.lin_regress('ptrm', 'th')
 
@@ -312,7 +312,7 @@ class Thellier(base.Measurement):
         self.results['sigma'] = sigma
         self.results['y_int'] = y_int
         self.results['x_int'] = x_int
-        self.results['n'] = len(th_data[component])
+        self.results['n'] = len(th_data[component].v)
 
         self.calculation_parameters['slope'] = {'t_min': t_min, 't_max': t_max, 'component': component}
 
@@ -325,7 +325,7 @@ class Thellier(base.Measurement):
         """
 
         b_lab = parameter.get('b_lab')
-        self.results['b_anc'] = b_lab * abs(self.results['slope'])
+        self.results['b_anc'] = b_lab * abs(self.results['slope'].v)
         self.calculation_parameters['b_anc'] = {'b_lab': b_lab}
 
     def calculate_sigma_b_anc(self, **parameter):
@@ -337,7 +337,7 @@ class Thellier(base.Measurement):
         """
 
         b_lab = parameter.get('b_lab')
-        self.results['sigma_b_anc'] = b_lab * abs(self.results['sigma'])
+        self.results['sigma_b_anc'] = b_lab * abs(self.results['sigma'].v)
         self.calculation_parameters['sigma_b_anc'] = {'b_lab': b_lab}
 
     def calculate_vds(self, **parameter):  # todo move in rockpydata?
@@ -355,7 +355,7 @@ class Thellier(base.Measurement):
         :return:
 
         '''
-        NRM_t_max = self.th['mag'][-1]
+        NRM_t_max = self.th['mag'].v[-1]
         NRM_sum = np.sum(self.calculate_vd(**parameter))
         self.results['vds'] = NRM_t_max + NRM_sum
 
@@ -370,9 +370,9 @@ class Thellier(base.Measurement):
         t_min = parameter.get('t_min', self.standard_parameters['vd']['t_min'])
         t_max = parameter.get('t_max', self.standard_parameters['vd']['t_max'])
 
-        idx = (self.th['temp'] <= t_max) & (t_min <= self.th['temp'])
+        idx = (self.th['temp'].v <= t_max) & (t_min <= self.th['temp'].v)
         data = self.th.filter(idx)
-        vd = np.array([np.linalg.norm(i) for i in np.diff(data['m'], axis=0)])
+        vd = np.array([np.linalg.norm(i) for i in np.diff(data['m'].v, axis=0)])
         return vd
 
     def calculate_x_dash(self, **parameter):
@@ -438,20 +438,20 @@ class Thellier(base.Measurement):
 
         self.log.info('CALCULATING\t << %s >> y_dash << t_min=%.1f , t_max=%.1f >>' % (component, t_min, t_max))
 
-        idx = (self.th['temp'] <= t_max) & (t_min <= self.th['temp'])  # filtering for t_min/t_max
+        idx = (self.th['temp'].v <= t_max) & (t_min <= self.th['temp'].v)  # filtering for t_min/t_max
         y = self.th.filter(idx)
 
-        idx = (self.ptrm['temp'] <= t_max) & (t_min <= self.ptrm['temp'])
+        idx = (self.ptrm['temp'].v <= t_max) & (t_min <= self.ptrm['temp'].v)
         x = self.ptrm.filter(idx)
 
-        idx = np.array([(ix, iy) for iy, v1 in enumerate(self.ptrm['temp'])
-                        for ix, v2 in enumerate(self.th['temp'])
+        idx = np.array([(ix, iy) for iy, v1 in enumerate(self.ptrm['temp'].v)
+                        for ix, v2 in enumerate(self.th['temp'].v)
                         if v1 == v2])  # filtering for equal var
 
         x = x.filter_idx(idx[:, 0])
         y = y.filter_idx(idx[:, 1])
 
-        y_dash = 0.5 * ( y[component] + self.result_slope(**parameter) * x[component] + self.result_y_int(**parameter))
+        y_dash = 0.5 * ( y[component].v + self.result_slope(**parameter).v * x[component].v + self.result_y_int(**parameter).v)
         return y_dash
 
     def calculate_delta_x_dash(self, **parameter):
@@ -493,7 +493,7 @@ class Thellier(base.Measurement):
 
         self.log.debug('CALCULATING\t f parameter')
         delta_y_dash = self.calculate_delta_y_dash(**parameter)
-        y_int = self.results['y_int']
+        y_int = self.results['y_int'].v
         self.results['f'] = delta_y_dash / abs(y_int)
 
     def calculate_f_vds(self, **parameter):
@@ -510,7 +510,7 @@ class Thellier(base.Measurement):
 
         """
         delta_y = self.calculate_delta_y_dash(**parameter)
-        VDS = self.result_vds(**parameter)
+        VDS = self.result_vds(**parameter).v
         self.results['f_vds'] = delta_y / VDS
 
     def calculate_frac(self, **parameter):
@@ -529,7 +529,7 @@ class Thellier(base.Measurement):
         """
 
         NRM_sum = np.sum(np.fabs(self.calculate_vd(**parameter)))
-        VDS = self.result_vds(**parameter)
+        VDS = self.result_vds(**parameter).v
         self.results['frac'] = NRM_sum / VDS
 
     def calculate_beta(self, **parameter):
@@ -548,8 +548,8 @@ class Thellier(base.Measurement):
 
         """
 
-        slope = self.result_slope(**parameter)
-        sigma = self.result_sigma(**parameter)
+        slope = self.result_slope(**parameter).v
+        sigma = self.result_sigma(**parameter).v
         self.results['beta'] = sigma / abs(slope)
 
     def calculate_g(self, **parameter):
@@ -600,9 +600,9 @@ class Thellier(base.Measurement):
         """
         self.log.debug('CALCULATING\t quality parameter')
 
-        beta = self.result_beta(**parameter)
-        f = self.result_f(**parameter)
-        gap = self.result_g(**parameter)
+        beta = self.result_beta(**parameter).v
+        f = self.result_f(**parameter).v
+        gap = self.result_g(**parameter).v
 
         self.results['q'] = (f * gap) / beta
 
@@ -630,6 +630,6 @@ class Thellier(base.Measurement):
 
         :param parameter:
         """
-        q = self.result_q(**parameter)
-        n = self.result_n(**parameter)
+        q = self.result_q(**parameter).v
+        n = self.result_n(**parameter).v
         self.results['w'] = q / np.sqrt((n - 2))

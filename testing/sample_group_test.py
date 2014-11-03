@@ -14,5 +14,5 @@ def test():
 
     SG.get_results(mtype='thellier')
 
-if __name__ is '__main__':
+if __name__ == '__main__':
     test()

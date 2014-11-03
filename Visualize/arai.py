@@ -37,7 +37,7 @@ class Arai(base.Generic):
                 arai.arai(self.ax, thellier, self.parameter, **self.plt_opt)
                 arai.arai_line(self.ax, thellier, self.parameter, **self.plt_opt)
 
-                x.append(max(thellier.ptrm[self.parameter['component']]))  # append max for x_lim
-                y.append(max(thellier.th[self.parameter['component']]))  # append max for y_lim
+                x.append(max(thellier.ptrm[self.parameter['component']].v))  # append max for x_lim
+                y.append(max(thellier.th[self.parameter['component']].v))  # append max for y_lim
         self.ax.set_xlim([0, max(x)])
         self.ax.set_ylim([0, max(y)])

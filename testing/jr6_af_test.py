@@ -2,7 +2,7 @@ __author__ = 'mike'
 from Structure.project import Sample
 
 def test():
-    data = 'test_data/High_T_AF-demag_neu.jr6'
+    data = 'test_data/MUCSPN_afdemag.jr6'
 
     S = Sample(name='VB')
 
@@ -11,5 +11,5 @@ def test():
     M.calc_all()
     print M.results
 
-if __name__ is '__main__':
+if __name__ == '__main__':
     test()

@@ -4,11 +4,11 @@ import logging
 import numpy as np
 import matplotlib.pyplot as plt
 
-import Functions
+import RockPy.Functions
 
 
 class Generic(object):
-    Functions.general.create_logger('RockPy.VISUALIZE')
+    RockPy.Functions.general.create_logger('RockPy.VISUALIZE')
 
     def __init__(self, sample_list, norm=None,
                  plot='show', folder=None, name=None,

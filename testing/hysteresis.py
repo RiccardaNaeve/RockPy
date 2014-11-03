@@ -1,5 +1,5 @@
 __author__ = 'volk'
-from Structure.project import Sample
+from RockPy.Structure.project import Sample
 
 def test():
     vftb_file = 'test_data/MUCVFTB_test.hys'

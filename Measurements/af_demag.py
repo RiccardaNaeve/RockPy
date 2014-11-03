@@ -21,6 +21,9 @@ class AfDemag(base.Measurement):
         self.data.define_alias('m', ( 'x', 'y', 'z'))
         self.data.append_columns('mag', self.data.magnitude('m'))
 
+    def format_sushibar(self):
+        pass
+
     def result_mdf(self, component='mag', recalc=False):
         """
         Calculates the MDF (median destructive field from data using linear interpolation between closest points

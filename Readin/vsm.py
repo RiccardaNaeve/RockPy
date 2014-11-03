@@ -57,7 +57,7 @@ class Vsm(base.Machine):
              j in segment_start_idx]).T
         segment_info = [' '.join(i) for i in segment_info]
         segment_info = np.array([' '.join(j.split()).lower() for j in segment_info])
-        out = RockPyData(column_names=segment_info, values=segment_data)
+        out = RockPyData(column_names=segment_info, data=segment_data)
         return out
 
     @property
@@ -72,7 +72,7 @@ class Vsm(base.Machine):
                               '-')][0]  # first idx of all indices with + or - (data)
 
         # setting up all data indices
-        data_indices = [data_start_idx] + [data_start_idx + i for i in list(map(int, self.segment_info['final index']))] #+ [len(self.raw_out[data_start_idx:])]
+        data_indices = [data_start_idx] + [data_start_idx + i for i in list(map(int, self.segment_info['final index'].v))] #+ [len(self.raw_out[data_start_idx:])]
 
         data = [self.raw_out[data_indices[i]:data_indices[i+1]] for i in range(len(data_indices)-1)]
         data = [[j.strip('\n').split(',') for j in i if not j == '\n'] for i in data]
@@ -87,7 +87,7 @@ class Vsm(base.Machine):
         if self.measurement_header['INSTRUMENT']['Temperature in'] == 'Kelvin':
             for i in range(len(data)):
                 # data[i][:,] *= 1e-3 # emu to Am^2
-                data[i][:,self.header_idx['temperature']] -= 273.15 # K to C
+                data[i][:,self.header_idx['temperature']] -= 0#273.15 # K to C
         return data
 
     def readMicroMagHeader(self, lines):

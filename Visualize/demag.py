@@ -41,7 +41,7 @@ class AfDemag(base.Generic):
         if not self.norm:
             return [1, 1]
         if self.norm == 'max':
-            nf = max(measurement.data[self.component])
+            nf = max(measurement.data[self.component].v)
             return [1, nf]
         if self.norm == 'mass':
             return [1, measurement.sample_obj.mass_kg]

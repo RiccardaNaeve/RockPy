@@ -21,7 +21,8 @@ class T_v_Hys(base.Generic):
         measurement_dict = self.get_measurement_dict(mtype='hysteresis')
         for S in measurement_dict:
             for measurement in measurement_dict[S]:
-                # Plotting.hysteresis.vigin_branch(self.ax, measurement)
-                Plotting.hysteresis.up_field_branch(self.ax, measurement)
-                Plotting.hysteresis.down_field_branch(self.ax, measurement)
+                if measurement.virgin:
+                    Plotting.hysteresis.vigin_branch(self.ax, measurement)
+                # Plotting.hysteresis.up_field_branch(self.ax, measurement)
+                # Plotting.hysteresis.down_field_branch(self.ax, measurement)
                 # print measurement.down_field['field']

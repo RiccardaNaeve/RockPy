@@ -18,6 +18,7 @@ class Hysteresis(base.Measurement):
 
 
     """
+
     def __init__(self, sample_obj,
                  mtype, mfile, machine,
                  **options):
@@ -52,19 +53,35 @@ class Hysteresis(base.Measurement):
             header[header.index('moment')] = 'uncorrected moment'
             header[header.index('adjusted moment')] = 'moment'
 
-        if len(segments['segment number']) == 3:
-            self.virgin = RockPyData(column_names=header, values=self.machine_data.out_hysteresis()[0])
-            self.down_field = RockPyData(column_names=header, values=self.machine_data.out_hysteresis()[1])
-            self.up_field = RockPyData(column_names=header, values=self.machine_data.out_hysteresis()[2])
+        if len(segments['segment number'].v) == 3:
+            self.virgin = RockPyData(column_names=header, data=self.machine_data.out_hysteresis()[0])
+            self.down_field = RockPyData(column_names=header, data=self.machine_data.out_hysteresis()[1])
+            self.up_field = RockPyData(column_names=header, data=self.machine_data.out_hysteresis()[2])
 
-        if len(segments['segment number']) == 2:
+        if len(segments['segment number'].v) == 2:
             self.virgin = None
-            self.down_field = RockPyData(column_names=header, values=self.machine_data.out_hysteresis()[0])
-            self.up_field = RockPyData(column_names=header, values=self.machine_data.out_hysteresis()[1])
+            self.down_field = RockPyData(column_names=header, data=self.machine_data.out_hysteresis()[0])
+            self.up_field = RockPyData(column_names=header, data=self.machine_data.out_hysteresis()[1])
 
-        self.virgin.rename_column('moment', 'mag')
-        self.up_field.rename_column('moment', 'mag')
-        self.down_field.rename_column('moment', 'mag')
+        if len(segments['segment number'].v) == 1:
+            self.virgin = RockPyData(column_names=header, data=self.machine_data.out_hysteresis()[0])
+            self.down_field = None
+            self.up_field = None
+
+        try:
+            self.virgin.rename_column('moment', 'mag')
+        except AttributeError:
+            pass
+
+        try:
+            self.up_field.rename_column('moment', 'mag')
+        except AttributeError:
+            pass
+
+        try:
+            self.down_field.rename_column('moment', 'mag')
+        except AttributeError:
+            pass
 
     def format_microsense(self):
         data = self.machine_data.out_hys()
@@ -218,7 +235,7 @@ class Hysteresis(base.Measurement):
         pass  # todo implement
 
     def calculate_mrs(self):
-        pass  #todo implement
+        pass  # todo implement
 
     def calculate_bc(self):
         '''
@@ -263,7 +280,7 @@ class Hysteresis(base.Measurement):
         self.results['sigma_bc'] = np.std([df, uf])
 
     def calculate_brh(self):
-        pass  #todo implement
+        pass  # todo implement
 
 
     def down_field_interp(self):
@@ -307,8 +324,8 @@ class Hysteresis(base.Measurement):
         :return:
         '''
 
-        std, = plt.plot(self.down_field['field'], self.down_field['mag'], '.-', zorder=1)
-        plt.plot(self.up_field['field'], self.up_field['mag'], '.-',
+        std, = plt.plot(self.down_field['field'].v, self.down_field['mag'].v, '.-', zorder=1)
+        plt.plot(self.up_field['field'].v, self.up_field['mag'].v, '.-',
                  color=std.get_color(),
                  zorder=1)
 
@@ -321,10 +338,10 @@ class Hysteresis(base.Measurement):
         # zorder=1)
 
         if not self.virgin is None:
-            plt.plot(self.virgin['field'], self.virgin['mag'], color=std.get_color(), zorder=1)
+            plt.plot(self.virgin['field'].v, self.virgin['mag'].v, color=std.get_color(), zorder=1)
 
         # ## plotting pc as crosses
-        plt.plot([-(self.bc + (self.bc_diff / 2)), self.bc - (self.bc_diff / 2)], [0, 0], 'xr')
+        # plt.plot([-(self.bc + (self.bc_diff / 2)), self.bc - (self.bc_diff / 2)], [0, 0], 'xr')
         plt.axhline(0, color='#808080')
         plt.axvline(0, color='#808080')
         plt.grid()

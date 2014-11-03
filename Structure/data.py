@@ -786,8 +786,8 @@ class RockPyData(object):
         :param column_name_y:
         """
 
-        x = self[column_name_x]
-        y = self[column_name_y]
+        x = self[column_name_x].v
+        y = self[column_name_y].v
 
         if len(x) < 2 or len(y) < 2:
             return None

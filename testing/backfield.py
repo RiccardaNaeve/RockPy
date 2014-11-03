@@ -20,5 +20,5 @@ def test():
     # rudimentary plot
     # M.plt_backfield()
 
-if __name__ is '__main__':
+if __name__ == '__main__':
     test()

@@ -40,7 +40,7 @@ class Backfield(base.Measurement):
         '''
         data = self.machine_data.out_backfield()
         header = self.machine_data.header
-        self.remanence = RockPyData(column_names=header, values=data[0])
+        self.remanence = RockPyData(column_names=header, data=data[0])
         self.induced = None
 
     @property
@@ -99,9 +99,9 @@ class Backfield(base.Measurement):
         self.log.info('CALCULATING << Bcr >> parameter from linear interpolation')
         self.log.info('               ---    If sample is not saturated, value could be too low')
 
-        idx = np.argmin(np.abs(self.remanence['mag']))  # index of closest to 0
+        idx = np.argmin(np.abs(self.remanence['mag'].v))  # index of closest to 0
 
-        if self.remanence['mag'][idx] < 0:
+        if self.remanence['mag'].v[idx] < 0:
             idx1 = idx
             idx2 = idx - 1
         else:
@@ -109,7 +109,7 @@ class Backfield(base.Measurement):
             idx2 = idx
 
         i = [idx1, idx2]
-        tf_array = [True if x in i else False for x in range(len(self.remanence['mag']))]
+        tf_array = [True if x in i else False for x in range(len(self.remanence['mag'].v))]
         d = self.remanence.filter(tf_array=tf_array)
         slope, sigma, y_intercept, x_intercept = d.lin_regress('field', 'mag')
         bcr = - y_intercept / slope
@@ -123,9 +123,9 @@ class Backfield(base.Measurement):
         :return: result
         '''
         self.log.info('CALCULATING << S300 >> parameter, assuming measurement started in saturation remanence')
-        idx = np.argmin(np.abs(self.remanence['field'] + 0.300))
+        idx = np.argmin(np.abs(self.remanence['field'].v + 0.300))
 
-        if self.remanence['field'].all() < 0.300:
+        if self.remanence['field'].v.all() < 0.300:
             self.results['s300'] = np.nan
             return
 

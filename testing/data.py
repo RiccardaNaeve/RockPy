@@ -45,8 +45,6 @@ def test():
     # calculate magnitude of vector 'M' and save it as new column 'magM'
     d.append_columns('magM', d.magnitude('M'))
 
-    d.concat(d.magnitude(('Mx', 'My', 'Mz')))
-    d.derivative('field', ('Mx', 'My', 'Mz'))
     # calculate values of 'magM' normalized to 100
     #d.append_columns('normM', d.normalize('magM', 100))
 
@@ -96,7 +94,7 @@ def test():
     l.append_columns( 'X', 5)
     print l
 
-
+    print l['X']
 
 if __name__ == '__main__':
     test()

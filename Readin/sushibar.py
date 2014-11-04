@@ -21,6 +21,7 @@ class SushiBar(base.Machine):
                              'a95', 'par5', 'par4', 'par3', 'par2', 'sm', 'par6', 'dg', 'is', 'hade', 'dc', 'npos',
                              'bl diff/sample', 'ic', 'ds', 'ig']
         self.raw_data = np.array([i.strip('\r\n').split('\t') for i in self.reader_object])[1:]
+        self.raw_data = np.array([i for i in self.raw_data if i[0] == sample_name])
         self.raw_data = np.array([self.__replace_none(self.raw_data)])[0]
 
     def __replace_none(self, data):
@@ -47,7 +48,11 @@ class SushiBar(base.Machine):
 
     def out_afdemag(self):
         idx = [24, 5, 6, 7]
-        return self.raw_data[:,idx].astype(float)
+        return self.raw_data[:, idx].astype(float)
+
+    def out_trm(self):
+        idx = [24, 5, 6, 7]
+        return self.raw_data[:, idx].astype(float)
 
     def _check_data_exists(self):
         return True

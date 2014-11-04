@@ -22,6 +22,10 @@ class SushiBar(base.Machine):
                              'bl diff/sample', 'ic', 'ds', 'ig']
         self.raw_data = np.array([i.strip('\r\n').split('\t') for i in self.reader_object])[1:]
         self.raw_data = np.array([i for i in self.raw_data if i[0] == sample_name])
+
+        if len(self.raw_data) == 0:
+            self.log.error('SAMPLE NAME not recognized')
+
         self.raw_data = np.array([self.__replace_none(self.raw_data)])[0]
 
     def __replace_none(self, data):
@@ -55,7 +59,11 @@ class SushiBar(base.Machine):
         return self.raw_data[:, idx].astype(float)
 
     def _check_data_exists(self):
-        return True
+        if len(self.raw_data) !=0:
+            return True
+        else:
+            return False
+
 
 
 def test():

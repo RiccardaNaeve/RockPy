@@ -774,7 +774,6 @@ class RockPyData(object):
                   column_name to be sorted for
         """
         idx = self.column_dict[key][0]
-        print self.data
         self.data = self.data[self.data[idx].argsort()]
 
 

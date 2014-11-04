@@ -4,10 +4,10 @@ from Visualize import demag
 
 def test():
     data = 'test_data/MUCSUSH_af_test.af'
-    S = Sample(name='Wurm')
+    S = Sample(name='WURM')
     M=S.add_measurement(mtype='afdemag', mfile=data, machine='SushiBar')
     # M.plt_afdemag()
-    print M.result_mdf()
-    demag.AfDemag(S, norm='max')
+    print M.result_mdf(interpolation='smooth_spline')
+    # demag.AfDemag(S, norm='max')
 if __name__ == '__main__':
     test()

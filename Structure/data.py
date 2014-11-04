@@ -472,7 +472,7 @@ class RockPyData(object):
         self.uncertainties = None
 
     """
-    arithmetic operations
+    todo: arithmetic operations
     =====================
 
     There are several cases to distinguish when doing math with RockPyData objects!

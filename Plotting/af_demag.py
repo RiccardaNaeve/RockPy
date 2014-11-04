@@ -17,7 +17,9 @@ def mdf_line(ax, afdemag_obj, component='mag', norm_factor=[1, 1],
 
 
 def mdf_txt(ax, afdemag_obj, component='mag', norm_factor=[1, 1],
-            plt_idx=0,
+            plt_idx=0, y_shift=0, x_shift=0,
             **plt_opt):
     mdf = afdemag_obj.result_mdf()
-    ax.text(mdf.v, 0.5 * (max(afdemag_obj.data[component].v) / norm_factor[1]), '%.1f %s' % (mdf.v, 'mT'))  # todo units
+    ax.text(x_shift+ mdf.v,
+            y_shift + 0.5 * (max(afdemag_obj.data[component].v) / norm_factor[1]),
+            '%.1f %s' % (mdf.v, 'mT'))  # todo units

@@ -27,20 +27,6 @@ class AfDemag(base.Measurement):
         self.data.define_alias('m', ( 'x', 'y', 'z'))
         self.data.append_columns('mag', self.data.magnitude('m'))
 
-    def smoothing_spline(self, y_component='mag', x_component='field', out_spline=False):
-        from scipy.interpolate import UnivariateSpline
-        x_old = self.data[x_component].v
-        y_old = self.data[y_component].v
-        smoothing_spline = UnivariateSpline(x_old, y_old, s=1)
-
-        if not out_spline:
-            x_new = np.linspace(min(x_old), max(x_old), 100)
-            y_new = smoothing_spline(x_new)
-            out = RockPyData(column_names=[x_component, y_component], data=np.c_[x_new, y_new])
-            return out
-        else:
-            return smoothing_spline
-
     def result_mdf(self, component='mag', interpolation='linear', recalc=False):
         """
         Calculates the MDF (median destructive field from data using linear interpolation between closest points
@@ -84,7 +70,7 @@ class AfDemag(base.Measurement):
             self.results['mdf'] = np.nan
             return
 
-        smooth_spline = self.smoothing_spline(y_component='field', x_component=component, out_spline=False)
+        smooth_spline = self.interpolate_smoothing_spline(y_component='field', x_component=component, out_spline=False)
         # smooth_spline = self.smoothing_spline(x_component='field', y_component=component, out_spline=False)
         print smooth_spline
         plt.plot(self.data['field'].v, self.data['mag'].v, '.')
@@ -96,6 +82,8 @@ class AfDemag(base.Measurement):
     def calc_mdf_linear(self, **parameter):
         component = parameter.get('component', 'mag')
         data = self.data[component].v / max(self.data[component].v)  # normalize data
+        data = np.array([i for i in data if not i == np.nan])
+
         idx = np.argmin(np.abs(data - 0.5))  # index of closest to 0.5
 
         if np.all(data > 0.5):
@@ -105,7 +93,6 @@ class AfDemag(base.Measurement):
             idx1 = idx2 - 1  # second to last idx
 
         else:
-            print data[idx - 1], data[idx], data[idx + 1]
             if data[idx] < 0.5:
                 idx1 = idx - 1
                 idx2 = idx
@@ -118,6 +105,44 @@ class AfDemag(base.Measurement):
         slope, sigma, y_intercept, x_intercept = d.lin_regress('field', component)
         mdf = abs((0.5 * max(self.data[component].v) - y_intercept) / slope)
         self.results['mdf'] = mdf
+
+    ### INTERPOLATION
+
+    def interpolate_smoothing_spline(self, y_component='mag', x_component='field', out_spline=False):
+        """
+        Interpolates using a smoothing spline between a x and y component
+        :param y_component:
+        :param x_component:
+        :param out_spline:
+        :return:
+        """
+        from scipy.interpolate import UnivariateSpline
+        x_old = self.data[x_component].v #
+        y_old = self.data[y_component].v
+        smoothing_spline = UnivariateSpline(x_old, y_old, s=1)
+
+        if not out_spline:
+            x_new = np.linspace(min(x_old), max(x_old), 100)
+            y_new = smoothing_spline(x_new)
+            out = RockPyData(column_names=[x_component, y_component], data=np.c_[x_new, y_new])
+            return out
+        else:
+            return smoothing_spline
+
+    def interpolation_spline(self, y_component='mag', x_component='field', out_spline=False):
+
+        from scipy.interpolate import UnivariateSpline
+        x_old = self.data[x_component].v #
+        y_old = self.data[y_component].v
+        smoothing_spline = UnivariateSpline(x_old, y_old, s=1)
+
+        if not out_spline:
+            x_new = np.linspace(min(x_old), max(x_old), 100)
+            y_new = smoothing_spline(x_new)
+            out = RockPyData(column_names=[x_component, y_component], data=np.c_[x_new, y_new])
+            return out
+        else:
+            return smoothing_spline
 
     def plt_afdemag(self, norm=False):
         if norm:

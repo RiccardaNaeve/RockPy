@@ -18,7 +18,7 @@ class AfDemag(base.Generic):
                                       plt_opt=plt_opt, style=style,
                                       **options)
         self.component = component
-        self.show()
+        self.show(**options)
 
         self.x_label = 'AF-Field [%s]' % ('mT')  # todo get_unit
         self.y_label = 'Magnetic Moment [%s]' % ('Am^2')  # todo get_unit
@@ -29,7 +29,11 @@ class AfDemag(base.Generic):
 
         self.out()
 
-    def show(self):
+    def show(self, **options):
+        mdf_line = options.get('mdf_line', True)
+        mdf_text = options.get('mdf_text', False)
+        shift = 0
+
         for sample, measurements in self.get_measurement_dict(mtype='afdemag').iteritems():
             for measurement in measurements:
                 plt_opt = self.get_plt_opt(sample, measurements, measurement)
@@ -37,12 +41,16 @@ class AfDemag(base.Generic):
                 RockPy.Plotting.af_demag.field_mom(self.ax, measurement,
                                             component=self.component, norm_factor=norm_factor,
                                             **plt_opt)
-                RockPy.Plotting.af_demag.mdf_line(self.ax, measurement,
-                                           component=self.component, norm_factor=norm_factor,
-                                           **plt_opt)
-                RockPy.Plotting.af_demag.mdf_txt(self.ax, measurement,
-                                           component=self.component, norm_factor=norm_factor,
-                                           **plt_opt)
+                if mdf_line:
+                    RockPy.Plotting.af_demag.mdf_line(self.ax, measurement,
+                                               component=self.component, norm_factor=norm_factor,
+                                               **plt_opt)
+                if mdf_text:
+                    RockPy.Plotting.af_demag.mdf_txt(self.ax, measurement,
+                                               component=self.component, norm_factor=norm_factor,
+                                               y_shift = shift,
+                                               **plt_opt)
+                shift += 0.1
 
 
     def get_norm_factor(self, measurement):

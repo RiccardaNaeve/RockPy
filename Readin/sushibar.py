@@ -21,10 +21,14 @@ class SushiBar(base.Machine):
                              'a95', 'par5', 'par4', 'par3', 'par2', 'sm', 'par6', 'dg', 'is', 'hade', 'dc', 'npos',
                              'bl diff/sample', 'ic', 'ds', 'ig']
         self.raw_data = np.array([i.strip('\r\n').split('\t') for i in self.reader_object])[1:]
-        self.raw_data = np.array([i for i in self.raw_data if i[0] == sample_name])
+        self.sample_names = list(set([i[0] for i in self.raw_data]))
+
+        self.raw_data = np.array([i for i in self.raw_data if i[0] == sample_name
+                                  and i[8] != 'None'
+                                  and i[8] != '-'])  # filter for sample and missing data
 
         if len(self.raw_data) == 0:
-            self.log.error('SAMPLE NAME not recognized')
+            self.log.error('SAMPLE NAME not recognized: SAMPLES: %s' % str(self.sample_names))
 
         self.raw_data = np.array([self.__replace_none(self.raw_data)])[0]
 
@@ -59,11 +63,10 @@ class SushiBar(base.Machine):
         return self.raw_data[:, idx].astype(float)
 
     def _check_data_exists(self):
-        if len(self.raw_data) !=0:
+        if len(self.raw_data) != 0:
             return True
         else:
             return False
-
 
 
 def test():

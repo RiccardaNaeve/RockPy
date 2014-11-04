@@ -4,7 +4,7 @@ __author__ = 'Michael Volk'
 import logging
 
 from RockPy.Functions import general
-import RockPy.Measurements.base
+from RockPy.Measurements.base import Measurement
 
 
 class Sample():
@@ -60,7 +60,7 @@ class Sample():
         '''
         mtype = mtype.lower()
 
-        implemented = {i.__name__.lower(): i for i in RockPy.Measurements.base.Measurement.inheritors()}
+        implemented = {i.__name__.lower(): i for i in Measurement.inheritors()}
         if mtype in implemented:
             self.log.info(' ADDING\t << measurement >> %s' % mtype)
             measurement = implemented[mtype](self,

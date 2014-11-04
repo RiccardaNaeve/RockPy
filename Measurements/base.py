@@ -5,7 +5,7 @@ import inspect
 import numpy as np
 
 import RockPy
-import RockPy.Functions.general
+import RockPy.Functions.general as RP_functions
 import RockPy.Readin.base
 from RockPy.Structure.data import RockPyData
 from RockPy.Treatments.base import Generic
@@ -13,7 +13,7 @@ from RockPy.Readin import *
 
 
 class Measurement(object):
-    Functions.general.create_logger('RockPy.MEASUREMENT')
+    RP_functions.create_logger('RockPy.MEASUREMENT')
 
     def __init__(self, sample_obj,
                  mtype, mfile, machine,

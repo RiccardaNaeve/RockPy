@@ -10,7 +10,6 @@ from RockPy.Structure import ureg
 class RockPyData(object):
     # todo units
     # todo append rockpydata object rpd(('a','b','c'), (1,2,3)).append(rpd(('a','b'), (1,2)) -> rpd(('a','b','c'), ((1,2,3), (1,2,np.nan))
-    # todo make columns not computable rpd(('a','b','c'), (1,2,3)).not_computable('b') + rpd(('a','b','c'), (4,5,6)) = a=5,b=2,c=9 ??? normalizing a95 for example does not make much sense, right?
     """
     class to manage specific numeric data based on a numpy array
     e.g. d = rockpydata( column_names=( 'F','Mx', 'My', 'Mz'))
@@ -37,7 +36,7 @@ class RockPyData(object):
             :param values: numpy array with values
             :param errors: numpy array with error estimates
         """
-        # todo: check dimension of data and the treat as values or values+uncertainties
+        # todo: check dimension of data and the treat as values or values+errors
 
         if type(column_names) is str:  # if we got a single string, convert it to tuple with one entry
             column_names = (column_names,)
@@ -64,14 +63,13 @@ class RockPyData(object):
 
         # define some default aliases
         self._update_all_alias()
-        self._column_dict['variable'] = (0,)
-        self._column_dict['values'] = tuple(range(self.column_count)[1:])
+        self._define_alias_indices('variable', (0,))
+        self._define_alias_indices('values', tuple(range(self.column_count)[1:]))
 
-        #self['all'] = values
-        data = np.array( data)
-        if data.ndim == 2: # two dimension -> only vlaues
+        data = np.array(data)
+        if data.ndim == 2: # two dimension -> only values
             self.values = data
-        elif data.ndim == 3: # three dimensions -> values + uncertainties
+        elif data.ndim == 3: # three dimensions -> values + errors
             self.data = data
 
         if row_names is None:
@@ -138,6 +136,10 @@ class RockPyData(object):
     def units(self):
         return self._units
 
+    @property # alias for units
+    def u(self):
+        return self.units
+
     @property
     def data(self):
         return self._data
@@ -149,7 +151,7 @@ class RockPyData(object):
     @data.setter
     def data(self, data):
         """
-        set values and uncertainties and check if it fits the number of columns
+        set values and errors and check if it fits the number of columns
         """
         if data is None:
             self._data = None  # clear existing data
@@ -183,7 +185,7 @@ class RockPyData(object):
     @values.setter
     def values(self, values):
         """
-        set values of data, set uncertainties to nan
+        set values of data, set errors to nan
         checks whether number of data columns fits array shape
 
         :param values:
@@ -203,45 +205,45 @@ class RockPyData(object):
 
         d = d[:,:,np.newaxis]
         self._data = np.append( d, np.zeros_like( d), axis=2)
-        self.uncertainties = None
+        self.errors = None
 
     @v.setter
     def v(self, values): #alias for values
         self.values = values
 
     @property
-    def uncertainties(self):
+    def errors(self):
         return self.data[:,:,1]
 
-    @property # alias for uncertainties
-    def u(self):
-        return self.uncertainties
+    @property # alias for errors
+    def e(self):
+        return self.errors
 
 
-    @uncertainties.setter
-    def uncertainties(self, uncertainties):
+    @errors.setter
+    def errors(self, errors):
         """
-        set uncertainties, shape of numpy array must match existing values
-        set all entries to np.NAN if uncertainties == None
+        set errors, shape of numpy array must match existing values
+        set all entries to np.NAN if errors == None
 
-        :param uncertainties: numerical array of uncertainties
+        :param errors: numerical array of errors
         :return:
         """
 
-        if uncertainties is None or uncertainties == np.NAN:
+        if errors is None or errors == np.NAN:
             self._data[:,:,1] = np.NAN
         else:
-            # todo: check type of uncertainties
-            d = np.array( uncertainties)
+            # todo: check type of errors
+            d = np.array( errors)
 
             if d.shape != self.values.shape: # check if array shapes match
-                raise TypeError( 'uncertainties has wrong shape %s instead of %s' % (str( d.shape), str( self.values.shape)))
+                raise TypeError( 'errors has wrong shape %s instead of %s' % (str( d.shape), str( self.values.shape)))
 
-            self._data[:,:,1] = uncertainties
+            self._data[:,:,1] = errors
 
-    @u.setter
-    def u(self, uncertainties): #alias for uncertainties
-        self.uncertainties = uncertainties
+    @e.setter
+    def e(self, errors): #alias for errors
+        self.errors = errors
 
 
     def define_alias(self, alias_name, column_names):
@@ -267,6 +269,8 @@ class RockPyData(object):
         define an alias as a sequence of numeric column indices
         """
         # todo check if column_indices is integer array?
+        if len(column_indices) == 0:
+            return # nothing to do
         # check if column indices are in valid range
         if max(column_indices) > self.column_count or min(column_indices) < 0:
             raise IndexError('column indices out of range')
@@ -306,9 +310,9 @@ class RockPyData(object):
         if values.ndim == 1: # single column
             values = values.reshape(values.shape[0], 1)
 
-        values = values[:,:,np.newaxis] # add extra dimension for uncertainties
-        values = np.concatenate( (values, np.zeros_like( values)), axis=2) # add zeroes in 3rd dimension as uncertainties
-        values[:,:,1] = np.NAN # set uncertainties to NAN
+        values = values[:,:,np.newaxis] # add extra dimension for errors
+        values = np.concatenate( (values, np.zeros_like( values)), axis=2) # add zeroes in 3rd dimension as errors
+        values[:,:,1] = np.NAN # set errors to NAN
 
         # append new values
         self._data = np.concatenate(( self._data, values), axis=1)
@@ -341,9 +345,26 @@ class RockPyData(object):
         self._column_names[idx] = new_cname
         self._update_column_dictionary(self._column_names)
 
-    def append_rows(self, column_names = None, data = None):
+    def append_rows(self, column_names=None, data=None):
         raise NotImplemented
 
+    def _find_duplicate_variables(self):
+        '''
+        find rows with identical variables
+        :return: list of arrays with indices of rows with identical variables
+        '''
+        # create array of tuple for each line
+        #print self['variable'].v
+        varrows = [tuple([row]) for row in self['variable'].v]
+
+        # get unique elements of variable columns
+        uar, idx, inv = np.unique(varrows, return_index=True, return_inverse=True)
+        # uar: array with unique variables
+        # idx: array of row indices of unique elements
+        # inv: array of indices from uar to reconstruct original array
+
+        # return only elements with more than one entry, i.e. duplicate row indices
+        return [tuple( np.where(inv == i)[0]) for i in range(len(uar)) if len( np.where(inv==i)[0]) > 1]
 
     def key_exists(self, key):
         """
@@ -425,12 +446,12 @@ class RockPyData(object):
             return None
             # todo: return multiple Nones corresponding to alias length
 
-        colidxs = self._keyseq2colseq( key)
+        colidxs = self._keyseq2colseq(key)
 
-        return RockPyData( column_names = self.column_indices_to_names( colidxs),
-                           row_names = self.row_names,
-                           units = None,
-                           data = self.data[:, colidxs])
+        return RockPyData( column_names=self.column_indices_to_names(colidxs),
+                           row_names=self.row_names,
+                           units=None,
+                           data=self.data[:, colidxs])
 
         # return appropriate columns from self.data numpy array
         #d = self.values[:, self._column_dict[key]]
@@ -469,7 +490,7 @@ class RockPyData(object):
             values = values.reshape(values.shape[0], 1)
 
         self._data[:, self._column_dict[key],0] = values
-        self.uncertainties = None
+        self.errors = None
 
     """
     todo: arithmetic operations
@@ -518,7 +539,7 @@ class RockPyData(object):
 
         #print '\nrcn', result_c_names, '\nrv', results_variable, '\nrd1', rd1[:,:,0], '\nrd1', rd2[:,:,0]
 
-        # todo: care about uncertainties
+        # todo: care about errors
         results_data = np.append(results_variable, rd1[:,:,0] - rd2[:,:,0], axis=1)  # variable columns + calculated data columns
 
         return RockPyData(column_names=result_c_names, row_names=self.row_names, units=None, data=results_data)
@@ -540,7 +561,7 @@ class RockPyData(object):
 
         result_c_names, results_variable, rd1, rd2 = self._get_arithmetic_data(other)
 
-        # todo: care about uncertainties
+        # todo: care about errors
         results_data = np.append(results_variable, rd1[:,:,0] + rd2[:,:,0], axis=1)  # variable columns + calculated data columns
 
         return RockPyData(column_names=result_c_names, row_names=self.row_names, data=results_data)
@@ -562,7 +583,7 @@ class RockPyData(object):
 
         result_c_names, results_variable, rd1, rd2 = self._get_arithmetic_data(other)
 
-        # todo: care about uncertainties
+        # todo: care about errors
         results_data = np.append(results_variable, rd1[:,:,0] * rd2[:,:,0], axis=1)  # variable columns + calculated data columns
 
         return RockPyData(column_names=result_c_names, row_names=self.row_names, data=results_data)
@@ -584,7 +605,7 @@ class RockPyData(object):
 
         result_c_names, results_variable, rd1, rd2 = self._get_arithmetic_data(other)
 
-        # todo: care about uncertainties
+        # todo: care about errors
         results_data = np.append(results_variable, rd1[:,:,0] / rd2[:,:,0], axis=1)  # variable columns + calculated data columns
 
         return RockPyData(column_names=result_c_names, row_names=self.row_names, data=results_data)

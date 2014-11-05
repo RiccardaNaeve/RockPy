@@ -17,4 +17,3 @@ class TestHysteresis(TestCase):
     def test_calculate_mrs(self):
         self.VSM_hys.calculate_mrs()
         print self.VSM_hys.results['mrs']
-        self.VSM_hys.plt_hys()

@@ -136,7 +136,8 @@ class Vsm(base.Machine):
         return self.out
 
     def out_backfield(self):
-        pass
+        return self.out
+
 
     def _check_data_exists(self):
         if self.raw_out:

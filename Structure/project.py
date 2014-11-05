@@ -27,6 +27,8 @@ class Sample():
         self.log.info('CREATING\t new sample << %s >>' % self.name)
 
         self.measurements = []
+        self.results = {}
+
         if mass is not None:
             self.add_measurement(mtype='mass', mfile=None, machine=mass_machine,
                                  value=float(mass), unit=mass_unit)
@@ -74,6 +76,23 @@ class Sample():
         else:
             self.log.error(' << %s >> not implemented, yet' % mtype)
 
+    def calc_all(self):
+        for measurement in self.measurements:
+            measurement.calc_all()
+            for result in measurement.results.column_names:
+                if not result in self.results:
+                    self.results[result] = []
+                else:
+                    self.results[result].append(measurement.results[result].v[0])
+
+            if not 'suffix' in self.results:
+                self.results['suffix'] = []
+            else:
+                if measurement.suffix:
+                    self.results['suffix'].append(measurement.suffix)
+                else:
+                    self.results['suffix'].append(None)
+
     @property
     def mass_kg(self):
         measurement = self.get_measurements(mtype='mass')
@@ -116,3 +135,4 @@ class Sample():
         else:
             self.log.error('UNKNOWN\t mtype << %s >> or no measurement found' % mtype.lower())
         return out
+

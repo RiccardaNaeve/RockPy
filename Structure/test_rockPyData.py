@@ -40,4 +40,9 @@ class TestRockPyData(TestCase):
         self.assertEqual(self.RPD.column_names, ['F', 'M_x', 'My', 'Mz'])
 
     def test_append_rows(self):
-        self.RPD.append_rows([5,6,7,8], '5.Zeile')
+        self.RPD.append_rows([5, 6, 7, 8], '5.Zeile')
+
+
+    def test_append_rockpydata(self):
+        self.RPD.append_rockpydata(self.RPD)
+        self.fail()

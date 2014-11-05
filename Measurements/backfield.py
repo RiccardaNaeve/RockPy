@@ -32,15 +32,8 @@ class Backfield(base.Measurement):
         super(Backfield, self).__init__(sample_obj,
                                         mtype, mfile, machine,
                                         **options)
-    #todo dynamic properties
-    #     for i in self.result_methods:
-    #         setattr(self, i, property(self.get_property(i)))
-    #         # self.__dict__[i] = getattr(self, 'result_'+i)()[0]
-    #
-    # def get_property(self, property_name):
-    #     if self.results[property_name] is None or self.results[property_name] == np.nan:
-    #         getattr(self, 'calculate_'+property_name)()
-    #     return self.results[property_name][0]
+
+    # todo dynamic properties
 
     def format_vftb(self):
         '''
@@ -52,6 +45,17 @@ class Backfield(base.Measurement):
         self.remanence = RockPyData(column_names=header, data=data[0])
         self.induced = None
 
+    def format_vsm(self):
+        """
+        formats the vsm output to be compatible with backfield measurements
+        :return:
+        """
+        data = self.machine_data.out_backfield()
+        header = self.machine_data.header
+        self.remanence = RockPyData(column_names=['field', 'mag'], data=data[0][:, [0, 1]])
+        self.induced = RockPyData(column_names=['field', 'mag'], data=data[0][:, [0, 2]])
+
+
     @property
     def bcr(self):
         '''
@@ -59,15 +63,15 @@ class Backfield(base.Measurement):
         calls calculate_bcr if not yet calculated
         :return:
         '''
-        if self.results['bcr'] is None or self.results['bcr'] == 0:
+        if self.results['bcr'] is None or self.results['bcr'].v == np.nan:
             self.calculate_bcr()
-        return self.results['bcr']
+        return self.results['bcr'].v
 
     @property
     def s300(self):
-        if self.results['s300'] is None or self.results['s300'] == 0:
+        if self.results['s300'] is None or self.results['s300'].v == np.nan:
             self.results['s300'] = self.calculate_s300()
-        return self.results['s300'][0]
+        return self.results['s300'].v
 
 
     def result_bcr(self, recalc=False):
@@ -95,8 +99,24 @@ class Backfield(base.Measurement):
         self.calc_result(parameter, recalc)
         return self.results['s300']
 
+    def result_mrs(self, recalc=False):
+        parameter = {}
+        self.calc_result(parameter, recalc)
+        return self.results['mrs']
 
-    def calculate_bcr(self):
+    def result_ms(self, recalc=False):
+        parameter = {}
+        self.calc_result(parameter, recalc)
+        return self.results['ms']
+
+    def result_sigma_mrs(self, recalc=False):
+        parameter = {}
+        self.calc_result(parameter, recalc, force_caller='mrs')
+        return self.results['sigma_mrs']
+
+
+
+    def calculate_bcr(self, **parameter):
         '''
         calculates Bcr from linear interpolation between two points closest to mag = o
 
@@ -124,8 +144,7 @@ class Backfield(base.Measurement):
         bcr = - y_intercept / slope
         self.results['bcr'] = abs(bcr)
 
-
-    def calculate_s300(self):
+    def calculate_s300(self, **parameter):
         '''
         S300: :math:`(1 - (M_{300mT} /M_{rs})) / 2`
 
@@ -138,7 +157,7 @@ class Backfield(base.Measurement):
             self.results['s300'] = np.nan
             return
 
-        if abs(self.remanence['field'][idx]) < 0.300:
+        if abs(self.remanence['field'].v[idx]) < 0.300:
             idx2 = idx
             idx1 = idx + 1
         else:
@@ -146,24 +165,33 @@ class Backfield(base.Measurement):
             idx2 = idx - 1
 
         i = [idx1, idx2]
-        tf_array = [True if x in i else False for x in range(len(self.remanence['mag']))]
+        tf_array = [True if x in i else False for x in range(len(self.remanence['mag'].v))]
 
         d = self.remanence.filter(tf_array=tf_array)
         slope, sigma, y_intercept, x_intercept = d.lin_regress('field', 'mag')
 
         m300 = y_intercept + (slope * 0.3)
-        mrs = self.remanence['mag'][0]
+        mrs = self.remanence['mag'].v[0]
 
         s300 = (1 - ( m300 / mrs)) / 2
 
         self.results['s300'] = s300
 
+    def calculate_mrs(self, **parameter):
+        start = self.remanence['mag'].v[0]
+        end = self.remanence['mag'].v[-1]
+        self.results['mrs'] = np.mean(np.fabs([start, end]))
+        self.results['sigma_mrs'] = np.std(np.fabs([start, end]))
+
+    def calculate_ms(self, **parameter):
+        self.results['ms'] = None
+
     def plt_backfield(self):
-        plt.plot(self.remanence['field'], self.remanence['mag'], '.-', zorder=1)
-        plt.plot(self.bcr, 0.0, 'x', color='k')
+        plt.plot(self.remanence['field'].v, self.remanence['mag'].v, '.-', zorder=1)
+        plt.plot(-self.bcr, 0.0, 'x', color='k')
 
         if self.induced:
-            plt.plot(self.induced['field'], self.induced['mag'], zorder=1)
+            plt.plot(self.induced['field'].v, self.induced['mag'].v, zorder=1)
 
         plt.axhline(0, color='#808080')
         plt.axvline(0, color='#808080')

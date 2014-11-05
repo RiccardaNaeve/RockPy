@@ -408,6 +408,8 @@ class RockPyData(object):
 
         return True  # successfully done
 
+    def append_rockpydata(self, other):
+        pass
 
     def delete_rows(self, idx):
 

@@ -7,7 +7,6 @@ from prettytable import PrettyTable
 
 from RockPy.Structure import ureg
 
-
 class RockPyData(object):
     # todo units
     # todo append rockpydata object rpd(('a','b','c'), (1,2,3)).append(rpd(('a','b'), (1,2)) -> rpd(('a','b','c'), ((1,2,3), (1,2,np.nan))
@@ -318,7 +317,7 @@ class RockPyData(object):
         values[:, :, 1] = np.NAN  # set errors to NAN
 
         # append new values
-        self._data = np.concatenate(( self._data, values), axis=1)
+        self._data = np.concatenate((self._data, values), axis=1)
 
         # update "all" alias to comprise also the new columns
         self._update_all_alias()
@@ -351,19 +350,19 @@ class RockPyData(object):
     def append_rows(self, column_names=None, data=None):
         raise NotImplemented
 
-    def _find_duplicate_variables(self):
+    def _find_duplicate_variable_rows(self):
         '''
         find rows with identical variables
         :return: list of arrays with indices of rows with identical variables
         '''
-        # create array of tuple for each line
-        # print self['variable'].v
-        varrows = [tuple([row]) for row in self['variable'].v]
+
+        # create structured array
+        a = self['variable'].v
+        varrows = np.ascontiguousarray(a).view(np.dtype((np.void,a.dtype.itemsize * (a.shape[1] if a.ndim == 2 else 1))))
 
         # get unique elements of variable columns
-        uar, idx, inv = np.unique(varrows, return_index=True, return_inverse=True)
+        uar, inv = np.unique(varrows, return_index=False, return_inverse=True)
         # uar: array with unique variables
-        # idx: array of row indices of unique elements
         # inv: array of indices from uar to reconstruct original array
 
         # return only elements with more than one entry, i.e. duplicate row indices
@@ -871,8 +870,3 @@ class RockPyData(object):
                          data=aux)
         out.define_alias('d' + dependent_var + '/d' + independent_var, dependent_var)
         return out
-
-
-        # if __name__ == "__main__":
-        #    import doctest
-        #    doctest.testmod()

@@ -196,15 +196,15 @@ class RockPyData(object):
             self._data = None  # clear existing data
             return
 
-        d = np.array(values, dtype = float)
+        d = np.array(values, dtype=float)
         if d.ndim != 2:
             raise TypeError('wrong data dimension')
 
         if d.shape[1] != self.column_count:
             raise TypeError('%d columns instead of %d in values' % (d.shape[1], self.column_count))
 
-        d = d[:,:,np.newaxis]
-        self._data = np.append( d, np.zeros_like( d), axis=2)
+        d = d[:, :, np.newaxis]
+        self._data = np.append(d, np.zeros_like(d), axis=2)
         self.errors = None
 
     @v.setter
@@ -231,15 +231,15 @@ class RockPyData(object):
         """
 
         if errors is None or errors == np.NAN:
-            self._data[:,:,1] = np.NAN
+            self._data[:, :, 1] = np.NAN
         else:
             # todo: check type of errors
-            d = np.array( errors)
+            d = np.array(errors)
 
             if d.shape != self.values.shape: # check if array shapes match
-                raise TypeError( 'errors has wrong shape %s instead of %s' % (str( d.shape), str( self.values.shape)))
+                raise TypeError('errors has wrong shape %s instead of %s' % (str(d.shape), str(self.values.shape)))
 
-            self._data[:,:,1] = errors
+            self._data[:, :, 1] = errors
 
     @e.setter
     def e(self, errors): #alias for errors
@@ -311,11 +311,11 @@ class RockPyData(object):
             values = values.reshape(values.shape[0], 1)
 
         values = values[:,:,np.newaxis] # add extra dimension for errors
-        values = np.concatenate( (values, np.zeros_like( values)), axis=2) # add zeroes in 3rd dimension as errors
-        values[:,:,1] = np.NAN # set errors to NAN
+        values = np.concatenate((values, np.zeros_like( values)), axis=2) # add zeroes in 3rd dimension as errors
+        values[:, :, 1] = np.NAN # set errors to NAN
 
         # append new values
-        self._data = np.concatenate(( self._data, values), axis=1)
+        self._data = np.concatenate((self._data, values), axis=1)
 
         # update "all" alias to comprise also the new columns
         self._update_all_alias()
@@ -348,23 +348,23 @@ class RockPyData(object):
     def append_rows(self, column_names=None, data=None):
         raise NotImplemented
 
-    def _find_duplicate_variables(self):
+    def _find_duplicate_variable_rows(self):
         '''
         find rows with identical variables
         :return: list of arrays with indices of rows with identical variables
         '''
-        # create array of tuple for each line
-        #print self['variable'].v
-        varrows = [tuple([row]) for row in self['variable'].v]
+
+        # create structured array
+        a = self['variable'].v
+        varrows = np.ascontiguousarray(a).view(np.dtype((np.void,a.dtype.itemsize * (a.shape[1] if a.ndim == 2 else 1))))
 
         # get unique elements of variable columns
-        uar, idx, inv = np.unique(varrows, return_index=True, return_inverse=True)
+        uar, inv = np.unique(varrows, return_index=False, return_inverse=True)
         # uar: array with unique variables
-        # idx: array of row indices of unique elements
         # inv: array of indices from uar to reconstruct original array
 
         # return only elements with more than one entry, i.e. duplicate row indices
-        return [tuple( np.where(inv == i)[0]) for i in range(len(uar)) if len( np.where(inv==i)[0]) > 1]
+        return [tuple(np.where(inv == i)[0]) for i in range(len(uar)) if len(np.where(inv == i)[0]) > 1]
 
     def key_exists(self, key):
         """

@@ -38,3 +38,6 @@ class TestRockPyData(TestCase):
     def test_rename_column(self):
         self.RPD.rename_column('Mx', 'M_x')
         self.assertEqual(self.RPD.column_names, ['F', 'M_x', 'My', 'Mz'])
+
+    def test_append_rows(self):
+        self.RPD.append_rows([5,6,7,8], '5.Zeile')

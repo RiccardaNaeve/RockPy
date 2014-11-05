@@ -28,9 +28,13 @@ class TestRockPyData(TestCase):
         self.assertEqual(self.RPD.column_count, len(self.col_names))
 
     def test__find_duplicate_variable_rows(self):
-        #self.assertTrue((self.RPD._find_duplicate_variables()[0] == np.array([0, 1, 2])).all())
+        # self.assertTrue((self.RPD._find_duplicate_variables()[0] == np.array([0, 1, 2])).all())
         self.assertEqual(self.RPD._find_duplicate_variable_rows(), [(0, 1, 2, 3)])
 
         # redefine variabe alias to the first two columns
         self.RPD.define_alias('variable', ('F', 'Mx'))
         self.assertEqual(self.RPD._find_duplicate_variable_rows(), [(0, 2), (1, 3)])
+
+    def test_rename_column(self):
+        self.RPD.rename_column('Mx', 'M_x')
+        self.assertEqual(self.RPD.column_names, ['F', 'M_x', 'My', 'Mz'])

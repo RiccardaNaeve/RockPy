@@ -9,7 +9,7 @@ def test():
     M = S.add_measurement(mtype='afdemag', mfile=data, machine='SushiBar')
     # M.plt_afdemag()
     # print M.result_mdf(interpolation='smooth_spline')
-    demag.AfDemag(S, norm='max', mdf_text=True, mdf_line=True, diff_fill=True, plot='save', smoothing=1, diff=2)
+    demag.AfDemag(S, norm='max', mdf_text=True, mdf_line=True, diff_fill=True, plot='save', smoothing=1, diff=1)
 
 
 if __name__ == '__main__':

@@ -183,7 +183,6 @@ class RockPyData(object):
     def v(self):
         return self.values
 
-
     @values.setter
     def values(self, values):
         """
@@ -220,7 +219,6 @@ class RockPyData(object):
     @property  # alias for errors
     def e(self):
         return self.errors
-
 
     @errors.setter
     def errors(self, errors):
@@ -347,8 +345,75 @@ class RockPyData(object):
         self._column_names[idx] = new_cname
         self._update_column_dictionary(self._column_names)
 
-    def append_rows(self, column_names=None, data=None):
+
+    def _convert_input_to_data(self, input):
+        '''
+        convert given data to 3D numpy array
+
+        :param data:
+        :return: 3D numpy array, representing matrix of values and errors as used by RockPyData.data
+        '''
+        if input is None:
+            return None
+
+        # convert input data to a numpy array
+        data = np.array(input, dtype=float)
+
+        if data.ndim > 3:
+            raise RuntimeError( 'data has dimension > 3')
+
+        if data.ndim == 1:  # values for one row, no errors
+            data.reshape(data.shape[0], 1)  # reshape to 2D array with one row
+
+        if data.ndim == 2:  # values for one or multiple rows, no errors
+            data = data[:, :, np.newaxis]  # add extra dimension for errors
+
+        # now data must be 3D
+        if data.shape[2] == 0 or data.shape[2] > 2:
+            raise RuntimeError( 'data.shape[2] must be 1 or 2 and not %d' % data.shape[2])
+
+        if data.shape[2] == 1: # only values, need to add errors
+            data = np.concatenate((data, np.zeros_like(data)), axis=2)  # add zeroes in 3rd dimension as errors
+            values[:, :, 1] = np.NAN  # set errors to NAN
+
+        # if data.shape[2] == 2 -> erros are already included in data
+
+        return data
+
+    def append_rows(self, data, row_names=None):
+        '''
+        append rows with data and optionally row_labels
+        :param row_names:
+        :param data: can be only values or values + errors
+        :return:
+        '''
+        if self.row_names is None and row_names is not None and self.row_count > 0:
+            raise RuntimeError('cannot append rows with row_names to RockPyData object without row_names')
+
+        if self.row_names is not None and row_names is None:
+            raise RuntimeError('cannot append data without row_names to RockPyData object with row_names')
+
+        data = self._convert_input_to_data(data)
+        if data == None:
+            return False  # do nothing
+
+        if data.shape[1] != self.column_count:
+            raise RuntimeError('column count of data does not match number of columns')
+
+        # todo check if row names are unique
+        if row_names is not None:
+            self.row_names.extend(list([row_names]))
+
+        self._data = np.concatenate((self._data, data), axis=0)
+
+        return True  # successfully done
+
+
+    def delete_rows(self, idx):
+
         raise NotImplemented
+
+
 
     def _find_duplicate_variable_rows(self):
         '''
@@ -367,6 +432,33 @@ class RockPyData(object):
 
         # return only elements with more than one entry, i.e. duplicate row indices
         return [tuple(np.where(inv == i)[0]) for i in range(len(uar)) if len(np.where(inv == i)[0]) > 1]
+
+    def average_duplicate_variable_rows(self, errors='stdev'):
+        '''
+        average values of rows with matching variables
+        :param errors: defines how the errors of the averaged values are calculated
+                       'stdev' takes the standard deviation of the averaged values as error
+                       'max' takes the maximum value of the errors of the averaged values as error
+        :return: ?
+        '''
+
+        pass
+
+    def delete_duplicate_variable_rows(self):
+        '''
+        remove all rows with non unique variables
+        :return: ?
+        '''
+        pass
+
+    def interpolate(self, new_variables, method='linear'):
+        '''
+        interpolate existig data columns to new variables
+        ??? how is this done for mutli-column-variables ???
+        :param new_variables:
+        :param method:
+        :return: ?
+        '''
 
     def key_exists(self, key):
         """
@@ -781,10 +873,6 @@ class RockPyData(object):
             tf_array = [True if x in index_list else False for x in range(len(self.data))]
         return self.filter(tf_array)
 
-    def check_duplicate(self):
-        # todo look for duplicate entries e.g Temp
-        raise NotImplemented
-
     def sort(self, key='variable'):
         """
         sorting all data according to one column_name or alias
@@ -855,7 +943,9 @@ class RockPyData(object):
 
     def derivative(self, dependent_var, independent_var, smoothing=0):
         """
-
+        calculate d( independent_var) / d( dependent_var)
+        :param dependent_var: column name
+        :param independent_var: column name
         :return:
         """
         x = self[independent_var].v
@@ -864,7 +954,7 @@ class RockPyData(object):
         # aux = [[x[i], (y[i - smoothing] - y[i + smoothing]) / (x[i - smoothing] - x[i + smoothing])] for i in
         #        range(smoothing, len(x) - smoothing)]
 
-        aux = [[(x[i-smoothing]+x[i+1+smoothing])/2. , (y[i-smoothing]-y[i+1+smoothing]) / (x[i-smoothing]- x[i+1+smoothing])] for i in range(smoothing, len(x)-1-smoothing)]
+        aux = [[(x[i-smoothing]+x[i+1+smoothing])/2., (y[i-smoothing]-y[i+1+smoothing]) / (x[i-smoothing]-x[i+1+smoothing])] for i in range(smoothing, len(x)-1-smoothing)]
         aux = np.array(aux)
 
         out = RockPyData(column_names=[independent_var, dependent_var],

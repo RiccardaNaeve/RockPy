@@ -32,6 +32,9 @@ class AfDemag(base.Generic):
     def show(self, **options):
         mdf_line = options.get('mdf_line', True)
         mdf_text = options.get('mdf_text', False)
+        diff_fill = options.get('diff_fill', False)
+        smoothing = options.get('smoothing', 1)
+        diff = options.get('diff', 1)
         shift = 0
 
         for sample, measurements in self.get_measurement_dict(mtype='afdemag').iteritems():
@@ -50,6 +53,11 @@ class AfDemag(base.Generic):
                                                component=self.component, norm_factor=norm_factor,
                                                y_shift = shift,
                                                **plt_opt)
+                if diff_fill:
+                    RockPy.Plotting.af_demag.diff_fill(self.ax, measurement,
+                                component=self.component, norm_factor=norm_factor,
+                                smoothing=smoothing, diff=diff,
+                                **plt_opt)
                 shift += 0.1
 
 

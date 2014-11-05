@@ -47,12 +47,12 @@ class RockPyData(object):
         # initialize member variables
         self._column_names = list(column_names)
 
-        #  todo: check for right dimension of units
+        # todo: check for right dimension of units
         if units is None:
             self._units = None
-        elif isinstance(units, basestring): # single string
-            self._units = [ureg(units),]
-        elif all(isinstance(u, basestring) for u in units): # list of strings
+        elif isinstance(units, basestring):  # single string
+            self._units = [ureg(units), ]
+        elif all(isinstance(u, basestring) for u in units):  # list of strings
             self._units = [ureg(u) for u in units]
         else:
             raise RuntimeError('unknown values type for units: %s' % units.__class__)
@@ -67,19 +67,21 @@ class RockPyData(object):
         self._define_alias_indices('values', tuple(range(self.column_count)[1:]))
 
         data = np.array(data)
-        if data.ndim == 2: # two dimension -> only values
+        if data.ndim == 2:  # two dimension -> only values
             self.values = data
-        elif data.ndim == 3: # three dimensions -> values + errors
+        elif data.ndim == 3:  # three dimensions -> values + errors
             self.data = data
 
         if row_names is None:
-            self._row_names = None # don't use row names
+            self._row_names = None  # don't use row names
         else:
             # make sure that number of row names matches number of lines in values
             if len(row_names) == self.row_count:
                 self._row_names = list(row_names)
             else:
-                raise RuntimeError('number of entries in row_names (%d) does not match number of lines in values (%d)'%(len(row_names),self.row_count))
+                raise RuntimeError(
+                    'number of entries in row_names (%d) does not match number of lines in values (%d)' % (
+                        len(row_names), self.row_count))
 
     def _update_column_dictionary(self, column_names=None):
         """
@@ -136,7 +138,7 @@ class RockPyData(object):
     def units(self):
         return self._units
 
-    @property # alias for units
+    @property  # alias for units
     def u(self):
         return self.units
 
@@ -144,7 +146,7 @@ class RockPyData(object):
     def data(self):
         return self._data
 
-    @property # alias for data
+    @property  # alias for data
     def d(self):
         return self.data
 
@@ -167,7 +169,7 @@ class RockPyData(object):
         self._data = d
 
     @d.setter
-    def d(self, data): #alias for data
+    def d(self, data):  # alias for data
         self.data = data
 
     @property
@@ -175,9 +177,9 @@ class RockPyData(object):
         """
         :return: values
         """
-        return self.data[:,:,0].T[0] if self.data.shape[1] == 1 else self.data[:,:,0]
+        return self.data[:, :, 0].T[0] if self.data.shape[1] == 1 else self.data[:, :, 0]
 
-    @property # alias for values
+    @property  # alias for values
     def v(self):
         return self.values
 
@@ -208,14 +210,14 @@ class RockPyData(object):
         self.errors = None
 
     @v.setter
-    def v(self, values): #alias for values
+    def v(self, values):  # alias for values
         self.values = values
 
     @property
     def errors(self):
-        return self.data[:,:,1]
+        return self.data[:, :, 1]
 
-    @property # alias for errors
+    @property  # alias for errors
     def e(self):
         return self.errors
 
@@ -236,13 +238,13 @@ class RockPyData(object):
             # todo: check type of errors
             d = np.array(errors)
 
-            if d.shape != self.values.shape: # check if array shapes match
+            if d.shape != self.values.shape:  # check if array shapes match
                 raise TypeError('errors has wrong shape %s instead of %s' % (str(d.shape), str(self.values.shape)))
 
             self._data[:, :, 1] = errors
 
     @e.setter
-    def e(self, errors): #alias for errors
+    def e(self, errors):  # alias for errors
         self.errors = errors
 
 
@@ -270,7 +272,7 @@ class RockPyData(object):
         """
         # todo check if column_indices is integer array?
         if len(column_indices) == 0:
-            return # nothing to do
+            return  # nothing to do
         # check if column indices are in valid range
         if max(column_indices) > self.column_count or min(column_indices) < 0:
             raise IndexError('column indices out of range')
@@ -301,18 +303,18 @@ class RockPyData(object):
             values = np.empty((self.row_count, len(column_names)))
             values[:] = np.NAN
         else:
-            values = np.array( values, dtype=float)
+            values = np.array(values, dtype=float)
 
         # make sure values is 2 dim, even if there is only one number or one column
-        if values.ndim == 0: # single number
+        if values.ndim == 0:  # single number
             values = values.reshape(1, 1)
 
-        if values.ndim == 1: # single column
+        if values.ndim == 1:  # single column
             values = values.reshape(values.shape[0], 1)
 
-        values = values[:,:,np.newaxis] # add extra dimension for errors
-        values = np.concatenate((values, np.zeros_like( values)), axis=2) # add zeroes in 3rd dimension as errors
-        values[:, :, 1] = np.NAN # set errors to NAN
+        values = values[:, :, np.newaxis]  # add extra dimension for errors
+        values = np.concatenate((values, np.zeros_like(values)), axis=2)  # add zeroes in 3rd dimension as errors
+        values[:, :, 1] = np.NAN  # set errors to NAN
 
         # append new values
         self._data = np.concatenate((self._data, values), axis=1)
@@ -412,25 +414,25 @@ class RockPyData(object):
         colidxs = []
         # check type of key and convert to tuple of column indices
         try:
-            if isinstance( key, basestring): # single string
-                colidxs.extend( self.column_dict[key])
-            elif isinstance( key, int): # single int
+            if isinstance(key, basestring):  # single string
+                colidxs.extend(self.column_dict[key])
+            elif isinstance(key, int):  # single int
                 if key < self.column_count and key >= 0:
                     colidxs.append(key)
                 else:
-                    raise KeyError( 'key is out of range')
-            elif all(isinstance(k, basestring) for k in key): # list of strings
+                    raise KeyError('key is out of range')
+            elif all(isinstance(k, basestring) for k in key):  # list of strings
                 for k in key:
                     colidxs.extend(self.column_dict[k])
-            elif all(isinstance(k, int) for k in key): # list of ints
-                if max( key) < self.column_count and min(key) >= 0:
+            elif all(isinstance(k, int) for k in key):  # list of ints
+                if max(key) < self.column_count and min(key) >= 0:
                     colidxs = key
                 else:
-                    raise KeyError( 'at least one key is out of range')
+                    raise KeyError('at least one key is out of range')
             else:
-                raise KeyError( 'invalid key %s' % str(key))
+                raise KeyError('invalid key %s' % str(key))
         except TypeError:
-            raise KeyError( 'invalid key %s' % str(key))
+            raise KeyError('invalid key %s' % str(key))
 
         return colidxs
 
@@ -448,14 +450,14 @@ class RockPyData(object):
 
         colidxs = self._keyseq2colseq(key)
 
-        return RockPyData( column_names=self.column_indices_to_names(colidxs),
-                           row_names=self.row_names,
-                           units=None,
-                           data=self.data[:, colidxs])
+        return RockPyData(column_names=self.column_indices_to_names(colidxs),
+                          row_names=self.row_names,
+                          units=None,
+                          data=self.data[:, colidxs])
 
         # return appropriate columns from self.data numpy array
-        #d = self.values[:, self._column_dict[key]]
-        #if d.shape[1] == 1:
+        # d = self.values[:, self._column_dict[key]]
+        # if d.shape[1] == 1:
         #    d = d.T[0]
         #return d
 
@@ -489,7 +491,7 @@ class RockPyData(object):
         if values.ndim == 1:
             values = values.reshape(values.shape[0], 1)
 
-        self._data[:, self._column_dict[key],0] = values
+        self._data[:, self._column_dict[key], 0] = values
         self.errors = None
 
     """
@@ -537,10 +539,11 @@ class RockPyData(object):
 
         result_c_names, results_variable, rd1, rd2 = self._get_arithmetic_data(other)
 
-        #print '\nrcn', result_c_names, '\nrv', results_variable, '\nrd1', rd1[:,:,0], '\nrd1', rd2[:,:,0]
+        # print '\nrcn', result_c_names, '\nrv', results_variable, '\nrd1', rd1[:,:,0], '\nrd1', rd2[:,:,0]
 
         # todo: care about errors
-        results_data = np.append(results_variable, rd1[:,:,0] - rd2[:,:,0], axis=1)  # variable columns + calculated data columns
+        results_data = np.append(results_variable, rd1[:, :, 0] - rd2[:, :, 0],
+                                 axis=1)  # variable columns + calculated data columns
 
         return RockPyData(column_names=result_c_names, row_names=self.row_names, units=None, data=results_data)
 
@@ -562,7 +565,8 @@ class RockPyData(object):
         result_c_names, results_variable, rd1, rd2 = self._get_arithmetic_data(other)
 
         # todo: care about errors
-        results_data = np.append(results_variable, rd1[:,:,0] + rd2[:,:,0], axis=1)  # variable columns + calculated data columns
+        results_data = np.append(results_variable, rd1[:, :, 0] + rd2[:, :, 0],
+                                 axis=1)  # variable columns + calculated data columns
 
         return RockPyData(column_names=result_c_names, row_names=self.row_names, data=results_data)
 
@@ -584,7 +588,8 @@ class RockPyData(object):
         result_c_names, results_variable, rd1, rd2 = self._get_arithmetic_data(other)
 
         # todo: care about errors
-        results_data = np.append(results_variable, rd1[:,:,0] * rd2[:,:,0], axis=1)  # variable columns + calculated data columns
+        results_data = np.append(results_variable, rd1[:, :, 0] * rd2[:, :, 0],
+                                 axis=1)  # variable columns + calculated data columns
 
         return RockPyData(column_names=result_c_names, row_names=self.row_names, data=results_data)
 
@@ -606,7 +611,8 @@ class RockPyData(object):
         result_c_names, results_variable, rd1, rd2 = self._get_arithmetic_data(other)
 
         # todo: care about errors
-        results_data = np.append(results_variable, rd1[:,:,0] / rd2[:,:,0], axis=1)  # variable columns + calculated data columns
+        results_data = np.append(results_variable, rd1[:, :, 0] / rd2[:, :, 0],
+                                 axis=1)  # variable columns + calculated data columns
 
         return RockPyData(column_names=result_c_names, row_names=self.row_names, data=results_data)
 
@@ -655,7 +661,8 @@ class RockPyData(object):
         # todo: check if matching rows are unique !!!
 
         result_c_names = self.column_names_from_key('variable') + self.column_indices_to_names(mcidx[:, 0])
-        results_variable = d1[mridx[:, 0],:]  # all columns of variable but only those lines which match in both rockpydata objects
+        results_variable = d1[mridx[:, 0],
+                           :]  # all columns of variable but only those lines which match in both rockpydata objects
 
         # data for calculation of both objects with reordered columns according to mcidx
         rd1 = self.data[mridx[:, 0], :][:, mcidx[:, 0]]
@@ -677,13 +684,13 @@ class RockPyData(object):
         :return:
         """
 
-        tab = PrettyTable(('row_name',)+tuple(self.column_names))
+        tab = PrettyTable(('row_name',) + tuple(self.column_names))
         for i in range(self.row_count):
-            linestrs = tuple( ['%s +- %s' % (str(v),str(u)) if not np.isnan( u) else str(v) for (v,u) in self.data[i]])
+            linestrs = tuple(['%s +- %s' % (str(v), str(u)) if not np.isnan(u) else str(v) for (v, u) in self.data[i]])
             if self.row_names is None:
-                l = (i,) + linestrs # if there are no row labels, put numeric index in first column
+                l = (i,) + linestrs  # if there are no row labels, put numeric index in first column
             else:
-                l = (self.row_names[i],) + linestrs # otherwise put row label in first column
+                l = (self.row_names[i],) + linestrs  # otherwise put row label in first column
             tab.add_row(l)
 
         return tab.get_string()
@@ -736,7 +743,8 @@ class RockPyData(object):
 
         self_copy._data = self_copy._data[tf_array]
         if self_copy._row_names is not None:
-            self_copy._row_names = list(np.array(self_copy._row_names, dtype=object)[tf_array]) # filter row names with same true/false array
+            self_copy._row_names = list(
+                np.array(self_copy._row_names, dtype=object)[tf_array])  # filter row names with same true/false array
         return self_copy
 
     def filter_idx(self, index_list, invert=False):
@@ -798,8 +806,6 @@ class RockPyData(object):
         self.data = self.data[self.data[idx].argsort()]
 
 
-
-
     def lin_regress(self, column_name_x, column_name_y):
         """
         calculates a least squares linear regression for given x/y data
@@ -835,7 +841,7 @@ class RockPyData(object):
 
         slope = np.sqrt(y_sum_diff_sq / x_sum_diff_sq) * np.sign(mixed_sum)
 
-        if n <= 2: # stdev not valid for two points
+        if n <= 2:  # stdev not valid for two points
             sigma = np.nan
         else:
             sigma = np.sqrt((2 * y_sum_diff_sq - 2 * slope * mixed_sum) / ((n - 2) * x_sum_diff_sq))
@@ -846,29 +852,21 @@ class RockPyData(object):
         return slope, sigma, y_intercept, x_intercept
 
 
-    def derivative(self, independent_var='variable', smoothing=1):
+    def derivative(self, dependent_var, independent_var, smoothing=0):
         """
 
         :return:
         """
+        x = self[independent_var].v
+        y = self[dependent_var].v
 
-        aux = [
-            [self.x[i], (self.y[i - strength] - self.y[i + strength]) / (self.x[i - strength] - self.x[i + strength])]
-            for i in
-            range(strength, len(self.x) - strength)]
+        # aux = [[x[i], (y[i - smoothing] - y[i + smoothing]) / (x[i - smoothing] - x[i + smoothing])] for i in
+        #        range(smoothing, len(x) - smoothing)]
 
+        aux = [[(x[i-smoothing]+x[i+1+smoothing])/2. , (y[i-smoothing]-y[i+1+smoothing]) / (x[i-smoothing]- x[i+1+smoothing])] for i in range(smoothing, len(x)-1-smoothing)]
         aux = np.array(aux)
 
-        out.x = aux[:, 0]
-        if 'abs' in args:
-            out.y = np.fabs(aux[:, 1])
-        else:
-            out.y = aux[:, 1]
-        out.xy = aux
-        out.recalc_idx()
+        out = RockPyData(column_names=[independent_var, dependent_var],
+                         data=aux)
+        out.define_alias('d' + dependent_var + '/d' + independent_var, dependent_var)
         return out
-
-
-#if __name__ == "__main__":
-#    import doctest
-#    doctest.testmod()

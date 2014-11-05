@@ -181,7 +181,7 @@ class Hysteresis(base.Measurement):
 
     # ## results
 
-    def result_generic(self, parameters='standard', recalc=False):
+    def result_generic(self, parameters='standard', recalc=False, **options):
         '''
         Generic for for result implementation. Every calculation of result should be in the self.results data structure
         before calculation.
@@ -192,13 +192,25 @@ class Hysteresis(base.Measurement):
         self.calc_result(parameters, recalc)
         return self.results['generic']
 
-    def result_ms(self, recalc=False):
-        self.calc_result(dict(), recalc)
+    def result_ms(self, from_field=80, recalc=False, **options):
+        parameter = {'from_field': from_field
+        }
+        self.calc_result(parameter, recalc)
         return self.results['ms']
 
-    def result_mrs(self, recalc=False):
+    def result_sigma_ms(self, from_field=80, recalc=False, **options):
+
+        parameter = {'from_field': from_field}
+        self.calc_result(parameter, recalc, force_caller='ms')
+        return self.results['sigma_ms']
+
+    def result_mrs(self, recalc=False, **options):
         self.calc_result(dict(), recalc)
         return self.results['mrs']
+
+    def result_sigma_mrs(self, recalc=False, **options):
+        self.calc_result(dict(), recalc, force_caller='mrs')
+        return self.results['sigma_mrs']
 
     def result_bc(self, recalc=False, **options):
         """
@@ -220,43 +232,59 @@ class Hysteresis(base.Measurement):
         self.calc_result(dict(), recalc)
         return self.results['bc']
 
-    def result_sigma_bc(self, recalc=False):
+    def result_sigma_bc(self, recalc=False, **options):
         self.calc_result(dict(), recalc, force_caller='bc')
-        return self.results['bc']
+        return self.results['sigma_bc']
 
-
-    def result_brh(self, recalc=False):
+    def result_brh(self, recalc=False, **options):
         self.calc_result(dict(), recalc)
         return self.results['brh']
 
     # ## calculations
 
-    def calculate_ms(self):
-        pass  # todo implement
-
-    def calculate_mrs(self):
-        pass  # todo implement
-
-    def calculate_bc(self):
-        '''
-
+    def calculate_ms(self, **parameters):
+        """
+        Calculates the value for Ms
+        :param parameters: from_field: from % of this value a linear interpolation will be calculated for all branches (+ & -)
         :return:
-        '''
-        self.log.info('CALCULATING << Bc >> parameter from linear interpolation between points closest to m=0')
+        """
+        from_field = parameters.get('from_field', 80) / 100.0
+        df_fields = self.down_field['field'].v / max(self.down_field['field'].v)
+        uf_fields = self.up_field['field'].v / max(self.up_field['field'].v)
+
+        # get the indices of the fields larger that from_field
+        df_plus = [i for i, v in enumerate(df_fields) if v >= from_field]
+        df_minus = [i for i, v in enumerate(df_fields) if v <= -from_field]
+        uf_plus = [i for i, v in enumerate(uf_fields) if v >= from_field]
+        uf_minus = [i for i, v in enumerate(uf_fields) if v <= -from_field]
+
+        dfp = abs(self.down_field.filter_idx(df_plus).lin_regress(column_name_x='field', column_name_y='mag')[2])
+        dfm = abs(self.down_field.filter_idx(df_minus).lin_regress(column_name_x='field', column_name_y='mag')[2])
+        ufp = abs(self.down_field.filter_idx(uf_plus).lin_regress(column_name_x='field', column_name_y='mag')[2])
+        ufm = abs(self.down_field.filter_idx(uf_minus).lin_regress(column_name_x='field', column_name_y='mag')[2])
+
+        ms_all = [dfp, dfm, ufp, ufm] #todo fix
+
+        self.results['ms'] = np.max(ms_all)
+        self.results['sigma_ms'] = np.std(ms_all)
+
+        self.calculation_parameters['ms'] = parameters
+
+    def calculate_mrs(self, **parameters):
 
         def calc(direction):
             d = getattr(self, direction)
-            idx = np.argmin(abs(d['mag']))  # index of closest to 0
-
-            if d['mag'][idx] < 0:
-                if d['mag'][idx + 1] < 0:
+            data = d['field'].v
+            idx = np.argmin(abs(data))  # index of closest to 0
+            if data[idx] < 0:
+                if data[idx + 1] < 0:
                     idx1 = idx
                     idx2 = idx - 1
                 else:
                     idx1 = idx + 1
                     idx2 = idx
             else:
-                if d['mag'][idx + 1] < 0:
+                if data[idx + 1] < 0:
                     idx1 = idx + 1
                     idx2 = idx
                 else:
@@ -266,10 +294,47 @@ class Hysteresis(base.Measurement):
             i = [idx1, idx2]
             d = d.filter_idx(i)
 
-            dy = d['mag'][1] - d['mag'][0]
-            dx = d['field'][1] - d['field'][0]
+            mrs = d.lin_regress(column_name_y='mag', column_name_x='field')[2]
+            return abs(mrs)
+
+        df = calc('down_field')
+        uf = calc('up_field')
+        self.results['mrs'] = np.mean([df, uf])
+        self.results['sigma_mrs'] = np.std([df, uf])
+
+    def calculate_bc(self, **parameters):
+        '''
+
+        :return:
+        '''
+        self.log.info('CALCULATING << Bc >> parameter from linear interpolation between points closest to m=0')
+
+        def calc(direction):
+            d = getattr(self, direction)
+            data = d['mag'].v
+            idx = np.argmin(abs(data))  # index of closest to 0
+            if data[idx] < 0:
+                if data[idx + 1] < 0:
+                    idx1 = idx
+                    idx2 = idx - 1
+                else:
+                    idx1 = idx + 1
+                    idx2 = idx
+            else:
+                if data[idx + 1] < 0:
+                    idx1 = idx + 1
+                    idx2 = idx
+                else:
+                    idx1 = idx - 1
+                    idx2 = idx
+
+            i = [idx1, idx2]
+            d = d.filter_idx(i)
+
+            dy = d['mag'].v[1] - d['mag'].v[0]
+            dx = d['field'].v[1] - d['field'].v[0]
             m = dy / dx
-            b = d['mag'][1] - d['field'][1] * m
+            b = d['mag'].v[1] - d['field'].v[1] * m
             bc = abs(b / m)
 
             return bc
@@ -279,15 +344,14 @@ class Hysteresis(base.Measurement):
         self.results['bc'] = np.mean([df, uf])
         self.results['sigma_bc'] = np.std([df, uf])
 
-    def calculate_brh(self):
+    def calculate_brh(self, **parameters):
         pass  # todo implement
 
-
-    def down_field_interp(self):
+    def down_field_interp(self, **parameters):
         from scipy import interpolate
 
         x = self.down_field['field']
-        y = self.down_field['mag']
+        y = self.down_fieldata
 
         if np.all(np.diff(x) > 0):
             f = interpolate.interp1d(x, y, kind='slinear')
@@ -300,11 +364,11 @@ class Hysteresis(base.Measurement):
         y_new = f(x_new)
         return x_new, y_new
 
-    def up_field_interp(self):
+    def up_field_interp(self, **parameters):
         from scipy import interpolate
 
         x = self.up_field['field']
-        y = self.up_field['mag']
+        y = self.up_fieldata
 
         if np.all(np.diff(x) > 0):
             f = interpolate.interp1d(x, y, kind='slinear')

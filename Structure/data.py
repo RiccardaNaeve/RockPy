@@ -811,6 +811,7 @@ class RockPyData(object):
         calculates a least squares linear regression for given x/y data
         :param column_name_x:
         :param column_name_y:
+        :returns : slope, sigma, y_intercept, x_intercept
         """
 
         x = self[column_name_x].v

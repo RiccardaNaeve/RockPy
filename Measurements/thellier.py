@@ -127,11 +127,6 @@ class Thellier(base.Measurement):
                 self.log.debug('UNABLE to find entriy for << %s, %.2f >> temperature' % (step, temp))
 
 
-    def calc_all(self, **parameter):
-        parameter['recalc'] = True
-        for result_method in self.result_methods:
-            getattr(self, 'result_' + result_method)(**parameter)
-
     ''' RESULT SECTION '''
 
     def result_slope(self, t_min=None, t_max=None, component=None, recalc=False):

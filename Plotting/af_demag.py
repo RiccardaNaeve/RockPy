@@ -1,17 +1,25 @@
 __author__ = 'mike'
 
 
-def field_mom(ax, afdemag_obj, component='mag', norm_factor=[1, 1],
+def field_mom(ax, afdemag_obj, component='mag', norm_factor=None,
               plt_idx=0,
               **plt_opt):
+
+    if norm_factor is None:
+        norm_factor = [1, 1]
+
     ax.plot(afdemag_obj.data['field'].v / norm_factor[0],
             afdemag_obj.data[component].v / norm_factor[1],
             **plt_opt)
 
 
-def diff_fill(ax, afdemag_obj, component='mag', norm_factor=[1, 1],
+def diff_fill(ax, afdemag_obj, component='mag', norm_factor=None,
               smoothing=1, diff=2, plt_idx=0,
               **plt_opt):
+
+    if norm_factor is None:
+        norm_factor = [1, 1]
+
     lim = ax.get_ylim()
     data = afdemag_obj.data
     label = 'd' + str(diff) + ' ' + component + '/d' + str(diff) + ' ' + 'field'

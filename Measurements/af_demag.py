@@ -11,10 +11,12 @@ class AfDemag(base.Measurement):
 
     def __init__(self, sample_obj,
                  mtype, mfile, machine,
+                 mag_method='',
                  **options):
         super(AfDemag, self).__init__(sample_obj,
                                       mtype, mfile, machine,
                                       **options)
+        self.mag_method = mag_method
 
     def format_jr6(self):
         self.data = RockPyData(column_names=['field', 'x', 'y', 'z'], data=self.machine_data.out_afdemag())
@@ -72,7 +74,6 @@ class AfDemag(base.Measurement):
 
         smooth_spline = self.interpolate_smoothing_spline(y_component='field', x_component=component, out_spline=False)
         # smooth_spline = self.smoothing_spline(x_component='field', y_component=component, out_spline=False)
-        print smooth_spline
         plt.plot(self.data['field'].v, self.data['mag'].v, '.')
         plt.plot(smooth_spline['field'].v, smooth_spline['mag'].v)
         plt.show()

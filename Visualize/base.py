@@ -1,5 +1,7 @@
 __author__ = 'volk'
 import logging
+import os
+import sys
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -105,6 +107,7 @@ class Generic(object):
                        'rtn': self.get_fig,
                        'save': self.save_fig,
                        'None': self.close_plot,
+                       'folder': self.plt_save_script_folder,
                        'get_ax': self.get_ax}
 
         if self.plot in ['show', 'save']:
@@ -114,6 +117,11 @@ class Generic(object):
 
                 plt.legend(loc='best')
         out_options[self.plot]()
+
+    def plt_save_script_folder(self):
+        import __main__ as main
+        name = main.__file__[:-2]+self.name[:-4]+'.pdf'
+        plt.savefig(name)
 
     def get_ax(self):
         plt.close()
@@ -184,6 +192,24 @@ class Generic(object):
                    'linestyle': self.linestyles[measurements.index(measurement)],
                    'label': label}
         return plt_opt
+
+    def create_heat_color_map(self, value_list, reverse=False):
+        """
+        takes a list of values and creates a list of colors from blue to red
+
+        :param value_list:
+        :param reverse:
+        :return:
+        """
+        r = np.linspace(0, 255, len(value_list)).astype('int')
+        r = [hex(i)[2:-1].zfill(2) for i in r]
+        # r = [i.encode('hex') for i in r]
+        b = r[::-1]
+
+        out = ['#%2s' % r[i] + '00' + '%2s' % b[i] for i in range(len(value_list))]
+        if reverse:
+            out = out[::-1]
+        return out
 
     def close_plot(self):
         plt.close()

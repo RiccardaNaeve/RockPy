@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 
 import base
 from RockPy.Structure.data import RockPyData
+from scipy import stats
 
 
 class Hysteresis(base.Measurement):
@@ -24,6 +25,7 @@ class Hysteresis(base.Measurement):
                  **options):
         super(Hysteresis, self).__init__(sample_obj, mtype, mfile, machine, **options)
 
+        self.paramag_correction = None
 
     # ## formatting functions
     def format_vftb(self):
@@ -258,15 +260,17 @@ class Hysteresis(base.Measurement):
         uf_plus = [i for i, v in enumerate(uf_fields) if v >= from_field]
         uf_minus = [i for i, v in enumerate(uf_fields) if v <= -from_field]
 
-        dfp = abs(self.down_field.filter_idx(df_plus).lin_regress(column_name_x='field', column_name_y='mag')[2])
-        dfm = abs(self.down_field.filter_idx(df_minus).lin_regress(column_name_x='field', column_name_y='mag')[2])
-        ufp = abs(self.down_field.filter_idx(uf_plus).lin_regress(column_name_x='field', column_name_y='mag')[2])
-        ufm = abs(self.down_field.filter_idx(uf_minus).lin_regress(column_name_x='field', column_name_y='mag')[2])
+        dfp = self.down_field.filter_idx(df_plus).lin_regress(column_name_x='field', column_name_y='mag')
+        dfm = self.down_field.filter_idx(df_minus).lin_regress(column_name_x='field', column_name_y='mag')
+        ufp = self.down_field.filter_idx(uf_plus).lin_regress(column_name_x='field', column_name_y='mag')
+        ufm = self.down_field.filter_idx(uf_minus).lin_regress(column_name_x='field', column_name_y='mag')
 
-        ms_all = [dfp, dfm, ufp, ufm] #todo fix
+        ms_all = [abs(dfp[2]), abs(dfm[2]), abs(ufp[2]), abs(ufm[2])]  # todo fix
 
         self.results['ms'] = np.max(ms_all)
         self.results['sigma_ms'] = np.std(ms_all)
+
+        self.paramag_correction = np.array([dfp, dfm, ufp, ufm])
 
         self.calculation_parameters['ms'] = parameters
 
@@ -294,8 +298,10 @@ class Hysteresis(base.Measurement):
             i = [idx1, idx2]
             d = d.filter_idx(i)
 
-            mrs = d.lin_regress(column_name_y='mag', column_name_x='field')[2]
-            return abs(mrs)
+            x = d['field'].v
+            y = d['mag'].v
+            slope, intercept, r_value, p_value, std_err = stats.linregress(x, y)
+            return abs(intercept)
 
         df = calc('down_field')
         uf = calc('up_field')
@@ -392,7 +398,21 @@ class Hysteresis(base.Measurement):
         plt.plot(self.up_field['field'].v, self.up_field['mag'].v, '.-',
                  color=std.get_color(),
                  zorder=1)
+        plt.plot(0, self.results['mrs'].v[0], 'x')
 
+        if not self.paramag_correction is None:
+            slopes = self.paramag_correction[:, 0]
+            intercepts = self.paramag_correction[:, 2]
+            # downfield paramag_correction_line
+            xdf = np.array([0, max(self.down_field['field'].v)])  #get x
+            xuf = np.array([min(self.down_field['field'].v), 0])  #get x
+            ydf = xdf * np.mean(slopes) + np.mean(np.fabs(intercepts))
+            yuf = xuf * np.mean(slopes) - np.mean(np.fabs(intercepts))
+
+            print np.mean(np.fabs(intercepts))
+            print intercepts
+            plt.plot(xdf, ydf, 'g--', alpha=0.5)
+            plt.plot(xuf, yuf, 'g--', alpha=0.5)
         # plotting interpolated data
         # plt.plot(self.down_field_interp()[0], self.down_field_interp()[1], '--',
         # color=std.get_color(),

@@ -9,9 +9,10 @@ from RockPy.Measurements.base import Measurement
 
 class Sample():
     general.create_logger('RockPy.SAMPLE')
+
     def __init__(self, name,
-                 mass=None, mass_unit='kg', mass_machine='generic',
-                 height=None, diameter=None, length_unit=None, length_machine='generic',
+                 mass=1, mass_unit='kg', mass_machine='generic',
+                 height=1, diameter=1, length_unit='mm', length_machine='generic',
                  **options):
         """
 
@@ -95,11 +96,11 @@ class Sample():
 
     @property
     def mass_kg(self):
-        measurement = self.get_measurements(mtype='mass')
-        if len(measurement) > 1:
+        measurements = self.get_measurements(mtype='mass')
+        if len(measurements) > 1:
             self.log.info('FOUND more than 1 << mass >> measurement. Returning first')
         try:
-            return measurement[0].data['mass'][0]
+            return measurements[0].data['mass'][0]
         except IndexError:  # todo fix
             return 1
 
@@ -121,7 +122,7 @@ class Sample():
 
     ''' FIND FUNCTIONS '''
 
-    def get_measurements(self, mtype):
+    def get_measurements(self, mtype, **options):
         """
         Returns a list of measurements of type = mtype
         :param mtype:
@@ -129,10 +130,13 @@ class Sample():
         """
         self.log.debug('SEARCHING\t measurements with mtype << %s >>' % (mtype.lower()))
         out = [m for m in self.measurements if m.mtype == mtype.lower()]
+        if options:
+            out = [m for m in out for key in options if hasattr(m, key) if getattr(m, key) == options[key]]
         if len(out) != 0:
             self.log.info('FOUND\t sample << %s >> has %i measurements with mtype << %s >>' % (
                 self.name, len(out), mtype.lower()))
         else:
             self.log.error('UNKNOWN\t mtype << %s >> or no measurement found' % mtype.lower())
+            return None
         return out
 

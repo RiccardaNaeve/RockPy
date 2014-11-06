@@ -937,7 +937,7 @@ class RockPyData(object):
         else:
             sigma = np.sqrt((2 * y_sum_diff_sq - 2 * slope * mixed_sum) / ((n - 2) * x_sum_diff_sq))
 
-        y_intercept = y_mean + abs(slope * x_mean)
+        y_intercept = y_mean - (slope * x_mean)
         x_intercept = - y_intercept / slope
 
         return slope, sigma, y_intercept, x_intercept

@@ -180,8 +180,8 @@ class Backfield(base.Measurement):
     def calculate_mrs(self, **parameter):
         start = self.remanence['mag'].v[0]
         end = self.remanence['mag'].v[-1]
-        self.results['mrs'] = np.mean(np.fabs([start, end]))
-        self.results['sigma_mrs'] = np.std(np.fabs([start, end]))
+        self.results['mrs'] = np.mean(np.fabs([end]))
+        self.results['sigma_mrs'] = np.std(np.fabs([end]))
 
     def calculate_ms(self, **parameter):
         self.results['ms'] = None

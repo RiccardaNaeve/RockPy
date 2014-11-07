@@ -433,10 +433,17 @@ class RockPyData(object):
         return True  # successfully done
 
     def delete_rows(self, idx):
-
-        raise NotImplemented
-
-
+        '''
+        delete rows specified by idx
+        :param idx: single index or list of numeric row indices
+        :return: None
+        '''
+        # delete rows from self._data
+        self._data = np.delete( self._data, idx, axis=0)
+        # delete corresponding row_names
+        if self.row_names is not None:
+            for i in sorted( _to_tuple( idx), reverse=True):
+                del self.row_names[i]
 
     def _find_duplicate_variable_rows(self):
         '''

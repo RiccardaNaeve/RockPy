@@ -40,12 +40,16 @@ class TestRockPyData(TestCase):
         self.assertEqual(self.RPD.column_names, ['F', 'M_x', 'My', 'Mz'])
 
     def test_append_rows(self):
-        d1 = [[5, 6, 7, 8], [9,10,11,12]]
+        d1 = [[5, 6, 7, 8], [9, 10, 11, 12]]
         self.RPD.append_rows(d1, ('5.Zeile', '6.Zeile'))
-        self.assertTrue( np.array_equal(self.RPD.v[-2:, :], np.array(d1)))
+        self.assertTrue(np.array_equal(self.RPD.v[-2:, :], np.array(d1)))
         d2 = [5, 6, 7, 8]
         self.RPD.append_rows(d2, '5.Zeile')
-        self.assertTrue( np.array_equal(self.RPD.v[-1, :], np.array(d2)))
-        #lets try with other RockPyData object
+        self.assertTrue(np.array_equal(self.RPD.v[-1, :], np.array(d2)))
+        # lets try with other RockPyData object
         #self.RPD.append_rows( self.RPD)
         #print self.RPD
+
+    def test_delete_rows(self):
+        self.RPD.delete_rows((0,2))
+        self.assertTrue(np.array_equal(self.RPD.v, np.array(self.testdata)[(1,3), :]))

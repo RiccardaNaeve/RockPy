@@ -2,10 +2,20 @@ __author__ = 'wack'
 
 from copy import deepcopy
 
+import itertools
 import numpy as np
 from prettytable import PrettyTable
 
 from RockPy.Structure import ureg
+
+
+def _to_tuple( oneormoreitems):
+    '''
+    convert argument to tuple of elements
+    :param oneormoreitems: single number or string or list of numbers or strings
+    :return: tuple of elements
+    '''
+    return tuple(oneormoreitems) if hasattr(oneormoreitems, '__iter__') else (oneormoreitems, )
 
 class RockPyData(object):
     # todo units
@@ -362,19 +372,21 @@ class RockPyData(object):
         if data.ndim > 3:
             raise RuntimeError( 'data has dimension > 3')
 
+
         if data.ndim == 1:  # values for one row, no errors
-            data.reshape(data.shape[0], 1)  # reshape to 2D array with one row
+            data = data[np.newaxis, :] # add extra dimension to make data 2D with single row
 
         if data.ndim == 2:  # values for one or multiple rows, no errors
             data = data[:, :, np.newaxis]  # add extra dimension for errors
+
 
         # now data must be 3D
         if data.shape[2] == 0 or data.shape[2] > 2:
             raise RuntimeError( 'data.shape[2] must be 1 or 2 and not %d' % data.shape[2])
 
-        if data.shape[2] == 1: # only values, need to add errors
+        if data.shape[2] == 1:  # only values, need to add errors
             data = np.concatenate((data, np.zeros_like(data)), axis=2)  # add zeroes in 3rd dimension as errors
-            values[:, :, 1] = np.NAN  # set errors to NAN
+            data[:, :, 1] = np.NAN  # set errors to NAN
 
         # if data.shape[2] == 2 -> erros are already included in data
 
@@ -382,11 +394,18 @@ class RockPyData(object):
 
     def append_rows(self, data, row_names=None):
         '''
-        append rows with data and optionally row_labels
-        :param row_names:
+        append rows with data and optionally row_names
+        :param row_names: can be either an 1-3 dim array or anoteher RockPyData object with matching number of columns
         :param data: can be only values or values + errors
         :return:
         '''
+        # check if we have another rockpydata object to append
+        if isinstance( data, RockPyData):
+            row_names = data.row_names
+            data = data.v
+
+        # todo: check if column names match????
+
         if self.row_names is None and row_names is not None and self.row_count > 0:
             raise RuntimeError('cannot append rows with row_names to RockPyData object without row_names')
 
@@ -394,22 +413,24 @@ class RockPyData(object):
             raise RuntimeError('cannot append data without row_names to RockPyData object with row_names')
 
         data = self._convert_input_to_data(data)
-        if data == None:
+        if data is None:
             return False  # do nothing
 
-        if data.shape[1] != self.column_count:
+        if data.shape[1] != self.column_count:  # check if number of data columns match number of columns in rpd object
             raise RuntimeError('column count of data does not match number of columns')
+
+        row_names = _to_tuple( row_names)
+
+        if row_names[0] is not None and data.shape[0] != len( row_names):
+            raise RuntimeError('number of rows in data does not match number row names given')
 
         # todo check if row names are unique
         if row_names is not None:
-            self.row_names.extend(list([row_names]))
+            self.row_names.extend(row_names) # add one or more row names
 
         self._data = np.concatenate((self._data, data), axis=0)
 
         return True  # successfully done
-
-    def append_rockpydata(self, other):
-        pass
 
     def delete_rows(self, idx):
 

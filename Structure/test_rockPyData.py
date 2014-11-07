@@ -1,6 +1,6 @@
 from unittest import TestCase
 import numpy as np
-from RockPy.Structure.data import RockPyData
+from RockPy.Structure.data import RockPyData, _to_tuple
 
 
 __author__ = 'wack'
@@ -40,9 +40,12 @@ class TestRockPyData(TestCase):
         self.assertEqual(self.RPD.column_names, ['F', 'M_x', 'My', 'Mz'])
 
     def test_append_rows(self):
-        self.RPD.append_rows([5, 6, 7, 8], '5.Zeile')
-
-
-    def test_append_rockpydata(self):
-        self.RPD.append_rockpydata(self.RPD)
-        self.fail()
+        d1 = [[5, 6, 7, 8], [9,10,11,12]]
+        self.RPD.append_rows(d1, ('5.Zeile', '6.Zeile'))
+        self.assertTrue( np.array_equal(self.RPD.v[-2:, :], np.array(d1)))
+        d2 = [5, 6, 7, 8]
+        self.RPD.append_rows(d2, '5.Zeile')
+        self.assertTrue( np.array_equal(self.RPD.v[-1, :], np.array(d2)))
+        #lets try with other RockPyData object
+        #self.RPD.append_rows( self.RPD)
+        #print self.RPD

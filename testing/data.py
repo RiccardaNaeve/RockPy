@@ -1,6 +1,6 @@
 __author__ = 'wack'
 
-from Structure.data import RockPyData
+from RockPy.Structure.data import RockPyData
 
 # script to test data objects
 
@@ -95,6 +95,8 @@ def test():
     print l
 
     print l['X']
+
+    print d.mean()
 
 if __name__ == '__main__':
     test()

@@ -2,8 +2,8 @@ __author__ = 'wack'
 
 from copy import deepcopy
 
-import itertools
 import numpy as np
+import itertools
 from prettytable import PrettyTable
 
 from RockPy.Structure import ureg
@@ -56,7 +56,6 @@ class RockPyData(object):
 
         # initialize member variables
         self._column_names = list(column_names)
-
         # todo: check for right dimension of units
         if units is None:
             self._units = None
@@ -153,6 +152,12 @@ class RockPyData(object):
         return self.units
 
     @property
+    def unitstrs(self):
+        if self.units == None:
+            return None
+        return [str(u.units) for u in self.units]
+
+    @property
     def data(self):
         return self._data
 
@@ -174,7 +179,7 @@ class RockPyData(object):
             raise TypeError('wrong data dimension')
 
         if d.shape[1] != self.column_count:
-            raise TypeError('wrong number of columns in data')
+            raise TypeError('found %d columns in data but needed %d' % (d.shape[1], self.column_count))
 
         self._data = d
 
@@ -402,7 +407,7 @@ class RockPyData(object):
         # check if we have another rockpydata object to append
         if isinstance( data, RockPyData):
             row_names = data.row_names
-            data = data.v
+            data = data.data
 
         # todo: check if column names match????
 
@@ -413,8 +418,9 @@ class RockPyData(object):
             raise RuntimeError('cannot append data without row_names to RockPyData object with row_names')
 
         data = self._convert_input_to_data(data)
+
         if data is None:
-            return False  # do nothing
+            return self  # do nothing
 
         if data.shape[1] != self.column_count:  # check if number of data columns match number of columns in rpd object
             raise RuntimeError('column count of data does not match number of columns')
@@ -424,13 +430,15 @@ class RockPyData(object):
         if row_names[0] is not None and data.shape[0] != len( row_names):
             raise RuntimeError('number of rows in data does not match number row names given')
 
+        self_copy = deepcopy(self)
+
         # todo check if row names are unique
         if row_names is not None:
-            self.row_names.extend(row_names) # add one or more row names
+            self_copy.row_names.extend(row_names) # add one or more row names
 
-        self._data = np.concatenate((self._data, data), axis=0)
+        self_copy._data = np.concatenate((self_copy._data, data), axis=0)
 
-        return True  # successfully done
+        return self_copy
 
     def delete_rows(self, idx):
         '''
@@ -438,12 +446,14 @@ class RockPyData(object):
         :param idx: single index or list of numeric row indices
         :return: None
         '''
-        # delete rows from self._data
-        self._data = np.delete( self._data, idx, axis=0)
+        self_copy = deepcopy( self)
+        # delete rows from self_copy._data
+        self_copy._data = np.delete( self_copy._data, idx, axis=0)
         # delete corresponding row_names
-        if self.row_names is not None:
+        if self_copy.row_names is not None:
             for i in sorted( _to_tuple( idx), reverse=True):
-                del self.row_names[i]
+                del self_copy.row_names[i]
+        return self_copy
 
     def _find_duplicate_variable_rows(self):
         '''
@@ -463,23 +473,44 @@ class RockPyData(object):
         # return only elements with more than one entry, i.e. duplicate row indices
         return [tuple(np.where(inv == i)[0]) for i in range(len(uar)) if len(np.where(inv == i)[0]) > 1]
 
-    def average_duplicate_variable_rows(self, errors='stdev'):
+    def eliminate_duplicate_variable_rows(self, subst=None):
         '''
-        average values of rows with matching variables
-        :param errors: defines how the errors of the averaged values are calculated
-                       'stdev' takes the standard deviation of the averaged values as error
-                       'max' takes the maximum value of the errors of the averaged values as error
+        eliminate rows with non unique variables
+        :param subst: determines wich data replaces  the removed non-unique variable rows
+                    None: nothing, rows with identical variables are just deleted
+                    'max': maximum value of each column
+                    'min': minimum value of each column
+                    'mean': average value of all values removed values in each row, error is set to the standard deviation
+                    'median': median value of all values removed values in each row, error is set to the standard deviation
         :return: ?
         '''
 
-        pass
+        # find rows with identical variables
+        dup = self._find_duplicate_variable_rows()
 
-    def delete_duplicate_variable_rows(self):
-        '''
-        remove all rows with non unique variables
-        :return: ?
-        '''
-        pass
+        self_copy = deepcopy( self)
+
+        for d in dup:
+            duprows = self.filter_idx(d)
+
+            if subst is None:
+                pass
+            elif subst == 'max':
+                raise NotImplemented
+            elif subst == 'min':
+                raise NotImplemented
+            elif subst == 'mean':
+                res = duprows.mean()
+                #print new
+                self_copy = self_copy.append_rows( res)
+            elif subst == 'median':
+                raise NotImplemented
+            else:
+                raise ValueError('unknown value for subst: %s' % str( subst))
+
+        # delete all rows with identical variable columns
+        return self_copy.delete_rows(list(itertools.chain.from_iterable(dup)))
+
 
     def interpolate(self, new_variables, method='linear'):
         '''
@@ -848,7 +879,7 @@ class RockPyData(object):
 
     def filter(self, tf_array):
         """
-        Returns a copy of the data filtered according to a True_False array. False entries are not returned.
+        Returns a copy of the data filtered by rows according to a True_False array. False entries are not returned.
 
         tf_array = (d['Mx'] > 10) & (d['Mx'] < 20)
         filtered_d = d.filter(tf_array)
@@ -871,7 +902,7 @@ class RockPyData(object):
 
     def filter_idx(self, index_list, invert=False):
         """
-        Returns a copy of the data filtered according to indices specified in index_list.
+        Returns a copy of the data filtered by rows according to indices specified in index_list.
 
         :example:
 
@@ -902,6 +933,24 @@ class RockPyData(object):
         else:
             tf_array = [True if x in index_list else False for x in range(len(self.data))]
         return self.filter(tf_array)
+
+    def mean(self):
+        '''
+        calculate mean values for each column and return as new RockPyData object
+        standard deviations are set as errors
+        :return: RockPyData object
+        '''
+        val = np.nanmean( self.values, axis=0)[np.newaxis, :, np.newaxis]
+        err = np.nanstd( self.values, axis=0)[np.newaxis, :, np.newaxis]
+
+        data = np.concatenate((val,err), axis=2)
+
+        if self.row_names is not None:
+            row_name = 'mean_' + '_'.join( self.row_names)
+        rpd = RockPyData( self.column_names, row_names=row_name, units=self.unitstrs, data=data)
+        # todo set variable columns right
+        return rpd
+
 
     def sort(self, key='variable'):
         """

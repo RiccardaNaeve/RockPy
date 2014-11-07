@@ -1,3 +1,3 @@
 __author__ = 'wack'
-from pint import UnitRegistry
-ureg = UnitRegistry()
+import pint
+ureg = pint.UnitRegistry()

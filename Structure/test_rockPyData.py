@@ -41,15 +41,32 @@ class TestRockPyData(TestCase):
 
     def test_append_rows(self):
         d1 = [[5, 6, 7, 8], [9, 10, 11, 12]]
-        self.RPD.append_rows(d1, ('5.Zeile', '6.Zeile'))
+        self.RPD = self.RPD.append_rows(d1, ('5.Zeile', '6.Zeile'))
         self.assertTrue(np.array_equal(self.RPD.v[-2:, :], np.array(d1)))
         d2 = [5, 6, 7, 8]
-        self.RPD.append_rows(d2, '5.Zeile')
+        self.RPD = self.RPD.append_rows(d2, '5.Zeile')
         self.assertTrue(np.array_equal(self.RPD.v[-1, :], np.array(d2)))
         # lets try with other RockPyData object
-        #self.RPD.append_rows( self.RPD)
-        #print self.RPD
+        # self.RPD.append_rows( self.RPD)
+        # print self.RPD
 
     def test_delete_rows(self):
-        self.RPD.delete_rows((0,2))
-        self.assertTrue(np.array_equal(self.RPD.v, np.array(self.testdata)[(1,3), :]))
+        self.RPD = self.RPD.delete_rows((0, 2))
+        self.assertTrue(np.array_equal(self.RPD.v, np.array(self.testdata)[(1, 3), :]))
+
+    def test_eliminate_duplicate_variable_rows(self):
+        # check for one variable column
+        self.RPD = self.RPD.eliminate_duplicate_variable_rows()
+        self.assertTrue(np.array_equal(self.RPD.v, np.array([]).reshape(0, 4)))
+
+    def test_eliminate_duplicate_variable_rows2(self):
+        # check for two variable columns
+        self.RPD.define_alias('variable', ('F', 'Mx'))
+        self.RPD  = self.RPD.eliminate_duplicate_variable_rows(subst='mean')
+        self.assertTrue(np.array_equal(self.RPD.v, np.array([[1., 2., 7., 8.], [1., 6., 31., 37.]])))
+        self.assertTrue(np.array_equal(self.RPD.e, np.array([[0., 0., 4., 4.], [0., 0., 24., 29.]])))
+
+    def test_mean(self):
+        self.RPD = self.RPD.mean()
+        self.assertTrue(np.array_equal(self.RPD.v, np.array([[1., 4., 19., 22.5]])))
+        np.testing.assert_allclose(self.RPD.e, np.array([[0., 2., 20.976, 25.273]]), atol=0.01)

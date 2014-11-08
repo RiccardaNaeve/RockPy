@@ -948,7 +948,8 @@ class RockPyData(object):
         if self.row_names is not None:
             row_name = 'mean_' + '_'.join( self.row_names)
         rpd = RockPyData( self.column_names, row_names=row_name, units=self.unitstrs, data=data)
-        # todo set variable columns right
+        # set variable columns the same way
+        rpd._column_dict['variable'] = self._column_dict['variable']
         return rpd
 
 

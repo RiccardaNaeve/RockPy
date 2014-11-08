@@ -1,6 +1,6 @@
-from unittest import TestCase
-import numpy as np
-from RockPy.Structure.data import RockPyData, _to_tuple
+from unittest import TestCase  # Unit testing framework
+import numpy as np  # numerical array functions
+from RockPy.Structure.data import RockPyData
 
 
 __author__ = 'wack'
@@ -15,7 +15,7 @@ class TestRockPyData(TestCase):
                          (1, 6, 55, 66))
 
         self.col_names = ('F', 'Mx', 'My', 'Mz')
-        self.row_names = ('1.Zeile', '2.Zeile', '3.Zeile', '4.Zeile')
+        self.row_names = ('1.Zeile', '2.Zeile_A', '3.Zeile', '4.Zeile_A')
         self.units = ('T', 'mT', 'fT', 'pT')
 
         self.RPD = RockPyData(column_names=self.col_names, row_names=self.row_names, units=self.units,
@@ -73,5 +73,11 @@ class TestRockPyData(TestCase):
 
     def test_max(self):
         self.RPD = self.RPD.max()
-        print self.RPD
         self.assertTrue(np.array_equal(self.RPD.v, np.array([[1., 6., 55., 66.]])))
+
+    def test_filter_row_names(self):
+        self.assertEqual(self.RPD.filter_row_names(('1.Zeile', '3.Zeile')).row_names, ['1.Zeile', '3.Zeile'])
+
+    def test_filter_match_row_names(self):
+        # get all rows ending with '_A'
+        self.assertEqual( self.RPD.filter_match_row_names( '.*_A').row_names, ['2.Zeile_A', '4.Zeile_A'])

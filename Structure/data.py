@@ -4,6 +4,7 @@ from copy import deepcopy
 
 import numpy as np
 import itertools
+import re  # regular expressions
 from prettytable import PrettyTable
 
 from RockPy.Structure import ureg
@@ -19,7 +20,6 @@ def _to_tuple( oneormoreitems):
 
 class RockPyData(object):
     # todo units
-    # todo append rockpydata object rpd(('a','b','c'), (1,2,3)).append(rpd(('a','b'), (1,2)) -> rpd(('a','b','c'), ((1,2,3), (1,2,np.nan))
     """
     class to manage specific numeric data based on a numpy array
     e.g. d = rockpydata( column_names=( 'F','Mx', 'My', 'Mz'))
@@ -32,7 +32,7 @@ class RockPyData(object):
     rows can be labeled as well
 
 
-    variable naming scheme:
+    column variable naming scheme:
        key: can be column_name and alias
        column_name: only used for single columns
        alias: only used for alias
@@ -927,19 +927,23 @@ class RockPyData(object):
             tf_array = [True if x in index_list else False for x in range(len(self.data))]
         return self.filter(tf_array)
 
-    def filter_row_names(self, row_names):
+    def filter_row_names(self, row_names, invert = False):
         '''
         extract rows that match the specified row_names
         :return:
         '''
-        raise NotImplemented
+        if self.row_names is None:
+            raise RuntimeError( 'no row names in RockPyData object')
+        return self.filter_idx([i for i,x in enumerate( self.row_names) if x in _to_tuple( row_names)], invert=invert)
 
     def filter_match_row_names(self, regex):
         '''
         extract rows with labels matching regex
         :return:
         '''
-        raise NotImplemented
+        if self.row_names is None:
+            raise RuntimeError('no row names in RockPyData object')
+        return self.filter([bool(re.match( regex, rn)) for rn in self.row_names])
 
     def _multirow_op(self, kind):
         '''

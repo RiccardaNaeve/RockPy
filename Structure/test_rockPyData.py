@@ -70,3 +70,8 @@ class TestRockPyData(TestCase):
         self.RPD = self.RPD.mean()
         self.assertTrue(np.array_equal(self.RPD.v, np.array([[1., 4., 19., 22.5]])))
         np.testing.assert_allclose(self.RPD.e, np.array([[0., 2., 20.976, 25.273]]), atol=0.01)
+
+    def test_max(self):
+        self.RPD = self.RPD.max()
+        print self.RPD
+        self.assertTrue(np.array_equal(self.RPD.v, np.array([[1., 6., 55., 66.]])))

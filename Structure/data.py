@@ -38,6 +38,44 @@ class RockPyData(object):
        alias: only used for alias
     """
 
+    @staticmethod
+    def _convert_input_to_data(input):
+        '''
+        convert given data to 3D numpy array
+
+        :param data:
+        :return: 3D numpy array, representing matrix of values and errors as used by RockPyData.data
+        '''
+        if input is None:
+            return None
+
+        # convert input data to a numpy array
+        data = np.array(input, dtype=float)
+
+        if data.ndim > 3:
+            raise RuntimeError( 'data has dimension > 3')
+
+
+        if data.ndim == 1:  # values for one row, no errors
+            data = data[np.newaxis, :] # add extra dimension to make data 2D with single row
+
+        if data.ndim == 2:  # values for one or multiple rows, no errors
+            data = data[:, :, np.newaxis]  # add extra dimension for errors
+
+
+        # now data must be 3D
+        if data.shape[2] == 0 or data.shape[2] > 2:
+            raise RuntimeError( 'data.shape[2] must be 1 or 2 and not %d' % data.shape[2])
+
+        if data.shape[2] == 1:  # only values, need to add errors
+            data = np.concatenate((data, np.zeros_like(data)), axis=2)  # add zeroes in 3rd dimension as errors
+            data[:, :, 1] = np.NAN  # set errors to NAN
+
+        # if data.shape[2] == 2 -> erros are already included in data
+
+        return data
+
+
     def __init__(self, column_names, row_names=None, units=None, data=None):
         """
             :param column_names: sequence of strings naming individual columns
@@ -361,41 +399,7 @@ class RockPyData(object):
         self._update_column_dictionary(self._column_names)
 
 
-    def _convert_input_to_data(self, input):
-        '''
-        convert given data to 3D numpy array
 
-        :param data:
-        :return: 3D numpy array, representing matrix of values and errors as used by RockPyData.data
-        '''
-        if input is None:
-            return None
-
-        # convert input data to a numpy array
-        data = np.array(input, dtype=float)
-
-        if data.ndim > 3:
-            raise RuntimeError( 'data has dimension > 3')
-
-
-        if data.ndim == 1:  # values for one row, no errors
-            data = data[np.newaxis, :] # add extra dimension to make data 2D with single row
-
-        if data.ndim == 2:  # values for one or multiple rows, no errors
-            data = data[:, :, np.newaxis]  # add extra dimension for errors
-
-
-        # now data must be 3D
-        if data.shape[2] == 0 or data.shape[2] > 2:
-            raise RuntimeError( 'data.shape[2] must be 1 or 2 and not %d' % data.shape[2])
-
-        if data.shape[2] == 1:  # only values, need to add errors
-            data = np.concatenate((data, np.zeros_like(data)), axis=2)  # add zeroes in 3rd dimension as errors
-            data[:, :, 1] = np.NAN  # set errors to NAN
-
-        # if data.shape[2] == 2 -> erros are already included in data
-
-        return data
 
     def append_rows(self, data, row_names=None):
         '''
@@ -417,7 +421,7 @@ class RockPyData(object):
         if self.row_names is not None and row_names is None:
             raise RuntimeError('cannot append data without row_names to RockPyData object with row_names')
 
-        data = self._convert_input_to_data(data)
+        data = RockPyData._convert_input_to_data(data)
 
         if data is None:
             return self  # do nothing

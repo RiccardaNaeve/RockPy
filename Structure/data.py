@@ -927,6 +927,20 @@ class RockPyData(object):
             tf_array = [True if x in index_list else False for x in range(len(self.data))]
         return self.filter(tf_array)
 
+    def filter_row_names(self, row_names):
+        '''
+        extract rows that match the specified row_names
+        :return:
+        '''
+        raise NotImplemented
+
+    def filter_match_row_names(self, regex):
+        '''
+        extract rows with labels matching regex
+        :return:
+        '''
+        raise NotImplemented
+
     def _multirow_op(self, kind):
         '''
         calculate result row out of existing rows

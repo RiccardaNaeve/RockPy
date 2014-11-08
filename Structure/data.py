@@ -477,16 +477,16 @@ class RockPyData(object):
         # return only elements with more than one entry, i.e. duplicate row indices
         return [tuple(np.where(inv == i)[0]) for i in range(len(uar)) if len(np.where(inv == i)[0]) > 1]
 
-    def eliminate_duplicate_variable_rows(self, subst=None):
+    def eliminate_duplicate_variable_rows(self, substfunc=None):
         '''
         eliminate rows with non unique variables
-        :param subst: determines wich data replaces  the removed non-unique variable rows
+        :param substfunc: deleted rows will be replaced by the result of this function
                     None: nothing, rows with identical variables are just deleted
                     'max': maximum value of each column
                     'min': minimum value of each column
                     'mean': average value of all values removed values in each row, error is set to the standard deviation
                     'median': median value of all values removed values in each row, error is set to the standard deviation
-        :return: ?
+        :return: returns modified copy of RockPyData object
         '''
 
         # find rows with identical variables
@@ -497,20 +497,9 @@ class RockPyData(object):
         for d in dup:
             duprows = self.filter_idx(d)
 
-            if subst is None:
-                pass
-            elif subst == 'max':
-                raise NotImplemented
-            elif subst == 'min':
-                raise NotImplemented
-            elif subst == 'mean':
-                res = duprows.mean()
-                #print new
+            if substfunc is not None:
+                res = duprows.__getattribute__(substfunc)()
                 self_copy = self_copy.append_rows( res)
-            elif subst == 'median':
-                raise NotImplemented
-            else:
-                raise ValueError('unknown value for subst: %s' % str( subst))
 
         # delete all rows with identical variable columns
         return self_copy.delete_rows(list(itertools.chain.from_iterable(dup)))

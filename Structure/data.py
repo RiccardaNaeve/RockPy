@@ -927,24 +927,69 @@ class RockPyData(object):
             tf_array = [True if x in index_list else False for x in range(len(self.data))]
         return self.filter(tf_array)
 
+    def _multirow_op(self, kind):
+        '''
+        calculate result row out of existing rows
+        :param kind: kind of operation
+        :return: RockPyData object with results
+        '''
+        if kind == 'mean':
+            val = np.nanmean(self.values, axis=0)[np.newaxis, :, np.newaxis]
+            err = np.nanstd(self.values, axis=0)[np.newaxis, :, np.newaxis]
+        elif kind == 'median':
+            val = np.nanmedian(self.values, axis=0)[np.newaxis, :, np.newaxis]
+            err = np.nanstd(self.values, axis=0)[np.newaxis, :, np.newaxis]
+        elif kind == 'min':
+            minidx = np.nanargmin( self.values, axis=0)
+            val = self.values[minidx, range( self.column_count)][np.newaxis, :, np.newaxis]
+            err = self.errors[minidx, range( self.column_count)][np.newaxis, :, np.newaxis]
+        elif kind == 'max':
+            minidx = np.nanargmax( self.values, axis=0)
+            val = self.values[minidx, range( self.column_count)][np.newaxis, :, np.newaxis]
+            err = self.errors[minidx, range( self.column_count)][np.newaxis, :, np.newaxis]
+        else:
+            return None # error
+
+        data = np.concatenate((val,err), axis=2)
+
+        if self.row_names is not None:
+            row_name = kind + '_' + '_'.join( self.row_names)
+        rpd = RockPyData( self.column_names, row_names=row_name, units=self.unitstrs, data=data)
+        # set variable columns the same way
+        rpd._column_dict['variable'] = self._column_dict['variable']
+        return rpd
+
     def mean(self):
         '''
         calculate mean values for each column and return as new RockPyData object
         standard deviations are set as errors
         :return: RockPyData object
         '''
-        val = np.nanmean( self.values, axis=0)[np.newaxis, :, np.newaxis]
-        err = np.nanstd( self.values, axis=0)[np.newaxis, :, np.newaxis]
+        return self._multirow_op('mean')
 
-        data = np.concatenate((val,err), axis=2)
+    def median(self):
+        '''
+        calculate median values for each column and return as new RockPyData object
+        standard deviations are set as errors
+        :return: RockPyData object
+        '''
+        return self._multirow_op('median')
 
-        if self.row_names is not None:
-            row_name = 'mean_' + '_'.join( self.row_names)
-        rpd = RockPyData( self.column_names, row_names=row_name, units=self.unitstrs, data=data)
-        # set variable columns the same way
-        rpd._column_dict['variable'] = self._column_dict['variable']
-        return rpd
+    def min(self):
+        '''
+        calculate minimum values for each column and return as new RockPyData object
+        errors are propagated
+        :return: RockPyData object
+        '''
+        return self._multirow_op('min')
 
+    def max(self):
+        '''
+        calculate maximum values for each column and return as new RockPyData object
+        errors are propagated
+        :return: RockPyData object
+        '''
+        return self._multirow_op('max')
 
     def sort(self, key='variable'):
         """

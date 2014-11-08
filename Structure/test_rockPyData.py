@@ -62,7 +62,7 @@ class TestRockPyData(TestCase):
     def test_eliminate_duplicate_variable_rows2(self):
         # check for two variable columns
         self.RPD.define_alias('variable', ('F', 'Mx'))
-        self.RPD  = self.RPD.eliminate_duplicate_variable_rows(substfunc='mean')
+        self.RPD = self.RPD.eliminate_duplicate_variable_rows(substfunc='mean')
         self.assertTrue(np.array_equal(self.RPD.v, np.array([[1., 2., 7., 8.], [1., 6., 31., 37.]])))
         self.assertTrue(np.array_equal(self.RPD.e, np.array([[0., 0., 4., 4.], [0., 0., 24., 29.]])))
 

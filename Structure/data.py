@@ -513,12 +513,13 @@ class RockPyData(object):
         :return: new RockPyData object with the interpolated data
         '''
 
-        # average away duplicated variable rows
-        self_copy = self.eliminate_duplicate_variable_rows( substfunc='mean')
+        # average away duplicated variable rows and sort by variable
+        sorted_copy = self.eliminate_duplicate_variable_rows( substfunc='mean').sort()
 
         if method == 'linear1d':
-            if len( self.column_dict[ 'variable']) != 1:
+            if len(sorted_copy.column_dict[ 'variable']) != 1:
                 raise RuntimeError( '%s works only with single column variables' % method)
+            raise NotImplemented
 
         else:
             raise NotImplemented( 'method %s not implemented' % method)
@@ -1025,8 +1026,8 @@ class RockPyData(object):
         .. code-block:: python
 
            d = data(column_names=('Temp','M'), data=[[10, 1.3],[30, 2.2],[20, 1.5]])
-           d.sort('Temp')
-           d.data
+           c = d.sort('Temp')
+           c.data
            array([[ 10. ,   1.3],
            [ 20. ,   1.5],
            [ 30. ,   2.2]])

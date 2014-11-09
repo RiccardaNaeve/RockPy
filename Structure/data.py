@@ -4,6 +4,8 @@ from copy import deepcopy
 
 import logging
 import numpy as np
+import scipy
+import scipy.interpolate
 import itertools
 import re  # regular expressions
 from prettytable import PrettyTable
@@ -88,7 +90,7 @@ class RockPyData(object):
             :param values: numpy array with values
             :param errors: numpy array with error estimates
         """
-        log.info( 'Creating new ' + type(self).__name__)
+        #log.info( 'Creating new ' + type(self).__name__)
 
         if type(column_names) is str:  # if we got a single string, convert it to tuple with one entry
             column_names = (column_names,)
@@ -114,8 +116,7 @@ class RockPyData(object):
 
         # define some default aliases
         self._update_all_alias()
-        self._define_alias_indices('variable', (0,))
-        self._define_alias_indices('values', tuple(range(self.column_count)[1:]))
+        self._define_alias_indices('variable', 0)
 
         self.data = RockPyData._convert_input_to_data( data)
 
@@ -155,6 +156,10 @@ class RockPyData(object):
                 self._column_dict[n] = (self._column_names.index(n),)
 
     def _update_all_alias(self):
+        '''
+        update 'all' alias to comprise all columns
+        :return: None
+        '''
         self._column_dict['all'] = tuple(range(self.column_count))
 
     @property
@@ -331,7 +336,13 @@ class RockPyData(object):
     def _define_alias_indices(self, alias_name, column_indices):
         """
         define an alias as a sequence of numeric column indices
+        if alias 'variable' is redefined, automatically updates 'dep_var' alias to all other columns
+        :param alias_name: str
+        :param column_indices: single or list of column indices
+        :return: None
         """
+        column_indices = _to_tuple(column_indices)
+
         # todo check if column_indices is integer array?
         if len(column_indices) == 0:
             return  # nothing to do
@@ -339,6 +350,11 @@ class RockPyData(object):
         if max(column_indices) > self.column_count or min(column_indices) < 0:
             raise IndexError('column indices out of range')
         self._column_dict[alias_name] = tuple(column_indices)
+
+        # if alias 'variable' was redefined, automatically update 'dep_var' alias to all other columns
+        if alias_name == 'variable':
+            self._column_dict['dep_var'] = [i for i in range(self.column_count) if i not in self._keyseq2colseq('variable')]
+
 
     def append_columns(self, column_names, data=None):
         """
@@ -510,30 +526,41 @@ class RockPyData(object):
         # delete all rows with identical variable columns
         return self_copy.delete_rows(list(itertools.chain.from_iterable(dup)))
 
-    def interpolate(self, new_variables, method='linear1d'):
+    def interpolate(self, new_variables, method='interp1d', kind=None):
         '''
         interpolate existing data columns to new variables
         first duplicated variables are averaged to make interpolation unique
         :param new_variables:
         :param method: defines interpolation method
-            'linear1d' works with single variable column only, each new point is linearly interpolated
+            'inter1d' works with single variable column only, uses scipy.interpolate.inter1p
+        :param kind: defines which kind of interpolation is done
+            for 'inter1d' this defaults to linear, other possible options: 'nearest', 'zero', 'slinear', 'quadratic', 'cubic'
         :return: new RockPyData object with the interpolated data
         '''
 
         # average away duplicated variable rows and sort by variable
-        sorted_copy = self.eliminate_duplicate_variable_rows( substfunc='mean').sort()
+        rpd_copy = self.eliminate_duplicate_variable_rows( substfunc='mean')
 
-        if method == 'linear1d':
-            if len(sorted_copy.column_dict[ 'variable']) != 1:
+        if method == 'interp1d':
+            if len(rpd_copy.column_dict[ 'variable']) != 1:
                 raise RuntimeError( '%s works only with single column variables' % method)
-            for v in _to_tuple( new_variables):
-                # check if new variable is within limits of the old data
-                if v > sorted_copy['variable'].v[0] and v < sorted_copy['variable'].v[-1]:
-                    pass
-                else:
-                    log.info( 'variable %d is out of original data range' % v)
+            newv = _to_tuple( new_variables)
+            oldv = rpd_copy['variable'].v
+            log.info('INTERPOLATING to new variables (interp1d)')
 
-        #self.log.info('CRATING new << samplegroup >>')
+            # get function to interpolate all columns
+            ipf = scipy.interpolate.interp1d( oldv, rpd_copy['dep_var'].values.T, kind=kind if kind is not None else 'linear', bounds_error=False, axis=1)
+
+            # calculate interpolated values for all dep_var columns
+            interp_values = ipf( newv).T
+
+            # put everything back together in new RockPyData object
+            rpd_copy.cleardata()
+            rpd_copy['variable'] = newv
+            rpd_copy['dep_var'] = interp_values
+
+            return rpd_copy
+
         else:
             raise NotImplemented( 'method %s not implemented' % method)
 
@@ -661,6 +688,14 @@ class RockPyData(object):
 
         self._data[:, self._column_dict[key], 0] = values
         self.errors = None
+
+    def cleardata(self):
+        '''
+        clears all data, column structure stays unchanged
+        :return:
+        '''
+        self._data = None
+        self._row_names = None
 
     """
     todo: arithmetic operations
@@ -996,6 +1031,7 @@ class RockPyData(object):
         rpd = RockPyData( self.column_names, row_names=row_name, units=self.unitstrs, data=data)
         # set variable columns the same way
         rpd._column_dict['variable'] = self._column_dict['variable']
+        rpd._column_dict['dep_var'] = self._column_dict['dep_var']
         return rpd
 
     def mean(self):

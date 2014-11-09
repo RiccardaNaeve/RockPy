@@ -36,7 +36,7 @@ class TestRockPyData(TestCase):
         self.assertEqual(self.RPD._find_duplicate_variable_rows(), [(0, 2), (1, 3)])
 
     def test_rename_column(self):
-        self.RPD.rename_column('Mx', 'M_x')
+        self.RPD = self.RPD.rename_column('Mx', 'M_x')
         self.assertEqual(self.RPD.column_names, ['F', 'M_x', 'My', 'Mz'])
 
     def test_append_rows(self):
@@ -90,4 +90,10 @@ class TestRockPyData(TestCase):
         self.assertTrue(np.array_equal(self.RPD['neue Spalte'].v, np.array(d)))
 
     def test_sort(self):
-        self.assertTrue(np.array_equal(self.RPD.sort( 'Mx')['Mx'].v, np.array( (2,2,6,6))))
+        self.assertTrue(np.array_equal(self.RPD.sort('Mx')['Mx'].v, np.array((2, 2, 6, 6))))
+
+    def test_interpolate(self):
+        self.RPD.define_alias('variable', ('My'))
+        iv = (1,11, 33, 55, 100)
+        self.assertTrue(np.array_equal((self.RPD.interpolate( iv))['My'].v, np.array(iv)))
+        self.assertTrue(np.array_equal((self.RPD.interpolate( iv))['Mx'].v[1:-1], np.array([2., 4., 6.])))

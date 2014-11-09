@@ -2,6 +2,7 @@ __author__ = 'wack'
 
 from RockPy.Structure.data import RockPyData
 
+
 # script to test data objects
 
 import numpy as np
@@ -43,19 +44,19 @@ def test():
 
     # some math fun
     # calculate magnitude of vector 'M' and save it as new column 'magM'
-    d.append_columns('magM', d.magnitude('M'))
+    d = d.append_columns('magM', d.magnitude('M'))
 
     # calculate values of 'magM' normalized to 100
     #d.append_columns('normM', d.normalize('magM', 100))
 
     # we can also add arbitrary data in a new column
-    d.append_columns(("T",), np.array((1, 2, 3)))
+    d = d.append_columns(("T",), np.array((1, 2, 3)))
 
     # we can also add an empty column
-    d.append_columns(("empty",))
+    d = d.append_columns(("empty",))
 
     # renaming a column
-    d.rename_column('T', 'temp')
+    d = d.rename_column('T', 'temp')
 
     # show all data again, now including magM and T as the last two columns
     print d
@@ -91,7 +92,7 @@ def test():
 
     # test single line object
     l = RockPyData(column_names=('A', 'B', 'C', 'D'), row_names=('1.Zeile',), units=('T', 'mT', 'fT', 'pT'), data=((1,2,3,4),))
-    l.append_columns( 'X', 5)
+    l = l.append_columns( 'X', (5,))
     print l
 
     print l['X']

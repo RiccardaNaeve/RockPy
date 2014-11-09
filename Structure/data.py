@@ -2,13 +2,17 @@ __author__ = 'wack'
 
 from copy import deepcopy
 
+import logging
 import numpy as np
 import itertools
 import re  # regular expressions
 from prettytable import PrettyTable
 
 from RockPy.Structure import ureg
+from RockPy.Functions import general
 
+general.create_logger(__name__)
+log = logging.getLogger(__name__)
 
 def _to_tuple( oneormoreitems):
     '''
@@ -76,7 +80,6 @@ class RockPyData(object):
 
         return data
 
-
     def __init__(self, column_names, row_names=None, units=None, data=None):
         """
             :param column_names: sequence of strings naming individual columns
@@ -85,7 +88,7 @@ class RockPyData(object):
             :param values: numpy array with values
             :param errors: numpy array with error estimates
         """
-        # todo: check dimension of data and the treat as values or values+errors
+        log.info( 'Creating new ' + type(self).__name__)
 
         if type(column_names) is str:  # if we got a single string, convert it to tuple with one entry
             column_names = (column_names,)
@@ -377,7 +380,7 @@ class RockPyData(object):
         return self_copy
 
     def rename_column(self, old_cname, new_cname):
-        """
+        '''
         renames a column according to specified key
 
         .. code-block:: python
@@ -389,16 +392,20 @@ class RockPyData(object):
 
         :param old_key: str
         :param new_key: str
-        """
+        :return: new RocPyData object with renamed column
+        '''
 
         if self.column_exists(new_cname):
             raise KeyError('Column %s already exists.' % new_cname)
         if not self.column_exists(old_cname):
             raise KeyError('Column %s does not exist.' % old_cname)
 
-        idx = self._column_names.index(old_cname)
-        self._column_names[idx] = new_cname
-        self._update_column_dictionary(self._column_names)
+        self_copy = deepcopy( self)
+        idx = self_copy._column_names.index(old_cname)
+        self_copy._column_names[idx] = new_cname
+        self_copy._update_column_dictionary(self_copy._column_names)
+
+        return self_copy
 
     def append_rows(self, data, row_names=None):
         '''
@@ -503,7 +510,7 @@ class RockPyData(object):
         # delete all rows with identical variable columns
         return self_copy.delete_rows(list(itertools.chain.from_iterable(dup)))
 
-    def interpolate(self, new_variables, method='linear'):
+    def interpolate(self, new_variables, method='linear1d'):
         '''
         interpolate existing data columns to new variables
         first duplicated variables are averaged to make interpolation unique
@@ -519,8 +526,14 @@ class RockPyData(object):
         if method == 'linear1d':
             if len(sorted_copy.column_dict[ 'variable']) != 1:
                 raise RuntimeError( '%s works only with single column variables' % method)
-            raise NotImplemented
+            for v in _to_tuple( new_variables):
+                # check if new variable is within limits of the old data
+                if v > sorted_copy['variable'].v[0] and v < sorted_copy['variable'].v[-1]:
+                    pass
+                else:
+                    log.info( 'variable %d is out of original data range' % v)
 
+        #self.log.info('CRATING new << samplegroup >>')
         else:
             raise NotImplemented( 'method %s not implemented' % method)
 
@@ -675,7 +688,6 @@ class RockPyData(object):
     * how are row labels handled?
     * variable columns must be unique to make matching work, better row label matching?
     """
-
 
     def __sub__(self, other):
         """

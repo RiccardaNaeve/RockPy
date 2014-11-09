@@ -39,11 +39,11 @@ class RockPyData(object):
     """
 
     @staticmethod
-    def _convert_input_to_data(input):
+    def _convert_input_to_data(input, column=False):
         '''
         convert given data to 3D numpy array
-
-        :param data:
+        :param input: array data consisting of values (and errors)
+        :param column: if FALSE -> 1D data is treated as a single row, otherwise as single column
         :return: 3D numpy array, representing matrix of values and errors as used by RockPyData.data
         '''
         if input is None:
@@ -55,13 +55,14 @@ class RockPyData(object):
         if data.ndim > 3:
             raise RuntimeError( 'data has dimension > 3')
 
+        if data.ndim == 1:  # values for one row or column, no errors
+            if not column:
+                data = data[np.newaxis, :] # add extra dimension to make data 2D with single row
+            else:
+                data = data[:, np.newaxis]  # single column data
 
-        if data.ndim == 1:  # values for one row, no errors
-            data = data[np.newaxis, :] # add extra dimension to make data 2D with single row
-
-        if data.ndim == 2:  # values for one or multiple rows, no errors
+        if data.ndim == 2:  # values for one or multiple rows or columns, no errors
             data = data[:, :, np.newaxis]  # add extra dimension for errors
-
 
         # now data must be 3D
         if data.shape[2] == 0 or data.shape[2] > 2:
@@ -113,11 +114,7 @@ class RockPyData(object):
         self._define_alias_indices('variable', (0,))
         self._define_alias_indices('values', tuple(range(self.column_count)[1:]))
 
-        data = np.array(data)
-        if data.ndim == 2:  # two dimension -> only values
-            self.values = data
-        elif data.ndim == 3:  # three dimensions -> values + errors
-            self.data = data
+        self.data = RockPyData._convert_input_to_data( data)
 
         if row_names is None:
             self._row_names = None  # don't use row names
@@ -342,49 +339,44 @@ class RockPyData(object):
             raise IndexError('column indices out of range')
         self._column_dict[alias_name] = tuple(column_indices)
 
-    def append_columns(self, column_names, values=None):
+    def append_columns(self, column_names, data=None):
         """
-        add values columns to values object
+        add one or more columns to values object
         :param column_names: list(str)
-        :param values:
+        :param data: array fo values (and errors) for the new columns
+        :return: new RockPyData object with appended data
         """
-        if type(column_names) is str:  # if we got a single string, convert it to tuple with one entry
-            column_names = (column_names,)
+
+        column_names = _to_tuple(column_names)
 
         # check if column names are already used as keys (= column names and aliases)
         for n in column_names:
             if self.key_exists(n):
                 raise IndexError('column %s already exists' % n)
 
+        self_copy = deepcopy( self)
+
         # append new column names to the list
-        self._column_names.extend(column_names)
+        self_copy._column_names.extend(column_names)
 
         # update internal column dictionary
-        self._update_column_dictionary(column_names)
+        self_copy._update_column_dictionary(column_names)
 
-        if values is None:
-            # if there is no values, create zeros
-            values = np.empty((self.row_count, len(column_names)))
-            values[:] = np.NAN
-        else:
-            values = np.array(values, dtype=float)
+        if data is None:
+            # if there are no data, fill with NAN
+            data = np.empty((self_copy.row_count, len(column_names)))
+            data[:] = np.NAN
 
-        # make sure values is 2 dim, even if there is only one number or one column
-        if values.ndim == 0:  # single number
-            values = values.reshape(1, 1)
 
-        if values.ndim == 1:  # single column
-            values = values.reshape(values.shape[0], 1)
-
-        values = values[:, :, np.newaxis]  # add extra dimension for errors
-        values = np.concatenate((values, np.zeros_like(values)), axis=2)  # add zeroes in 3rd dimension as errors
-        values[:, :, 1] = np.NAN  # set errors to NAN
+        data = RockPyData._convert_input_to_data( data, column=True)
 
         # append new values
-        self._data = np.concatenate((self._data, values), axis=1)
+        self_copy._data = np.concatenate((self_copy._data, data), axis=1)
 
         # update "all" alias to comprise also the new columns
-        self._update_all_alias()
+        self_copy._update_all_alias()
+
+        return self_copy
 
 
     def rename_column(self, old_cname, new_cname):
@@ -410,8 +402,6 @@ class RockPyData(object):
         idx = self._column_names.index(old_cname)
         self._column_names[idx] = new_cname
         self._update_column_dictionary(self._column_names)
-
-
 
 
     def append_rows(self, data, row_names=None):

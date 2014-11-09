@@ -227,14 +227,19 @@ class RockPyData(object):
 
     @property
     def values(self):
-        """
-        :return: values
-        """
-        return self.data[:, :, 0].T[0] if self.data.shape[1] == 1 else self.data[:, :, 0]
+        '''
+        get numeric values (without errors)
+        :return: 2D numpy array of values
+        '''
+        return self.data[:, :, 0] # always return 2D data
 
     @property  # alias for values
     def v(self):
-        return self.values
+        '''
+        get numeric values (without errors)
+        :return: return self.values if more than one column, otherwise self.values.T[0]
+        '''
+        return self.values.T[0] if self.data.shape[1] == 1 else self.values
 
     @values.setter
     def values(self, values):
@@ -267,11 +272,19 @@ class RockPyData(object):
 
     @property
     def errors(self):
+        '''
+        get numeric errors (no values)
+        :return: 2D numpy array of erros
+        '''
         return self.data[:, :, 1]
 
     @property  # alias for errors
     def e(self):
-        return self.errors
+        '''
+        get numeric errors
+        :return: return self.errors if more than one column, otherwise self.errors.T[0]
+        '''
+        return self.errors.T[0] if self.data.shape[1] == 1 else self.errors
 
     @errors.setter
     def errors(self, errors):

@@ -162,7 +162,6 @@ class RockPyData(object):
     def row_names(self):
         return self._row_names
 
-
     @property
     def column_count(self):
         return len(self._column_names)
@@ -308,7 +307,6 @@ class RockPyData(object):
     def e(self, errors):  # alias for errors
         self.errors = errors
 
-
     def define_alias(self, alias_name, column_names):
         """
         define an alias for a sequence of existing columns
@@ -378,7 +376,6 @@ class RockPyData(object):
 
         return self_copy
 
-
     def rename_column(self, old_cname, new_cname):
         """
         renames a column according to specified key
@@ -402,7 +399,6 @@ class RockPyData(object):
         idx = self._column_names.index(old_cname)
         self._column_names[idx] = new_cname
         self._update_column_dictionary(self._column_names)
-
 
     def append_rows(self, data, row_names=None):
         '''
@@ -507,15 +503,25 @@ class RockPyData(object):
         # delete all rows with identical variable columns
         return self_copy.delete_rows(list(itertools.chain.from_iterable(dup)))
 
-
     def interpolate(self, new_variables, method='linear'):
         '''
-        interpolate existig data columns to new variables
-        ??? how is this done for mutli-column-variables ???
+        interpolate existing data columns to new variables
+        first duplicated variables are averaged to make interpolation unique
         :param new_variables:
-        :param method:
-        :return: ?
+        :param method: defines interpolation method
+            'linear1d' works with single variable column only, each new point is linearly interpolated
+        :return: new RockPyData object with the interpolated data
         '''
+
+        # average away duplicated variable rows
+        self_copy = self.eliminate_duplicate_variable_rows( substfunc='mean')
+
+        if method == 'linear1d':
+            if len( self.column_dict[ 'variable']) != 1:
+                raise RuntimeError( '%s works only with single column variables' % method)
+
+        else:
+            raise NotImplemented( 'method %s not implemented' % method)
 
     def key_exists(self, key):
         """
@@ -584,7 +590,6 @@ class RockPyData(object):
             raise KeyError('invalid key %s' % str(key))
 
         return colidxs
-
 
     def __getitem__(self, key):
         """
@@ -1014,7 +1019,7 @@ class RockPyData(object):
 
     def sort(self, key='variable'):
         """
-        sorting all data according to one column_name or alias
+        sorting all data according to one or multiple columns, last colum is primary sort order -> see np.lexsort
         e.g.
 
         .. code-block:: python
@@ -1027,11 +1032,20 @@ class RockPyData(object):
            [ 30. ,   2.2]])
 
         :param key: str
-                  column_name to be sorted for
+                  column_name or alias
+        :return: new RockPyData object with reordered rows
         """
-        idx = self.column_dict[key][0]
-        self.data = self.data[self.data[idx].argsort()]
 
+        self_copy = deepcopy( self)
+
+        data = self[key].values
+        sortidx = np.lexsort(data.T, axis=0)  # get indices of ordered rows
+        self_copy._data = self_copy.data[ sortidx]  # reorder rows according to sorted indices
+
+        if self_copy.row_names is not None:
+            self_copy._row_names = [self_copy.row_names[i] for i in sortidx]  # reorder row names in the same manner
+
+        return self_copy
 
     def lin_regress(self, column_name_x, column_name_y):
         """
@@ -1078,7 +1092,6 @@ class RockPyData(object):
         x_intercept = - y_intercept / slope
 
         return slope, sigma, y_intercept, x_intercept
-
 
     def derivative(self, dependent_var, independent_var, smoothing=0):
         """

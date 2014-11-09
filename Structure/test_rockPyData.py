@@ -84,7 +84,10 @@ class TestRockPyData(TestCase):
 
     def test_append_columns(self):
         cb = self.RPD.column_count
-        d = (8,7,6,5)
-        self.RPD = self.RPD.append_columns( 'neue Spalte', d)
-        self.assertEqual( cb+1, self.RPD.column_count)
-        self.assertTrue(np.array_equal( self.RPD[ 'neue Spalte'].v, np.array(d)))
+        d = (8, 7, 6, 5)
+        self.RPD = self.RPD.append_columns('neue Spalte', d)
+        self.assertEqual(cb + 1, self.RPD.column_count)
+        self.assertTrue(np.array_equal(self.RPD['neue Spalte'].v, np.array(d)))
+
+    def test_sort(self):
+        self.assertTrue(np.array_equal(self.RPD.sort( 'Mx')['Mx'].v, np.array( (2,2,6,6))))

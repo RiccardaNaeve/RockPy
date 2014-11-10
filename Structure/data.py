@@ -45,7 +45,31 @@ class RockPyData(object):
     """
 
     @staticmethod
-    def _convert_input_to_data(input, column=False):
+    def _convert_to_2D(input, column=False):
+        '''
+        convert given input to 2D numpy array
+        :param input: array data consisting of values or errors
+        :param column: if FALSE -> 1D data is treated as a single row, otherwise as single column
+        :return: 2D numpy array, representing matrix of values or errors as used by RockPyData.data
+        '''
+        # convert input data to a numpy array
+        data = np.array(input, dtype=float)
+
+        if data.ndim > 2:
+            raise RuntimeError('data has dimension > 2')
+
+        # todo: handle single numbers
+        if data.ndim == 1:  # values for one row or column, no errors
+            if not column:
+                data = data[np.newaxis, :]  # add extra dimension to make data 2D with single row
+            else:
+                data = data[:, np.newaxis]  # single column data
+
+        return data
+
+
+    @staticmethod
+    def _convert_to_data3D(input, column=False):
         '''
         convert given data to 3D numpy array
         :param input: array data consisting of values (and errors)
@@ -59,26 +83,23 @@ class RockPyData(object):
         data = np.array(input, dtype=float)
 
         if data.ndim > 3:
-            raise RuntimeError( 'data has dimension > 3')
+            raise RuntimeError('data has dimension > 3')
 
-        if data.ndim == 1:  # values for one row or column, no errors
-            if not column:
-                data = data[np.newaxis, :] # add extra dimension to make data 2D with single row
-            else:
-                data = data[:, np.newaxis]  # single column data
+        if data.ndim <= 1:  # values for one row or column, no errors
+            data = RockPyData._convert_to_2D(data, column=column)
 
         if data.ndim == 2:  # values for one or multiple rows or columns, no errors
             data = data[:, :, np.newaxis]  # add extra dimension for errors
 
         # now data must be 3D
         if data.shape[2] == 0 or data.shape[2] > 2:
-            raise RuntimeError( 'data.shape[2] must be 1 or 2 and not %d' % data.shape[2])
+            raise RuntimeError('data.shape[2] must be 1 or 2 and not %d' % data.shape[2])
 
         if data.shape[2] == 1:  # only values, need to add errors
             data = np.concatenate((data, np.zeros_like(data)), axis=2)  # add zeroes in 3rd dimension as errors
             data[:, :, 1] = np.NAN  # set errors to NAN
 
-        # if data.shape[2] == 2 -> erros are already included in data
+        # if data.shape[2] == 2 -> errors are already included in data
 
         return data
 
@@ -118,7 +139,7 @@ class RockPyData(object):
         self._update_all_alias()
         self._define_alias_indices('variable', 0)
 
-        self.data = RockPyData._convert_input_to_data( data)
+        self.data = RockPyData._convert_to_data3D( data)
 
         if row_names is None:
             self._row_names = None  # don't use row names
@@ -259,9 +280,10 @@ class RockPyData(object):
             self._data = None  # clear existing data
             return
 
-        d = np.array(values, dtype=float)
+        d = RockPyData._convert_to_2D(values, column=True)
+
         if d.ndim != 2:
-            raise TypeError('wrong data dimension')
+            raise TypeError('wrong data dimension (%d)' % d.ndim)
 
         if d.shape[1] != self.column_count:
             raise TypeError('%d columns instead of %d in values' % (d.shape[1], self.column_count))
@@ -355,7 +377,6 @@ class RockPyData(object):
         if alias_name == 'variable':
             self._column_dict['dep_var'] = [i for i in range(self.column_count) if i not in self._keyseq2colseq('variable')]
 
-
     def append_columns(self, column_names, data=None):
         """
         add one or more columns to values object
@@ -384,8 +405,7 @@ class RockPyData(object):
             data = np.empty((self_copy.row_count, len(column_names)))
             data[:] = np.NAN
 
-
-        data = RockPyData._convert_input_to_data( data, column=True)
+        data = RockPyData._convert_to_data3D(data, column=True)
 
         # append new values
         self_copy._data = np.concatenate((self_copy._data, data), axis=1)
@@ -408,7 +428,7 @@ class RockPyData(object):
 
         :param old_key: str
         :param new_key: str
-        :return: new RocPyData object with renamed column
+        :return: None
         '''
 
         if self.column_exists(new_cname):
@@ -416,12 +436,9 @@ class RockPyData(object):
         if not self.column_exists(old_cname):
             raise KeyError('Column %s does not exist.' % old_cname)
 
-        self_copy = deepcopy( self)
-        idx = self_copy._column_names.index(old_cname)
-        self_copy._column_names[idx] = new_cname
-        self_copy._update_column_dictionary(self_copy._column_names)
-
-        return self_copy
+        idx = self._column_names.index(old_cname)
+        self._column_names[idx] = new_cname
+        self._update_column_dictionary(self._column_names)
 
     def append_rows(self, data, row_names=None):
         '''
@@ -443,7 +460,7 @@ class RockPyData(object):
         if self.row_names is not None and row_names is None:
             raise RuntimeError('cannot append data without row_names to RockPyData object with row_names')
 
-        data = RockPyData._convert_input_to_data(data)
+        data = RockPyData._convert_to_data3D(data)
 
         if data is None:
             return self  # do nothing
@@ -1014,13 +1031,13 @@ class RockPyData(object):
             val = np.nanmedian(self.values, axis=0)[np.newaxis, :, np.newaxis]
             err = np.nanstd(self.values, axis=0)[np.newaxis, :, np.newaxis]
         elif kind == 'min':
-            minidx = np.nanargmin( self.values, axis=0)
-            val = self.values[minidx, range( self.column_count)][np.newaxis, :, np.newaxis]
-            err = self.errors[minidx, range( self.column_count)][np.newaxis, :, np.newaxis]
+            minidx = np.nanargmin(self.values, axis=0)
+            val = self.values[minidx, range(self.column_count)][np.newaxis, :, np.newaxis]
+            err = self.errors[minidx, range(self.column_count)][np.newaxis, :, np.newaxis]
         elif kind == 'max':
-            minidx = np.nanargmax( self.values, axis=0)
-            val = self.values[minidx, range( self.column_count)][np.newaxis, :, np.newaxis]
-            err = self.errors[minidx, range( self.column_count)][np.newaxis, :, np.newaxis]
+            minidx = np.nanargmax(self.values, axis=0)
+            val = self.values[minidx, range(self.column_count)][np.newaxis, :, np.newaxis]
+            err = self.errors[minidx, range(self.column_count)][np.newaxis, :, np.newaxis]
         else:
             return None # error
 

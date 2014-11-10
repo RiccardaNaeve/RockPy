@@ -16,7 +16,8 @@ def test():
                  (9, 10, 11, 12))
 
     # create a rockpydata object with named columns and filled with testdata
-    d = RockPyData(column_names=('F', 'Mx', 'My', 'Mz'), row_names=('1.Zeile','2.Zeile','3.Zeile'), units=('T', 'mT', 'fT', 'pT'), data=testdata)
+    d = RockPyData(column_names=('F', 'Mx', 'My', 'Mz'), row_names=('1.Zeile', '2.Zeile', '3.Zeile'),
+                   units=('T', 'mT', 'fT', 'pT'), data=testdata)
 
 
     print d.units
@@ -56,7 +57,7 @@ def test():
     d = d.append_columns(("empty",))
 
     # renaming a column
-    d = d.rename_column('T', 'temp')
+    d.rename_column('T', 'temp')
 
     # show all data again, now including magM and T as the last two columns
     print d
@@ -74,7 +75,7 @@ def test():
     # arithmetic operations
     e = deepcopy(d)
     # mutlipy one column with value
-    e['Mx'].v * 2
+    e['Mx'].v *= 2
     # calculate difference of two rockpydata objects
     c = e - d
     print c
@@ -91,13 +92,17 @@ def test():
     print repr(c)
 
     # test single line object
-    l = RockPyData(column_names=('A', 'B', 'C', 'D'), row_names=('1.Zeile',), units=('T', 'mT', 'fT', 'pT'), data=((1,2,3,4),))
-    l = l.append_columns( 'X', (5,))
+    l = RockPyData(column_names=('A', 'B', 'C', 'D'), row_names=('1.Zeile',),
+                   units=('T', 'mT', 'fT', 'pT'), data=((1, 2, 3, 4),))
+    l = l.append_columns('X', (5,))
     print l
 
     print l['X']
 
     print d.mean()
+
+    d.define_alias('variable', 'F')
+    print d.interpolate(np.arange( 0,10,.5))
 
 if __name__ == '__main__':
     test()

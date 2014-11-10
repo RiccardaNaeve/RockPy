@@ -36,7 +36,7 @@ class TestRockPyData(TestCase):
         self.assertEqual(self.RPD._find_duplicate_variable_rows(), [(0, 2), (1, 3)])
 
     def test_rename_column(self):
-        self.RPD = self.RPD.rename_column('Mx', 'M_x')
+        self.RPD.rename_column('Mx', 'M_x')
         self.assertEqual(self.RPD.column_names, ['F', 'M_x', 'My', 'Mz'])
 
     def test_append_rows(self):

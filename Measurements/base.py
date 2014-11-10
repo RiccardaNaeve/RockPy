@@ -127,6 +127,27 @@ class Measurement(object):
             else:
                 self.machine_data = raw_data
 
+    def _get_treatment_from_suffix(self):
+        #todo next treatment
+        """
+        takes a given suffix and extracts treatment data-for quick assesment. For more treatment control use add_treatment method.
+
+        suffix must be given in the form of
+            stype: s_value [s_unit] | next treatment...
+        :return:
+        """
+        if self.suffix:
+            s_type = self.suffix.split(':')[0]
+            if len(s_type) > 1:
+                s_value = float(self.suffix.split()[1])
+                try:
+                    s_unit = self.suffix.split('[')[1].strip(']')
+                except IndexError:
+                    s_unit = None
+                return s_type, s_value, s_unit
+        else:
+            return None
+
 
     def set_initial_state(self,
                           mtype, mfile, machine,  # standard

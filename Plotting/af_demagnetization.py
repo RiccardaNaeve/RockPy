@@ -32,7 +32,7 @@ def diff_fill(ax, afdemag_obj, component='mag', norm_factor=None,
     x *= norm_factor[0]
 
     y = data[component].v
-    y /= max(abs(y))
+    y /= max(abs(y))/lim[1]
     ax.fill_between(x, 0, y, color = '#808080', alpha=0.1, label = label)
 
 

@@ -2,9 +2,10 @@
 __author__ = 'Michael Volk'
 # for all project related classes
 import logging
-
+import numpy as np
 from RockPy.Functions import general
 from RockPy.Measurements.base import Measurement
+from RockPy.Structure.data import RockPyData
 
 
 class Sample():
@@ -28,7 +29,7 @@ class Sample():
         self.log.info('CREATING\t new sample << %s >>' % self.name)
 
         self.measurements = []
-        self.results = {}
+        self.results = None
 
         if mass is not None:
             self.add_measurement(mtype='mass', mfile=None, machine=mass_machine,
@@ -79,20 +80,28 @@ class Sample():
 
     def calc_all(self):
         for measurement in self.measurements:
-            measurement.calc_all()
-            for result in measurement.results.column_names:
-                if not result in self.results:
-                    self.results[result] = []
-                else:
-                    self.results[result].append(measurement.results[result].v[0])
-
-            if not 'suffix' in self.results:
-                self.results['suffix'] = []
-            else:
+            if not measurement.mtype in ['mass', 'height', 'diameter']:
+                s_type = None
+                measurement.calc_all()
                 if measurement.suffix:
-                    self.results['suffix'].append(measurement.suffix)
+                    s_type, s_value, s_unit = measurement._get_treatment_from_suffix()
+                if not self.results:
+                    self.results = RockPyData(column_names=measurement.results.column_names,
+                                              data=measurement.results.data, row_names=measurement.suffix)
+                    # if s_type:
+                    #     self.results.append_columns(s_type, s_value)
                 else:
-                    self.results['suffix'].append(None)
+                    c_names = measurement.results.column_names
+                    data = measurement.results.data
+                    # if s_type:
+                    #     c_names = np.append(c_names, s_type)
+                    #     data = data[0][:, 0]
+                    #     data = np.append(data, s_value)
+                    # print data
+                    # print c_names
+                    rpdata = RockPyData(column_names=c_names, data=data, row_names=measurement.suffix)
+                    self.results.append_rows(rpdata)
+
 
     @property
     def mass_kg(self):

@@ -1,7 +1,7 @@
 __author__ = 'mike'
 import base
 from Plotting import arai
-
+import matplotlib.pyplot as plt
 
 class Arai(base.Generic):
     def __init__(self, sample_list, norm='mass',
@@ -39,5 +39,7 @@ class Arai(base.Generic):
 
                 x.append(max(thellier.ptrm[self.parameter['component']].v))  # append max for x_lim
                 y.append(max(thellier.th[self.parameter['component']].v))  # append max for y_lim
+        if len(self.sample_list)>1 or len(thellier_objects)>1:
+            plt.legend(loc='best')
         self.ax.set_xlim([0, max(x)])
         self.ax.set_ylim([0, max(y)])

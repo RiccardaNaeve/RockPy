@@ -62,8 +62,7 @@ class Sample_sheet(base.Generic):
             self.log.warning('MORE than one sample, using first')
 
         sample = self.sample_list[0]
-        thellier_objs = sample.get_measurements(mtype='thellier')
-
-        for thellier in thellier_objs:
-            self.arai = arai.Arai(sample, plot='get_ax', fig=self.fig, ax=self.arai)
+        # thellier_objs = sample.get_measurements(mtype='thellier')
+        # for thellier in thellier_objs:
+        arai.Arai(sample, plot='get_ax', fig=self.fig, ax=self.arai)
             # self.dunlop = arai.Arai(sample, plot='None', fig=self.fig, ax = self.arai).get_ax()

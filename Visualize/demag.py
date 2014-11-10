@@ -30,7 +30,7 @@ class AfDemag(base.Generic):
         self.out()
 
     def show(self, **options):
-        mdf_line = options.get('mdf_line', True)
+        mdf_line = options.get('mdf_line', False)
         mdf_text = options.get('mdf_text', False)
         diff_fill = options.get('diff_fill', False)
         smoothing = options.get('smoothing', 1)

@@ -3,11 +3,17 @@ import numpy as np
 
 
 def arai(ax, thellier_obj, parameter, **plt_opt):
+
+    if thellier_obj.suffix:
+        label = thellier_obj.suffix
+    else:
+        label =''
+
     component = parameter.get('component', 'mag')
     idx = np.array([[i, j]
                     for i, v1 in enumerate(thellier_obj.ptrm['temp'].v)
                     for j, v2 in enumerate(thellier_obj.th['temp'].v) if v1 == v2])
-    ax.plot(thellier_obj.ptrm[component].v[idx[:, 0]], thellier_obj.th[component].v[idx[:, 1]], '.-')
+    ax.plot(thellier_obj.ptrm[component].v[idx[:, 0]], thellier_obj.th[component].v[idx[:, 1]], '.-', label=label)
 
 
 def arai_line(ax, thellier_obj, parameter, **plt_opt):

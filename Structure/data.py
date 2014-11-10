@@ -417,7 +417,7 @@ class RockPyData(object):
             return False  # do nothing
 
         if data.shape[1] != self.column_count:  # check if number of data columns match number of columns in rpd object
-            raise RuntimeError('column count of data does not match number of columns')
+            raise RuntimeError('column count (%i) of data does not match number of columns (%s)' %(data.shape[1], self.column_count))
 
         row_names = _to_tuple( row_names)
 

@@ -1,6 +1,6 @@
-from unittest import TestCase
-import numpy as np
-from RockPy.Structure.data import RockPyData, _to_tuple
+from unittest import TestCase  # Unit testing framework
+import numpy as np  # numerical array functions
+from RockPy.Structure.data import RockPyData
 
 
 __author__ = 'wack'
@@ -15,7 +15,7 @@ class TestRockPyData(TestCase):
                          (1, 6, 55, 66))
 
         self.col_names = ('F', 'Mx', 'My', 'Mz')
-        self.row_names = ('1.Zeile', '2.Zeile', '3.Zeile', '4.Zeile')
+        self.row_names = ('1.Zeile', '2.Zeile_A', '3.Zeile', '4.Zeile_A')
         self.units = ('T', 'mT', 'fT', 'pT')
 
         self.RPD = RockPyData(column_names=self.col_names, row_names=self.row_names, units=self.units,
@@ -41,15 +41,59 @@ class TestRockPyData(TestCase):
 
     def test_append_rows(self):
         d1 = [[5, 6, 7, 8], [9, 10, 11, 12]]
-        self.RPD.append_rows(d1, ('5.Zeile', '6.Zeile'))
+        self.RPD = self.RPD.append_rows(d1, ('5.Zeile', '6.Zeile'))
         self.assertTrue(np.array_equal(self.RPD.v[-2:, :], np.array(d1)))
         d2 = [5, 6, 7, 8]
-        self.RPD.append_rows(d2, '5.Zeile')
+        self.RPD = self.RPD.append_rows(d2, '5.Zeile')
         self.assertTrue(np.array_equal(self.RPD.v[-1, :], np.array(d2)))
         # lets try with other RockPyData object
-        #self.RPD.append_rows( self.RPD)
-        #print self.RPD
+        # self.RPD.append_rows( self.RPD)
+        # print self.RPD
 
     def test_delete_rows(self):
-        self.RPD.delete_rows((0,2))
-        self.assertTrue(np.array_equal(self.RPD.v, np.array(self.testdata)[(1,3), :]))
+        self.RPD = self.RPD.delete_rows((0, 2))
+        self.assertTrue(np.array_equal(self.RPD.v, np.array(self.testdata)[(1, 3), :]))
+
+    def test_eliminate_duplicate_variable_rows(self):
+        # check for one variable column
+        self.RPD = self.RPD.eliminate_duplicate_variable_rows()
+        self.assertTrue(np.array_equal(self.RPD.v, np.array([]).reshape(0, 4)))
+
+    def test_eliminate_duplicate_variable_rows2(self):
+        # check for two variable columns
+        self.RPD.define_alias('variable', ('F', 'Mx'))
+        self.RPD = self.RPD.eliminate_duplicate_variable_rows(substfunc='mean')
+        self.assertTrue(np.array_equal(self.RPD.v, np.array([[1., 2., 7., 8.], [1., 6., 31., 37.]])))
+        self.assertTrue(np.array_equal(self.RPD.e, np.array([[0., 0., 4., 4.], [0., 0., 24., 29.]])))
+
+    def test_mean(self):
+        self.RPD = self.RPD.mean()
+        self.assertTrue(np.array_equal(self.RPD.v, np.array([[1., 4., 19., 22.5]])))
+        np.testing.assert_allclose(self.RPD.e, np.array([[0., 2., 20.976, 25.273]]), atol=0.01)
+
+    def test_max(self):
+        self.RPD = self.RPD.max()
+        self.assertTrue(np.array_equal(self.RPD.v, np.array([[1., 6., 55., 66.]])))
+
+    def test_filter_row_names(self):
+        self.assertEqual(self.RPD.filter_row_names(('1.Zeile', '3.Zeile')).row_names, ['1.Zeile', '3.Zeile'])
+
+    def test_filter_match_row_names(self):
+        # get all rows ending with '_A'
+        self.assertEqual(self.RPD.filter_match_row_names('.*_A').row_names, ['2.Zeile_A', '4.Zeile_A'])
+
+    def test_append_columns(self):
+        cb = self.RPD.column_count
+        d = (8, 7, 6, 5)
+        self.RPD = self.RPD.append_columns('neue Spalte', d)
+        self.assertEqual(cb + 1, self.RPD.column_count)
+        self.assertTrue(np.array_equal(self.RPD['neue Spalte'].v, np.array(d)))
+
+    def test_sort(self):
+        self.assertTrue(np.array_equal(self.RPD.sort('Mx')['Mx'].v, np.array((2, 2, 6, 6))))
+
+    def test_interpolate(self):
+        self.RPD.define_alias('variable', ('My'))
+        iv = (1,11, 33, 55, 100)
+        self.assertTrue(np.array_equal((self.RPD.interpolate( iv))['My'].v, np.array(iv)))
+        self.assertTrue(np.array_equal((self.RPD.interpolate( iv))['Mx'].v[1:-1], np.array([2., 4., 6.])))

@@ -161,15 +161,13 @@ class RockPyData(object):
         e.g. {'Mx': (0,),'My': (1,), 'Mz': (2,), 'Mx': (0,1,2))
         """
 
-        if type(column_names) is str:  # if we got a single string, convert it to tuple with one entry
-            column_names = (column_names,)
-
         if column_names is None:
             # Python < 2.7
             # self._column_dict = dict((name, (index,)) for (index, name) in enumerate(self._column_names))
             # Python > 2.7
             self._column_dict = {name: (index,) for (index, name) in enumerate(self._column_names)}
         else:
+            column_names = _to_tuple(column_names)
             for n in column_names:  # check if all column_names are valid, i.e. exist in self._column_names
                 if not self.column_exists(n):
                     raise IndexError('column %s does not exist' % n)
@@ -400,6 +398,7 @@ class RockPyData(object):
         # update internal column dictionary
         self_copy._update_column_dictionary(column_names)
 
+
         if data is None:
             # if there are no data, fill with NAN
             data = np.empty((self_copy.row_count, len(column_names)))
@@ -412,6 +411,9 @@ class RockPyData(object):
 
         # update "all" alias to comprise also the new columns
         self_copy._update_all_alias()
+
+        # update 'variable' and 'dep_var' aliases
+        self_copy._define_alias_indices('variable', self.column_dict['variable'])
 
         return self_copy
 

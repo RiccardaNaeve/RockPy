@@ -101,8 +101,9 @@ def test():
 
     print d.mean()
 
-    d.define_alias('variable', 'F')
-    print d.interpolate(np.arange( 0,10,.5))
+    print d.interpolate(np.arange(0, 10, .5))
+    d.define_alias('variable', 'Mx')
+    print d.interpolate(np.arange(0, 10, .5))
 
 if __name__ == '__main__':
     test()

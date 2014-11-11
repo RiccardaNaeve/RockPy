@@ -63,8 +63,10 @@ class CryoMag(base.Machine):
         if len(self.sample_idx) != 0:
             return True
         else:
-            return False
+            return False #todo clever?
 
+    def out_afdemag(self):
+        pass
 
     def out_thellier(self):
         data = self.get_float_data()

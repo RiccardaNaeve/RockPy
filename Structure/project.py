@@ -100,7 +100,7 @@ class Sample():
                     # print data
                     # print c_names
                     rpdata = RockPyData(column_names=c_names, data=data, row_names=measurement.suffix)
-                    self.results.append_rows(rpdata)
+                    self.results = self.results.append_rows(rpdata)
 
 
     @property

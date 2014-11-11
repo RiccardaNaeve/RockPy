@@ -34,10 +34,11 @@ class Measurement(object):
         # setting implemented machines
         # looking for all subclasses of Readin.base.Machine
         # generating a dictionary of implemented machines : {implemented out_* method : machine_class}
-        implemented_machines = [cls for cls in RockPy.Readin.base.Machine.__subclasses__()]
+        implemented_machines = [cls for cls in RockPy.Readin.base.Machine.__subclasses__()] #todo change to check for format_machine
         self.implemented = {
             cls.__name__.lower(): {'_'.join(i.split('_')[1:]).lower(): cls for i in dir(cls) if i.startswith('out_')}
             for cls in implemented_machines}
+
         ''' initialize parameters '''
         self.machine_data = None  # returned data from Readin.machines()
         self.suffix = options.get('suffix', '')

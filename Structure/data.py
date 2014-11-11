@@ -722,24 +722,22 @@ class RockPyData(object):
 
     There are several cases to distinguish when doing math with RockPyData objects!
 
-    RockPyData objects can have several variable columns (defined via alias 'variable')
-    and several data columns (alias 'dep_var').
+    RockPyData objects must have at least one variable column (defined via alias 'variable') and
+    can have several data columns (alias 'dep_var').
     Depending on the content of the RockPyData objects arithmetic operations work differently
     Units and errors are propagated when possible
 
 
     ROW MATCHING
-    If both operands contain a variable (one or many columns) calculation is performed only on
-    rows with matching variables. Only those rows are returned. Use interpolate to get matching variables.
+    Calculation is performed with matching variables. Only those rows are returned. Use interpolate to get matching variables.
     Operation fails when variables are not unique in one of the two objects. Use eliminate_duplicate_variable_rows first.
-    If at least one operand does not contain a variable, number of rows must match.
-    Calculations are then performed row by row.
 
 
     COLUMN MATCHING
     If both operands contain more than one data column calculation is applied on matching columns
     (i.e. with same column_name) e.g. (V,A,B,C) + (V,A,D,B) = (V,A+A,B+B)
-    If one operand contains only one data column, calculation is applied to all columns of other operand
+    If one operand contains only one data column, which does not exist in the other operand,
+    calculation is applied to all columns of other operand
     e.g. (V,A,B,C) + (V,A) = (V,A+A)
     e.g. (V,A,B,C) + (V,D) = (V,A+D,B+D,C+D)
 

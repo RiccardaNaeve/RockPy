@@ -2,6 +2,7 @@ __author__ = 'mike'
 import base
 import Plotting.hysteresis
 import matplotlib.pyplot as plt
+
 class T_v_Hys(base.Generic):
     def __init__(self, sample_list, norm='mass',
                  plot='show', folder=None, name='Hys[T]',

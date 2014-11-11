@@ -740,7 +740,8 @@ class RockPyData(object):
     If both operands contain more than one data column calculation is applied on matching columns
     (i.e. with same column_name) e.g. (V,A,B,C) + (V,A,D,B) = (V,A+A,B+B)
     If one operand contains only one data column, calculation is applied to all columns of other operand
-    e.g. (A,B,C) + (A) = (A+A,B+A,C+A)
+    e.g. (V,A,B,C) + (V,A) = (V,A+A)
+    e.g. (V,A,B,C) + (V,D) = (V,A+D,B+D,C+D)
 
 
     open questions

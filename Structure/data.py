@@ -724,8 +724,8 @@ class RockPyData(object):
 
     RockPyData objects must have at least one variable column (defined via alias 'variable') and
     can have several data columns (alias 'dep_var').
-    Depending on the content of the RockPyData objects arithmetic operations work differently
-    Units and errors are propagated when possible
+    Depending on the content of the RockPyData objects arithmetic operations work differently.
+    Units and errors are propagated when possible.
 
 
     ROW MATCHING
@@ -849,11 +849,10 @@ class RockPyData(object):
         :return
         """
         # check if we have a proper rockpydata object for arithmetic operation
-
         if not isinstance(other, RockPyData):  # todo implement for floats
             raise ArithmeticError('only rockpydata objects can be computed')
 
-        # check if 'variable' columns match in both objects
+        # check if 'variable' alias exist in both objects
         if not (self.key_exists('variable') and other.key_exists('variable')):
             raise ArithmeticError("alias 'variable' not known")
 
@@ -861,32 +860,34 @@ class RockPyData(object):
         if not sorted(self.column_names_from_key('variable')) == sorted(other.column_names_from_key('variable')):
             raise ArithmeticError("'variable' columns do not match")
 
+        # check if variables are unique in both objects
+        if len( self._find_duplicate_variable_rows()) > 0:
+            raise ArithmeticError("%s has non unique variables" % self.__str__())
+        if len( other._find_duplicate_variable_rows()) > 0:
+            raise ArithmeticError("%s has non unique variables" % other.__str__())
+
         # check if remaining columns for matching pairs, only those will be subtracted and returned
         cnames1 = self.column_indices_to_names(set(range(self.column_count)) - set(self.column_dict['variable']))
         cnames2 = other.column_indices_to_names(set(range(other.column_count)) - set(other.column_dict['variable']))
 
         # get intersection of name sets
         matching_cnames = set(cnames1) & set(cnames2)
-
         # get indices of matching column names
         mcidx = np.array([(self.column_names.index(n), other.column_names.index(n)) for n in matching_cnames])
 
+        # if we have no intersecting columns, we have to check if one operand has only one column
+        if len( matching_cnames) == 0:  # no matching columns
+            if not (len(cnames1) == 1 or len(cnames2) == 1):
+                # none of the operands has only one column which does not match any column in the other operand
+                raise ArithmeticError("arithmetic operation failed since there are no matching columns and no operand with single data column")
+
         # get indices of matching 'variable' values
         d1 = self['variable'].values
-        # make sure d1 is 2 dim, even if there is only one column
-        if d1.ndim == 1:
-            d1 = d1.reshape(d1.shape[0], 1)
-
         d2 = other['variable'].values
-        # make sure d1 is 2 dim, even if there is only one column
-        if d2.ndim == 1:
-            d2 = d2.reshape(d2.shape[0], 1)
         mridx = np.array(np.all((d1[:, None, :] == d2[None, :, :]), axis=-1).nonzero()).T
-        # todo: check if matching rows are unique !!!
 
         result_c_names = self.column_names_from_key('variable') + self.column_indices_to_names(mcidx[:, 0])
-        results_variable = d1[mridx[:, 0],
-                           :]  # all columns of variable but only those lines which match in both rockpydata objects
+        results_variable = d1[mridx[:, 0], :]  # all columns of variable but only those lines which match in both rockpydata objects
 
         # data for calculation of both objects with reordered columns according to mcidx
         rd1 = self.data[mridx[:, 0], :][:, mcidx[:, 0]]

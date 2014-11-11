@@ -722,25 +722,29 @@ class RockPyData(object):
 
     There are several cases to distinguish when doing math with RockPyData objects!
 
-    RockPyData objects can have several variable columns (defined via alias) and several data columns
+    RockPyData objects can have several variable columns (defined via alias 'variable')
+    and several data columns (alias 'dep_var').
     Depending on the content of the RockPyData objects arithmetic operations work differently
     Units and errors are propagated when possible
 
 
     ROW MATCHING
     If both operands contain a variable (one or many columns) calculation is performed only on
-    rows with matching variables. Only those rows are returned.
-    If at least one operand does not contain a variable, number of rows must match. Calculations are performed row by row.
+    rows with matching variables. Only those rows are returned. Use interpolate to get matching variables.
+    Operation fails when variables are not unique in one of the two objects. Use eliminate_duplicate_variable_rows first.
+    If at least one operand does not contain a variable, number of rows must match.
+    Calculations are then performed row by row.
 
 
     COLUMN MATCHING
-    If second operand contains more than one data column calculation is performed only on matching columns
-    If second operand contains only one data column, calculation is applied to all columns of first operand
+    If both operands contain more than one data column calculation is applied on matching columns
+    (i.e. with same column_name) e.g. (V,A,B,C) + (V,A,D,B) = (V,A+A,B+B)
+    If one operand contains only one data column, calculation is applied to all columns of other operand
+    e.g. (A,B,C) + (A) = (A+A,B+A,C+A)
 
 
     open questions
     * how are row labels handled?
-    * variable columns must be unique to make matching work, better row label matching?
     """
 
     def __sub__(self, other):

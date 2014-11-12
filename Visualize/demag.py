@@ -7,6 +7,16 @@ import base
 
 
 class AfDemag(base.Generic):
+    """
+    Basic visualization for af_demag measurement class:
+
+    :builtin options::
+       mdf_line
+       mdf_text
+       diff
+       diff_fill
+       smoothing
+    """
     def __init__(self, sample_list, norm='mass',
                  component='mag',
                  plot='show', folder=None, name='af-demagnetization',
@@ -70,3 +80,9 @@ class AfDemag(base.Generic):
             return [1, nf]
         if self.norm == 'mass':
             return [1, measurement.sample_obj.mass_kg.v]
+
+        if self.norm == 'is':
+            if measurement.initial_state:
+                return [1, max(measurement.initial_state.data[self.component].v)]
+            else:
+                return [1, max(measurement.data[self.component].v)]

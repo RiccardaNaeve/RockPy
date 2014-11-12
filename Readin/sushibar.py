@@ -58,9 +58,16 @@ class SushiBar(base.Machine):
         idx = [24, 5, 6, 7]
         return self.raw_data[:, idx].astype(float)
 
+    def out_parm_spectra(self):
+        idx = [24, 25, 26, 27, 28, 5, 6, 7]
+        header = ['ac_field', 'dc_field', 'upper_window', 'lower_window', 'step', 'x', 'y', 'z']
+        units = ['mT', 'mT', 'mT', 'mT', 'mT', 'A m^2', 'A m^2', 'A m^2']
+        return self.raw_data[:, idx].astype(float), header, units
+
     def out_trm(self):
         idx = [24, 5, 6, 7]
         return self.raw_data[:, idx].astype(float)
+
 
     def _check_data_exists(self):
         if len(self.raw_data) != 0:

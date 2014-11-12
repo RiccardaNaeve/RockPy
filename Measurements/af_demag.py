@@ -21,13 +21,13 @@ class AfDemag(base.Measurement):
     def format_jr6(self):
         self.data = RockPyData(column_names=['field', 'x', 'y', 'z'], data=self.machine_data.out_afdemag())
         self.data.define_alias('m', ( 'x', 'y', 'z'))
-        self.data.append_columns('mag', self.data.magnitude('m'))
+        self.data = self.data.append_columns('mag', self.data.magnitude('m'))
 
     def format_sushibar(self):
         self.data = RockPyData(column_names=['field', 'x', 'y', 'z'],
                                data=self.machine_data.out_afdemag())  # , units=['mT', 'Am^2', 'Am^2', 'Am^2'])
         self.data.define_alias('m', ( 'x', 'y', 'z'))
-        self.data.append_columns('mag', self.data.magnitude('m'))
+        self.data = self.data.append_columns('mag', self.data.magnitude('m'))
 
     def result_mdf(self, component='mag', interpolation='linear', recalc=False):
         """

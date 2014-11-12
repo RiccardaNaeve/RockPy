@@ -13,4 +13,4 @@ class Trm(base.Measurement):
         self.data = RockPyData(column_names=['field', 'x', 'y', 'z'],
                                data=self.machine_data.out_afdemag())  # , units=['mT', 'Am^2', 'Am^2', 'Am^2'])
         self.data.define_alias('m', ( 'x', 'y', 'z'))
-        self.data.append_columns('mag', self.data.magnitude('m'))
+        self.data = self.data.append_columns('mag', self.data.magnitude('m'))

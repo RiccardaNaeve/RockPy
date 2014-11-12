@@ -449,8 +449,8 @@ class RockPyData(object):
         :param data: can be only values or values + errors
         :return:
         '''
-        # check if we have another rockpydata object to append
-        if isinstance( data, RockPyData):
+        # check if we have another RockPyData object to append
+        if isinstance(data, RockPyData):
             row_names = data.row_names
             data = data.data
 
@@ -468,18 +468,18 @@ class RockPyData(object):
             return self  # do nothing
 
         if data.shape[1] != self.column_count:  # check if number of data columns match number of columns in rpd object
-            raise RuntimeError('column count (%i) of data does not match number of columns (%s)' %(data.shape[1], self.column_count))
+            raise RuntimeError('column count (%i) of data does not match number of columns (%s)' % (data.shape[1], self.column_count))
 
-        row_names = _to_tuple( row_names)
+        row_names = _to_tuple(row_names)
 
-        if row_names[0] is not None and data.shape[0] != len( row_names):
+        if row_names[0] is not None and data.shape[0] != len(row_names):
             raise RuntimeError('number of rows in data does not match number row names given')
 
         self_copy = deepcopy(self)
 
         # todo check if row names are unique
         if row_names is not None:
-            self_copy.row_names.extend(row_names) # add one or more row names
+            self_copy.row_names.extend(row_names)  # add one or more row names
 
         self_copy._data = np.concatenate((self_copy._data, data), axis=0)
 
@@ -527,20 +527,21 @@ class RockPyData(object):
                     'min': minimum value of each column
                     'mean': average value of all values removed values in each row, error is set to the standard deviation
                     'median': median value of all values removed values in each row, error is set to the standard deviation
+                    'fist', 'last': first or last row with same variable
         :return: returns modified copy of RockPyData object
         '''
 
         # find rows with identical variables
         dup = self._find_duplicate_variable_rows()
 
-        self_copy = deepcopy( self)
+        self_copy = deepcopy(self)
 
         for d in dup:
             duprows = self.filter_idx(d)
 
             if substfunc is not None:
                 res = duprows.__getattribute__(substfunc)()
-                self_copy = self_copy.append_rows( res)
+                self_copy = self_copy.append_rows(res)
 
         # delete all rows with identical variable columns
         return self_copy.delete_rows(list(itertools.chain.from_iterable(dup)))
@@ -743,7 +744,7 @@ class RockPyData(object):
 
 
     open questions
-    * how are row labels handled?
+    * how are row labels handled? at the moment the result has no row labels at all
     """
 
     def __sub__(self, other):
@@ -840,12 +841,13 @@ class RockPyData(object):
 
         return RockPyData(column_names=result_c_names, row_names=self.row_names, data=results_data)
 
-    def _get_arithmetic_data(self, other):
+    def _arithmetic_op(self, other, op):
         """
         looks for matching entries in the 'variable' aliased columns and for matching data columns
         this is needed to prepare an arithmetic operation of two rockpydata objects
 
         :param other: rockpydata
+        :param op: operand ('+','-','/','*')
         :return
         """
         # check if we have a proper rockpydata object for arithmetic operation
@@ -1006,7 +1008,7 @@ class RockPyData(object):
             tf_array = [True if x in index_list else False for x in range(len(self.data))]
         return self.filter(tf_array)
 
-    def filter_row_names(self, row_names, invert = False):
+    def filter_row_names(self, row_names, invert=False):
         '''
         extract rows that match the specified row_names
         :return:
@@ -1041,17 +1043,23 @@ class RockPyData(object):
             val = self.values[minidx, range(self.column_count)][np.newaxis, :, np.newaxis]
             err = self.errors[minidx, range(self.column_count)][np.newaxis, :, np.newaxis]
         elif kind == 'max':
-            minidx = np.nanargmax(self.values, axis=0)
-            val = self.values[minidx, range(self.column_count)][np.newaxis, :, np.newaxis]
-            err = self.errors[minidx, range(self.column_count)][np.newaxis, :, np.newaxis]
+            maxidx = np.nanargmax(self.values, axis=0)
+            val = self.values[maxidx, range(self.column_count)][np.newaxis, :, np.newaxis]
+            err = self.errors[maxidx, range(self.column_count)][np.newaxis, :, np.newaxis]
+        elif kind == 'last':
+            val = self.values[-1, :][np.newaxis, :, np.newaxis]
+            err = self.errors[-1, :][np.newaxis, :, np.newaxis]
+        elif kind == 'first':
+            val = self.values[0, :][np.newaxis, :, np.newaxis]
+            err = self.errors[0, :][np.newaxis, :, np.newaxis]
         else:
-            return None # error
+            return None  # error
 
-        data = np.concatenate((val,err), axis=2)
+        data = np.concatenate((val, err), axis=2)
 
         if self.row_names is not None:
-            row_name = kind + '_' + '_'.join( self.row_names)
-        rpd = RockPyData( self.column_names, row_names=row_name, units=self.unitstrs, data=data)
+            row_name = kind + '_' + '_'.join(self.row_names)
+        rpd = RockPyData(self.column_names, row_names=row_name, units=self.unitstrs, data=data)
         # set variable columns the same way
         rpd._column_dict['variable'] = self._column_dict['variable']
         rpd._column_dict['dep_var'] = self._column_dict['dep_var']
@@ -1088,6 +1096,24 @@ class RockPyData(object):
         :return: RockPyData object
         '''
         return self._multirow_op('max')
+
+    def first(self):
+        '''
+        get first row and return as new RockPyData object
+        errors are propagated
+        :return: RockPyData object
+        '''
+        return self._multirow_op('first')
+
+    def last(self):
+        '''
+        get first row and return as new RockPyData object
+        errors are propagated
+        :return: RockPyData object
+        '''
+        return self._multirow_op('last')
+
+
 
     def sort(self, key='variable'):
         """

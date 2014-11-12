@@ -12,14 +12,34 @@ from copy import deepcopy
 def test():
     # define some data for testing
     testdata = ( (1, 2, 3, 4),
-                 (1, 6, 7, 8),
+                 (2, 6, 7, 8),
                  (9, 10, 11, 12))
+
+    testdata2 = ( (1, 1),
+                 (2, 2),
+                 (19, 3))
 
     # create a rockpydata object with named columns and filled with testdata
     d = RockPyData(column_names=('F', 'Mx', 'My', 'Mz'), row_names=('1.Zeile', '2.Zeile', '3.Zeile'),
                    units=('T', 'mT', 'fT', 'pT'), data=testdata)
 
-    print d.eliminate_duplicate_variable_rows(substfunc='last')
+    #d = d.eliminate_duplicate_variable_rows(substfunc='last')
+    print('d:\n%s' % d)
+
+    e = RockPyData(column_names=('F', 'Mx'), row_names=('1.Zeile', '2.Zeile', '3.Zeile'),
+                   units=('T', 'mT', 'fT', 'pT'), data=testdata2)
+
+    print('e:\n%s' % e)
+
+    print('e/d:\n%s' % (e/d))
+    print('e*d:\n%s' % (e*d))
+    print('e+d:\n%s' % (e+d))
+    print('e-d:\n%s' % (e-d))
+
+    print('d/e:\n%s' % (d/e))
+    print('d*e:\n%s' % (d*e))
+    print('d+e:\n%s' % (d+e))
+    print('d-e:\n%s' % (d-e))
 
     print d.units
     # define as many aliases as you want
@@ -27,7 +47,7 @@ def test():
     d.define_alias('Mzx', ('Mz', 'Mx'))
 
     # show some data
-    # aliases 'all', 'variable' and 'measurement are predefined
+    # aliases 'all', 'variable' and 'dep_var' are predefined
     print('all:\n%s' % d['all'])
     print('Mzx:\n%s' % d['Mzx'])
 

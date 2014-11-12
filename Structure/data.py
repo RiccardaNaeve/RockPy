@@ -558,6 +558,7 @@ class RockPyData(object):
         :return: new RockPyData object with the interpolated data
         '''
 
+        #todo: add parameter: keeporiginaldata
         # average away duplicated variable rows and sort by variable
         rpd_copy = self.eliminate_duplicate_variable_rows( substfunc='mean')
 
@@ -757,20 +758,9 @@ class RockPyData(object):
            A = B - C
 
         :param other: rockpydata
+        :return: new rockpydat object with the results
         """
-
-        # build and return a new rockpydata object containing the variable columns and matching remaining columns with
-        # the calculated data
-
-        result_c_names, results_variable, rd1, rd2 = self._get_arithmetic_data(other)
-
-        # print '\nrcn', result_c_names, '\nrv', results_variable, '\nrd1', rd1[:,:,0], '\nrd1', rd2[:,:,0]
-
-        # todo: care about errors
-        results_data = np.append(results_variable, rd1[:, :, 0] - rd2[:, :, 0],
-                                 axis=1)  # variable columns + calculated data columns
-
-        return RockPyData(column_names=result_c_names, row_names=self.row_names, units=None, data=results_data)
+        return self._arithmetic_op(other, '-')
 
     def __add__(self, other):
         """
@@ -782,18 +772,9 @@ class RockPyData(object):
            A = B + C
 
         :param other: rockpydata
+        :return: new rockpydat object with the results
         """
-
-        # build and return a new rockpydata object containing the variable columns and matching remaining columns with
-        # the calculated data
-
-        result_c_names, results_variable, rd1, rd2 = self._get_arithmetic_data(other)
-
-        # todo: care about errors
-        results_data = np.append(results_variable, rd1[:, :, 0] + rd2[:, :, 0],
-                                 axis=1)  # variable columns + calculated data columns
-
-        return RockPyData(column_names=result_c_names, row_names=self.row_names, data=results_data)
+        return self._arithmetic_op(other, '+')
 
     def __mul__(self, other):
         """
@@ -805,18 +786,9 @@ class RockPyData(object):
            A = B - C
 
         :param other: rockpydata
+        :return: new rockpydat object with the results
         """
-
-        # build and return a new rockpydata object containing the variable columns and matching remaining columns with
-        # the calculated data
-
-        result_c_names, results_variable, rd1, rd2 = self._get_arithmetic_data(other)
-
-        # todo: care about errors
-        results_data = np.append(results_variable, rd1[:, :, 0] * rd2[:, :, 0],
-                                 axis=1)  # variable columns + calculated data columns
-
-        return RockPyData(column_names=result_c_names, row_names=self.row_names, data=results_data)
+        return self._arithmetic_op(other, '*')
 
     def __div__(self, other):
         """
@@ -828,18 +800,10 @@ class RockPyData(object):
            A = B/C
 
         :param other: rockpydata
+        :return: new rockpydat object with the results
         """
 
-        # build and return a new rockpydata object containing the variable columns and matching remaining columns with
-        # the calculated data
-
-        result_c_names, results_variable, rd1, rd2 = self._get_arithmetic_data(other)
-
-        # todo: care about errors
-        results_data = np.append(results_variable, rd1[:, :, 0] / rd2[:, :, 0],
-                                 axis=1)  # variable columns + calculated data columns
-
-        return RockPyData(column_names=result_c_names, row_names=self.row_names, data=results_data)
+        return self._arithmetic_op(other, '/')
 
     def _arithmetic_op(self, other, op):
         """
@@ -878,8 +842,12 @@ class RockPyData(object):
         mcidx = np.array([(self.column_names.index(n), other.column_names.index(n)) for n in matching_cnames])
 
         # if we have no intersecting columns, we have to check if one operand has only one column
-        if len( matching_cnames) == 0:  # no matching columns
-            if not (len(cnames1) == 1 or len(cnames2) == 1):
+        if len(matching_cnames) == 0:  # no matching columns
+            if len(cnames1) == 1:
+                mcidx = np.array([(self.column_names.index(cnames1[0]), other.column_names.index(n)) for n in cnames2])
+            elif len(cnames2) == 1:
+                mcidx = np.array([(self.column_names.index(n), other.column_names.index(cnames2[0])) for n in cnames1])
+            else:
                 # none of the operands has only one column which does not match any column in the other operand
                 raise ArithmeticError("arithmetic operation failed since there are no matching columns and no operand with single data column")
 
@@ -892,10 +860,24 @@ class RockPyData(object):
         results_variable = d1[mridx[:, 0], :]  # all columns of variable but only those lines which match in both rockpydata objects
 
         # data for calculation of both objects with reordered columns according to mcidx
-        rd1 = self.data[mridx[:, 0], :][:, mcidx[:, 0]]
-        rd2 = other.data[mridx[:, 1], :][:, mcidx[:, 1]]
+        rd1 = self.data[mridx[:, 0], :][:, mcidx[:, 0]][:, :, 0]
+        rd2 = other.data[mridx[:, 1], :][:, mcidx[:, 1]][:, :, 0]
 
-        return result_c_names, results_variable, rd1, rd2
+
+        # todo: care about errors
+        if op == '+':
+            result_data = rd1 + rd2
+        elif op == '-':
+            result_data = rd1 - rd2
+        elif op == '*':
+            result_data = rd1 * rd2
+        elif op == '/':
+            result_data = rd1 / rd2
+
+        # todo: get column_names and units right
+        results_rpd_data = np.append(results_variable, result_data, axis=1)  # variable columns + calculated data columns
+
+        return RockPyData(column_names=result_c_names, row_names=None, data=results_rpd_data)
 
     def __repr__(self):
         """

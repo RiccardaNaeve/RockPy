@@ -11,8 +11,11 @@ class AfDemag(base.Measurement):
 
     def __init__(self, sample_obj,
                  mtype, mfile, machine,
-                 mag_method='',
+                 mag_method='', demag_type='af3',
                  **options):
+
+        self.demag_type = demag_type
+
         super(AfDemag, self).__init__(sample_obj,
                                       mtype, mfile, machine,
                                       **options)
@@ -28,6 +31,15 @@ class AfDemag(base.Measurement):
                                data=self.machine_data.out_afdemag())  # , units=['mT', 'Am^2', 'Am^2', 'Am^2'])
         self.data.define_alias('m', ( 'x', 'y', 'z'))
         self.data = self.data.append_columns('mag', self.data.magnitude('m'))
+
+    def format_cryomag(self):
+        self.data = RockPyData(column_names=self.machine_data.float_header,
+                               data=self.machine_data.get_float_data())
+        if self.demag_type != 'af3':
+            idx = [i for i, v in enumerate(self.machine_data.steps) if v == self.demag_type]
+            self.data = self.data.filter_idx(idx)
+        self.data = self.data.append_columns('mag', self.data.magnitude('m'))
+        self.data.rename_column('step', 'field')
 
     def result_mdf(self, component='mag', interpolation='linear', recalc=False):
         """
@@ -49,8 +61,7 @@ class AfDemag(base.Measurement):
 
     def calculate_mdf(self, **parameter):
         interpolation = parameter.get('interpolation', 'linear')
-        self.log.info('CALCULATING << MDF >> parameter from %s interpolation' %interpolation)
-
+        self.log.info('CALCULATING << MDF >> parameter from %s interpolation' % interpolation)
 
         methods = {'linear': self.calc_mdf_linear,
                    'smooth_spline': self.calc_mdf_smooth}
@@ -107,7 +118,7 @@ class AfDemag(base.Measurement):
         mdf = abs((0.5 * max(self.data[component].v) - y_intercept) / slope)
         self.results['mdf'] = mdf
 
-    ### INTERPOLATION
+    # ## INTERPOLATION
 
     def interpolate_smoothing_spline(self, y_component='mag', x_component='field', out_spline=False):
         """
@@ -118,7 +129,8 @@ class AfDemag(base.Measurement):
         :return:
         """
         from scipy.interpolate import UnivariateSpline
-        x_old = self.data[x_component].v #
+
+        x_old = self.data[x_component].v  #
         y_old = self.data[y_component].v
         smoothing_spline = UnivariateSpline(x_old, y_old, s=1)
 
@@ -133,7 +145,8 @@ class AfDemag(base.Measurement):
     def interpolation_spline(self, y_component='mag', x_component='field', out_spline=False):
 
         from scipy.interpolate import UnivariateSpline
-        x_old = self.data[x_component].v #
+
+        x_old = self.data[x_component].v  #
         y_old = self.data[y_component].v
         smoothing_spline = UnivariateSpline(x_old, y_old, s=1)
 

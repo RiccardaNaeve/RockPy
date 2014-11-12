@@ -31,6 +31,7 @@ class Measurement(object):
         self.log = logging.getLogger('RockPy.MEASUREMENT.' + type(self).__name__)
         self.has_data = True
         machine = machine.lower() #for consistency incode
+        mtype = mtype.lower() #for consistency incode
         # setting implemented machines
         # looking for all subclasses of Readin.base.Machine
         # generating a dictionary of implemented machines : {implemented out_* method : machine_class}
@@ -50,12 +51,11 @@ class Measurement(object):
 
         if machine in self.implemented:
             self.machine = machine.lower()
-            if mtype.lower() in self.implemented[machine]:
-                # self.log.debug('FOUND\t measurement type: << %s >>' % mtype.lower())
-                self.mtype = mtype.lower()
+            self.mfile = mfile
+            if mtype in self.implemented[machine]:
+                self.log.debug('FOUND\t measurement type: << %s >>' % mtype.lower())
+                self.mtype = mtype
                 self.sample_obj = sample_obj
-                self.mfile = mfile
-
                 if self.machine and self.mfile:
                     self.import_data()
                     self.has_data = self.machine_data.has_data

@@ -44,7 +44,7 @@ class Thellier(base.Measurement):
             if len(idx) != 0:
                 self.__dict__[step] = self.all_data.filter_idx(idx)  # finding step_idx
                 self.__dict__[step] = self.remove_duplicate_measurements(self.__dict__[step])
-                self.__dict__[step].define_alias('m', ( 'x', 'y', 'z'))
+                self.__dict__[step] = self.__dict__[step].define_alias('m', ( 'x', 'y', 'z'))
                 self.__dict__[step]= self.__dict__[step].append_columns('mag', self.__dict__[step].magnitude('m'))
                 # self.__dict__[step].sort('temp') # todo BUG
             else:

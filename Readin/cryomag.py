@@ -66,7 +66,9 @@ class CryoMag(base.Machine):
             return False #todo clever?
 
     def out_afdemag(self):
-        pass
+        data = self.get_float_data()
+        return data
+
 
     def out_thellier(self):
         data = self.get_float_data()

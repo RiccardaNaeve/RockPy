@@ -2,6 +2,7 @@ __author__ = 'wack'
 
 from RockPy.Structure.project import Sample
 from RockPy.Visualize import demag
+import matplotlib.pyplot as plt
 
 
 def test():
@@ -23,12 +24,21 @@ def test():
 
     for csample in csamples:
         csample.add_measurement(mfile=cfC, mtype='afdemag', machine='cryomag', mag_method='IRM', demag_type='x', suffix='x')
-        #csample.add_measurement(mfile=cfC, mtype='afdemag', machine='cryomag', mag_method='IRM', demag_type='y', suffix='y')
-        #csample.add_measurement(mfile=cfC, mtype='afdemag', machine='cryomag', mag_method='IRM', demag_type='z', suffix='z')
+        csample.add_measurement(mfile=cfC, mtype='afdemag', machine='cryomag', mag_method='IRM', demag_type='y', suffix='y')
+        csample.add_measurement(mfile=cfC, mtype='afdemag', machine='cryomag', mag_method='IRM', demag_type='z', suffix='z')
 
-    demag.AfDemag(bsamples)
-    demag.AfDemag(csamples)
+    #print m.data
+    #demag.AfDemag(bsamples, norm='max')
+    #demag.AfDemag(csamples, norm='max')
+    for s in csamples:
+        demag.AfDemag(s, plot='save')
+    for s in bsamples:
+        demag.AfDemag(s, plot='save')
 
+
+
+    #plt.plot(m.data['field'].v, m.data['m'].v)
+    #plt.show()
 
 if __name__ == '__main__':
     test()

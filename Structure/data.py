@@ -449,8 +449,8 @@ class RockPyData(object):
         :param data: can be only values or values + errors
         :return:
         '''
-        # check if we have another rockpydata object to append
-        if isinstance( data, RockPyData):
+        # check if we have another RockPyData object to append
+        if isinstance(data, RockPyData):
             row_names = data.row_names
             data = data.data
 
@@ -468,18 +468,18 @@ class RockPyData(object):
             return self  # do nothing
 
         if data.shape[1] != self.column_count:  # check if number of data columns match number of columns in rpd object
-            raise RuntimeError('column count (%i) of data does not match number of columns (%s)' %(data.shape[1], self.column_count))
+            raise RuntimeError('column count (%i) of data does not match number of columns (%s)' % (data.shape[1], self.column_count))
 
-        row_names = _to_tuple( row_names)
+        row_names = _to_tuple(row_names)
 
-        if row_names[0] is not None and data.shape[0] != len( row_names):
+        if row_names[0] is not None and data.shape[0] != len(row_names):
             raise RuntimeError('number of rows in data does not match number row names given')
 
         self_copy = deepcopy(self)
 
         # todo check if row names are unique
         if row_names is not None:
-            self_copy.row_names.extend(row_names) # add one or more row names
+            self_copy.row_names.extend(row_names)  # add one or more row names
 
         self_copy._data = np.concatenate((self_copy._data, data), axis=0)
 
@@ -527,20 +527,21 @@ class RockPyData(object):
                     'min': minimum value of each column
                     'mean': average value of all values removed values in each row, error is set to the standard deviation
                     'median': median value of all values removed values in each row, error is set to the standard deviation
+                    'fist', 'last': first or last row with same variable
         :return: returns modified copy of RockPyData object
         '''
 
         # find rows with identical variables
         dup = self._find_duplicate_variable_rows()
 
-        self_copy = deepcopy( self)
+        self_copy = deepcopy(self)
 
         for d in dup:
             duprows = self.filter_idx(d)
 
             if substfunc is not None:
                 res = duprows.__getattribute__(substfunc)()
-                self_copy = self_copy.append_rows( res)
+                self_copy = self_copy.append_rows(res)
 
         # delete all rows with identical variable columns
         return self_copy.delete_rows(list(itertools.chain.from_iterable(dup)))
@@ -557,6 +558,7 @@ class RockPyData(object):
         :return: new RockPyData object with the interpolated data
         '''
 
+        #todo: add parameter: keeporiginaldata
         # average away duplicated variable rows and sort by variable
         rpd_copy = self.eliminate_duplicate_variable_rows( substfunc='mean')
 
@@ -724,8 +726,8 @@ class RockPyData(object):
 
     RockPyData objects must have at least one variable column (defined via alias 'variable') and
     can have several data columns (alias 'dep_var').
-    Depending on the content of the RockPyData objects arithmetic operations work differently
-    Units and errors are propagated when possible
+    Depending on the content of the RockPyData objects arithmetic operations work differently.
+    Units and errors are propagated when possible.
 
 
     ROW MATCHING
@@ -743,7 +745,7 @@ class RockPyData(object):
 
 
     open questions
-    * how are row labels handled?
+    * how are row labels handled? at the moment the result has no row labels at all
     """
 
     def __sub__(self, other):
@@ -756,20 +758,9 @@ class RockPyData(object):
            A = B - C
 
         :param other: rockpydata
+        :return: new rockpydat object with the results
         """
-
-        # build and return a new rockpydata object containing the variable columns and matching remaining columns with
-        # the calculated data
-
-        result_c_names, results_variable, rd1, rd2 = self._get_arithmetic_data(other)
-
-        # print '\nrcn', result_c_names, '\nrv', results_variable, '\nrd1', rd1[:,:,0], '\nrd1', rd2[:,:,0]
-
-        # todo: care about errors
-        results_data = np.append(results_variable, rd1[:, :, 0] - rd2[:, :, 0],
-                                 axis=1)  # variable columns + calculated data columns
-
-        return RockPyData(column_names=result_c_names, row_names=self.row_names, units=None, data=results_data)
+        return self._arithmetic_op(other, '-')
 
     def __add__(self, other):
         """
@@ -781,18 +772,9 @@ class RockPyData(object):
            A = B + C
 
         :param other: rockpydata
+        :return: new rockpydat object with the results
         """
-
-        # build and return a new rockpydata object containing the variable columns and matching remaining columns with
-        # the calculated data
-
-        result_c_names, results_variable, rd1, rd2 = self._get_arithmetic_data(other)
-
-        # todo: care about errors
-        results_data = np.append(results_variable, rd1[:, :, 0] + rd2[:, :, 0],
-                                 axis=1)  # variable columns + calculated data columns
-
-        return RockPyData(column_names=result_c_names, row_names=self.row_names, data=results_data)
+        return self._arithmetic_op(other, '+')
 
     def __mul__(self, other):
         """
@@ -804,18 +786,9 @@ class RockPyData(object):
            A = B - C
 
         :param other: rockpydata
+        :return: new rockpydat object with the results
         """
-
-        # build and return a new rockpydata object containing the variable columns and matching remaining columns with
-        # the calculated data
-
-        result_c_names, results_variable, rd1, rd2 = self._get_arithmetic_data(other)
-
-        # todo: care about errors
-        results_data = np.append(results_variable, rd1[:, :, 0] * rd2[:, :, 0],
-                                 axis=1)  # variable columns + calculated data columns
-
-        return RockPyData(column_names=result_c_names, row_names=self.row_names, data=results_data)
+        return self._arithmetic_op(other, '*')
 
     def __div__(self, other):
         """
@@ -827,33 +800,25 @@ class RockPyData(object):
            A = B/C
 
         :param other: rockpydata
+        :return: new rockpydat object with the results
         """
 
-        # build and return a new rockpydata object containing the variable columns and matching remaining columns with
-        # the calculated data
+        return self._arithmetic_op(other, '/')
 
-        result_c_names, results_variable, rd1, rd2 = self._get_arithmetic_data(other)
-
-        # todo: care about errors
-        results_data = np.append(results_variable, rd1[:, :, 0] / rd2[:, :, 0],
-                                 axis=1)  # variable columns + calculated data columns
-
-        return RockPyData(column_names=result_c_names, row_names=self.row_names, data=results_data)
-
-    def _get_arithmetic_data(self, other):
+    def _arithmetic_op(self, other, op):
         """
         looks for matching entries in the 'variable' aliased columns and for matching data columns
         this is needed to prepare an arithmetic operation of two rockpydata objects
 
         :param other: rockpydata
+        :param op: operand ('+','-','/','*')
         :return
         """
         # check if we have a proper rockpydata object for arithmetic operation
-
         if not isinstance(other, RockPyData):  # todo implement for floats
             raise ArithmeticError('only rockpydata objects can be computed')
 
-        # check if 'variable' columns match in both objects
+        # check if 'variable' alias exist in both objects
         if not (self.key_exists('variable') and other.key_exists('variable')):
             raise ArithmeticError("alias 'variable' not known")
 
@@ -861,38 +826,58 @@ class RockPyData(object):
         if not sorted(self.column_names_from_key('variable')) == sorted(other.column_names_from_key('variable')):
             raise ArithmeticError("'variable' columns do not match")
 
+        # check if variables are unique in both objects
+        if len( self._find_duplicate_variable_rows()) > 0:
+            raise ArithmeticError("%s has non unique variables" % self.__str__())
+        if len( other._find_duplicate_variable_rows()) > 0:
+            raise ArithmeticError("%s has non unique variables" % other.__str__())
+
         # check if remaining columns for matching pairs, only those will be subtracted and returned
         cnames1 = self.column_indices_to_names(set(range(self.column_count)) - set(self.column_dict['variable']))
         cnames2 = other.column_indices_to_names(set(range(other.column_count)) - set(other.column_dict['variable']))
 
         # get intersection of name sets
         matching_cnames = set(cnames1) & set(cnames2)
-
         # get indices of matching column names
         mcidx = np.array([(self.column_names.index(n), other.column_names.index(n)) for n in matching_cnames])
 
+        # if we have no intersecting columns, we have to check if one operand has only one column
+        if len(matching_cnames) == 0:  # no matching columns
+            if len(cnames1) == 1:
+                mcidx = np.array([(self.column_names.index(cnames1[0]), other.column_names.index(n)) for n in cnames2])
+            elif len(cnames2) == 1:
+                mcidx = np.array([(self.column_names.index(n), other.column_names.index(cnames2[0])) for n in cnames1])
+            else:
+                # none of the operands has only one column which does not match any column in the other operand
+                raise ArithmeticError("arithmetic operation failed since there are no matching columns and no operand with single data column")
+
         # get indices of matching 'variable' values
         d1 = self['variable'].values
-        # make sure d1 is 2 dim, even if there is only one column
-        if d1.ndim == 1:
-            d1 = d1.reshape(d1.shape[0], 1)
-
         d2 = other['variable'].values
-        # make sure d1 is 2 dim, even if there is only one column
-        if d2.ndim == 1:
-            d2 = d2.reshape(d2.shape[0], 1)
         mridx = np.array(np.all((d1[:, None, :] == d2[None, :, :]), axis=-1).nonzero()).T
-        # todo: check if matching rows are unique !!!
 
         result_c_names = self.column_names_from_key('variable') + self.column_indices_to_names(mcidx[:, 0])
-        results_variable = d1[mridx[:, 0],
-                           :]  # all columns of variable but only those lines which match in both rockpydata objects
+        results_variable = d1[mridx[:, 0], :]  # all columns of variable but only those lines which match in both rockpydata objects
 
         # data for calculation of both objects with reordered columns according to mcidx
-        rd1 = self.data[mridx[:, 0], :][:, mcidx[:, 0]]
-        rd2 = other.data[mridx[:, 1], :][:, mcidx[:, 1]]
+        rd1 = self.data[mridx[:, 0], :][:, mcidx[:, 0]][:, :, 0]
+        rd2 = other.data[mridx[:, 1], :][:, mcidx[:, 1]][:, :, 0]
 
-        return result_c_names, results_variable, rd1, rd2
+
+        # todo: care about errors
+        if op == '+':
+            result_data = rd1 + rd2
+        elif op == '-':
+            result_data = rd1 - rd2
+        elif op == '*':
+            result_data = rd1 * rd2
+        elif op == '/':
+            result_data = rd1 / rd2
+
+        # todo: get column_names and units right
+        results_rpd_data = np.append(results_variable, result_data, axis=1)  # variable columns + calculated data columns
+
+        return RockPyData(column_names=result_c_names, row_names=None, data=results_rpd_data)
 
     def __repr__(self):
         """
@@ -1005,7 +990,7 @@ class RockPyData(object):
             tf_array = [True if x in index_list else False for x in range(len(self.data))]
         return self.filter(tf_array)
 
-    def filter_row_names(self, row_names, invert = False):
+    def filter_row_names(self, row_names, invert=False):
         '''
         extract rows that match the specified row_names
         :return:
@@ -1040,17 +1025,23 @@ class RockPyData(object):
             val = self.values[minidx, range(self.column_count)][np.newaxis, :, np.newaxis]
             err = self.errors[minidx, range(self.column_count)][np.newaxis, :, np.newaxis]
         elif kind == 'max':
-            minidx = np.nanargmax(self.values, axis=0)
-            val = self.values[minidx, range(self.column_count)][np.newaxis, :, np.newaxis]
-            err = self.errors[minidx, range(self.column_count)][np.newaxis, :, np.newaxis]
+            maxidx = np.nanargmax(self.values, axis=0)
+            val = self.values[maxidx, range(self.column_count)][np.newaxis, :, np.newaxis]
+            err = self.errors[maxidx, range(self.column_count)][np.newaxis, :, np.newaxis]
+        elif kind == 'last':
+            val = self.values[-1, :][np.newaxis, :, np.newaxis]
+            err = self.errors[-1, :][np.newaxis, :, np.newaxis]
+        elif kind == 'first':
+            val = self.values[0, :][np.newaxis, :, np.newaxis]
+            err = self.errors[0, :][np.newaxis, :, np.newaxis]
         else:
-            return None # error
+            return None  # error
 
-        data = np.concatenate((val,err), axis=2)
+        data = np.concatenate((val, err), axis=2)
 
         if self.row_names is not None:
-            row_name = kind + '_' + '_'.join( self.row_names)
-        rpd = RockPyData( self.column_names, row_names=row_name, units=self.unitstrs, data=data)
+            row_name = kind + '_' + '_'.join(self.row_names)
+        rpd = RockPyData(self.column_names, row_names=row_name, units=self.unitstrs, data=data)
         # set variable columns the same way
         rpd._column_dict['variable'] = self._column_dict['variable']
         rpd._column_dict['dep_var'] = self._column_dict['dep_var']
@@ -1087,6 +1078,24 @@ class RockPyData(object):
         :return: RockPyData object
         '''
         return self._multirow_op('max')
+
+    def first(self):
+        '''
+        get first row and return as new RockPyData object
+        errors are propagated
+        :return: RockPyData object
+        '''
+        return self._multirow_op('first')
+
+    def last(self):
+        '''
+        get first row and return as new RockPyData object
+        errors are propagated
+        :return: RockPyData object
+        '''
+        return self._multirow_op('last')
+
+
 
     def sort(self, key='variable'):
         """

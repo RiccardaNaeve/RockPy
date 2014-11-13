@@ -1,6 +1,7 @@
 __author__ = 'volk'
 import logging
 import inspect
+from pprint import pprint
 
 import numpy as np
 
@@ -30,15 +31,26 @@ class Measurement(object):
         """
         self.log = logging.getLogger('RockPy.MEASUREMENT.' + type(self).__name__)
         self.has_data = True
-        machine = machine.lower() #for consistency incode
-        mtype = mtype.lower() #for consistency incode
+        machine = machine.lower()  # for consistency incode
+        mtype = mtype.lower()  # for consistency incode
+
         # setting implemented machines
         # looking for all subclasses of Readin.base.Machine
         # generating a dictionary of implemented machines : {implemented out_* method : machine_class}
-        implemented_machines = [cls for cls in RockPy.Readin.base.Machine.__subclasses__()] #todo change to check for format_machine
-        self.implemented = {
-            cls.__name__.lower(): {'_'.join(i.split('_')[1:]).lower(): cls for i in dir(cls) if i.startswith('out_')}
-            for cls in implemented_machines}
+        self.implemented_machines = {cls.__name__.lower(): cls for cls in RockPy.Readin.base.Machine.__subclasses__()}
+        self.implemented_measurements = [i for i in Measurement.inheritors()]
+
+        # measurement formatters are important!
+        # if they are not inside the measurement class, the measurement has not been implemented for this machine.
+        # the following machine formatters:
+        # 1. looks through all implemented measurements
+        # 2. for each measurement stores the machine and the applicable readin class in a dictonary
+
+        self.measurement_formatters = {cls.__name__.lower():
+                                           {'_'.join(i.split('_')[1:]).lower():
+                                                self.implemented_machines['_'.join(i.split('_')[1:]).lower()]
+                                            for i in dir(cls) if i.startswith('format_')}
+                                       for cls in self.implemented_measurements}
 
         ''' initialize parameters '''
         self.machine_data = None  # returned data from Readin.machines()
@@ -49,22 +61,29 @@ class Measurement(object):
         self.is_machine_data = None  # returned data from Readin.machines()
         self.initial_state = None
 
-        if machine in self.implemented:
-            self.machine = machine.lower()
-            self.mfile = mfile
-            if mtype in self.implemented[machine]:
-                self.log.debug('FOUND\t measurement type: << %s >>' % mtype.lower())
-                self.mtype = mtype
-                self.sample_obj = sample_obj
-                if self.machine and self.mfile:
+        if mtype in self.measurement_formatters:
+            self.log.debug('MTYPE << %s >> implemented' % mtype)
+            self.mtype = mtype  # set mtype
+            if machine in self.measurement_formatters[mtype]:
+                self.log.debug('MACHINE << %s >> implemented' % machine)
+                self.machine = machine  # set machine
+                self.sample_obj = sample_obj  # set sample_obj
+                if not mfile:
+                    self.log.debug('NO machine or mfile passed -> no raw_data will be generated')
+                    return
+                else:
+                    self.mfile = mfile
                     self.import_data()
                     self.has_data = self.machine_data.has_data
-                else:
-                    self.log.debug('NO machine or mfile passed -> no raw_data will be generated')
+                    if not self.machine_data.has_data:
+                        self.log.error('NO DATA passed: check sample name << %s >>' % sample_obj.name)
             else:
-                self.log.error('UNKNOWN\t measurement type: << %s >>' % mtype)
+                self.log.error('UNKNOWN\t MACHINE: << %s >>' % machine)
+                self.log.info('most likely cause is the \"format_%s\" method is missing in the measurement << %s >>' % (
+                    machine, mtype))
         else:
-            self.log.error('UNKNOWN\t machine << %s >>' % machine)
+            self.log.error('UNKNOWN\t MTYPE: << %s >>' % mtype)
+
 
         # dynamic data formatting
         # checks is format_'machine_name' exists. If exists it formats self.raw_data according to format_'machine_name'
@@ -117,7 +136,7 @@ class Measurement(object):
         machine = options.get('machine', self.machine)
         mtype = options.get('mtype', self.mtype)
         mfile = options.get('mfile', self.mfile)
-        raw_data = self.implemented[machine][mtype](mfile, self.sample_obj.name)
+        raw_data = self.measurement_formatters[mtype][machine](mfile, self.sample_obj.name)
         if raw_data is None:
             self.log.error('IMPORTING\t did not transfer data - CHECK sample name and data file')
             return
@@ -129,7 +148,7 @@ class Measurement(object):
                 self.machine_data = raw_data
 
     def _get_treatment_from_suffix(self):
-        #todo next treatment
+        # todo next treatment
         """
         takes a given suffix and extracts treatment data-for quick assesment. For more treatment control use add_treatment method.
 
@@ -244,7 +263,7 @@ class Measurement(object):
         if force_caller is not None:
             caller = force_caller
         else:
-            caller = '_'.join(inspect.stack()[1][3].split('_')[1:]) #get clling function
+            caller = '_'.join(inspect.stack()[1][3].split('_')[1:])  # get clling function
 
         if callable(getattr(self, 'calculate_' + caller)):  # check if calculation function exists
             parameter = self.compare_parameters(caller, parameter,

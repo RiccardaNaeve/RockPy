@@ -65,19 +65,6 @@ class CryoMag(base.Machine):
         else:
             return False #todo clever?
 
-    def out_afdemag(self):
-        data = self.get_float_data()
-        return data
-
-
-    def out_thellier(self):
-        data = self.get_float_data()
-        return data
-
-    def out_trm(self):
-        data = self.get_float_data()
-        return data
-
     def convert_time(self, time):
         '''
         converts a time string of the format : 14-02-13 17:12:25 into seconds

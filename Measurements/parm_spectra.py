@@ -37,6 +37,23 @@ class Parm_Spectra(base.Measurement):
         self.data = self.data.append_columns(column_names='mean_window',
                                              data=np.array([self.data['upper_window'].v + self.data['lower_window'].v])[
                                                       0] / 2)
+        self.data.define_alias('variable', 'mean_window')
+
+    def _get_cumulative_data(self, subtract_af3=True):
+        cumulative_data = deepcopy(self.data)
+
+        if subtract_af3:
+            cumulative_data['x'] = cumulative_data['x'].v - self.af3['x'].v
+            cumulative_data['y'] = cumulative_data['y'].v - self.af3['y'].v
+            cumulative_data['z'] = cumulative_data['z'].v - self.af3['z'].v
+            cumulative_data['mag'] = cumulative_data.magnitude('m')
+
+        cumulative_data['x'] = [np.sum(cumulative_data['x'].v[:i]) for i in range(len(cumulative_data['x'].v))]
+        cumulative_data['y'] = [np.sum(cumulative_data['y'].v[:i]) for i in range(len(cumulative_data['y'].v))]
+        cumulative_data['z'] = [np.sum(cumulative_data['z'].v[:i]) for i in range(len(cumulative_data['z'].v))]
+        cumulative_data['mag'] = cumulative_data.magnitude('m')
+
+        return cumulative_data
 
     def plt_parm_spectra(self, subtract_af3=True, rtn=False, norm=False, fill=False):
         plot_data = deepcopy(self.data)
@@ -64,20 +81,7 @@ class Parm_Spectra(base.Measurement):
 
 
     def plt_parm_acquisition(self, subtract_af3=True, rtn=False, norm=False):
-        plot_data = deepcopy(self.data)
-
-
-
-        if subtract_af3:
-            plot_data['x'] = plot_data['x'].v - self.af3['x'].v
-            plot_data['y'] = plot_data['y'].v - self.af3['y'].v
-            plot_data['z'] = plot_data['z'].v - self.af3['z'].v
-            plot_data['mag'] = plot_data.magnitude('m')
-
-        plot_data['x'] = [np.sum(plot_data['x'].v[:i]) for i in range(len(plot_data['x'].v))]
-        plot_data['y'] = [np.sum(plot_data['y'].v[:i]) for i in range(len(plot_data['y'].v))]
-        plot_data['z'] = [np.sum(plot_data['z'].v[:i]) for i in range(len(plot_data['z'].v))]
-        plot_data['mag'] = plot_data.magnitude('m')
+        plot_data = self._get_cumulative_data(subtract_af3=subtract_af3)
 
         if norm:
             norm_factor = max(plot_data['mag'].v)

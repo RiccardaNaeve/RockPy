@@ -8,6 +8,9 @@ import base
 
 
 class Thellier(base.Measurement):
+    # todo format_sushibar
+    # todo format_jr6
+
     def __init__(self, sample_obj,
                  mtype, mfile, machine,
                  **options):
@@ -31,7 +34,11 @@ class Thellier(base.Measurement):
         '''
         steps = self.machine_data.steps
         data = self.machine_data.get_float_data()
-        self.all_data = RockPyData(column_names=self.machine_data.float_header, data=data)
+        row_labels = [v + '[%.0f]' % (data[i, 0]) for i, v in enumerate(steps)]
+
+        self.all_data = RockPyData(column_names=self.machine_data.float_header,
+                                   data=data,
+                                   row_names=row_labels)
         self.all_data.rename_column('step', 'temp')
         self.all_data.append_columns('time', self.machine_data.get_time_data())
         nrm_idx = [i for i, v in enumerate(steps) if v == 'nrm']
@@ -43,12 +50,13 @@ class Thellier(base.Measurement):
                 idx.append(nrm_idx[0])
             if len(idx) != 0:
                 self.__dict__[step] = self.all_data.filter_idx(idx)  # finding step_idx
-                self.__dict__[step] = self.remove_duplicate_measurements(self.__dict__[step])
-                self.__dict__[step] = self.__dict__[step].define_alias('m', ( 'x', 'y', 'z'))
-                self.__dict__[step]= self.__dict__[step].append_columns('mag', self.__dict__[step].magnitude('m'))
-                # self.__dict__[step].sort('temp') # todo BUG
+                self.__dict__[step] = self.__dict__[step].eliminate_duplicate_variable_rows(substfunc='last')
+                self.__dict__[step].define_alias('m', ( 'x', 'y', 'z'))
+                self.__dict__[step] = self.__dict__[step].append_columns('mag', self.__dict__[step].magnitude('m'))
+                self.__dict__[step] = self.__dict__[step].sort('temp')
             else:
                 self.__dict__[step] = None
+
 
         # ## PTRM
         self.ptrm = self.pt - self.th
@@ -63,8 +71,6 @@ class Thellier(base.Measurement):
         self.difference.define_alias('m', ( 'x', 'y', 'z'))
         self.difference['mag'] = self.sum.magnitude('m')
 
-    def format_sushibar(self):
-        raise NotImplementedError
 
     def remove_duplicate_measurements(self, data, handling='last'):
         """
@@ -89,6 +95,16 @@ class Thellier(base.Measurement):
         else:
             return data
 
+    def _get_idx_tmin_tmax(self, step, t_min, t_max):
+        idx = (getattr(self, step)['temp'].v <= t_max) & (t_min <= getattr(self, step)['temp'].v)
+        return idx
+
+    def _get_idx_equal_val(self, step_a, step_b, key='temp'):
+
+        idx = np.array([(ix, iy) for iy, v1 in enumerate(getattr(self, step_a)[key].v)
+                        for ix, v2 in enumerate(getattr(self, step_b)[key].v)
+                        if v1 == v2])
+        return idx
 
     # ## plotting functions
     def plt_dunlop(self):
@@ -283,7 +299,8 @@ class Thellier(base.Measurement):
 
         equal_steps = list(set(self.th['temp'].v) & set(self.ptrm['temp'].v))
         th_steps = (t_min <= self.th['temp'].v) & (self.th['temp'].v <= t_max)  # True if step between t_min, t_max
-        ptrm_steps = (t_min <= self.ptrm['temp'].v) & (self.ptrm['temp'].v <= t_max)  # True if step between t_min, t_max
+        ptrm_steps = (t_min <= self.ptrm['temp'].v) & (
+            self.ptrm['temp'].v <= t_max)  # True if step between t_min, t_max
 
         th_data = self.th.filter(th_steps)  # filtered data for t_min t_max
         ptrm_data = self.ptrm.filter(ptrm_steps)  # filtered data for t_min t_max
@@ -433,20 +450,19 @@ class Thellier(base.Measurement):
 
         self.log.info('CALCULATING\t << %s >> y_dash << t_min=%.1f , t_max=%.1f >>' % (component, t_min, t_max))
 
-        idx = (self.th['temp'].v <= t_max) & (t_min <= self.th['temp'].v)  # filtering for t_min/t_max
+        idx = self._get_idx_tmin_tmax('th', t_min, t_max)  # filtering for t_min/t_max
         y = self.th.filter(idx)
 
-        idx = (self.ptrm['temp'].v <= t_max) & (t_min <= self.ptrm['temp'].v)
+        idx = self._get_idx_tmin_tmax('ptrm', t_min, t_max)  # filtering for t_min/t_max
         x = self.ptrm.filter(idx)
 
-        idx = np.array([(ix, iy) for iy, v1 in enumerate(self.ptrm['temp'].v)
-                        for ix, v2 in enumerate(self.th['temp'].v)
-                        if v1 == v2])  # filtering for equal var
+        idx = self._get_idx_equal_val('th', 'ptrm', 'temp')  # filtering for equal var
 
         x = x.filter_idx(idx[:, 0])
         y = y.filter_idx(idx[:, 1])
 
-        y_dash = 0.5 * ( y[component].v + self.result_slope(**parameter).v * x[component].v + self.result_y_int(**parameter).v)
+        y_dash = 0.5 * (
+            y[component].v + self.result_slope(**parameter).v * x[component].v + self.result_y_int(**parameter).v)
         return y_dash
 
     def calculate_delta_x_dash(self, **parameter):

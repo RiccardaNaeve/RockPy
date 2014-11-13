@@ -1,11 +1,17 @@
 __author__ = 'mike'
-import nrm
+import single_moment
 from RockPy.Structure.data import RockPyData
 
 
-class Trm(nrm.Nrm):
+class Trm(single_moment.generic_moment):
+    def __init__(self, sample_obj,
+                 mtype, mfile, machine,
+                 **options):
+
+        super(Trm, self).__init__(sample_obj,
+                                  mtype, mfile, machine,
+                                  **options)
+
     def format_cryomag(self):
-        data = self.machine_data.out_trm()
-        header = self.machine_data.float_header
-        self.data = RockPyData(column_names=header, data=data)
+        super(Trm, self).fomat_cryomag()
         self.data.rename_column('step', 'temp')

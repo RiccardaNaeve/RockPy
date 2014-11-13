@@ -1,6 +1,7 @@
-__author__ = 'mike'
 from unittest import TestCase
 import RockPy as rp
+
+__author__ = 'mike'
 
 
 class TestHysteresis(TestCase):

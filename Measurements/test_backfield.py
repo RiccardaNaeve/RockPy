@@ -1,6 +1,9 @@
 from unittest import TestCase
 import RockPy as rp
 
+__author__ = 'mike'
+
+
 class TestBackfield(TestCase):
     def setUp(self):
         self.vsm_file = '../testing/test_data/MUCVSM_test01.coe'

@@ -922,7 +922,7 @@ class RockPyData(object):
         """
         if not self.column_exists(column_name):
             raise IndexError
-        d = self[column_name]
+        d = self[column_name].v
         return d / np.max(d) * value
 
     """ METHODS returning OBJECTS """
@@ -1099,7 +1099,7 @@ class RockPyData(object):
 
     def sort(self, key='variable'):
         """
-        sorting all data according to one or multiple columns, last colum is primary sort order -> see np.lexsort
+        sorting all data according to one or multiple columns, last column is primary sort order -> see np.lexsort
         e.g.
 
         .. code-block:: python

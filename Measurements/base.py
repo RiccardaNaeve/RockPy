@@ -244,7 +244,7 @@ class Measurement(object):
         if force_caller is not None:
             caller = force_caller
         else:
-            caller = '_'.join(inspect.stack()[1][3].split('_')[1:])
+            caller = '_'.join(inspect.stack()[1][3].split('_')[1:]) #get clling function
 
         if callable(getattr(self, 'calculate_' + caller)):  # check if calculation function exists
             parameter = self.compare_parameters(caller, parameter,

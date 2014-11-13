@@ -43,7 +43,7 @@ class Vftb(base.Machine):
         data = self.get_data()
         return data
 
-    def out_irm(self):
+    def out_irm_acquisition(self):
         data = self.get_data()
         return data
 

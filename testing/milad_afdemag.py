@@ -18,7 +18,7 @@ def test():
         sample.add_measurement(mfile=cfB, mtype='afdemag', machine='cryomag', mag_method='IRM', demag_type='y', suffix = 'y')
         sample.add_measurement(mfile=cfB, mtype='afdemag', machine='cryomag', mag_method='IRM', demag_type='z', suffix = 'z')
 
-    demag.AfDemag(samples)
+    demag.AfDemag(samples, plot='show')
 
 
 if __name__ == '__main__':

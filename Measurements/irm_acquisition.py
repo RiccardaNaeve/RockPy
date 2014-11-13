@@ -3,13 +3,13 @@ import matplotlib.pyplot as plt
 
 import base
 from RockPy.Structure.data import RockPyData
+import nrm
 
-
-class Irm(base.Measurement):
+class Irm_Acquisition(base.Measurement):
     def __init__(self, sample_obj,
                  mtype, mfile, machine,
                  **options):
-        super(Irm, self).__init__(sample_obj, mtype, mfile, machine)
+        super(Irm_Acquisition, self).__init__(sample_obj, mtype, mfile, machine)
 
 
     def format_vftb(self):

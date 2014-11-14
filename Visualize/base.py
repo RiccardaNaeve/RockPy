@@ -65,7 +65,7 @@ class Generic(object):
             sample_list = [sample_list]
 
         self.name = name
-        self.samples_in_plot = []
+
         if folder is None:
             from os.path import expanduser
 
@@ -77,8 +77,8 @@ class Generic(object):
         self.samples = [i for i in sample_list]
         self.sample_list = sample_list
         self.sample_names = [i.name for i in sample_list]
-
-
+        # self.sample_names_txt = ['_'.join(i) for i in list(self.sample_names)]
+        # print self.sample_names_txt
         # check if a figure is provided, this way multiple plots can be combined into one figure
         if create_fig:
             self.fig = options.get('fig', plt.figure(figsize=(8, 6), dpi=100))
@@ -94,10 +94,10 @@ class Generic(object):
         ylim = options.get('ylim', None)
         if ylim is not None:
             self.ax.set_ylim(ylim)
-            
+
     def out(self, *args):
         if not self.name:
-            self.name = ' '.join(self.samples_in_plot)
+            self.name = ''.join(self.sample_names)
             self.name += '_'+ type(self).__name__
 
         if not '.pdf' in self.name:
@@ -120,7 +120,9 @@ class Generic(object):
 
     def plt_save_script_folder(self):
         import __main__ as main
-        name = main.__file__[:-2]+self.name[:-4]+'.pdf'
+        name = main.__file__[:-2]
+        name += ''.join(self.sample_names)
+        name += '.pdf'
         plt.savefig(name)
 
     def get_ax(self):

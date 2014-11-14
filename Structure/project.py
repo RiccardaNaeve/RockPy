@@ -31,6 +31,7 @@ class Sample():
         self.measurements = []
         self.results = None
 
+
         if mass is not None:
             self.add_measurement(mtype='mass', mfile=None, machine=mass_machine,
                                  value=float(mass), unit=mass_unit)
@@ -78,11 +79,11 @@ class Sample():
         else:
             self.log.error(' << %s >> not implemented, yet' % mtype)
 
-    def calc_all(self):
+    def calc_all(self, **options):
         for measurement in self.measurements:
             if not measurement.mtype in ['mass', 'height', 'diameter']:
                 s_type = None
-                measurement.calc_all()
+                measurement.calc_all(**options)
                 if measurement.suffix:
                     s_type, s_value, s_unit = measurement._get_treatment_from_suffix()
                 if not self.results:
@@ -101,7 +102,6 @@ class Sample():
                     # print c_names
                     rpdata = RockPyData(column_names=c_names, data=data, row_names=measurement.suffix)
                     self.results = self.results.append_rows(rpdata)
-
 
     @property
     def mass_kg(self):

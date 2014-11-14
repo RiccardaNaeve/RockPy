@@ -72,29 +72,6 @@ class Thellier(base.Measurement):
         self.difference['mag'] = self.sum.magnitude('m')
 
 
-    def remove_duplicate_measurements(self, data, handling='last'):
-        """
-        removes one measurement / rudimentary not finished
-        """
-        from collections import Counter
-
-        # idx_temp = np.unique(data['temp'], return_index=True, return_inverse=True)[1]
-        # find temperatures with more than one entry
-        duplicate_temps = [item for item, count in Counter(data['temp'].v).iteritems() if count > 1]
-        # get their indices
-        idx = [np.where(data['temp'].v == i)[0] for i in duplicate_temps]
-
-        # duplicate handling:
-        if handling == 'last':  # last one is kept
-            dup_idx = [i[0] for i in idx]  # idx for deletion
-        if handling == 'first':  # first is kept
-            dup_idx = [i[-1] for i in idx]  # idx for deletion
-
-        if len(idx) != 0:
-            return data.filter_idx(dup_idx, invert=True)
-        else:
-            return data
-
     def _get_idx_tmin_tmax(self, step, t_min, t_max):
         idx = (getattr(self, step)['temp'].v <= t_max) & (t_min <= getattr(self, step)['temp'].v)
         return idx
@@ -319,8 +296,8 @@ class Thellier(base.Measurement):
         data['ptrm'] = ptrm_data[component].v
 
         slope, sigma, y_int, x_int = data.lin_regress('ptrm', 'th')
-
-        self.results['slope'] = slope
+        self.results['slope']= slope
+        # self.results['slope']= sigma
         self.results['sigma'] = sigma
         self.results['y_int'] = y_int
         self.results['x_int'] = x_int
@@ -644,3 +621,8 @@ class Thellier(base.Measurement):
         q = self.result_q(**parameter).v
         n = self.result_n(**parameter).v
         self.results['w'] = q / np.sqrt((n - 2))
+
+    ''' EXPORT SECTION '''
+
+    def export_tdt(self):
+        raise NotImplementedError()

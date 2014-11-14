@@ -15,20 +15,21 @@ def test():
     print 'calculation of slope'
     print 'just returning the standard values'
     print M.result_slope()
-    print 'recalculating with different parameters'
-    print M.result_slope(t_min=300)
-    print 'calculating slope 1: t_min=400'
-    M.calculate_slope(t_min=400, component='z')  # calculation with non standard parameters
-    print 'returning calculation'
-    print M.result_slope(), M.result_sigma()
-
-    print 'getting results -> simple calculation with standard parameters'
-    print M.result_slope(), M.result_sigma(), M.result_y_int(), M.result_x_int()
-
-    print M.result_b_anc(t_min=300)
-    print M.result_sigma_b_anc(t_min=300)
-    M.calc_all()
-    print M.results
+    print M.slope
+    # print 'recalculating with different parameters'
+    # print M.result_slope(t_min=300)
+    # print 'calculating slope 1: t_min=400'
+    # M.calculate_slope(t_min=400, component='z')  # calculation with non standard parameters
+    # print 'returning calculation'
+    # print M.result_slope(), M.result_sigma()
+    #
+    # print 'getting results -> simple calculation with standard parameters'
+    # print M.result_slope(), M.result_sigma(), M.result_y_int(), M.result_x_int()
+    #
+    # print M.result_b_anc(t_min=300)
+    # print M.result_sigma_b_anc(t_min=300)
+    # M.calc_all()
+    # print M.results
     # print M.calculate_y_dash()
     # plotting dunlop plot
     # M.plt_dunlop()

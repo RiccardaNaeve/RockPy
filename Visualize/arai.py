@@ -7,7 +7,7 @@ class Arai(base.Generic):
     def __init__(self, sample_list, norm='mass',
                  t_min=20, t_max=700, component='mag',
                  line=True, check=True,
-                 plot='show', folder=None, name='arai plot',
+                 plot='show', folder=None, name=None,
                  plt_opt=None, style='screen',
                  **options):
 
@@ -23,6 +23,7 @@ class Arai(base.Generic):
         self.show()
         self.x_label = 'pTRM gained [%s]' % ('Am^2')  # todo get_unit
         self.y_label = 'NRM remaining [%s]' % ('Am^2')  # todo get_unit
+        self.ax.set_title('%s'%self.sample_names)
         if style == 'publication':
             self.setFigLinesBW()
 
@@ -31,11 +32,13 @@ class Arai(base.Generic):
     def show(self):
         x = []
         y = []
-        for sample in self.sample_list:
-            thellier_objects = sample.get_measurements(mtype='thellier')
+        measurement_dict = self.get_measurement_dict(mtype='thellier')
+        for sample in measurement_dict:
+            thellier_objects = measurement_dict[sample]
             for thellier in thellier_objects:
-                arai.arai(self.ax, thellier, self.parameter, **self.plt_opt)
-                arai.arai_line(self.ax, thellier, self.parameter, **self.plt_opt)
+                plt_opt = self.get_plt_opt(sample, thellier_objects, thellier)
+                arai.arai(self.ax, thellier, self.parameter, **plt_opt)
+                arai.arai_line(self.ax, thellier, self.parameter, **plt_opt)
 
                 x.append(max(thellier.ptrm[self.parameter['component']].v))  # append max for x_lim
                 y.append(max(thellier.th[self.parameter['component']].v))  # append max for y_lim

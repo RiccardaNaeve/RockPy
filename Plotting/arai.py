@@ -3,11 +3,10 @@ import numpy as np
 
 
 def arai(ax, thellier_obj, parameter, **plt_opt):
-
     if thellier_obj.suffix:
         label = thellier_obj.suffix
     else:
-        label =''
+        label = ''
 
     component = parameter.get('component', 'mag')
     idx = np.array([[i, j]
@@ -25,4 +24,5 @@ def arai_line(ax, thellier_obj, parameter, **plt_opt):
     x_new = [min(thellier_obj.ptrm[component].v), max(thellier_obj.ptrm[component].v)]
     y_new = slope * x_new + y_int
 
-    ax.plot(x_new, y_new, color='#808080', alpha=0.8)
+    plt_opt.update({'linestyle': '--', 'alpha': 0.5, 'zorder': 0, 'marker':'', 'label':''})
+    ax.plot(x_new, y_new, **plt_opt)

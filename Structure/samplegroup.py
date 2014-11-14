@@ -2,7 +2,7 @@ __author__ = 'mike'
 import logging
 import csv
 
-from Structure.project import Sample
+from RockPy import Sample
 import Functions.general
 
 
@@ -20,10 +20,11 @@ class SampleGroup(object):
 
         if sample_file:
             self.import_multiple_samples(sample_file, **options)
+        self._resort_sample_list()
 
     def import_multiple_samples(self, sample_file, length_unit='mm', mass_unit='mg', **options):
         """
-        imports a csv file with sample_names masses and dimansions and creates the sample_objects
+        imports a csv file with sample_names masses and dimensions and creates the sample_objects
         :param sample_file:
         :param length_unit:
         :param mass_unit:
@@ -60,3 +61,6 @@ class SampleGroup(object):
                 data.append(aux)
             print(data)
             # self.results = RockPyData(column_names=header, data=data)
+
+    def _resort_sample_list(self):
+        self.sample_list = sorted(self.sample_list)

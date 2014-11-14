@@ -61,30 +61,11 @@ class Diameter(Length):
     """
     simple 1d measurement for Length
     """
-
-    def __init__(self, sample_obj,
-                 mtype, mfile=None, machine='generic',
-                 value=1.0, unit='m',
-                 std=None, time=None,
-                 **options):
-        super(Diameter, self).__init__(sample_obj=sample_obj,
-                                       mtype=mtype, mfile=mfile, machine=machine,
-                                       **options)
-
-    def format_generic(self):
-        pass
+    pass
 
 
 class Height(Length):
-    def __init__(self, sample_obj,
-                 mtype, mfile=None, machine='generic',
-                 value=1.0, unit='m',
-                 std=None, time=None,
-                 **options):
-        super(Height, self).__init__(sample_obj=sample_obj,
-                                     mtype=mtype, mfile=mfile, machine=machine,
-                                     **options)
-
-
-    def format_generic(self):
-        pass
+    """
+    simple 1d measurement for Length
+    """
+    pass

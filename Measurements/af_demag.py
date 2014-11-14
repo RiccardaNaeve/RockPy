@@ -38,6 +38,7 @@ class AfDemag(base.Measurement):
         if self.demag_type != 'af3':
             idx = [i for i, v in enumerate(self.machine_data.steps) if v == self.demag_type]
             self.data = self.data.filter_idx(idx)
+        self.data.define_alias('m', ( 'x', 'y', 'z'))
         self.data = self.data.append_columns('mag', self.data.magnitude('m'))
         self.data.rename_column('step', 'field')
 

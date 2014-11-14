@@ -2,5 +2,6 @@ __author__ = 'volk'
 import RockPy.Functions.general
 import Plotting
 from RockPy.Structure.project import Sample
+from RockPy.Structure.samplegroup import SampleGroup
 
 # RockPy.Functions.general.create_logger('RockPy')

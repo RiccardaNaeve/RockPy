@@ -31,8 +31,8 @@ class Measurement(object):
         """
         self.log = logging.getLogger('RockPy.MEASUREMENT.' + type(self).__name__)
         self.has_data = True
-        machine = machine.lower()  # for consistency incode
-        mtype = mtype.lower()  # for consistency incode
+        machine = machine.lower()  # for consistency in code
+        mtype = mtype.lower()  # for consistency in code
 
         # setting implemented machines
         # looking for all subclasses of Readin.base.Machine
@@ -55,7 +55,13 @@ class Measurement(object):
         ''' initialize parameters '''
         self.machine_data = None  # returned data from Readin.machines()
         self.suffix = options.get('suffix', '')
+
+        ''' treatments '''
         self.treatments = []
+        self._treatment_opt = options.get('treatments', None)
+
+        if self._treatment_opt:
+            self._add_treatment_from_opt()
 
         ''' initial state '''
         self.is_machine_data = None  # returned data from Readin.machines()
@@ -103,6 +109,7 @@ class Measurement(object):
         # has to be written
         self.result_methods = [i[7:] for i in dir(self) if i.startswith('result_') if
                                not i.endswith('generic')]  # search for implemented results methods
+
         self.results = RockPyData(
             column_names=self.result_methods)  # dynamic entry creation for all available result methods
 
@@ -123,9 +130,17 @@ class Measurement(object):
         self.standard_parameters = {i[10:]: None for i in dir(self) if i.startswith('calculate_') if
                                     not i.endswith('generic')}
 
+
+    def __getattr__(self, name):
+        try:
+            return getattr(self, 'result_'+name)().v[0]
+        except KeyError:
+            msg = "'{0}' object has no attribute '{1}'"
+            raise AttributeError(msg.format(type(self).__name__, name))
+
     def import_data(self, rtn_raw_data=None, **options):
         '''
-        Importing the data from dfile and machine
+        Importing the data from mfile and machine
         :param rtn_raw_data:
         :param options:
         :return:
@@ -150,7 +165,8 @@ class Measurement(object):
     def _get_treatment_from_suffix(self):
         # todo next treatment
         """
-        takes a given suffix and extracts treatment data-for quick assesment. For more treatment control use add_treatment method.
+        takes a given suffix and extracts treatment data-for quick assessment. For more treatment control
+        use add_treatment method.
 
         suffix must be given in the form of
             stype: s_value [s_unit] | next treatment...
@@ -168,6 +184,29 @@ class Measurement(object):
         else:
             return None
 
+    def _get_treatments_from_opt(self):
+        """
+        creates a list of treatments from the treatment option
+        :return:
+        """
+        if self._treatment_opt:
+            treatments = self._treatment_opt.replace(' ', '').split(';')  # split ; for multiple treatments
+            treatments = [i.split(',') for i in treatments]  # split , for type, value, unit
+            for i in treatments:
+                try:
+                    i[1] = float(i[1])
+                except:
+                    raise TypeError('%s can not be converted to float')
+        else:
+            treatments = None
+        return treatments
+
+    def _add_treatment_from_opt(self):
+        treatments = self._get_treatments_from_opt()
+
+        for t in treatments:
+            treatment = Generic(ttype=t[0], value=t[1], unit=t[2])
+            self.treatments.append(treatment)
 
     def set_initial_state(self,
                           mtype, mfile, machine,  # standard

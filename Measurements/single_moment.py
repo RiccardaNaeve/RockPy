@@ -1,7 +1,7 @@
 __author__ = 'mike'
 
 import base
-from Structure.data import RockPyData
+from RockPy.Structure.data import RockPyData
 
 
 class generic_moment(base.Measurement):

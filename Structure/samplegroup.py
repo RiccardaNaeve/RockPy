@@ -3,11 +3,11 @@ import logging
 import csv
 
 from RockPy import Sample
-import Functions.general
+import RockPy.Functions.general
 
 
 class SampleGroup(object):
-    Functions.general.create_logger('RockPy.SAMPLEGROUP')
+    RockPy.Functions.general.create_logger('RockPy.SAMPLEGROUP')
 
 
     def __init__(self, sample_file=None, **options):
@@ -64,3 +64,8 @@ class SampleGroup(object):
 
     def _resort_sample_list(self):
         self.sample_list = sorted(self.sample_list)
+
+    #todo export
+
+    def export_cryomag(self):
+        raise NotImplemented()

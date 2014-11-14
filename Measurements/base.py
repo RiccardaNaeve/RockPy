@@ -9,7 +9,7 @@ import RockPy
 import RockPy.Functions.general as RP_functions
 import RockPy.Readin.base
 from RockPy.Structure.data import RockPyData
-from RockPy.Treatments.base import Generic
+from RockPy import Treatments
 from RockPy.Readin import *
 
 
@@ -205,7 +205,7 @@ class Measurement(object):
         treatments = self._get_treatments_from_opt()
 
         for t in treatments:
-            treatment = Generic(ttype=t[0], value=t[1], unit=t[2])
+            treatment = Treatments.base.Generic(ttype=t[0], value=t[1], unit=t[2])
             self.treatments.append(treatment)
 
     def set_initial_state(self,

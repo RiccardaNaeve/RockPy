@@ -60,9 +60,13 @@ class Generic(object):
 
         self.log = logging.getLogger('RockPy.VISUALIZE.' + type(self).__name__)
 
+        if isinstance(sample_list, RockPy.SampleGroup):
+            sample_list = sample_list.sample_list
+
         if type(sample_list) is not list:
             self.log.debug('CONVERTING Sample Instance to Samples List')
             sample_list = [sample_list]
+
 
         self.name = name
 

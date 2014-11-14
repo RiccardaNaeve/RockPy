@@ -58,7 +58,8 @@ class RockPyData(object):
         if data.ndim > 2:
             raise RuntimeError('data has dimension > 2')
 
-        # todo: handle single numbers
+        if data.ndim == 0:  # single number
+            data = data[np.newaxis]  # convert to 1D array
         if data.ndim == 1:  # values for one row or column, no errors
             if not column:
                 data = data[np.newaxis, :]  # add extra dimension to make data 2D with single row

@@ -14,7 +14,7 @@ class generic_moment(base.Measurement):
                                              **options)
 
     def format_cryomag(self):
-        data = self.machine_data.out_trm()
+        data = self.machine_data.float_data
         header = self.machine_data.float_header
         self.data = RockPyData(column_names=header, data=data)
         self.data.define_alias('m', ( 'x', 'y', 'z'))

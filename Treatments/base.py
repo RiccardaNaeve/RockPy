@@ -12,7 +12,9 @@ class Generic(object):
         self.log = logging.getLogger('RockPy.TREATMENT.' + type(self).__name__)
         self.log.info('CREATING treatment << %s >>' % ttype)
         self.ttype = ttype.lower()
-        self.data = RockPyData(column_names=ttype, data=value, units = unit)
+        self.value = value
+        self.data = RockPyData(column_names=ttype, data=value)
+        self.unit = unit
         self.comment = comment
 
     def add_value(self, type, value, unit=None):
@@ -20,4 +22,4 @@ class Generic(object):
         self.data[type] = value
 
     def __repr__(self):
-        return '<RockPy.Treatments> %s, %.2f, [%s]' %(self.ttype, self.data[self.ttype].v, self.data[self.ttype].u)
+        return '<RockPy.Treatments> %s, %.2f, [%s]' %(self.ttype, self.value, self.unit)

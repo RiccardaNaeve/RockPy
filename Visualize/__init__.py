@@ -1,2 +1,2 @@
 __author__ = 'volk'
-import demag
+import demag, arai, thellier

@@ -60,13 +60,14 @@ class Generic(object):
 
         self.log = logging.getLogger('RockPy.VISUALIZE.' + type(self).__name__)
 
+
+
         if isinstance(sample_list, RockPy.SampleGroup):
             sample_list = sample_list.sample_list
 
         if type(sample_list) is not list:
             self.log.debug('CONVERTING Sample Instance to Samples List')
             sample_list = [sample_list]
-
 
         self.name = name
 
@@ -81,8 +82,10 @@ class Generic(object):
         self.samples = [i for i in sample_list]
         self.sample_list = sample_list
         self.sample_names = [i.name for i in sample_list]
-        # self.sample_names_txt = ['_'.join(i) for i in list(self.sample_names)]
-        # print self.sample_names_txt
+
+        ''' initialize '''
+        self._title = type(self).__name__ + '[' + ','.join(self.sample_names)+']'
+
         # check if a figure is provided, this way multiple plots can be combined into one figure
         if create_fig:
             self.fig = options.get('fig', plt.figure(figsize=(8, 6), dpi=100))
@@ -102,7 +105,7 @@ class Generic(object):
     def out(self, *args):
         if not self.name:
             self.name = ''.join(self.sample_names)
-            self.name += '_'+ type(self).__name__
+            self.name += '_' + type(self).__name__
 
         if not '.pdf' in self.name:
             self.name += '.pdf'
@@ -114,16 +117,19 @@ class Generic(object):
                        'folder': self.plt_save_script_folder,
                        'get_ax': self.get_ax}
 
-        if self.plot in ['show', 'save']:
+        if self.plot in ['show', 'save', 'folder']:
             if not 'nolable' in args:
                 self.ax.set_xlabel(self.x_label)
                 self.ax.set_ylabel(self.y_label)
 
                 plt.legend(loc='best')
+
+        self.ax.set_title(self.title)
         out_options[self.plot]()
 
     def plt_save_script_folder(self):
         import __main__ as main
+
         name = main.__file__[:-2]
         name += ''.join(self.sample_names)
         name += '.pdf'
@@ -137,10 +143,7 @@ class Generic(object):
         return self.fig1
 
     def save_fig(self):
-        try:
-            plt.savefig(self.folder + self.samples[0].name + '_' + self.name, dpi=300)
-        except IndexError:
-            plt.savefig(self.folder + self.name, dpi=300)
+        plt.savefig(self.folder + self.name, dpi=300)
 
     def setAxLinesBW(self, ax):
         """
@@ -176,11 +179,20 @@ class Generic(object):
             self.setAxLinesBW(ax)
 
     @property
+    def title(self):
+        return self._title
+
+    @title.setter
+    def title(self, text):
+        self._title = text
+
+    @property
     def nr_samples(self):
         return len(self.sample_list)
 
     def get_measurement_dict(self, mtype):
-        measure_dict = {sample: [i for i in sample.get_measurements(mtype=mtype)] for sample in self.sample_list}
+        measure_dict = {sample: [i for i in sample.get_measurements(mtype=mtype)] for sample in self.sample_list
+                        if sample.get_measurements(mtype=mtype)}
         return measure_dict
 
     def get_plt_opt(self, sample, measurements, measurement):

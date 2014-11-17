@@ -1,6 +1,6 @@
 __author__ = 'mike'
 import base
-from Plotting import arai
+from RockPy.Plotting import arai
 import matplotlib.pyplot as plt
 
 class Arai(base.Generic):

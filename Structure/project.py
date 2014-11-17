@@ -145,7 +145,7 @@ class Sample():
             self.log.info('FOUND\t sample << %s >> has %i measurements with mtype << %s >>' % (
                 self.name, len(out), mtype.lower()))
         else:
-            self.log.error('UNKNOWN\t mtype << %s >> or no measurement found' % mtype.lower())
+            self.log.error('UNKNOWN\t mtype << %s >> or no measurement found for sample << %s >>' %(mtype.lower(), self.name))
             return None
         return out
 

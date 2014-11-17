@@ -13,5 +13,5 @@ class Trm(single_moment.generic_moment):
                                   **options)
 
     def format_cryomag(self):
-        super(Trm, self).fomat_cryomag()
+        super(Trm, self).format_cryomag()
         self.data.rename_column('step', 'temp')

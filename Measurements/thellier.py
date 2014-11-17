@@ -44,7 +44,7 @@ class Thellier(base.Measurement):
         nrm_idx = [i for i, v in enumerate(steps) if v == 'nrm']
         self.machine_data.get_time_data()
         # generating the palint data for all steps
-        for step in ['nrm', 'trm', 'th', 'pt', 'ac', 'tr', 'ck']:
+        for step in ['nrm', 'th', 'pt', 'ac', 'tr', 'ck']:
             idx = [i for i, v in enumerate(steps) if v == step]
             if step in ['th', 'pt']:
                 idx.append(nrm_idx[0])

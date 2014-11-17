@@ -130,13 +130,15 @@ class Measurement(object):
         self.standard_parameters = {i[10:]: None for i in dir(self) if i.startswith('calculate_') if
                                     not i.endswith('generic')}
 
-
-    def __getattr__(self, name):
-        try:
-            return getattr(self, 'result_'+name)().v[0]
-        except KeyError:
-            msg = "'{0}' object has no attribute '{1}'"
-            raise AttributeError(msg.format(type(self).__name__, name))
+    # def __getattr__(self, name):
+    #     try:
+    #         try:
+    #             return getattr(self, 'result_'+name)().v[0]
+    #         except:
+    #             return getattr(self, name)
+    #     except KeyError:
+    #         msg = "'{0}' object has no attribute '{1}'"
+    #         raise AttributeError(msg.format(type(self).__name__, name))
 
     def import_data(self, rtn_raw_data=None, **options):
         '''

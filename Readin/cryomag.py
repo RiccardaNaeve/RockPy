@@ -21,6 +21,10 @@ class CryoMag(base.Machine):
             [v for i, v in enumerate(d) if v[0] == sample_name or sample_name in v[9] if v[11] == 'results'])
         self.header = self.get_header()
 
+    @property
+    def float_data(self):
+        return self.get_float_data()
+
     def get_header(self):
         header = [i.split('[Am^2]')[0] for i in self.raw_data[1]]
         header = map(str.strip, header)

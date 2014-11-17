@@ -16,11 +16,9 @@ class SampleGroup(object):
 
         # ## initialize
         self.samples = {}
-        self.sample_list = []
 
         if sample_file:
             self.import_multiple_samples(sample_file, **options)
-        self._resort_sample_list()
 
     def import_multiple_samples(self, sample_file, length_unit='mm', mass_unit='mg', **options):
         """
@@ -31,7 +29,7 @@ class SampleGroup(object):
         :return:
         """
         reader_object = csv.reader(open(sample_file), delimiter='\t')
-        r_list = [i for i in reader_object]
+        r_list = [i for i in reader_object if not '#' in i]
         header = r_list[0]
         d_dict = {i[0]: {header[j].lower(): float(i[j]) for j in range(1, len(i))} for i in r_list[1:]}
         for sample in d_dict:
@@ -41,8 +39,16 @@ class SampleGroup(object):
             S = Sample(sample, mass=mass, height=height, diameter=diameter, mass_unit=mass_unit,
                        length_unit=length_unit)
             self.samples.update({sample: S})
-            self.sample_list.append(S)
-        self.sample_list = sorted(self.sample_list)
+
+    def pop_sample(self, sample_name):
+        if sample_name in self.samples:
+            self.samples.pop(sample_name)
+        return self
+
+    @property
+    def sample_list(self):
+        out = [self.samples[i] for i in sorted(self.samples.keys())]
+        return out
 
     def get_results(self, mtype, **parameter):
         i = 0
@@ -62,8 +68,9 @@ class SampleGroup(object):
             print(data)
             # self.results = RockPyData(column_names=header, data=data)
 
-    def _resort_sample_list(self):
-        self.sample_list = sorted(self.sample_list)
+    def __add__(self, other):
+        self.samples.update(other.samples)
+        return self
 
     #todo export
 

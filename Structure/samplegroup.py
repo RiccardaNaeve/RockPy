@@ -50,6 +50,32 @@ class SampleGroup(object):
         out = [self.samples[i] for i in sorted(self.samples.keys())]
         return out
 
+    @property
+    def treatment_dict(self):
+        """
+        returns all treatments and lust of values as dictionaty
+        """
+        t_dict = {i: {j: self._get_measurements_with_treatment(i, j) for j in self._get_all_treatment_values(i)} for i in
+                  self.treatment_types}
+        return t_dict
+
+    def _get_all_treatment_values(self, ttype):
+        return sorted(list(set([n.value for j in self.sample_list for i in j.measurements for n in i.treatments
+                                if n.ttype == ttype])))
+
+    def _get_measurements_with_treatment(self, ttype, tvalue):
+        out = [m
+               for sample in self.sample_list
+               for m in sample.get_measurements_with_treatment(ttype)
+               for t in m.treatments
+               if t.value == tvalue]
+        return out
+
+    @property
+    def treatment_types(self):
+        treatments = list(set([n.ttype for j in self.sample_list for i in j.measurements for n in i.treatments]))
+        return sorted(treatments)
+
     def get_results(self, mtype, **parameter):
         i = 0
         data = []
@@ -72,7 +98,7 @@ class SampleGroup(object):
         self.samples.update(other.samples)
         return self
 
-    #todo export
+    # todo export
 
     def export_cryomag(self):
         raise NotImplemented()

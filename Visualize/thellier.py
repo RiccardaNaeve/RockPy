@@ -1,8 +1,8 @@
 __author__ = 'mike'
 import matplotlib.pyplot as plt
-
 import base
 import arai
+from RockPy import Plotting
 
 
 class Sample_sheet(base.Generic):
@@ -66,3 +66,51 @@ class Sample_sheet(base.Generic):
         # for thellier in thellier_objs:
         arai.Arai(sample, plot='get_ax', fig=self.fig, ax=self.arai)
             # self.dunlop = arai.Arai(sample, plot='None', fig=self.fig, ax = self.arai).get_ax()
+
+
+
+class Dunlop(base.Generic):
+    def __init__(self, sample_list, norm='mass',
+                 t_min=20, t_max=700, component='mag',
+                 line=True, check=True,
+                 plot='show', folder=None, name='arai plot',
+                 plt_opt=None, style='screen',
+                 **options):
+        """
+
+        implemented options:
+           arai_line: adds the line fit to the arai_plot
+
+        """
+
+        super(Dunlop, self).__init__(sample_list, norm=norm,
+                                           plot=plot, folder=folder, name=name,
+                                           plt_opt=plt_opt, style=style,
+                                           create_fig=True, create_ax=True,
+                                           **options)
+        self.component = component
+        self.show(**options)
+        self.out()
+
+    def show(self):
+        measure_dict = self.get_measurement_dict(mtype='thellier')
+        for sample in measure_dict:
+            for measurement in measure_dict[sample]:
+                norm_factor = self.get_norm_factor(measurement)
+                plt_opt = self.get_plt_opt(sample=sample, measurements=measure_dict[sample], measurement=measurement)
+                Plotting.dunlop.dunlop(self.ax, measurement, norm_factor=norm_factor, **plt_opt)
+
+    def get_norm_factor(self, measurement):
+        implemented = {'is':
+        self._get_initial_state_normalizer}
+
+        out = [1.0, implemented[self.norm](measurement)]
+        return out
+
+    def _get_initial_state_normalizer(self, measurement):
+        """
+        gets the initial state value for normalization
+        """
+        if measurement.initial_state:
+            out = measurement.initial_state.data[self.component].v
+        return out

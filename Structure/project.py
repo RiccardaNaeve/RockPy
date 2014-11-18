@@ -149,3 +149,14 @@ class Sample():
             return None
         return out
 
+    def get_measurements_with_treatment(self, ttype, **options):
+        self.log.debug('SEARCHING\t measurements with treatment type << %s >>' % (ttype.lower()))
+        out = [m for m in self.measurements for t in m.treatments if t.ttype == ttype.lower()]
+
+        if len(out) != 0:
+            self.log.info('FOUND\t sample << %s >> has %i measurements with treatment << %s >>' % (
+                self.name, len(out), ttype.lower()))
+        else:
+            self.log.error('UNKNOWN\t treatment << %s >> or no measurement found for sample << %s >>' %(ttype.lower(), self.name))
+            return []
+        return out

@@ -124,6 +124,9 @@ class Generic(object):
 
                 plt.legend(loc='best')
 
+        if self.style == 'publication':
+            self.setFigLinesBW()
+
         self.ax.set_title(self.title)
         out_options[self.plot]()
 

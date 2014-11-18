@@ -83,6 +83,12 @@ class Thellier(base.Measurement):
                         if v1 == v2])
         return idx
 
+    def correct_last_step(self):
+        idx = [len(self.th['temp'].v) - 1]
+        last_step = self.th.filter_idx(idx)
+        self.th = self.th - last_step
+        print self.th
+
     # ## plotting functions
     def plt_dunlop(self):
         plt.plot(self.th['temp'], self.th['mag'], '.-', zorder=1)
@@ -296,7 +302,7 @@ class Thellier(base.Measurement):
         data['ptrm'] = ptrm_data[component].v
 
         slope, sigma, y_int, x_int = data.lin_regress('ptrm', 'th')
-        self.results['slope']= slope
+        self.results['slope'] = slope
         # self.results['slope']= sigma
         self.results['sigma'] = sigma
         self.results['y_int'] = y_int

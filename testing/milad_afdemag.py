@@ -28,12 +28,15 @@ def test():
         csample.add_measurement(mfile=cfC, mtype='afdemag', machine='cryomag', mag_method='IRM', demag_type='z', suffix='z')
 
     #print m.data
-    #demag.AfDemag(bsamples, norm='max')
+    demag.AfDemag(bsamples, norm='max')
     #demag.AfDemag(csamples, norm='max')
-    for s in csamples:
-        demag.AfDemag(s, plot='save')
-    for s in bsamples:
-        demag.AfDemag(s, plot='save')
+
+    # save plots AF demag plots for all samples
+    if False:
+        for s in csamples:
+            demag.AfDemag(s, plot='save')
+        for s in bsamples:
+            demag.AfDemag(s, plot='save')
 
 
 

@@ -100,5 +100,7 @@ class SampleGroup(object):
 
     # todo export
 
+    # todo get_average_sample
+
     def export_cryomag(self):
         raise NotImplemented()

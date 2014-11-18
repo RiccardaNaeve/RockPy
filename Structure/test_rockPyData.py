@@ -97,6 +97,17 @@ class TestRockPyData(TestCase):
 
     def test_interpolate(self):
         self.RPD.define_alias('variable', 'My')
-        iv = (1,11, 33, 55, 100)
+        iv = (1, 11, 33, 55, 100)
         self.assertTrue(np.array_equal((self.RPD.interpolate(iv))['My'].v, np.array(iv)))
         self.assertTrue(np.array_equal((self.RPD.interpolate(iv))['Mx'].v[1:-1], np.array([2., 4., 6.])))
+
+
+    def test_normalize(self):
+        self.RPD.define_alias('m', ('Mx', 'My', 'Mz'))
+        self.RPD = self.RPD.append_columns('mag', self.RPD.magnitude('m'))
+        MX = max(self.RPD['mag'].v)
+        self.assertAlmostEqual(self.RPD.normalize(MX)['F'].v, [1.0, 1.0, 1.0, 1.0], 7)
+        self.assertAlmostEqual(self.RPD.normalize(MX)['Mx'].v, [0.02322287, 0.0696686, 0.02322287, 0.0696686], 7)
+        self.assertAlmostEqual(self.RPD.normalize(MX)['My'].v, [0.0348343, 0.08128004, 0.12772577, 0.63862887], 7)
+        self.assertAlmostEqual(self.RPD.normalize(MX, exception=['Mz'])['Mz'].v, [4.0, 8.0, 12.0, 66.0], 7) #????
+        self.assertAlmostEqual(self.RPD.normalize(MX)['mag'].v, [0.06252949, 0.14173562, 0.19044168, 1.], 7)

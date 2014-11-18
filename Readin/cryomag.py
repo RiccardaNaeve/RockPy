@@ -12,7 +12,7 @@ class CryoMag(base.Machine):
         super(CryoMag, self).__init__(dfile, sample_name)
         self.raw_data = [i.strip('\n\r').split('\t') for i in self.reader_object.readlines()]
         d = np.array(self.raw_data[2:])
-        self.float_data_idx = [7, 12, 13, 14, 1, 2, 3, 4, 5, 6, 16, 17, 18, 19, 20]
+        self.float_data_idx = [7, 12, 13, 14, 16]#, 1, 2, 3, 4, 5, 6, 17, 18, 19, 20
         self.time_idx = 10
         self.sample_idx = [i for i, v in enumerate(d[:, 0]) if
                            v == sample_name or sample_name in d[i, 9]]

@@ -120,9 +120,10 @@ def test():
 
     print l['X']
 
-    print d.mean()
+    #print d.mean()
+    print d
 
-    print d.interpolate(np.arange(0, 10, .5))
+    print d.interpolate(np.arange(2, 10, .5), includesourcedata=True)
     d.define_alias('variable', 'Mx')
     print d.interpolate(np.arange(0, 10, .5))
 

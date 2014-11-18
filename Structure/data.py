@@ -443,11 +443,13 @@ class RockPyData(object):
         self._column_names[idx] = new_cname
         self._update_column_dictionary(self._column_names)
 
-    def append_rows(self, data, row_names=None):
+    def append_rows(self, data, row_names=None, ignore_row_names=False):
         '''
         append rows with data and optionally row_names
-        :param row_names: can be either an 1-3 dim array or anoteher RockPyData object with matching number of columns
-        :param data: can be only values or values + errors
+        :param data: can be either an 1-3 dim array or another RockPyData object with matching number of columns
+        :param row_names: one or multiple row names matching the number of data rows. if data is another
+                            RockPyData object, row labels will be taken from that
+        :param ignore_row_names: if true, no row names will be appended in any case
         :return:
         '''
         # check if we have another RockPyData object to append
@@ -456,6 +458,9 @@ class RockPyData(object):
             data = data.data
 
         # todo: check if column names match????
+
+        if ignore_row_names:
+            row_names = None
 
         if self.row_names is None and row_names is not None and self.row_count > 0:
             raise RuntimeError('cannot append rows with row_names to RockPyData object without row_names')
@@ -479,7 +484,7 @@ class RockPyData(object):
         self_copy = deepcopy(self)
 
         # todo check if row names are unique
-        if row_names is not None:
+        if row_names[0] is not None:
             self_copy.row_names.extend(row_names)  # add one or more row names
 
         self_copy._data = np.concatenate((self_copy._data, data), axis=0)
@@ -547,44 +552,50 @@ class RockPyData(object):
         # delete all rows with identical variable columns
         return self_copy.delete_rows(list(itertools.chain.from_iterable(dup)))
 
-    def interpolate(self, new_variables, method='interp1d', kind=None):
+    def interpolate(self, new_variables, method='interp1d', kind=None, substdupvarfunc='mean', includesourcedata=False):
         '''
         interpolate existing data columns to new variables
         first duplicated variables are averaged to make interpolation unique
-        :param new_variables:
+        :param new_variables: one or multiple values for which the data columns will be interpolated
         :param method: defines interpolation method
             'inter1d' works with single variable column only, uses scipy.interpolate.inter1p
         :param kind: defines which kind of interpolation is done
             for 'inter1d' this defaults to linear, other possible options: 'nearest', 'zero', 'slinear', 'quadratic', 'cubic'
+        :param substdupvarfunc: substfunc for eliminated duplicated rows
+        :param includesourcedata: if true, source data points within interpolation range will be included in result
         :return: new RockPyData object with the interpolated data
         '''
 
-        #todo: add parameter: keeporiginaldata
         # average away duplicated variable rows and sort by variable
-        rpd_copy = self.eliminate_duplicate_variable_rows( substfunc='mean')
+        rpd_copy = self.eliminate_duplicate_variable_rows(substfunc=substdupvarfunc).sort()
 
         if method == 'interp1d':
-            if len(rpd_copy.column_dict[ 'variable']) != 1:
-                raise RuntimeError( '%s works only with single column variables' % method)
-            newv = _to_tuple( new_variables)
+            if len(rpd_copy.column_dict['variable']) != 1:
+                raise RuntimeError('%s works only with single column variables' % method)
+            newv = _to_tuple(new_variables)
             oldv = rpd_copy['variable'].v
             log.info('INTERPOLATING to new variables (interp1d)')
 
             # get function to interpolate all columns
-            ipf = scipy.interpolate.interp1d( oldv, rpd_copy['dep_var'].values.T, kind=kind if kind is not None else 'linear', bounds_error=False, axis=1)
+            ipf = scipy.interpolate.interp1d(oldv, rpd_copy['dep_var'].values.T, kind=kind if kind is not None else 'linear', bounds_error=False, axis=1)
 
             # calculate interpolated values for all dep_var columns
-            interp_values = ipf( newv).T
+            interp_values = ipf(newv).T
 
             # put everything back together in new RockPyData object
             rpd_copy.cleardata()
             rpd_copy['variable'] = newv
             rpd_copy['dep_var'] = interp_values
 
+            if includesourcedata:
+                # works only with single column variable!
+                srcdata = self.filter((self['variable'].v >= min(newv)) & (self['variable'].v <= max(newv)))
+                rpd_copy = rpd_copy.append_rows(srcdata, ignore_row_names=True)  # append original data to interpolated data
+
             return rpd_copy
 
         else:
-            raise NotImplemented( 'method %s not implemented' % method)
+            raise NotImplemented('interpolation method %s not implemented' % method)
 
     def key_exists(self, key):
         """
@@ -938,7 +949,7 @@ class RockPyData(object):
         """
         Returns a copy of the data filtered by rows according to a True_False array. False entries are not returned.
 
-        tf_array = (d['Mx'] > 10) & (d['Mx'] < 20)
+        tf_array = (d['Mx'].v > 10) & (d['Mx'].v < 20)
         filtered_d = d.filter(tf_array)
 
         :param column_name:

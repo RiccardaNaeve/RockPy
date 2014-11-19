@@ -6,11 +6,11 @@ from RockPy import Sample
 import RockPy.Functions.general
 
 
+RockPy.Functions.general.create_logger('RockPy.SAMPLEGROUP')
+
 class SampleGroup(object):
-    RockPy.Functions.general.create_logger('RockPy.SAMPLEGROUP')
 
-
-    def __init__(self, sample_file=None, **options):
+    def __init__(self, sample_list=None, sample_file=None, **options):
         self.log = logging.getLogger('RockPy.SAMPLEGROUP.' + type(self).__name__)
         self.log.info('CRATING new << samplegroup >>')
 
@@ -19,6 +19,10 @@ class SampleGroup(object):
 
         if sample_file:
             self.import_multiple_samples(sample_file, **options)
+
+        if sample_list:
+            self.add_samples(sample_list)
+
 
     def import_multiple_samples(self, sample_file, length_unit='mm', mass_unit='mg', **options):
         """
@@ -51,6 +55,10 @@ class SampleGroup(object):
         return out
 
     @property
+    def sample_names(self):
+        return self.samples.keys()
+
+    @property
     def treatment_dict(self):
         """
         returns all treatments and lust of values as dictionaty
@@ -70,6 +78,16 @@ class SampleGroup(object):
                for t in m.treatments
                if t.value == tvalue]
         return out
+
+    def _sdict_from_slist(self, s_list):
+        print s_list
+        if not type(s_list) is list:
+            s_list = [s_list]
+        out = {s.name : s for s in s_list}
+        return out
+
+    def add_samples(self, s_list):
+        self.samples.update(self._sdict_from_slist(s_list=s_list))
 
     @property
     def treatment_types(self):

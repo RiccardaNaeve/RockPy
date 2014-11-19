@@ -6,6 +6,7 @@ import sys
 import numpy as np
 import matplotlib.pyplot as plt
 
+import RockPy as rp
 import RockPy.Functions
 
 
@@ -17,6 +18,9 @@ class Generic(object):
                  plt_opt={}, style='screen',
                  create_fig=True, create_ax=True,
                  **options):
+        self.log = logging.getLogger('RockPy.VISUALIZE.' + type(self).__name__)
+
+
         if plt_opt is None: plt_opt = {}
 
         params = {'publication': {'backend': 'ps',
@@ -42,8 +46,6 @@ class Generic(object):
                                 'H', '+', 'x', 'D', 'd', '|', '_'], 10)
         self.markersizes = np.tile([10, 3, 3, 3, 3], 10)
 
-        self.log = logging.getLogger('RockPy.VISUALIZE.' + type(self).__name__)
-
         plt.rcParams.update(params[style])
         self.style = style
         self.plt_opt = plt_opt
@@ -53,44 +55,81 @@ class Generic(object):
         self.ax = None
 
         # ## labels and titles
-        self.x_label = None
-        self.y_label = None
+        self.x_label = ''
+        self.y_label = ''
 
         self.plot = plot
 
         self.log = logging.getLogger('RockPy.VISUALIZE.' + type(self).__name__)
 
-
-
-        if isinstance(sample_list, RockPy.SampleGroup):
-            sample_list = sample_list.sample_list
-
-        if type(sample_list) is not list:
-            self.log.debug('CONVERTING Sample Instance to Samples List')
-            sample_list = [sample_list]
+        self.sample_group = None
 
         self.name = name
 
-        if folder is None:
-            from os.path import expanduser
-
-            folder = expanduser("~") + '/Desktop/'
 
         self.folder = folder
 
         self.norm = norm
-        self.samples = [i for i in sample_list]
-        self.sample_list = sample_list
-        self.sample_names = [i.name for i in sample_list]
-
-        ''' initialize '''
-        self._title = type(self).__name__ + '[' + ','.join(self.sample_names)+']'
 
         # check if a figure is provided, this way multiple plots can be combined into one figure
         if create_fig:
             self.fig = options.get('fig', plt.figure(figsize=(8, 6), dpi=100))
         if create_ax:
             self.ax = options.get('ax', plt.subplot2grid((1, 1), (0, 0), colspan=1, rowspan=1))
+
+    @property
+    def title(self):
+        return type(self).__name__ + ' [' + ','.join(self.sample_names) + ']'
+
+    @property
+    def sample_names(self):
+        return self.sample_group.sample_names
+
+    @property
+    def sample_list(self):
+        return self.sample_group.sample_list
+
+    @property
+    def samples(self):
+        return self.sample_group.sample_list
+
+
+    @property
+    def folder(self):
+        return self._folder
+
+    @folder.setter
+    def folder(self, folder):
+        if folder is None:
+            from os.path import expanduser
+            self._folder = expanduser("~") + '/Desktop/'
+        else:
+            self._folder = folder
+        # if not os.path.exists(folder):
+        #     self.log.error('Folder does not exist, do you want to create it?')
+        #     self.log.error('Folder: %s' %folder)
+        #     var = raw_input("[Y]/[N]: ")
+        #     if var.lower() == 'y':
+        #         os.makedirs(folder)
+        #         self._folder = folder
+        #     else:
+        #         self.log.info('CHANGING out to << show >>')
+        #         self.plot = 'show'
+        #         self._folder = None
+
+
+    def _group_from_list(self, s_list):
+        """
+        takes sample_list argument and checks if it is sample, list(samples) or RockPy.sample_group
+        """
+        if isinstance(s_list, list):
+            self.log.debug('CONVERTING list(sample) -> RockPy.SampleGroup(Sample)')
+            self.sample_group = rp.SampleGroup(sample_list=s_list)
+
+        if type(s_list) is not list:
+            self.log.debug('CONVERTING sample -> list(sample) -> RockPy.SampleGroup(Sample)')
+            self.sample_group = rp.SampleGroup(sample_list=[s_list])
+
 
     def set_xlim(self, **options):
         xlim = options.get('xlim', None)
@@ -119,15 +158,21 @@ class Generic(object):
 
         if self.plot in ['show', 'save', 'folder']:
             if not 'nolable' in args:
-                self.ax.set_xlabel(self.x_label)
-                self.ax.set_ylabel(self.y_label)
-
+                try:
+                    self.ax.set_xlabel(self.x_label)
+                    self.ax.set_ylabel(self.y_label)
+                except AttributeError:
+                    self.log.info('NO label set for axis')
+            if not 'no_legend' in args:
                 plt.legend(loc='best')
 
         if self.style == 'publication':
             self.setFigLinesBW()
 
-        self.ax.set_title(self.title)
+        try:
+            self.ax.set_title(self.title)
+        except AttributeError:
+            self.log.info('NO title set for figure')
         out_options[self.plot]()
 
     def plt_save_script_folder(self):

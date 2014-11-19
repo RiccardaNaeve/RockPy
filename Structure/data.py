@@ -731,20 +731,21 @@ class RockPyData(object):
         self._row_names = None
 
     """
-    todo: arithmetic operations
-    =====================
+    arithmetic operations (two RockPyData objects)
+    ==============================================
 
     There are several cases to distinguish when doing math with RockPyData objects!
 
     RockPyData objects must have at least one variable column (defined via alias 'variable') and
     can have several data columns (alias 'dep_var').
     Depending on the content of the RockPyData objects arithmetic operations work differently.
-    Units and errors are propagated when possible.
+    Todo: Units and errors are propagated when possible.
 
 
     ROW MATCHING
-    Calculation is performed with matching variables. Only those rows are returned. Use interpolate to get matching variables.
-    Operation fails when variables are not unique in one of the two objects. Use eliminate_duplicate_variable_rows first.
+    Calculation is performed with matching variables. Only those rows are returned.
+    In this case use interpolate to get matching variables. Operation fails when variables are not unique
+    in one of the two objects. In this case use eliminate_duplicate_variable_rows first.
 
 
     COLUMN MATCHING
@@ -756,8 +757,23 @@ class RockPyData(object):
     e.g. (V,A,B,C) + (V,D) = (V,A+D,B+D,C+D)
 
 
-    open questions
+    open questions / Todo:
     * how are row labels handled? at the moment the result has no row labels at all
+    * how are errors handled
+
+    arithmetic operations (RockPyData object and number / array of numbers)
+    =======================================================================
+    TODO:
+    When an arithmetic operation of a RockPyData object and a simple number is requested, that operation will be applied
+    to all non variable elements of the RockPyData object.
+    e.g. A + 1, A * 2
+
+    The length of a list of numbers must match the number of non variable columns in the RockPyData object.
+    Operation will be applied to all columns
+
+    A 2D numpy array with one row or one column will be broadcasted to non-variable columns or rows
+
+    Todo: what to do with errors?
     """
 
     def __sub__(self, other):

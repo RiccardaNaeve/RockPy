@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 
 import RockPy as rp
 import RockPy.Functions
+from matplotlib.lines import Line2D
 
 
 class Generic(object):
@@ -31,7 +32,7 @@ class Generic(object):
                                   'legend.fontsize': 8,
                                   'xtick.labelsize': 10,
                                   'ytick.labelsize': 10,
-                                  # 'text.usetex': True,
+                                  'text.usetex': True,
                                   'axes.unicode_minus': True},
 
                   'screen': {'axes.labelsize': 12,
@@ -42,11 +43,11 @@ class Generic(object):
 
         self.colors = np.tile(['b', 'g', 'r', 'c', 'm', 'y', 'k'], 10)
         self.linestyles = np.tile(['-', '--', ':', '-.'], 10)
-        self.markers = np.tile(['.', ',', 'o', 'v', '^', '<', '>', '1', '2', '3', '4', '8', 's', 'p', '*', 'h',
+        self.markers = np.tile(['.', 'v', '^', '<', '>', '1', '2', '3', '4', '8', 's', 'p', '*', 'h',
                                 'H', '+', 'x', 'D', 'd', '|', '_'], 10)
-        self.markersizes = np.tile([10, 3, 3, 3, 3], 10)
+        self.markersizes = np.tile([5, 4, 4, 4, 4], 10)
 
-        plt.rcParams.update(params[style])
+        # plt.rcParams.update(params[style])
         self.style = style
         self.plt_opt = plt_opt
 
@@ -63,10 +64,9 @@ class Generic(object):
         self.log = logging.getLogger('RockPy.VISUALIZE.' + type(self).__name__)
 
         self.sample_group = None
+        self._group_from_list(sample_list)
 
         self.name = name
-
-
         self.folder = folder
 
         self.norm = norm
@@ -93,7 +93,6 @@ class Generic(object):
     def samples(self):
         return self.sample_group.sample_list
 
-
     @property
     def folder(self):
         return self._folder
@@ -105,31 +104,21 @@ class Generic(object):
             self._folder = expanduser("~") + '/Desktop/'
         else:
             self._folder = folder
-        # if not os.path.exists(folder):
-        #     self.log.error('Folder does not exist, do you want to create it?')
-        #     self.log.error('Folder: %s' %folder)
-        #     var = raw_input("[Y]/[N]: ")
-        #     if var.lower() == 'y':
-        #         os.makedirs(folder)
-        #         self._folder = folder
-        #     else:
-        #         self.log.info('CHANGING out to << show >>')
-        #         self.plot = 'show'
-        #         self._folder = None
-
 
     def _group_from_list(self, s_list):
         """
         takes sample_list argument and checks if it is sample, list(samples) or RockPy.sample_group
         """
+        if isinstance(s_list, RockPy.SampleGroup):
+            self.sample_group = s_list
+
         if isinstance(s_list, list):
             self.log.debug('CONVERTING list(sample) -> RockPy.SampleGroup(Sample)')
             self.sample_group = rp.SampleGroup(sample_list=s_list)
 
-        if type(s_list) is not list:
+        if isinstance(s_list, rp.Sample):
             self.log.debug('CONVERTING sample -> list(sample) -> RockPy.SampleGroup(Sample)')
             self.sample_group = rp.SampleGroup(sample_list=[s_list])
-
 
     def set_xlim(self, **options):
         xlim = options.get('xlim', None)
@@ -157,10 +146,11 @@ class Generic(object):
                        'get_ax': self.get_ax}
 
         if self.plot in ['show', 'save', 'folder']:
-            if not 'nolable' in args:
+            if not 'no_lable' in args:
                 try:
-                    self.ax.set_xlabel(self.x_label)
-                    self.ax.set_ylabel(self.y_label)
+                    if self.ax:
+                        self.ax.set_xlabel(self.x_label)
+                        self.ax.set_ylabel(self.y_label)
                 except AttributeError:
                     self.log.info('NO label set for axis')
             if not 'no_legend' in args:
@@ -170,7 +160,8 @@ class Generic(object):
             self.setFigLinesBW()
 
         try:
-            self.ax.set_title(self.title)
+            if self.ax:
+                self.ax.set_title(self.title)
         except AttributeError:
             self.log.info('NO title set for figure')
         out_options[self.plot]()
@@ -276,6 +267,9 @@ class Generic(object):
         if reverse:
             out = out[::-1]
         return out
+
+    def create_dummy_line(self, **kwds):
+        return Line2D([], [], **kwds)
 
     def close_plot(self):
         plt.close()

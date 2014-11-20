@@ -18,7 +18,9 @@ class CryoMag(base.Machine):
                            v == sample_name or sample_name in d[i, 9]]
         self.results_idx = [i for i, v in enumerate(d[:, 11]) if v == 'results' and i in self.sample_idx]
         self.data = np.array(
-            [v for i, v in enumerate(d) if v[0] == sample_name or sample_name in v[9] if v[11] == 'results'])
+            [v for i, v in enumerate(d) if v[0] == sample_name or sample_name in v[9]
+             if v[11] == 'results'
+             if not '#' in v[0]])
         self.header = self.get_header()
 
     @property

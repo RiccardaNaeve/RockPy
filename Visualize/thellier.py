@@ -103,8 +103,11 @@ class Dunlop(base.Generic):
     def get_norm_factor(self, measurement):
         implemented = {'is':
         self._get_initial_state_normalizer}
-
-        out = [1.0, implemented[self.norm](measurement)]
+        try:
+            out = [1.0, implemented[self.norm](measurement)]
+        except KeyError:
+            self.log.error('NORMALIZATION method << %s >> not implemented' %self.norm)
+            out = [1.0, 1.0]
         return out
 
     def _get_initial_state_normalizer(self, measurement):

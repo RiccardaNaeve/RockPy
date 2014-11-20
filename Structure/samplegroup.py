@@ -6,12 +6,12 @@ from RockPy import Sample
 import RockPy.Functions.general
 
 
-RockPy.Functions.general.create_logger('RockPy.SAMPLEGROUP')
+RockPy.Functions.general.create_logger('RockPy')
+
 
 class SampleGroup(object):
-
     def __init__(self, sample_list=None, sample_file=None, **options):
-        self.log = logging.getLogger('RockPy.SAMPLEGROUP.' + type(self).__name__)
+        self.log = logging.getLogger('RockPy.' + type(self).__name__)
         self.log.info('CRATING new << samplegroup >>')
 
         # ## initialize
@@ -45,8 +45,14 @@ class SampleGroup(object):
             self.samples.update({sample: S})
 
     def pop_sample(self, sample_name):
-        if sample_name in self.samples:
-            self.samples.pop(sample_name)
+        """
+        remove samples from sample_group will take str(sample_name), list(sample_name)
+        """
+        if not isinstance(sample_name, list):
+            sample_name = [sample_name]
+        for sample in sample_name:
+            if sample in self.samples:
+                self.samples.pop(sample)
         return self
 
     @property
@@ -63,13 +69,34 @@ class SampleGroup(object):
         """
         returns all treatments and lust of values as dictionaty
         """
-        t_dict = {i: {j: self._get_measurements_with_treatment(i, j) for j in self._get_all_treatment_values(i)} for i in
+        t_dict = {i: {j: self._get_measurements_with_treatment(i, j) for j in self._get_all_treatment_values(i)} for i
+                  in
                   self.treatment_types}
         return t_dict
+
+
+    @property
+    def mtype_dict(self):
+        m_dict = {i: [m for s in self.sample_list for m in s.get_measurements(i)] for i in self.mtypes}
+        return m_dict
 
     def _get_all_treatment_values(self, ttype):
         return sorted(list(set([n.value for j in self.sample_list for i in j.measurements for n in i.treatments
                                 if n.ttype == ttype])))
+
+    @property
+    def mtypes(self):
+        """
+        looks through all samples and returns measurement types
+        """
+        return sorted(list(set([i.mtype for j in self.sample_list for i in j.measurements])))
+
+    @property
+    def ttypes(self):
+        """
+        looks through all samples and returns measurement types
+        """
+        return sorted(list(set([t for sample in self.sample_list for t in sample.ttypes])))
 
     def _get_measurements_with_treatment(self, ttype, tvalue):
         out = [m
@@ -80,17 +107,16 @@ class SampleGroup(object):
         return out
 
     def _sdict_from_slist(self, s_list):
-        print s_list
         if not type(s_list) is list:
             s_list = [s_list]
-        out = {s.name : s for s in s_list}
+        out = {s.name: s for s in s_list}
         return out
 
     def add_samples(self, s_list):
         self.samples.update(self._sdict_from_slist(s_list=s_list))
 
     @property
-    def treatment_types(self):
+    def treatment_types(self):  # todo delete
         treatments = list(set([n.ttype for j in self.sample_list for i in j.measurements for n in i.treatments]))
         return sorted(treatments)
 
@@ -119,6 +145,22 @@ class SampleGroup(object):
     # todo export
 
     # todo get_average_sample
+    def average_mtype(self, mtype):
+        from pprint import pprint
+        pprint(self.treatment_dict)
+        try:
+            self.log.debug('AVERAGING: << %s >>' % type)
+            measurements = self.mtype_dict[mtype]
+            print self._mlist_to_tdict(measurements)
+        except KeyError:
+            self.log.error('CANT find mtype: << %s >>' % type)
+
+    def _mlist_to_tdict(self, mlist):
+        """
+        takes a list of measurements looks for common ttypes
+        """
+        ttypes = sorted(list(set([i.ttype for m in mlist for i in m.treatments])))
+        return {ttype: [m for m in mlist if ttype in m.ttypes] for ttype in ttypes}
 
     def export_cryomag(self):
         raise NotImplemented()

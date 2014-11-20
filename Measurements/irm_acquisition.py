@@ -5,12 +5,15 @@ import base
 from RockPy.Structure.data import RockPyData
 import nrm
 
+
 class Irm_Acquisition(base.Measurement):
     def __init__(self, sample_obj,
                  mtype, mfile, machine,
                  **options):
         super(Irm_Acquisition, self).__init__(sample_obj, mtype, mfile, machine)
 
+        self._data = {'remanence': self.remanence,
+                      'induced': self.induced}
 
     def format_vftb(self):
         data = self.machine_data.out_irm()
@@ -26,8 +29,7 @@ class Irm_Acquisition(base.Measurement):
 
         data = self.machine_data.out_trm()
         header = self.machine_data.float_header
-        self.data = RockPyData(column_names=header, data=data)
-        self.remanence = self.data
+        self.remanence = RockPyData(column_names=header, data=data)
         self.induced = None
 
 

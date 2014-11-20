@@ -57,7 +57,7 @@ class Measurement(object):
         self.suffix = options.get('suffix', '')
 
         ''' treatments '''
-        self.treatments = []
+        self._treatments = []
         self._treatment_opt = options.get('treatments', None)
 
         if self._treatment_opt:
@@ -132,7 +132,7 @@ class Measurement(object):
 
     def __getattr__(self, name):
         if name in self.result_methods:
-            value = getattr(self, 'result_'+name)().v[0]
+            value = getattr(self, 'result_' + name)().v[0]
             return value
         try:
             getattr(self, name)
@@ -208,7 +208,7 @@ class Measurement(object):
 
         for t in treatments:
             treatment = Treatments.base.Generic(ttype=t[0], value=t[1], unit=t[2])
-            self.treatments.append(treatment)
+            self._treatments.append(treatment)
 
     def set_initial_state(self,
                           mtype, mfile, machine,  # standard
@@ -232,7 +232,30 @@ class Measurement(object):
 
     def add_treatment(self, ttype, tvalue, comment=''):
         treatment = Generic(ttype=ttype, value=tvalue, comment=comment)
-        self.treatments.append(treatment)
+        self._treatments.append(treatment)
+
+    @property
+    def has_treatment(self):
+        if len(self._treatments) == 0:
+            return False
+        else:
+            return True
+
+    @property
+    def treatments(self):
+        if self.has_treatment:
+            return self._treatments
+        else:
+            treatment = Treatments.base.Generic(ttype='none', value=0, unit='')
+            return [treatment]
+
+    @property
+    def ttypes(self):
+        return sorted(list(set(t.ttype for t in self._treatments)))
+
+    @property
+    def data(self):
+        return self._data
 
     @property
     def generic(self):

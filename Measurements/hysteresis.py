@@ -26,6 +26,10 @@ class Hysteresis(base.Measurement):
         super(Hysteresis, self).__init__(sample_obj, mtype, mfile, machine, **options)
 
         self.paramag_correction = None
+        self._data = {'up_field': self.up_field,
+                      'down_field': self.down_field,
+                      'virgin': self.virgin,
+                      'msi': self.msi}
 
     # ## formatting functions
     def format_vftb(self):

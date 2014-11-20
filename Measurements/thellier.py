@@ -19,7 +19,7 @@ class Thellier(base.Measurement):
         # # ## initialize data
         self.standard_parameters['slope'] = {'t_min': 20, 't_max': 700, 'component': 'mag'}
         self.steps = ['th', 'pt', 'ac', 'tr', 'ck', 'ptrm', 'sum', 'difference']
-
+        self._data = {i : getattr(self, i) for i in self.steps[:5]}
         for i in self.standard_parameters:
             if self.standard_parameters[i] is None:
                 self.standard_parameters[i] = self.standard_parameters['slope']

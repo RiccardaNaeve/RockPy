@@ -128,6 +128,13 @@ class Sample():
             self.log.info('FOUND more than 1 << diameter >> measurement. Returning first')
         return measurement[0].data['diameter'][0]
 
+    @property
+    def mtypes(self):
+        return sorted(list(set(m.mtype for m in self.measurements)))
+
+    @property
+    def ttypes(self):
+        return sorted(list(set(t for m in self.measurements for t in m.ttypes)))
 
     ''' FIND FUNCTIONS '''
 

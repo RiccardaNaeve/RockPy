@@ -33,7 +33,8 @@ class Backfield(base.Measurement):
                                         mtype, mfile, machine,
                                         **options)
 
-    # todo dynamic properties
+        self._data = {'remanence': self.remanence,
+                      'induced': self.induced}
 
     def format_vftb(self):
         '''
@@ -113,7 +114,6 @@ class Backfield(base.Measurement):
         parameter = {}
         self.calc_result(parameter, recalc, force_caller='mrs')
         return self.results['sigma_mrs']
-
 
 
     def calculate_bcr(self, **parameter):

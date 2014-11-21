@@ -13,9 +13,37 @@ from RockPy import Treatments
 from RockPy.Readin import *
 
 
+RP_functions.create_logger('RockPy.MEASUREMENT')
 class Measurement(object):
-    RP_functions.create_logger('RockPy.MEASUREMENT')
+    """
 
+    HOW TO get at stuff
+    ===================
+    HowTo:
+    ======
+       TTYPES
+       ++++++
+        want all treatment types (e.g. pressure, temperature...):
+
+        as list: measurement.ttypes
+           print measurement.ttypes
+           >>> ['pressure']
+        as dictionary with corresponding treatment as value: measurement.tdict
+           print measurement.tdict
+           >>> {'pressure': <RockPy.Treatments> pressure, 0.60, [GPa]}
+        as dictionary with itself as value: measurement._self_tdict
+           >>> {'pressure': {0.6: <RockPy.Measurements.thellier.Thellier object at 0x10e2ef890>}}
+
+       TVALUES
+       +++++++
+       want all values for any treatment in a measurement
+
+        as list: measurement.tvals
+        print measuremtn.tvals
+        >>> [0.6]
+
+
+    """
     def __init__(self, sample_obj,
                  mtype, mfile, machine,
                  **options):
@@ -130,15 +158,16 @@ class Measurement(object):
         self.standard_parameters = {i[10:]: None for i in dir(self) if i.startswith('calculate_') if
                                     not i.endswith('generic')}
 
-    def __getattr__(self, name):
-        if name in self.result_methods:
-            value = getattr(self, 'result_' + name)().v[0]
-            return value
-        try:
-            getattr(self, name)
-        except:
-            msg = "'{0}' object has no attribute '{1}'"
-            raise AttributeError(msg.format(type(self).__name__, name))
+    # def __getattr__(self, name):
+    #     if name in self.result_methods:
+    #         value = getattr(self, 'result_' + name)().v[0]
+    #         return value
+    #     else:
+    #         try:
+    #             getattr(self, name)
+    #         except:
+    #             msg = "'{0}' object has no attribute '{1}'"
+    #             raise AttributeError(msg.format(type(self).__name__, name))
 
     def import_data(self, rtn_raw_data=None, **options):
         '''
@@ -251,7 +280,47 @@ class Measurement(object):
 
     @property
     def ttypes(self):
-        return sorted(list(set(t.ttype for t in self._treatments)))
+        """
+        list of all ttypes
+        """
+        out = [t.ttype for t in self.treatments]
+        return self.__sort_list_set(out)
+
+    @property
+    def tvals(self):
+        """
+        list of all ttypes
+        """
+        out = [t.value for t in self.treatments]
+        return self.__sort_list_set(out)
+
+    @property
+    def tdict(self):
+        """
+        dictionary of ttype: treatment}
+        """
+        out = {t.ttype: t for t in self.treatments}
+        return out
+
+    @property
+    def _self_tdict(self):
+        """
+        dictionary of ttype: {tvalue: self}
+        """
+        out = {i.ttype: {i.value: self} for i in self.treatments}
+        return out
+
+    def _get_treatment(self, ttype=None, tval=None):
+        out = [t for t in treatments]
+        if ttype:
+            out = [t for t in out if t.ttype == ttype]
+        if tval:
+            out = [t for t in out if t.value == tval]
+
+    def _get_treatment_value(self, ttype):
+        if ttype in self.tdict:
+            out =  self.tdict[ttype].value
+            return out
 
     @property
     def data(self):
@@ -415,3 +484,11 @@ class Measurement(object):
                     subclasses.add(child)
                     work.append(child)
         return subclasses
+
+    def __sort_list_set(self, values):
+        """
+        returns a sorted list of non duplicate values
+        :param values:
+        :return:
+        """
+        return sorted(list(set(values)))

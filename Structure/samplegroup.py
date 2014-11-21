@@ -146,12 +146,10 @@ class SampleGroup(object):
 
     # todo get_average_sample
     def average_mtype(self, mtype):
-        from pprint import pprint
-        pprint(self.treatment_dict)
         try:
             self.log.debug('AVERAGING: << %s >>' % type)
             measurements = self.mtype_dict[mtype]
-            print self._mlist_to_tdict(measurements)
+            print measurements[0].tdict
         except KeyError:
             self.log.error('CANT find mtype: << %s >>' % type)
 
@@ -159,7 +157,7 @@ class SampleGroup(object):
         """
         takes a list of measurements looks for common ttypes
         """
-        ttypes = sorted(list(set([i.ttype for m in mlist for i in m.treatments])))
+        ttypes = sorted(list(set([m.ttypes for m in mlist])))
         return {ttype: [m for m in mlist if ttype in m.ttypes] for ttype in ttypes}
 
     def export_cryomag(self):

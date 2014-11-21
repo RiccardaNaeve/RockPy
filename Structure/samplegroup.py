@@ -4,7 +4,7 @@ import csv
 
 from RockPy import Sample
 import RockPy.Functions.general
-
+import numpy as np
 
 RockPy.Functions.general.create_logger('RockPy')
 
@@ -55,10 +55,20 @@ class SampleGroup(object):
                 self.samples.pop(sample)
         return self
 
+
+    # ### DATA properties
     @property
     def sample_list(self):
+        return self.slist
+
+    @property
+    def slist(self):
         out = [self.samples[i] for i in sorted(self.samples.keys())]
         return out
+
+    @property
+    def mtypes(self):
+        out = []
 
     @property
     def sample_names(self):
@@ -142,9 +152,6 @@ class SampleGroup(object):
         self.samples.update(other.samples)
         return self
 
-    # todo export
-
-    # todo get_average_sample
     def average_mtype(self, mtype):
         try:
             self.log.debug('AVERAGING: << %s >>' % type)
@@ -162,3 +169,44 @@ class SampleGroup(object):
 
     def export_cryomag(self):
         raise NotImplemented()
+
+    def _get_sample(self, sname=None, mtype=None, ttype=None, tval=None):
+        """
+        Primary search function for all parameters
+
+        """
+        if tval is None:
+            t_value = np.nan
+        else:
+            t_value = tval
+
+        if sname:
+            try:
+                out = [self.samples[sname]]
+            except KeyError:
+                raise KeyError('RockPy.sample_group does not contain sample << %s >>' % sname)
+        else:
+            out = self.sample_list
+            if len(out) == 0:
+                raise KeyError('RockPy.sample_group does not contain any samples')
+                return
+
+        if mtype:
+            out = [s for s in out if mtype in s.mtypes]
+            if len(out) == 0:
+                raise KeyError('RockPy.sample_group does not contain sample with mtype: << %s >>' % mtype)
+                return
+        if ttype:
+            out = [s for s in out if ttype in s.ttypes]
+            if len(out) == 0:
+                raise KeyError('RockPy.sample_group does not contain sample with ttype: << %s >>' % ttype)
+                return
+
+            if tval:
+                out = [s for s in out if tval in s.ttype_tval_dict[ttype]]
+                if len(out) == 0:
+                    raise KeyError('RockPy.sample_group does not contain sample with (ttype, tval) pair: << %s, %.2f >>' %(ttype ,t_value))
+                    return
+        if len(out) == 0:
+            self.log.error('UNABLE to find sample with << %s, %s, %s, %.2f >>' % (sname, mtype, ttype, t_value))
+        return out

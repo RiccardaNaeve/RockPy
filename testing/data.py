@@ -122,7 +122,7 @@ def test():
 
     #print d.mean()
     print d
-    print d + (1,2,3,4,5,6)
+    print d + (1, 2, 3, 4, 5, 6)
 
     print d.interpolate(np.arange(2, 10, .5), includesourcedata=True)
     d.define_alias('variable', 'Mx')

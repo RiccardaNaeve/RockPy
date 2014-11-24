@@ -769,7 +769,8 @@ class RockPyData(object):
     e.g. A + 1, A * 2
 
     The length of a list of numbers must match the number of non variable columns in the RockPyData object.
-    Operation will be applied to all columns
+    Operation will be applied to all columns. For '+' and '-' errors will not be touched. For '*' and '-' errors will
+    be scaled with the values.
 
 
 
@@ -860,13 +861,13 @@ class RockPyData(object):
                 self_copy.values[:, nvc] -= numoperand
             elif op == '*':
                 self_copy.values[:, nvc] *= numoperand
+                self_copy.errors[:, nvc] *= numoperand
             elif op == '/':
                 self_copy.values[:, nvc] /= numoperand
+                self_copy.errors[:, nvc] /= numoperand
             else:
                 raise RuntimeError('unknown operand %s' % op)
             return self_copy  # in case of a numeric operand we are done
-
-
 
         # check if we have a proper rockpydata object for arithmetic operation
         if not isinstance(other, RockPyData):  # todo implement for floats
@@ -881,9 +882,9 @@ class RockPyData(object):
             raise ArithmeticError("'variable' columns do not match")
 
         # check if variables are unique in both objects
-        if len( self._find_duplicate_variable_rows()) > 0:
+        if len(self._find_duplicate_variable_rows()) > 0:
             raise ArithmeticError("%s has non unique variables" % self.__str__())
-        if len( other._find_duplicate_variable_rows()) > 0:
+        if len(other._find_duplicate_variable_rows()) > 0:
             raise ArithmeticError("%s has non unique variables" % other.__str__())
 
         # check if remaining columns for matching pairs, only those will be subtracted and returned

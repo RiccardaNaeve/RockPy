@@ -40,6 +40,8 @@ def test():
 
 
 
+
+
     #plt.plot(m.data['field'].v, m.data['m'].v)
     #plt.show()
 

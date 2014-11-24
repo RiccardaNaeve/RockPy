@@ -9,6 +9,7 @@ from RockPy.Structure.data import RockPyData
 
 general.create_logger('RockPy.SAMPLE')
 
+
 class Sample():
     """
     Sample in a way a container for measurements
@@ -81,6 +82,7 @@ class Sample():
                 'height': {'none': {0: [<RockPy.Measurements.parameters.Height object at 0x10e1bda50>]}}}
 
     """
+
     def __init__(self, name,
                  mass=1, mass_unit='kg', mass_machine='generic',
                  height=1, diameter=1, length_unit='mm', length_machine='generic',
@@ -209,11 +211,34 @@ class Sample():
         """
         returns a list of all ttypes
         """
-        out = [t for m in self.measurements for t in m.tdict]
+        out = [t for m in self.measurements for t in m.ttype_dict]
         return self.__sort_list_set(out)
 
     @property
-    def mdict(self):
+    def tvals(self):
+        """
+        returns a list of all ttypes
+        """
+        out = []
+        for m in self.measurements:
+            out.extend(m.tvals)
+        return self.__sort_list_set(out)
+
+    @property
+    def mtype_tdict(self):
+        """
+        dictionary with all measurement_types {mtype:[tretments to corresponding m]}
+        """
+        out = {}
+        for mtype in self.mtypes:
+            aux = []
+            for m in self.get_measurements(mtype=mtype):
+                aux.extend(m.treatments)
+            out.update({mtype: aux})
+        return out
+
+    @property
+    def mtype_dict(self):
         """
         dictionary with all measurement_types {mtype:[list of measurements]}
 
@@ -225,7 +250,7 @@ class Sample():
         return out
 
     @property
-    def tdict(self):
+    def ttype_dict(self):
         """
         dictionary with all treatment_types {ttype:[list of measurements]}
 
@@ -245,8 +270,18 @@ class Sample():
         return out
 
     @property
+    def mtype_ttype_mdict(self):
+        """
+        returns a dictionary of mtypes, with all ttypes in that mtype
+        """
+        out = {mtype: {ttype: self.get_measurements(mtype=mtype, ttype=ttype)
+        for ttype in self.ttypes}
+        for mtype in self.mtypes}
+        return out
+
+    @property
     def ttype_tval_dict(self):
-        out = {ttype: self.__sort_list_set([m.tdict[ttype].value for m in self.tdict[ttype]]) for ttype in self.ttypes}
+        out = {ttype: self.__sort_list_set([m.ttype_dict[ttype].value for m in self.ttype_dict[ttype]]) for ttype in self.ttypes}
         return out
 
     @property
@@ -260,32 +295,60 @@ class Sample():
 
     ''' FIND FUNCTIONS '''
 
-    def get_measurements(self, mtype=None, ttype=None, tval=None, **options):
+    def get_measurements(self, mtype=None, ttype=None, tval=None, tval_range=None, **options):
         """
         Returns a list of measurements of type = mtype
+
+        :tval_range: can be used to look up measurements within a certain range. if only one value is given,
+                     it is assumed to be an upper limit and the range is set to [0, tval_range]
+
+
         :param mtype:
         :return:
         """
         if not tval:
             tvalue = np.nan
         else:
-            tvalue = tval
-        self.log.debug('SEARCHING\t measurements with  << %s, %s, %.1f >>' % (mtype, ttype, tvalue))
+            if isinstance(tval, list):
+                tvalue = ''.join(map(str, tval))
+            else:
+                tvalue = str(tval)
+
+        self.log.debug('SEARCHING\t measurements with  << %s, %s, %s >>' % (mtype, ttype, tvalue))
 
         out = [m for m in self.measurements]
 
         if not mtype is None:
             out = [m for m in out if m.mtype == mtype]
+
         if not ttype is None:
-            out = [m for m in out if ttype in m.ttypes]
+            if isinstance(ttype, list):
+                out = [m for m in out for t in ttype if t in m.ttypes]
+            else:
+                out = [m for m in out if ttype in m.ttypes]
+
         if not tval is None:
-            out = [m for m in out if tval in m.tvals]
+            if isinstance(tval, list):
+                out = [m for m in out for val in tval if val in m.tvals]
+            else:
+                out = [m for m in out if tval in m.tvals]
+
+        if not tval_range is None:
+            if not isinstance(tval_range, list):
+                tval_range = [0, tval_range]
+            else:
+                if len(tval_range) == 1:
+                    tval_range = [0] + tval_range
+            out = [m for m in out for val in m.tvals
+                   if val <= max(tval_range)
+                   if val >= min(tval_range)]
 
         if len(out) == 0:
             self.log.error(
-                'UNKNOWN\t << %s, %s, %.1f >> or no measurement found for sample << %s >>' % (
+                'UNKNOWN\t << %s, %s, %s >> or no measurement found for sample << %s >>' % (
                     mtype, ttype, tvalue, self.name))
             return
+
         return out
 
     def get_measurements_with_treatment(self, ttype, **options):

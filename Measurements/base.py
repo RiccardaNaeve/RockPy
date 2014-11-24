@@ -14,6 +14,8 @@ from RockPy.Readin import *
 
 
 RP_functions.create_logger('RockPy.MEASUREMENT')
+
+
 class Measurement(object):
     """
 
@@ -44,6 +46,7 @@ class Measurement(object):
 
 
     """
+
     def __init__(self, sample_obj,
                  mtype, mfile, machine,
                  **options):
@@ -159,7 +162,7 @@ class Measurement(object):
                                     not i.endswith('generic')}
 
     # def __getattr__(self, name):
-    #     if name in self.result_methods:
+    # if name in self.result_methods:
     #         value = getattr(self, 'result_' + name)().v[0]
     #         return value
     #     else:
@@ -193,51 +196,6 @@ class Measurement(object):
             else:
                 self.machine_data = raw_data
 
-    def _get_treatment_from_suffix(self):
-        # todo next treatment
-        """
-        takes a given suffix and extracts treatment data-for quick assessment. For more treatment control
-        use add_treatment method.
-
-        suffix must be given in the form of
-            stype: s_value [s_unit] | next treatment...
-        :return:
-        """
-        if self.suffix:
-            s_type = self.suffix.split(':')[0]
-            if len(s_type) > 1:
-                s_value = float(self.suffix.split()[1])
-                try:
-                    s_unit = self.suffix.split('[')[1].strip(']')
-                except IndexError:
-                    s_unit = None
-                return s_type, s_value, s_unit
-        else:
-            return None
-
-    def _get_treatments_from_opt(self):
-        """
-        creates a list of treatments from the treatment option
-        :return:
-        """
-        if self._treatment_opt:
-            treatments = self._treatment_opt.replace(' ', '').split(';')  # split ; for multiple treatments
-            treatments = [i.split(',') for i in treatments]  # split , for type, value, unit
-            for i in treatments:
-                try:
-                    i[1] = float(i[1])
-                except:
-                    raise TypeError('%s can not be converted to float')
-        else:
-            treatments = None
-        return treatments
-
-    def _add_treatment_from_opt(self):
-        treatments = self._get_treatments_from_opt()
-
-        for t in treatments:
-            treatment = Treatments.base.Generic(ttype=t[0], value=t[1], unit=t[2])
-            self._treatments.append(treatment)
 
     def set_initial_state(self,
                           mtype, mfile, machine,  # standard
@@ -295,7 +253,7 @@ class Measurement(object):
         return self.__sort_list_set(out)
 
     @property
-    def tdict(self):
+    def ttype_dict(self):
         """
         dictionary of ttype: treatment}
         """
@@ -310,22 +268,13 @@ class Measurement(object):
         out = {i.ttype: {i.value: self} for i in self.treatments}
         return out
 
-    def _get_treatment(self, ttype=None, tval=None):
-        out = [t for t in treatments]
-        if ttype:
-            out = [t for t in out if t.ttype == ttype]
-        if tval:
-            out = [t for t in out if t.value == tval]
-
-    def _get_treatment_value(self, ttype):
-        if ttype in self.tdict:
-            out =  self.tdict[ttype].value
-            return out
 
     @property
     def data(self):
         return self._data
 
+    ### DATA RELATED
+    ### Calculation and parameters
     @property
     def generic(self):
         '''
@@ -333,7 +282,6 @@ class Measurement(object):
         it with standard parameters
         '''
         return self.result_generic()
-
 
     def result_generic(self, recalc=False):
         '''
@@ -347,7 +295,6 @@ class Measurement(object):
 
         self.calc_result(parameter, recalc)
         return self.results['generic']
-
 
     def calculate_generic(self, **parameter):
         '''
@@ -472,6 +419,66 @@ class Measurement(object):
         else:
             return True
 
+    ### TREATMENT RELATED
+
+    def _get_treatment_from_suffix(self):
+        # todo next treatment
+        """
+        takes a given suffix and extracts treatment data-for quick assessment. For more treatment control
+        use add_treatment method.
+
+        suffix must be given in the form of
+            stype: s_value [s_unit] | next treatment...
+        :return:
+        """
+        if self.suffix:
+            s_type = self.suffix.split(':')[0]
+            if len(s_type) > 1:
+                s_value = float(self.suffix.split()[1])
+                try:
+                    s_unit = self.suffix.split('[')[1].strip(']')
+                except IndexError:
+                    s_unit = None
+                return s_type, s_value, s_unit
+        else:
+            return None
+
+    def _get_treatments_from_opt(self):
+        """
+        creates a list of treatments from the treatment option
+        :return:
+        """
+        if self._treatment_opt:
+            treatments = self._treatment_opt.replace(' ', '').split(';')  # split ; for multiple treatments
+            treatments = [i.split(',') for i in treatments]  # split , for type, value, unit
+            for i in treatments:
+                try:
+                    i[1] = float(i[1])
+                except:
+                    raise TypeError('%s can not be converted to float')
+        else:
+            treatments = None
+        return treatments
+
+    def _add_treatment_from_opt(self):
+        treatments = self._get_treatments_from_opt()
+
+        for t in treatments:
+            treatment = Treatments.base.Generic(ttype=t[0], value=t[1], unit=t[2])
+            self._treatments.append(treatment)
+
+    def _get_treatment(self, ttype=None, tval=None):
+        out = [t for t in self.treatments]
+        if ttype:
+            out = [t for t in out if t.ttype == ttype]
+        if tval:
+            out = [t for t in out if t.value == tval]
+
+    def _get_treatment_value(self, ttype):
+        if ttype in self.ttype_dict:
+            out = self.ttype_dict[ttype].value
+            return out
+
 
     @classmethod
     def inheritors(cls):
@@ -492,3 +499,58 @@ class Measurement(object):
         :return:
         """
         return sorted(list(set(values)))
+
+    ### Normalize functions
+
+    def normalize(self, reference, rtype='mag', vval=None, norm_method='max'):
+        """
+        normalizes all available data to reference value, using norm_method
+        """
+        norm_factor = self._get_norm_factor(reference, rtype, vval, norm_method)
+
+        for name, data in self.data.iteritems():
+            var = data['variable']
+            data.data /= norm_factor
+            data['variable'] = var.v
+        return self
+
+    def _get_norm_factor(self, reference, rtype, vval, norm_method):
+        norm_factor = 1 #inititalize
+
+        if reference in self.data:
+            norm_factor = self._norm_method(norm_method, vval, rtype, self.data[reference])
+
+        if reference in  ['is', 'initial', 'initial_state']:
+            if self.initial_state:
+                norm_factor = self._norm_method(norm_method, vval, rtype, self.initial_state.data)
+
+        if reference == 'mass':
+            m = self.sample_obj.get_measurements(mtype='mass', ttype=self.ttypes, tval=self.tvals)
+            if m is None:
+                m = self.sample_obj.get_measurements(mtype='mass')
+            if isinstance(m, list):
+                m = m[0]
+            norm_factor = self._norm_method(norm_method, vval, rtype, m.data['mass'])
+
+        if isinstance(reference, float) or isinstance(reference, int):
+            norm_factor = reference
+
+        return norm_factor
+
+    def _norm_method(self, norm_method, vval, rtype, data):
+        methods = {'max': max,
+                   'min': min,
+                   # 'val': self.get_val_from_data,
+                   }
+
+        if not vval:
+            if not norm_method in methods:
+                raise NotImplemented('NORMALIZATION METHOD << %s >>' %norm_method)
+                return
+            else:
+                return methods[norm_method](data[rtype].v)
+
+        if vval:
+            idx = np.argmin(abs(data['variable'].v - vval))
+            out = data.filter_idx([idx])[rtype].v[0]
+            return out

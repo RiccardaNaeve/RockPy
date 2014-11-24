@@ -18,7 +18,7 @@ class Thellier(base.Measurement):
 
         # # ## initialize data
         self.standard_parameters['slope'] = {'t_min': 20, 't_max': 700, 'component': 'mag'}
-        self.steps = ['th', 'pt', 'ac', 'tr', 'ck', 'ptrm', 'sum', 'difference']
+        self.steps = ['nrm', 'th', 'pt', 'ac', 'tr', 'ck', 'ptrm', 'sum', 'difference']
         self._data = {i : getattr(self, i) for i in self.steps[:5]}
         for i in self.standard_parameters:
             if self.standard_parameters[i] is None:
@@ -54,6 +54,7 @@ class Thellier(base.Measurement):
                 self.__dict__[step].define_alias('m', ( 'x', 'y', 'z'))
                 self.__dict__[step] = self.__dict__[step].append_columns('mag', self.__dict__[step].magnitude('m'))
                 self.__dict__[step] = self.__dict__[step].sort('temp')
+                self.__dict__[step].define_alias('variable', 'temp')
             else:
                 self.__dict__[step] = None
 

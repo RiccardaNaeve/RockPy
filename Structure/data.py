@@ -9,6 +9,7 @@ import scipy.interpolate
 import itertools
 import re  # regular expressions
 from prettytable import PrettyTable
+from numbers import Number
 
 from RockPy.Structure import ureg
 from RockPy.Functions import general
@@ -763,15 +764,15 @@ class RockPyData(object):
 
     arithmetic operations (RockPyData object and number / array of numbers)
     =======================================================================
-    TODO:
     When an arithmetic operation of a RockPyData object and a simple number is requested, that operation will be applied
     to all non variable elements of the RockPyData object.
     e.g. A + 1, A * 2
 
     The length of a list of numbers must match the number of non variable columns in the RockPyData object.
-    Operation will be applied to all columns
+    Operation will be applied to all columns. For '+' and '-' errors will not be touched. For '*' and '-' errors will
+    be scaled with the values.
 
-    A 2D numpy array with one row or one column will be broadcasted to non-variable columns or rows
+
 
     Todo: what to do with errors?
     """
@@ -835,13 +836,39 @@ class RockPyData(object):
 
     def _arithmetic_op(self, other, op):
         """
-        looks for matching entries in the 'variable' aliased columns and for matching data columns
-        this is needed to prepare an arithmetic operation of two rockpydata objects
+        do arithmetic operation of two RockPyData objects or a RockPyData object and numbers
 
-        :param other: rockpydata
+        :param other: rockpydata, number, lit of numbers
         :param op: operand ('+','-','/','*')
         :return
         """
+
+        numoperand = None  # numeric operand
+        nvc = self.column_dict['dep_var']
+        if isinstance(other, Number):  # single number
+            numoperand = other
+        elif all(isinstance(o, Number) for o in _to_tuple(other)):  # array of numbers
+            na = _to_tuple(other)
+            if len(na) != len(nvc):  # check if number of array elements matches number of non variable columns
+                raise RuntimeError('number of elements in operand (%d) does not match number of non-variable columns (%d)' % (len(na), len(nvc)))
+            numoperand = np.array(na)
+
+        if numoperand is not None:  # simple numeric operation
+            self_copy = deepcopy(self)
+            if op == '+':
+                self_copy.values[:, nvc] += numoperand
+            elif op == '-':
+                self_copy.values[:, nvc] -= numoperand
+            elif op == '*':
+                self_copy.values[:, nvc] *= numoperand
+                self_copy.errors[:, nvc] *= numoperand
+            elif op == '/':
+                self_copy.values[:, nvc] /= numoperand
+                self_copy.errors[:, nvc] /= numoperand
+            else:
+                raise RuntimeError('unknown operand %s' % op)
+            return self_copy  # in case of a numeric operand we are done
+
         # check if we have a proper rockpydata object for arithmetic operation
         if not isinstance(other, RockPyData):  # todo implement for floats
             raise ArithmeticError('only rockpydata objects can be computed')
@@ -855,9 +882,9 @@ class RockPyData(object):
             raise ArithmeticError("'variable' columns do not match")
 
         # check if variables are unique in both objects
-        if len( self._find_duplicate_variable_rows()) > 0:
+        if len(self._find_duplicate_variable_rows()) > 0:
             raise ArithmeticError("%s has non unique variables" % self.__str__())
-        if len( other._find_duplicate_variable_rows()) > 0:
+        if len(other._find_duplicate_variable_rows()) > 0:
             raise ArithmeticError("%s has non unique variables" % other.__str__())
 
         # check if remaining columns for matching pairs, only those will be subtracted and returned
@@ -891,7 +918,6 @@ class RockPyData(object):
         rd1 = self.data[mridx[:, 0], :][:, mcidx[:, 0]][:, :, 0]
         rd2 = other.data[mridx[:, 1], :][:, mcidx[:, 1]][:, :, 0]
 
-
         # todo: care about errors
         if op == '+':
             result_data = rd1 + rd2
@@ -901,6 +927,8 @@ class RockPyData(object):
             result_data = rd1 * rd2
         elif op == '/':
             result_data = rd1 / rd2
+        else:
+            raise RuntimeError('unknown operand %s' % op)
 
         # todo: get column_names and units right
         results_rpd_data = np.append(results_variable, result_data, axis=1)  # variable columns + calculated data columns
@@ -942,16 +970,6 @@ class RockPyData(object):
         """
 
         return np.sum(np.abs(self[key].values) ** 2, axis=-1) ** (1. / 2)
-
-    def normalize(self, column_name, value=1.0):
-        """
-        return column data normalized to given value
-        e.g. d.normalize('X', 100)
-        """
-        if not self.column_exists(column_name):
-            raise IndexError
-        d = self[column_name].v
-        return d / np.max(d) * value
 
     """ METHODS returning OBJECTS """
 

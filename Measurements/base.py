@@ -14,7 +14,8 @@ from RockPy.Readin import *
 
 
 RP_functions.create_logger('RockPy.MEASUREMENT')
-
+# RockPy.Functions.general.create_logger(__name__)
+# log = logging.getLogger(__name__)
 
 class Measurement(object):
     """
@@ -273,6 +274,11 @@ class Measurement(object):
     def data(self):
         return self._data
 
+    # @data.setter
+    # def data(self, data):
+    #     for dtype in data:
+    #         setattr(self, dtype, data[dtype])
+    #
     ### DATA RELATED
     ### Calculation and parameters
     @property
@@ -505,6 +511,11 @@ class Measurement(object):
     def normalize(self, reference, rtype='mag', vval=None, norm_method='max'):
         """
         normalizes all available data to reference value, using norm_method
+
+        :reference: reference state, to which to normalize to e.g. 'NRM'
+        :rtype: component, if applicable. standard - 'mag'
+        :vval: variable value, if reference == value then it will search for the point closest to the vval
+        :norm_method: how the norm_factor is generated, could be min
         """
         norm_factor = self._get_norm_factor(reference, rtype, vval, norm_method)
 
@@ -521,7 +532,6 @@ class Measurement(object):
         if reference in  ['is', 'initial', 'initial_state']:
             if self.initial_state:
                 norm_factor = self._norm_method(norm_method, vval, rtype, self.initial_state.data)
-
         if reference == 'mass':
             m = self.sample_obj.get_measurements(mtype='mass', ttype=self.ttypes, tval=self.tvals)
             if m is None:

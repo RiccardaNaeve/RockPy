@@ -1,17 +1,18 @@
 __author__ = 'mike'
 import logging
 import csv
-
+from RockPy.Structure.data import condense
 from RockPy import Sample
 import RockPy.Functions.general
 import numpy as np
 
-RockPy.Functions.general.create_logger('RockPy')
 
+RockPy.Functions.general.create_logger(__name__)
+log = logging.getLogger(__name__)
 
 class SampleGroup(object):
     def __init__(self, sample_list=None, sample_file=None, **options):
-        self.log = logging.getLogger('RockPy.' + type(self).__name__)
+        self.log = log #logging.getLogger('RockPy.' + type(self).__name__)
         self.log.info('CRATING new << samplegroup >>')
 
         # ## initialize
@@ -403,20 +404,37 @@ class SampleGroup(object):
         average_sample = Sample(name = name)
         dict = self.mtype_ttype_tval_mdict
         data = {}
-        for ttype in dict[mtype]:
-            for tval in dict[mtype][ttype]:
-                for measurement in dict[mtype][ttype][tval]:
-                    m = measurement.normalize(reference=reference, rtype=rtype, vval=vval, norm_method=norm_method)
-                    for d in m.data:
-                        if not d in data:
-                            data[d]=[]
-                        data[d].append(m.data[d])
-        average_data = {}
-        for dtype in data:
-            var_list = self.__get_variable_list(data[dtype])
-            aux = [m.interpolate(var_list) for m in data[dtype] if len(var_list) > 1]
-            average_data.update({dtype:aux})
-        print average_data
+        for ttype in dict[mtype]: #cycle through treatments
+            data[ttype]={}
+            for tval in dict[mtype][ttype]: #cycle through treatment values
+                data[ttype][tval]={}
+                for measurement in dict[mtype][ttype][tval]: #cycle through all measurements & samples (all measurements with ttype = ttype & mtype = mtype)
+                    m = measurement.normalize(reference=reference, rtype=rtype, vval=vval, norm_method=norm_method) # normalize each individual measurement
+                    for d in m.data: # some measurements have multiple data sets, like hysteresis
+                        if not d in data[ttype][tval]:
+                            data[ttype][tval][d]=[]
+                        data[ttype][tval][d].append(m.data[d]) # store corresponding dataset in dictionary
+        # from pprint import pprint
+        # pprint(data)
+
+        for ttype in data:
+            for tval in data[ttype]:
+                average_data = {}
+                for dtype in data[ttype][tval]:
+                    var_list = self.__get_variable_list(data[ttype][tval][dtype])
+                    if len(var_list) > 1:
+                        aux = [m.interpolate(var_list) for m in data[ttype][tval][dtype]]
+                    else:
+                        aux = [m for m in data[ttype][tval][dtype]]
+                    aux = condense(aux)
+                    aux = aux.sort('temp')
+                    average_data.update({dtype:aux})
+                measurement = dict[mtype][ttype][tval][0]
+                average_measurement = measurement
+                average_measurement.data = average_data
+                average_sample.measurements.append(average_measurement)
+        return average_sample
+
 
     def __get_variable_list(self, rpdata_list):
         out = []

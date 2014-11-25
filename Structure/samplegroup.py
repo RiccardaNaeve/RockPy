@@ -61,6 +61,8 @@ class SampleGroup(object):
     def sample_list(self):
         return self.slist
 
+    ### components of container
+    #lists
     @property
     def slist(self):
         out = [self.samples[i] for i in sorted(self.samples.keys())]
@@ -68,7 +70,107 @@ class SampleGroup(object):
 
     @property
     def mtypes(self):
+        out = [sample.mtypes for sample in self.sample_list]
+        return self.__sort_list_set(out)
+
+    @property
+    def ttypes(self):
         out = []
+        for sample in self.sample_list:
+            out.extend(sample.ttypes)
+        return self.__sort_list_set(out)
+
+    @property
+    def tvals(self):
+        out = []
+        for sample in self.sample_list:
+            out.extend(sample.tvals)
+        return sorted(list(set(out)))
+
+    ### sample-stage
+    @property
+    def sname_mdict(self):
+        out = {s.name: s.mtype_dict for s in self.slist}
+        return out
+
+    @property
+    def sname_tdict(self):
+        out = {s.name: s.ttype_dict for s in self.slist}
+        return out
+
+    @property
+    def sname_tvals(self):
+        out = {s.name: s.tvals for s in self.slist}
+        return out
+
+    @property
+    def sname_mtype_ttype_tval_mdict(self):
+        out = {s.name: s.mtype_ttype_tval_dict for s in self.slist}
+        return out
+
+    ### measurement stage
+
+    #measurement: samples
+    @property
+    def mtype_sdict(self):
+        out = {mtype: self.get_samples(mtype=mtype) for mtype in self.mtypes}
+        return out
+
+    # mtype: ttypes
+    @property
+    def mtype_ttype_dict(self):
+        """
+        returns a list of tratment types within a certain measurement type
+        """
+        out = {}
+        for mtype in self.mtypes:
+            aux = []
+            for s in self.get_samples(mtype=mtype):
+                for t in s.mtype_tdict[mtype]:
+                    aux.extend([t.ttype])
+            out.update({mtype: self.__sort_list_set(aux)})
+        return out
+
+    @property
+    def mtype_ttype_mdict(self):
+        """
+        returns a list of tratment types within a certain measurement type
+        """
+        out = {}
+        for mtype in self.mtypes:
+            for s in self.get_samples(mtype=mtype):
+                for t in s.mtype_ttype_dict[mtype]:
+                    aux = {t: s.mtype_ttype_mdict[mtype][t]}
+            out.update({mtype: aux})
+        return out
+
+    @property
+    def mtype_ttype_sdict(self):
+        """
+        returns a list of tratment types within a certain measurement type
+        """
+        out = {}
+        for mtype in self.mtypes:
+            for s in self.get_samples(mtype=mtype):
+                for t in s.mtype_ttype_dict[mtype]:
+                    aux = {t: self.get_samples(mtype=mtype, ttype=t)}
+            out.update({mtype: aux})
+        return out
+
+    # mtype: tvals
+    @property
+    def mtype_tvals_dict(self):
+        """
+        returns a list of tratment types within a certain measurement type
+        """
+        out = {}
+        for mtype in self.mtypes:
+            aux = []
+            for s in self.get_samples(mtype=mtype):
+                for t in s.mtype_tdict[mtype]:
+                    aux.extend([t.value])
+            out.update({mtype: self.__sort_list_set(aux)})
+        return out
 
     @property
     def sample_names(self):
@@ -84,6 +186,50 @@ class SampleGroup(object):
                   self.treatment_types}
         return t_dict
 
+    @property
+    def ttype_dict(self):
+        """
+        returns all treatments and lust of values as dictionaty
+        """
+        t_dict = {i: {j: self._get_measurements_with_treatment(i, j) for j in self._get_all_treatment_values(i)} for i
+                  in
+                  self.ttypes}
+        return t_dict
+
+    @property
+    def sample_mtype_ttype_dict(self):
+        """
+        generates a dictionary with sample: measurement: treatment: treatment_value: measurement(sample, mtype, ttype, tval)
+        """
+        out = {name: object.mtype_ttype_tval_dict for name, object in self.samples.iteritems()}
+        return out
+
+    @property
+    def mtype_sample_dict(self):
+        out = {mtype : {sample.name: {ttype: {tval : sample.get_measurements(ttype=ttype, tval=tval, mtype=mtype)
+                                              for tval in sample.ttype_tval_dict[ttype]}
+                                 for ttype in sample.ttype_tval_dict}
+                        for sample in self.get_samples(mtype=mtype)}
+               for mtype in self.mtypes}
+        return out
+
+    @property
+    def mtype_ttype_sample_dict(self):
+        out = {mtype : {ttype: {sample.name: {tval : sample.get_measurements(ttype=ttype, tval=tval, mtype=mtype)
+                                     for tval in sample.ttype_tval_dict[ttype]}
+                            for sample in self.get_samples(mtype=mtype, ttype=ttype)}
+                     for ttype in self.ttypes}
+               for mtype in self.mtypes}
+        return out
+
+    @property
+    def mtype_ttype_tval_mdict(self):
+        out = {mtype: {ttype: {tval: self.get_measurements(ttype=ttype, tval=tval, mtype=mtype)
+                                             for tval in self.ttype_dict[ttype]
+        }
+                       for ttype in self.mtype_ttype_mdict[mtype]}
+               for mtype in self.mtypes}
+        return out
 
     @property
     def mtype_dict(self):
@@ -152,14 +298,6 @@ class SampleGroup(object):
         self.samples.update(other.samples)
         return self
 
-    def average_mtype(self, mtype):
-        try:
-            self.log.debug('AVERAGING: << %s >>' % type)
-            measurements = self.mtype_dict[mtype]
-            print measurements[0].tdict
-        except KeyError:
-            self.log.error('CANT find mtype: << %s >>' % type)
-
     def _mlist_to_tdict(self, mlist):
         """
         takes a list of measurements looks for common ttypes
@@ -170,7 +308,20 @@ class SampleGroup(object):
     def export_cryomag(self):
         raise NotImplemented()
 
-    def _get_sample(self, sname=None, mtype=None, ttype=None, tval=None):
+    def get_measurements(self, sname=None, mtype=None, ttype=None, tval=None, tval_range=None):
+        """
+        Wrapper, for finding measurements, calls get_samples first and sample.get_measurements
+        """
+        samples = self.get_samples(sname, mtype, ttype, tval, tval_range)
+        out = []
+        for sample in samples:
+            try:
+                out.extend(sample.get_measurements(mtype, ttype, tval, tval_range))
+            except TypeError:
+                pass
+        return out
+
+    def get_samples(self, sname=None, mtype=None, ttype=None, tval=None, tval_range=None):
         """
         Primary search function for all parameters
 
@@ -181,10 +332,18 @@ class SampleGroup(object):
             t_value = tval
 
         if sname:
-            try:
-                out = [self.samples[sname]]
-            except KeyError:
-                raise KeyError('RockPy.sample_group does not contain sample << %s >>' % sname)
+            if isinstance(sname, str):
+                try:
+                    out = [self.samples[sname]]
+                except KeyError:
+                    raise KeyError('RockPy.sample_group does not contain sample << %s >>' % sname)
+            if isinstance(sname, list):
+                out = []
+                for s in sname:
+                    try:
+                        out.append(self.samples[s])
+                    except KeyError:
+                        raise KeyError('RockPy.sample_group does not contain sample << %s >>' % s)
         else:
             out = self.sample_list
             if len(out) == 0:
@@ -192,21 +351,77 @@ class SampleGroup(object):
                 return
 
         if mtype:
-            out = [s for s in out if mtype in s.mtypes]
+            if isinstance(mtype, list):
+                out = [s for s in out for mt in mtype if mt in s.mtypes]
+            else:
+                out = [s for s in out if mtype in s.mtypes]
             if len(out) == 0:
                 raise KeyError('RockPy.sample_group does not contain sample with mtype: << %s >>' % mtype)
                 return
         if ttype:
-            out = [s for s in out if ttype in s.ttypes]
+            if isinstance(ttype, list):
+                out = [s for s in out for tt in ttype if tt in s.ttypes]
+            else:
+                out = [s for s in out if ttype in s.ttypes]
             if len(out) == 0:
                 raise KeyError('RockPy.sample_group does not contain sample with ttype: << %s >>' % ttype)
                 return
 
             if tval:
-                out = [s for s in out if tval in s.ttype_tval_dict[ttype]]
+                if isinstance(tval, list):
+                    out = [s for s in out for tv in tval if tv in s.ttype_tval_dict[ttype]]
+                else:
+                    out = [s for s in out if tval in s.ttype_tval_dict[ttype]]
                 if len(out) == 0:
                     raise KeyError('RockPy.sample_group does not contain sample with (ttype, tval) pair: << %s, %.2f >>' %(ttype ,t_value))
                     return
+
+            if tval_range:
+                if not isinstance(tval_range, list):
+                    tval_range = [0, tval_range]
+                else:
+                    if len(tval_range) == 1:
+                        tval_range = [0] + tval_range
+
+                out = [s for s in out for tv in s.ttype_tval_dict[ttype]
+                       if tv <= max(tval_range)
+                       if tv >= min(tval_range)]
+                if len(out) == 0:
+                    raise KeyError('RockPy.sample_group does not contain sample with (ttype, tval_range) pair: << %s, %.2f >>' %(ttype ,t_value))
+                    return
+
+
+
         if len(out) == 0:
             self.log.error('UNABLE to find sample with << %s, %s, %s, %.2f >>' % (sname, mtype, ttype, t_value))
+
         return out
+
+    def get_average_mtype_sample(self, mtype, reference, name = 'average_sample_group',
+                           rtype='mag', vval=None, norm_method='max'):
+
+        average_sample = Sample(name = name)
+        dict = self.mtype_ttype_tval_mdict
+
+        for ttype in dict[mtype]:
+            for tval in dict[mtype][ttype]:
+                for measurement in dict[mtype][ttype][tval]:
+                    m = measurement.normalize(reference=reference, rtype=rtype, vval=vval, norm_method=norm_method)
+                    for d in m.data:
+                        data = {d: m.data[d]}
+
+
+    def __get_variable_list(self, measurements):
+        out = []
+        for m in measurements:
+            for d in m.data:
+                out.extend(m.data[d]['variable'].v)
+        return self.__sort_list_set(out)
+
+    def __sort_list_set(self, values):
+        """
+        returns a sorted list of non duplicate values
+        :param values:
+        :return:
+        """
+        return sorted(list(set(values)))

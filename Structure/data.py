@@ -17,13 +17,33 @@ from RockPy.Functions import general
 general.create_logger(__name__)
 log = logging.getLogger(__name__)
 
-def _to_tuple( oneormoreitems):
-    '''
+
+def _to_tuple(oneormoreitems):
+    """
     convert argument to tuple of elements
     :param oneormoreitems: single number or string or list of numbers or strings
     :return: tuple of elements
-    '''
+    """
     return tuple(oneormoreitems) if hasattr(oneormoreitems, '__iter__') else (oneormoreitems, )
+
+
+def condense(listofRPD, substfunc='mean'):
+    """
+    condenses a list of RockPyData objects into single one
+    substfunc determines how this is done, default is "mean"
+    :param listofRPD: list of RockPyData object
+    :param substfunc: see eliminate_duplicate_variable_rows
+    :return: condensed RockPyData object
+    """
+    res = deepcopy(listofRPD[0])
+    for rpd in listofRPD[1:]:
+        res = res.append_rows(rpd, ignore_row_names=True)
+    # delete all unique variables
+    res = res.eliminate_unique_variable_rows()
+    # condense remaining rows
+    res = res.eliminate_duplicate_variable_rows(substfunc=substfunc)
+    return res
+
 
 class RockPyData(object):
     # todo units
@@ -47,12 +67,12 @@ class RockPyData(object):
 
     @staticmethod
     def _convert_to_2D(input, column=False):
-        '''
+        """
         convert given input to 2D numpy array
         :param input: array data consisting of values or errors
         :param column: if FALSE -> 1D data is treated as a single row, otherwise as single column
         :return: 2D numpy array, representing matrix of values or errors as used by RockPyData.data
-        '''
+        """
         # convert input data to a numpy array
         data = np.array(input, dtype=float)
 
@@ -72,12 +92,12 @@ class RockPyData(object):
 
     @staticmethod
     def _convert_to_data3D(input, column=False):
-        '''
+        """
         convert given data to 3D numpy array
         :param input: array data consisting of values (and errors)
         :param column: if FALSE -> 1D data is treated as a single row, otherwise as single column
         :return: 3D numpy array, representing matrix of values and errors as used by RockPyData.data
-        '''
+        """
         if input is None:
             return None
 
@@ -113,7 +133,7 @@ class RockPyData(object):
             :param values: numpy array with values
             :param errors: numpy array with error estimates
         """
-        #log.info( 'Creating new ' + type(self).__name__)
+        # log.info( 'Creating new ' + type(self).__name__)
 
         if type(column_names) is str:  # if we got a single string, convert it to tuple with one entry
             column_names = (column_names,)
@@ -141,7 +161,7 @@ class RockPyData(object):
         self._update_all_alias()
         self._define_alias_indices('variable', 0)
 
-        self.data = RockPyData._convert_to_data3D( data)
+        self.data = RockPyData._convert_to_data3D(data)
 
         if row_names is None:
             self._row_names = None  # don't use row names
@@ -177,10 +197,10 @@ class RockPyData(object):
                 self._column_dict[n] = (self._column_names.index(n),)
 
     def _update_all_alias(self):
-        '''
+        """
         update 'all' alias to comprise all columns
         :return: None
-        '''
+        """
         self._column_dict['all'] = tuple(range(self.column_count))
 
     @property
@@ -252,18 +272,18 @@ class RockPyData(object):
 
     @property
     def values(self):
-        '''
+        """
         get numeric values (without errors)
         :return: 2D numpy array of values
-        '''
-        return self.data[:, :, 0] # always return 2D data
+        """
+        return self.data[:, :, 0]  # always return 2D data
 
     @property  # alias for values
     def v(self):
-        '''
+        """
         get numeric values (without errors)
         :return: return self.values if more than one column, otherwise self.values.T[0]
-        '''
+        """
         return self.values.T[0] if self.data.shape[1] == 1 else self.values
 
     @values.setter
@@ -298,18 +318,18 @@ class RockPyData(object):
 
     @property
     def errors(self):
-        '''
+        """
         get numeric errors (no values)
         :return: 2D numpy array of erros
-        '''
+        """
         return self.data[:, :, 1]
 
     @property  # alias for errors
     def e(self):
-        '''
+        """
         get numeric errors
         :return: return self.errors if more than one column, otherwise self.errors.T[0]
-        '''
+        """
         return self.errors.T[0] if self.data.shape[1] == 1 else self.errors
 
     @errors.setter
@@ -375,7 +395,8 @@ class RockPyData(object):
 
         # if alias 'variable' was redefined, automatically update 'dep_var' alias to all other columns
         if alias_name == 'variable':
-            self._column_dict['dep_var'] = [i for i in range(self.column_count) if i not in self._keyseq2colseq('variable')]
+            self._column_dict['dep_var'] = [i for i in range(self.column_count) if
+                                            i not in self._keyseq2colseq('variable')]
 
     def append_columns(self, column_names, data=None):
         """
@@ -392,14 +413,13 @@ class RockPyData(object):
             if self.key_exists(n):
                 raise IndexError('column %s already exists' % n)
 
-        self_copy = deepcopy( self)
+        self_copy = deepcopy(self)
 
         # append new column names to the list
         self_copy._column_names.extend(column_names)
 
         # update internal column dictionary
         self_copy._update_column_dictionary(column_names)
-
 
         if data is None:
             # if there are no data, fill with NAN
@@ -420,7 +440,7 @@ class RockPyData(object):
         return self_copy
 
     def rename_column(self, old_cname, new_cname):
-        '''
+        """
         renames a column according to specified key
 
         .. code-block:: python
@@ -433,7 +453,7 @@ class RockPyData(object):
         :param old_key: str
         :param new_key: str
         :return: None
-        '''
+        """
 
         if self.column_exists(new_cname):
             raise KeyError('Column %s already exists.' % new_cname)
@@ -445,14 +465,14 @@ class RockPyData(object):
         self._update_column_dictionary(self._column_names)
 
     def append_rows(self, data, row_names=None, ignore_row_names=False):
-        '''
+        """
         append rows with data and optionally row_names
         :param data: can be either an 1-3 dim array or another RockPyData object with matching number of columns
         :param row_names: one or multiple row names matching the number of data rows. if data is another
                             RockPyData object, row labels will be taken from that
         :param ignore_row_names: if true, no row names will be appended in any case
         :return:
-        '''
+        """
         # check if we have another RockPyData object to append
         if isinstance(data, RockPyData):
             row_names = data.row_names
@@ -462,6 +482,7 @@ class RockPyData(object):
 
         if ignore_row_names:
             row_names = None
+            self._row_names = None
 
         if self.row_names is None and row_names is not None and self.row_count > 0:
             raise RuntimeError('cannot append rows with row_names to RockPyData object without row_names')
@@ -475,7 +496,8 @@ class RockPyData(object):
             return self  # do nothing
 
         if data.shape[1] != self.column_count:  # check if number of data columns match number of columns in rpd object
-            raise RuntimeError('column count (%i) of data does not match number of columns (%s)' % (data.shape[1], self.column_count))
+            raise RuntimeError(
+                'column count (%i) of data does not match number of columns (%s)' % (data.shape[1], self.column_count))
 
         row_names = _to_tuple(row_names)
 
@@ -493,29 +515,40 @@ class RockPyData(object):
         return self_copy
 
     def delete_rows(self, idx):
-        '''
+        """
         delete rows specified by idx
         :param idx: single index or list of numeric row indices
         :return: None
-        '''
-        self_copy = deepcopy( self)
+        """
+        self_copy = deepcopy(self)
         # delete rows from self_copy._data
-        self_copy._data = np.delete( self_copy._data, idx, axis=0)
+        self_copy._data = np.delete(self_copy._data, idx, axis=0)
         # delete corresponding row_names
         if self_copy.row_names is not None:
-            for i in sorted( _to_tuple( idx), reverse=True):
+            for i in sorted(_to_tuple(idx), reverse=True):
                 del self_copy.row_names[i]
         return self_copy
 
+    def _find_unique_variable_rows(self):
+        """
+        find rows with unique variables
+        :return: list of indices of rows with unique variables
+        """
+        dvr = self._find_duplicate_variable_rows()
+        # flatten structure to get list of duplicate row indices
+        dvr = [val for sublist in dvr for val in sublist]
+        return list(set(range(self.row_count)) - set(dvr))
+
     def _find_duplicate_variable_rows(self):
-        '''
+        """
         find rows with identical variables
         :return: list of arrays with indices of rows with identical variables
-        '''
+        """
 
         # create structured array
         a = self['variable'].v
-        varrows = np.ascontiguousarray(a).view(np.dtype((np.void,a.dtype.itemsize * (a.shape[1] if a.ndim == 2 else 1))))
+        varrows = np.ascontiguousarray(a).view(
+            np.dtype((np.void, a.dtype.itemsize * (a.shape[1] if a.ndim == 2 else 1))))
 
         # get unique elements of variable columns
         uar, inv = np.unique(varrows, return_index=False, return_inverse=True)
@@ -525,8 +558,11 @@ class RockPyData(object):
         # return only elements with more than one entry, i.e. duplicate row indices
         return [tuple(np.where(inv == i)[0]) for i in range(len(uar)) if len(np.where(inv == i)[0]) > 1]
 
+    def eliminate_unique_variable_rows(self):
+        return self.delete_rows(self._find_unique_variable_rows())
+
     def eliminate_duplicate_variable_rows(self, substfunc=None):
-        '''
+        """
         eliminate rows with non unique variables
         :param substfunc: deleted rows will be replaced by the result of this function
                     None: nothing, rows with identical variables are just deleted
@@ -536,7 +572,7 @@ class RockPyData(object):
                     'median': median value of all values removed values in each row, error is set to the standard deviation
                     'fist', 'last': first or last row with same variable
         :return: returns modified copy of RockPyData object
-        '''
+        """
 
         # find rows with identical variables
         dup = self._find_duplicate_variable_rows()
@@ -554,7 +590,7 @@ class RockPyData(object):
         return self_copy.delete_rows(list(itertools.chain.from_iterable(dup)))
 
     def interpolate(self, new_variables, method='interp1d', kind=None, substdupvarfunc='mean', includesourcedata=False):
-        '''
+        """
         interpolate existing data columns to new variables
         first duplicated variables are averaged to make interpolation unique
         :param new_variables: one or multiple values for which the data columns will be interpolated
@@ -565,7 +601,7 @@ class RockPyData(object):
         :param substdupvarfunc: substfunc for eliminated duplicated rows
         :param includesourcedata: if true, source data points within interpolation range will be included in result
         :return: new RockPyData object with the interpolated data
-        '''
+        """
 
         # average away duplicated variable rows and sort by variable
         rpd_copy = self.eliminate_duplicate_variable_rows(substfunc=substdupvarfunc).sort()
@@ -578,7 +614,8 @@ class RockPyData(object):
             log.info('INTERPOLATING to new variables (interp1d)')
 
             # get function to interpolate all columns
-            ipf = scipy.interpolate.interp1d(oldv, rpd_copy['dep_var'].values.T, kind=kind if kind is not None else 'linear', bounds_error=False, axis=1)
+            ipf = scipy.interpolate.interp1d(oldv, rpd_copy['dep_var'].values.T,
+                                             kind=kind if kind is not None else 'linear', bounds_error=False, axis=1)
 
             # calculate interpolated values for all dep_var columns
             interp_values = ipf(newv).T
@@ -591,7 +628,8 @@ class RockPyData(object):
             if includesourcedata:
                 # works only with single column variable!
                 srcdata = self.filter((self['variable'].v >= min(newv)) & (self['variable'].v <= max(newv)))
-                rpd_copy = rpd_copy.append_rows(srcdata, ignore_row_names=True)  # append original data to interpolated data
+                rpd_copy = rpd_copy.append_rows(srcdata,
+                                                ignore_row_names=True)  # append original data to interpolated data
 
             return rpd_copy
 
@@ -687,7 +725,7 @@ class RockPyData(object):
         # return appropriate columns from self.data numpy array
         # d = self.values[:, self._column_dict[key]]
         # if d.shape[1] == 1:
-        #    d = d.T[0]
+        # d = d.T[0]
         #return d
 
     def __setitem__(self, key, values):
@@ -724,10 +762,10 @@ class RockPyData(object):
         self.errors = None
 
     def cleardata(self):
-        '''
+        """
         clears all data, column structure stays unchanged
         :return:
-        '''
+        """
         self._data = None
         self._row_names = None
 
@@ -850,7 +888,9 @@ class RockPyData(object):
         elif all(isinstance(o, Number) for o in _to_tuple(other)):  # array of numbers
             na = _to_tuple(other)
             if len(na) != len(nvc):  # check if number of array elements matches number of non variable columns
-                raise RuntimeError('number of elements in operand (%d) does not match number of non-variable columns (%d)' % (len(na), len(nvc)))
+                raise RuntimeError(
+                    'number of elements in operand (%d) does not match number of non-variable columns (%d)' % (
+                        len(na), len(nvc)))
             numoperand = np.array(na)
 
         if numoperand is not None:  # simple numeric operation
@@ -904,7 +944,8 @@ class RockPyData(object):
                 mcidx = np.array([(self.column_names.index(n), other.column_names.index(cnames2[0])) for n in cnames1])
             else:
                 # none of the operands has only one column which does not match any column in the other operand
-                raise ArithmeticError("arithmetic operation failed since there are no matching columns and no operand with single data column")
+                raise ArithmeticError(
+                    "arithmetic operation failed since there are no matching columns and no operand with single data column")
 
         # get indices of matching 'variable' values
         d1 = self['variable'].values
@@ -912,7 +953,8 @@ class RockPyData(object):
         mridx = np.array(np.all((d1[:, None, :] == d2[None, :, :]), axis=-1).nonzero()).T
 
         result_c_names = self.column_names_from_key('variable') + self.column_indices_to_names(mcidx[:, 0])
-        results_variable = d1[mridx[:, 0], :]  # all columns of variable but only those lines which match in both rockpydata objects
+        results_variable = d1[mridx[:, 0],
+                           :]  # all columns of variable but only those lines which match in both rockpydata objects
 
         # data for calculation of both objects with reordered columns according to mcidx
         rd1 = self.data[mridx[:, 0], :][:, mcidx[:, 0]][:, :, 0]
@@ -931,7 +973,8 @@ class RockPyData(object):
             raise RuntimeError('unknown operand %s' % op)
 
         # todo: get column_names and units right
-        results_rpd_data = np.append(results_variable, result_data, axis=1)  # variable columns + calculated data columns
+        results_rpd_data = np.append(results_variable, result_data,
+                                     axis=1)  # variable columns + calculated data columns
 
         return RockPyData(column_names=result_c_names, row_names=None, data=results_rpd_data)
 
@@ -1037,29 +1080,29 @@ class RockPyData(object):
         return self.filter(tf_array)
 
     def filter_row_names(self, row_names, invert=False):
-        '''
+        """
         extract rows that match the specified row_names
         :return:
-        '''
-        if self.row_names is None:
-            raise RuntimeError( 'no row names in RockPyData object')
-        return self.filter_idx([i for i,x in enumerate( self.row_names) if x in _to_tuple( row_names)], invert=invert)
-
-    def filter_match_row_names(self, regex):
-        '''
-        extract rows with labels matching regex
-        :return:
-        '''
+        """
         if self.row_names is None:
             raise RuntimeError('no row names in RockPyData object')
-        return self.filter([bool(re.match( regex, rn)) for rn in self.row_names])
+        return self.filter_idx([i for i, x in enumerate(self.row_names) if x in _to_tuple(row_names)], invert=invert)
+
+    def filter_match_row_names(self, regex):
+        """
+        extract rows with labels matching regex
+        :return:
+        """
+        if self.row_names is None:
+            raise RuntimeError('no row names in RockPyData object')
+        return self.filter([bool(re.match(regex, rn)) for rn in self.row_names])
 
     def _multirow_op(self, kind):
-        '''
+        """
         calculate result row out of existing rows
         :param kind: kind of operation
         :return: RockPyData object with results
-        '''
+        """
         if kind == 'mean':
             val = np.nanmean(self.values, axis=0)[np.newaxis, :, np.newaxis]
             err = np.nanstd(self.values, axis=0)[np.newaxis, :, np.newaxis]
@@ -1085,6 +1128,7 @@ class RockPyData(object):
 
         data = np.concatenate((val, err), axis=2)
 
+        row_name = None
         if self.row_names is not None:
             row_name = kind + '_' + '_'.join(self.row_names)
         rpd = RockPyData(self.column_names, row_names=row_name, units=self.unitstrs, data=data)
@@ -1094,53 +1138,52 @@ class RockPyData(object):
         return rpd
 
     def mean(self):
-        '''
+        """
         calculate mean values for each column and return as new RockPyData object
         standard deviations are set as errors
         :return: RockPyData object
-        '''
+        """
         return self._multirow_op('mean')
 
     def median(self):
-        '''
+        """
         calculate median values for each column and return as new RockPyData object
         standard deviations are set as errors
         :return: RockPyData object
-        '''
+        """
         return self._multirow_op('median')
 
     def min(self):
-        '''
+        """
         calculate minimum values for each column and return as new RockPyData object
         errors are propagated
         :return: RockPyData object
-        '''
+        """
         return self._multirow_op('min')
 
     def max(self):
-        '''
+        """
         calculate maximum values for each column and return as new RockPyData object
         errors are propagated
         :return: RockPyData object
-        '''
+        """
         return self._multirow_op('max')
 
     def first(self):
-        '''
+        """
         get first row and return as new RockPyData object
         errors are propagated
         :return: RockPyData object
-        '''
+        """
         return self._multirow_op('first')
 
     def last(self):
-        '''
+        """
         get first row and return as new RockPyData object
         errors are propagated
         :return: RockPyData object
-        '''
+        """
         return self._multirow_op('last')
-
 
 
     def sort(self, key='variable'):
@@ -1162,11 +1205,11 @@ class RockPyData(object):
         :return: new RockPyData object with reordered rows
         """
 
-        self_copy = deepcopy( self)
+        self_copy = deepcopy(self)
 
         data = self[key].values
         sortidx = np.lexsort(data.T, axis=0)  # get indices of ordered rows
-        self_copy._data = self_copy.data[ sortidx]  # reorder rows according to sorted indices
+        self_copy._data = self_copy.data[sortidx]  # reorder rows according to sorted indices
 
         if self_copy.row_names is not None:
             self_copy._row_names = [self_copy.row_names[i] for i in sortidx]  # reorder row names in the same manner
@@ -1230,9 +1273,11 @@ class RockPyData(object):
         y = self[dependent_var].v
 
         # aux = [[x[i], (y[i - smoothing] - y[i + smoothing]) / (x[i - smoothing] - x[i + smoothing])] for i in
-        #        range(smoothing, len(x) - smoothing)]
+        # range(smoothing, len(x) - smoothing)]
 
-        aux = [[(x[i-smoothing]+x[i+1+smoothing])/2., (y[i-smoothing]-y[i+1+smoothing]) / (x[i-smoothing]-x[i+1+smoothing])] for i in range(smoothing, len(x)-1-smoothing)]
+        aux = [[(x[i - smoothing] + x[i + 1 + smoothing]) / 2.,
+                (y[i - smoothing] - y[i + 1 + smoothing]) / (x[i - smoothing] - x[i + 1 + smoothing])] for i in
+               range(smoothing, len(x) - 1 - smoothing)]
         aux = np.array(aux)
 
         out = RockPyData(column_names=[independent_var, dependent_var],

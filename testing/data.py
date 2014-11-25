@@ -1,6 +1,6 @@
 __author__ = 'wack'
 
-from RockPy.Structure.data import RockPyData
+from RockPy.Structure.data import RockPyData, condense
 
 
 # script to test data objects
@@ -11,11 +11,11 @@ from copy import deepcopy
 
 def test():
     # define some data for testing
-    testdata = ( (1, 2, 3, 4),
+    testdata = ((1, 2, 3, 4),
                  (2, 6, 7, 8),
                  (9, 10, 11, 12))
 
-    testdata2 = ( (1, 1),
+    testdata2 = ((1, 1),
                  (2, 2),
                  (19, 3))
 
@@ -24,6 +24,7 @@ def test():
                    units=('T', 'mT', 'fT', 'pT'), data=testdata)
 
     #d = d.eliminate_duplicate_variable_rows(substfunc='last')
+    #print d._find_unique_variable_rows()
     print('d:\n%s' % d)
 
     e = RockPyData(column_names=('F', 'Mx'), row_names=('1.Zeile', '2.Zeile', '3.Zeile'),
@@ -125,8 +126,11 @@ def test():
     print d + (1, 2, 3, 4, 5, 6)
 
     print d.interpolate(np.arange(2, 10, .5), includesourcedata=True)
-    d.define_alias('variable', 'Mx')
-    print d.interpolate(np.arange(0, 10, .5))
+    #d.define_alias('variable', 'Mx')
+    #print d.interpolate(np.arange(0, 10, .5))
+
+    print "condense:"
+    print condense([d, d*2, d*3], substfunc='median')
 
 if __name__ == '__main__':
     test()

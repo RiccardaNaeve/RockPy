@@ -14,6 +14,10 @@ class CryoMag(base.Machine):
         d = np.array(self.raw_data[2:])
         self.float_data_idx = [7, 12, 13, 14, 16]#, 1, 2, 3, 4, 5, 6, 17, 18, 19, 20
         self.time_idx = 10
+
+        if sample_name == 'test_sample':
+            sample_name = self.samples[0]
+
         self.sample_idx = [i for i, v in enumerate(d[:, 0]) if
                            v == sample_name or sample_name in d[i, 9]]
         self.results_idx = [i for i, v in enumerate(d[:, 11]) if v == 'results' and i in self.sample_idx]
@@ -50,6 +54,7 @@ class CryoMag(base.Machine):
         data = map(self.convert_time, data)
         return np.array(data)
 
+    @property
     def samples(self):
         samples = np.array(self.raw_data[2:])[:, 0]
         return samples

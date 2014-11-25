@@ -19,7 +19,7 @@ class Thellier(base.Measurement):
         # # ## initialize data
         self.standard_parameters['slope'] = {'t_min': 20, 't_max': 700, 'component': 'mag'}
         self.steps = ['nrm', 'th', 'pt', 'ac', 'tr', 'ck', 'ptrm', 'sum', 'difference']
-        self._data = {i : getattr(self, i) for i in self.steps[:5]}
+        self._data = {i: getattr(self, i) for i in self.steps[:5]}
         for i in self.standard_parameters:
             if self.standard_parameters[i] is None:
                 self.standard_parameters[i] = self.standard_parameters['slope']
@@ -39,15 +39,19 @@ class Thellier(base.Measurement):
         self.all_data = RockPyData(column_names=self.machine_data.float_header,
                                    data=data,
                                    row_names=row_labels)
+
         self.all_data.rename_column('step', 'temp')
         self.all_data.append_columns('time', self.machine_data.get_time_data())
         nrm_idx = [i for i, v in enumerate(steps) if v == 'nrm']
+
         self.machine_data.get_time_data()
         # generating the palint data for all steps
         for step in ['nrm', 'th', 'pt', 'ac', 'tr', 'ck']:
             idx = [i for i, v in enumerate(steps) if v == step]
             if step in ['th', 'pt']:
                 idx.append(nrm_idx[0])
+            if step == 'nrm' and len(idx) == 0:
+                idx = [i for i, v in enumerate(steps) if v == 'th'][0]
             if len(idx) != 0:
                 self.__dict__[step] = self.all_data.filter_idx(idx)  # finding step_idx
                 self.__dict__[step] = self.__dict__[step].eliminate_duplicate_variable_rows(substfunc='last')

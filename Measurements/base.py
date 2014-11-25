@@ -509,9 +509,7 @@ class Measurement(object):
         norm_factor = self._get_norm_factor(reference, rtype, vval, norm_method)
 
         for name, data in self.data.iteritems():
-            var = data['variable']
-            data.data /= norm_factor
-            data['variable'] = var.v
+            self.data[name] = data / norm_factor
         return self
 
     def _get_norm_factor(self, reference, rtype, vval, norm_method):

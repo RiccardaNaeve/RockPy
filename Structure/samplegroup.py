@@ -402,20 +402,26 @@ class SampleGroup(object):
 
         average_sample = Sample(name = name)
         dict = self.mtype_ttype_tval_mdict
-
+        data = {}
         for ttype in dict[mtype]:
             for tval in dict[mtype][ttype]:
                 for measurement in dict[mtype][ttype][tval]:
                     m = measurement.normalize(reference=reference, rtype=rtype, vval=vval, norm_method=norm_method)
                     for d in m.data:
-                        data = {d: m.data[d]}
+                        if not d in data:
+                            data[d]=[]
+                        data[d].append(m.data[d])
+        average_data = {}
+        for dtype in data:
+            var_list = self.__get_variable_list(data[dtype])
+            aux = [m.interpolate(var_list) for m in data[dtype] if len(var_list) > 1]
+            average_data.update({dtype:aux})
+        print average_data
 
-
-    def __get_variable_list(self, measurements):
+    def __get_variable_list(self, rpdata_list):
         out = []
-        for m in measurements:
-            for d in m.data:
-                out.extend(m.data[d]['variable'].v)
+        for rp in rpdata_list:
+            out.extend(rp['variable'].v)
         return self.__sort_list_set(out)
 
     def __sort_list_set(self, values):

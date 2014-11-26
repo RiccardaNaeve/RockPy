@@ -47,6 +47,7 @@ def condense(listofRPD, substfunc='mean'):
 
 class RockPyData(object):
     # todo units
+    # todo fill column, so you can do append column -> fill column with single value e.g. for treatments
     """
     class to manage specific numeric data based on a numpy array
     e.g. d = rockpydata( column_names=( 'F','Mx', 'My', 'Mz'))
@@ -404,7 +405,9 @@ class RockPyData(object):
         :param column_names: list(str)
         :param data: array fo values (and errors) for the new columns
         :return: new RockPyData object with appended data
+
         """
+        #todo units
 
         column_names = _to_tuple(column_names)
 

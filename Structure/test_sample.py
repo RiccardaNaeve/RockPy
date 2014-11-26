@@ -72,7 +72,7 @@ class TestSample(TestCase):
         self.assertEqual(self.sample.mtype_tdict.keys(), ['diameter', 'mass', 'height'])
 
     def test_mtype_dict(self):
-        print self.sample.mtype_dict
+        print self.sample.mtype_mdict
         self.assertEqual(self.sample.mtype_tdict.keys(), ['diameter', 'mass', 'height'])
     #
     # def test_ttype_dict(self):

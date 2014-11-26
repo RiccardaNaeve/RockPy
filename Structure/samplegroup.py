@@ -91,7 +91,7 @@ class SampleGroup(object):
     ### sample-stage
     @property
     def sname_mdict(self):
-        out = {s.name: s.mtype_dict for s in self.slist}
+        out = {s.name: s.mtype_mdict for s in self.slist}
         return out
 
     @property
@@ -106,7 +106,7 @@ class SampleGroup(object):
 
     @property
     def sname_mtype_ttype_tval_mdict(self):
-        out = {s.name: s.mtype_ttype_tval_dict for s in self.slist}
+        out = {s.name: s.mtype_ttype_tval_mdict for s in self.slist}
         return out
 
     ### measurement stage
@@ -202,7 +202,7 @@ class SampleGroup(object):
         """
         generates a dictionary with sample: measurement: treatment: treatment_value: measurement(sample, mtype, ttype, tval)
         """
-        out = {name: object.mtype_ttype_tval_dict for name, object in self.samples.iteritems()}
+        out = {name: object.mtype_ttype_tval_mdict for name, object in self.samples.iteritems()}
         return out
 
     @property

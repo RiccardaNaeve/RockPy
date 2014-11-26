@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 import RockPy as rp
 import RockPy.Functions
 from matplotlib.lines import Line2D
+import copy
 
 
 class Generic(object):
@@ -20,7 +21,6 @@ class Generic(object):
                  create_fig=True, create_ax=True,
                  **options):
         self.log = logging.getLogger('RockPy.VISUALIZE.' + type(self).__name__)
-
 
         if plt_opt is None: plt_opt = {}
 
@@ -101,6 +101,7 @@ class Generic(object):
     def folder(self, folder):
         if folder is None:
             from os.path import expanduser
+
             self._folder = expanduser("~") + '/Desktop/'
         else:
             self._folder = folder
@@ -217,9 +218,40 @@ class Generic(object):
         for ax in self.fig.get_axes():
             self.setAxLinesBW(ax)
 
-    @property
-    def title(self):
-        return self._title
+
+    def _treatment_variable_transformation(self, sample_obj, mtype, ttype):
+        mdict = sample_obj.mtype_ttype_tval_mdict[mtype][ttype]
+        var_vals = self.get_common_variables_from_treatments(mdict)
+        out = {}
+        for tval in sorted(mdict):
+            for measure in mdict[tval]:
+                for dtype in measure.data:
+                    if not dtype in out:
+                        out[dtype] = copy.deepcopy(measure.data[dtype])
+                    else:
+                        aux = copy.deepcopy(measure.data[dtype])
+                        out[dtype] = out[dtype].append_rows(aux)
+        return out
+
+    def get_common_variables_from_treatments(self, mdict):
+        var_vals = {}
+        for tval in mdict:
+            for measure in mdict[tval]:
+                for dtype in measure.data:
+                    if not dtype in var_vals:
+                        var_vals[dtype] = set(measure.data[dtype]['variable'].v)
+                    var_vals[dtype] = var_vals[dtype].intersection(set(measure.data[dtype]['variable'].v))
+
+        # convert sets to sorted lists
+        for dtype in var_vals:
+            var_vals[dtype] = sorted(list(var_vals[dtype]))
+
+        return var_vals
+
+
+    # @property
+    # def title(self):
+    # return self._title
 
     @title.setter
     def title(self, text):

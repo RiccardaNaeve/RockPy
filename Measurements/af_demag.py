@@ -22,25 +22,25 @@ class AfDemag(base.Measurement):
         self.mag_method = mag_method
 
     def format_jr6(self):
-        self.data = RockPyData(column_names=['field', 'x', 'y', 'z'], data=self.machine_data.out_afdemag())
-        self.data.define_alias('m', ( 'x', 'y', 'z'))
-        self.data = self.data.append_columns('mag', self.data.magnitude('m'))
+        self._data = RockPyData(column_names=['field', 'x', 'y', 'z'], data=self.machine_data.out_afdemag())
+        self._data.define_alias('m', ( 'x', 'y', 'z'))
+        self._data = self._data.append_columns('mag', self._data.magnitude('m'))
 
     def format_sushibar(self):
-        self.data = RockPyData(column_names=['field', 'x', 'y', 'z'],
+        self._data = RockPyData(column_names=['field', 'x', 'y', 'z'],
                                data=self.machine_data.out_afdemag())  # , units=['mT', 'Am^2', 'Am^2', 'Am^2'])
-        self.data.define_alias('m', ( 'x', 'y', 'z'))
-        self.data = self.data.append_columns('mag', self.data.magnitude('m'))
+        self._data.define_alias('m', ( 'x', 'y', 'z'))
+        self._data = self._data.append_columns('mag', self._data.magnitude('m'))
 
     def format_cryomag(self):
-        self.data = RockPyData(column_names=self.machine_data.float_header,
+        self._data = RockPyData(column_names=self.machine_data.float_header,
                                data=self.machine_data.get_float_data())
         if self.demag_type != 'af3':
             idx = [i for i, v in enumerate(self.machine_data.steps) if v == self.demag_type]
-            self.data = self.data.filter_idx(idx)
-        self.data.define_alias('m', ( 'x', 'y', 'z'))
-        self.data = self.data.append_columns('mag', self.data.magnitude('m'))
-        self.data.rename_column('step', 'field')
+            self._data = self._data.filter_idx(idx)
+        self._data.define_alias('m', ( 'x', 'y', 'z'))
+        self._data = self._data.append_columns('mag', self._data.magnitude('m'))
+        self._data.rename_column('step', 'field')
 
     def result_mdf(self, component='mag', interpolation='linear', recalc=False):
         """
@@ -63,7 +63,7 @@ class AfDemag(base.Measurement):
     def calculate_mdf(self, **parameter):
 
         component = parameter.get('component', 'mag')
-        data = self.data  # normalize data #todo replace with normalize function
+        data = self._data  # normalize data #todo replace with normalize function
         data.define_alias('variable', component)
         data_max = max(data[component].v)
         data = data.sort('mag')
@@ -82,8 +82,8 @@ class AfDemag(base.Measurement):
         """
         from scipy.interpolate import UnivariateSpline
 
-        x_old = self.data[x_component].v  #
-        y_old = self.data[y_component].v
+        x_old = self._data[x_component].v  #
+        y_old = self._data[y_component].v
         smoothing_spline = UnivariateSpline(x_old, y_old, s=1)
 
         if not out_spline:
@@ -98,8 +98,8 @@ class AfDemag(base.Measurement):
 
         from scipy.interpolate import UnivariateSpline
 
-        x_old = self.data[x_component].v  #
-        y_old = self.data[y_component].v
+        x_old = self._data[x_component].v  #
+        y_old = self._data[y_component].v
         smoothing_spline = UnivariateSpline(x_old, y_old, s=1)
 
         if not out_spline:
@@ -112,12 +112,12 @@ class AfDemag(base.Measurement):
 
     def plt_afdemag(self, norm=False):
         if norm:
-            norm_factor = max(self.data['mag'])
+            norm_factor = max(self._data['mag'])
         else:
             norm_factor = 1
 
         plt.title('%s' % self.sample_obj.name)
-        plt.plot(self.data['field'].v, self.data['mag'].v / norm_factor, '.-')
+        plt.plot(self._data['field'].v, self._data['mag'].v / norm_factor, '.-')
         plt.xlabel('field [%s]' % 'mT')
         plt.ylabel('Moment [%s]' % 'Am^2')
         plt.grid()

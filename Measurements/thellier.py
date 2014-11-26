@@ -14,12 +14,19 @@ class Thellier(base.Measurement):
     def __init__(self, sample_obj,
                  mtype, mfile, machine,
                  **options):
-        super(Thellier, self).__init__(sample_obj, mtype, mfile, machine, **options)
+
 
         # # ## initialize data
-        self.standard_parameters['slope'] = {'t_min': 20, 't_max': 700, 'component': 'mag'}
         self.steps = ['nrm', 'th', 'pt', 'ac', 'tr', 'ck', 'ptrm', 'sum', 'difference']
-        self.reset__data()
+
+        ### SUPER
+        super(Thellier, self).__init__(sample_obj, mtype, mfile, machine, **options)
+
+        self.standard_parameters['slope'] = {'t_min': 20, 't_max': 700, 'component': 'mag'}
+
+        # self._data = {i: getattr(self, i) for i in self.steps[:5]}
+        # print self._data
+        # self.reset__data()
         for i in self.standard_parameters:
             if self.standard_parameters[i] is None:
                 self.standard_parameters[i] = self.standard_parameters['slope']
@@ -32,13 +39,8 @@ class Thellier(base.Measurement):
 
     @property
     def data(self):
-    #     ptrm = self._ptrm
-    #     sum = self._sum
-    #     difference = self._difference
-    #
-    #     self._data.update({'ptrm':ptrm,
-    #                        'sum':sum,
-    #                        'difference':difference})
+        if not hasattr(self, '_data'):
+            self.reset__data()
         return self._data
 
     @data.setter
@@ -77,15 +79,15 @@ class Thellier(base.Measurement):
             if step == 'nrm' and len(idx) == 0:
                 idx = [i for i, v in enumerate(steps) if v == 'th'][0]
             if len(idx) != 0:
-                self.__dict__[step] = self.all_data.filter_idx(idx)  # finding step_idx
-                self.__dict__[step] = self.__dict__[step].eliminate_duplicate_variable_rows(substfunc='last')
-                self.__dict__[step].define_alias('m', ( 'x', 'y', 'z'))
-                self.__dict__[step] = self.__dict__[step].append_columns('mag', self.__dict__[step].magnitude('m'))
-                self.__dict__[step] = self.__dict__[step].sort('temp')
-                self.__dict__[step].define_alias('variable', 'temp')
+                rp_data = self.all_data.filter_idx(idx)  # finding step_idx
+                rp_data = rp_data.eliminate_duplicate_variable_rows(substfunc='last')
+                rp_data.define_alias('m', ( 'x', 'y', 'z'))
+                rp_data = rp_data.append_columns('mag', rp_data.magnitude('m'))
+                rp_data = rp_data.sort('temp')
+                rp_data.define_alias('variable', 'temp')
+                setattr(self, step, rp_data)
             else:
-                self.__dict__[step] = None
-
+                setattr(self, step, None)
 
     @property
     def _ptrm(self):
@@ -157,7 +159,7 @@ class Thellier(base.Measurement):
             if o_len - len(idx) != 0:
                 self.log.info(
                     'DELETING << %i, %s >> entries for << %.2f >> temperature' % (o_len - len(idx), step, temp))
-                self.__dict__[step] = getattr(self, step).filter_idx(idx)
+                setattr(self, step, getattr(self, step).filter_idx(idx))
             else:
                 self.log.debug('UNABLE to find entriy for << %s, %.2f >> temperature' % (step, temp))
 

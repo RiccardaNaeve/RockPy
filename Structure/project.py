@@ -238,7 +238,7 @@ class Sample():
         return out
 
     @property
-    def mtype_dict(self):
+    def mtype_mdict(self):
         """
         dictionary with all measurement_types {mtype:[list of measurements]}
 
@@ -275,7 +275,7 @@ class Sample():
         returns a dictionary of mtypes, with all ttypes in that mtype
         """
         out = {mtype: {ttype: self.get_measurements(mtype=mtype, ttype=ttype)
-        for ttype in self.ttypes}
+        for ttype in self.mtype_ttype_dict[mtype]}
         for mtype in self.mtypes}
         return out
 
@@ -285,7 +285,7 @@ class Sample():
         return out
 
     @property
-    def mtype_ttype_tval_dict(self):
+    def mtype_ttype_tval_mdict(self):
         out = {mt:
                    {tt: {tv: self.get_measurements(mtype=mt, ttype=tt, tval=tv)
                          for tv in self.ttype_tval_dict[tt]}

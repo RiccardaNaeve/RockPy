@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import RockPy.Plotting
 from RockPy.Plotting import af_demagnetization
 import base
-
+import numpy as np
 
 class AfDemag(base.Generic):
     """
@@ -46,7 +46,6 @@ class AfDemag(base.Generic):
         smoothing = options.get('smoothing', 1)
         diff = options.get('diff', 1)
         shift = 0
-
         for sample, measurements in self.get_measurement_dict(mtype='afdemag').iteritems():
             for measurement in measurements:
                 plt_opt = self.get_plt_opt(sample, measurements, measurement)
@@ -73,13 +72,18 @@ class AfDemag(base.Generic):
         plt.grid()
 
     def get_norm_factor(self, measurement):
+
         if not self.norm:
             return [1, 1]
+
         if self.norm == 'max':
-            nf = max(measurement.data[self.component].v)
+            idx = np.argmax(abs(measurement.data[self.component].v))
+            nf = measurement.data[self.component].v[idx]
             return [1, nf]
+
         if self.norm == 'mass':
-            return [1, measurement.sample_obj.mass_kg.v]
+            # return [1, measurement.sample_obj.mass_kg.v]
+            return [1,1]
 
         if self.norm == 'is':
             if measurement.initial_state:

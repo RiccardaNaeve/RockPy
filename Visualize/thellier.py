@@ -65,8 +65,7 @@ class Sample_sheet(base.Generic):
         # thellier_objs = sample.get_measurements(mtype='thellier')
         # for thellier in thellier_objs:
         arai.Arai(sample, plot='get_ax', fig=self.fig, ax=self.arai)
-            # self.dunlop = arai.Arai(sample, plot='None', fig=self.fig, ax = self.arai).get_ax()
-
+        # self.dunlop = arai.Arai(sample, plot='None', fig=self.fig, ax = self.arai).get_ax()
 
 
 class Dunlop(base.Generic):
@@ -84,12 +83,12 @@ class Dunlop(base.Generic):
         """
 
         super(Dunlop, self).__init__(sample_list, norm=norm,
-                                           plot=plot, folder=folder, name=name,
-                                           plt_opt=plt_opt, style=style,
-                                           create_fig=True, create_ax=True,
-                                           **options)
+                                     plot=plot, folder=folder, name=name,
+                                     plt_opt=plt_opt, style=style,
+                                     create_fig=True, create_ax=True,
+                                     **options)
         self.component = component
-        self.title= 'Dunlop Plot %s' %self.sample_names
+        self.title = 'Dunlop Plot %s' % self.sample_names
         self.x_label = 'Temperature [C]'
         self.y_label = 'Moment'
 
@@ -109,11 +108,11 @@ class Dunlop(base.Generic):
 
     def get_norm_factor(self, measurement):
         implemented = {'is':
-        self._get_initial_state_normalizer}
+                           self._get_initial_state_normalizer}
         try:
             out = [1.0, implemented[self.norm](measurement)]
         except KeyError:
-            self.log.error('NORMALIZATION method << %s >> not implemented' %self.norm)
+            self.log.error('NORMALIZATION method << %s >> not implemented' % self.norm)
             out = [1.0, 1.0]
         return out
 
@@ -124,7 +123,6 @@ class Dunlop(base.Generic):
         if measurement.initial_state:
             out = measurement.initial_state.data[self.component].v
         return out
-
 
 
 class Dunlop_Treatments_Difference(base.Generic):
@@ -174,18 +172,21 @@ class Dunlop_Treatments_Difference(base.Generic):
         ax1_lines.append(sum_line)
         for i, tval in enumerate(sorted(d.keys())):
             self.markers[i] = '.'
-            self.markersizes[i] = 1+ tval * 5
-            ax1_lines.append((str(tval) +' GPa',{'color':'k', 'linestyle': self.linestyles[i],'marker': self.markers[i],
-                                         'markersize': self.markersizes[i]}))
+            self.markersizes[i] = 1 + tval * 5
+            ax1_lines.append(
+                (str(tval) + ' GPa', {'color': 'k', 'linestyle': self.linestyles[i], 'marker': self.markers[i],
+                                      'markersize': self.markersizes[i]}))
             for j, m in enumerate(d[tval]):
                 if m.mtype == 'thellier':
                     self.plt_opt.update({'linestyle': self.linestyles[i],
                                          'marker': self.markers[i],
                                          'markersize': self.markersizes[i]})
-                    norm_factor = [1, 1]#m.initial_state.data['mag'].v[0]]
-                    Plotting.dunlop.dunlop(self.ax1, thellier_obj=m, component=self.component, norm_factor=norm_factor, **self.plt_opt)
+                    norm_factor = [1, 1]  # m.initial_state.data['mag'].v[0]]
+                    Plotting.dunlop.dunlop(self.ax1, thellier_obj=m, component=self.component, norm_factor=norm_factor,
+                                           **self.plt_opt)
                     if self.std_fill:
-                        Plotting.dunlop.dunlop_std(self.ax1, thellier_obj=m, component=self.component, norm_factor=norm_factor, **self.plt_opt)
+                        Plotting.dunlop.dunlop_std(self.ax1, thellier_obj=m, component=self.component,
+                                                   norm_factor=norm_factor, **self.plt_opt)
 
         treats = sorted(d.keys())
         initial = min(treats)
@@ -202,36 +203,36 @@ class Dunlop_Treatments_Difference(base.Generic):
                 for b in B:
                     diff = (str(perm) + ' GPa', {'color': 'k', 'linestyle': '', 'marker': self.markers[i]})
                     ax2_lines.append(diff)
-                    norm_factor = [1, 1]#b.initial_state.data['mag'].v[0]]
+                    norm_factor = [1, 1]  # b.initial_state.data['mag'].v[0]]
 
                     self.plt_opt.update({'linestyle': self.linestyles[i],
                                          'marker': self.markers[i],
                                          'markersize': self.markersizes[i],
-                                         })
-                    Plotting.dunlop.difference(self.ax2, a, b, component=self.component,  norm_factor=norm_factor, **self.plt_opt)
+                    })
+                    Plotting.dunlop.difference(self.ax2, a, b, component=self.component, norm_factor=norm_factor,
+                                               **self.plt_opt)
 
                     if self.std_fill:
-                        Plotting.dunlop.difference_std(self.ax2, a, b, component=self.component,  norm_factor=norm_factor, **self.plt_opt)
-
+                        Plotting.dunlop.difference_std(self.ax2, a, b, component=self.component,
+                                                       norm_factor=norm_factor, **self.plt_opt)
 
         self.ax1.set_title('Dunlop %s' % self.sample_names)
         self.ax2.set_title('differences')
 
         # self.ax2.legend([self.create_dummy_line(**l[1]) for l in ax2_lines],
-        #                # Line titles
+        # # Line titles
         #                [l[0] for l in ax2_lines],
         #                loc='best'
         # )
         self.ax1.legend([self.create_dummy_line(**l[1]) for l in ax1_lines],
-                       # Line titles
-                       [l[0] for l in ax1_lines],
-                       loc='best',
-                       fontsize=8,
+                        # Line titles
+                        [l[0] for l in ax1_lines],
+                        loc='best',
+                        fontsize=8,
         )
         self.ax2.set_xlabel = 'Temperature [$^\\circ C$]'
         self.ax1.set_ylabel = 'Magnetic Moment'
         self.ax2.set_ylabel = 'M($P_0)-M($P_n$)'
-
 
 
 class Dunlop_Treatments_Derivative(base.Generic):
@@ -256,7 +257,7 @@ class Dunlop_Treatments_Derivative(base.Generic):
         self.std_fill = options.pop('std_fill', False)
         self.ttype = ttype
         self.component = component
-        self.fig = plt.figure(figsize=(11.69,8.27))
+        self.fig = plt.figure(figsize=(11.69, 8.27))
         self.ax1 = plt.subplot2grid((4, 1), (0, 0), rowspan=2)
         self.ax2 = plt.subplot2grid((4, 1), (2, 0), rowspan=2)
         self.show()
@@ -288,20 +289,21 @@ class Dunlop_Treatments_Derivative(base.Generic):
                     self.plt_opt.update({'linestyle': self.linestyles[i],
                                          'marker': self.markers[i],
                                          'markersize': self.markersizes[i]})
-                    norm_factor = [1, 1]# m.initial_state.data['mag'].v[0]]
+                    norm_factor = [1, 1]  # m.initial_state.data['mag'].v[0]]
                     Plotting.dunlop.dunlop(self.ax1, thellier_obj=m, component=self.component, norm_factor=norm_factor,
-                                  **self.plt_opt)
+                                           **self.plt_opt)
 
                     if self.std_fill:
-                        Plotting.dunlop.dunlop_std(self.ax1, thellier_obj=m, component=self.component, norm_factor=norm_factor,
-                                  **self.plt_opt)
+                        Plotting.dunlop.dunlop_std(self.ax1, thellier_obj=m, component=self.component,
+                                                   norm_factor=norm_factor,
+                                                   **self.plt_opt)
 
                     Plotting.dunlop.derivative(self.ax2, thellier_obj=m, component=self.component,
-                                      norm_factor=norm_factor, diff=1, interpolate=False,
-                                      **self.plt_opt)
+                                               norm_factor=norm_factor, diff=1, interpolate=False,
+                                               **self.plt_opt)
 
-        self.ax1.set_ylim([0,1.1])
-        self.ax2.set_xlim(self.ax1.get_xlim()) #ax1 & ax2 same xlim()
+        self.ax1.set_ylim([0, 1.1])
+        self.ax2.set_xlim(self.ax1.get_xlim())  # ax1 & ax2 same xlim()
         self.ax1.set_title('Dunlop %s' % self.sample_names)
         self.ax2.set_title('derivatives')
         self.ax1.set_xlabel('Temperature [$^\\circ C$]')
@@ -315,3 +317,27 @@ class Dunlop_Treatments_Derivative(base.Generic):
                         loc='best',
                         fontsize=10,
         )
+
+
+class Dunlop_vs_Treatment(base.Generic):
+    def __init__(self, sample_list, norm='mass',
+                 t_min=20, t_max=700, component='mag',
+                 line=True, check=True,
+                 plot='show', folder=None, name='arai plot',
+                 plt_opt=None, style='screen',
+                 **options):
+        """
+
+        implemented options:
+           arai_line: adds the line fit to the arai_plot
+
+        """
+
+        super(Dunlop_vs_Treatment, self).__init__(sample_list, norm=norm,
+                                                  plot=plot, folder=folder, name=name,
+                                                  plt_opt=plt_opt, style=style,
+                                                  create_fig=True, create_ax=True,
+                                                  **options)
+
+    def show(self):
+        pass

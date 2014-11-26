@@ -92,9 +92,6 @@ class Measurement(object):
         self._treatments = []
         self._treatment_opt = options.get('treatments', None)
 
-        if self._treatment_opt:
-            self._add_treatment_from_opt()
-
         ''' initial state '''
         self.is_machine_data = None  # returned data from Readin.machines()
         self.initial_state = None
@@ -162,6 +159,8 @@ class Measurement(object):
         self.standard_parameters = {i[10:]: None for i in dir(self) if i.startswith('calculate_') if
                                     not i.endswith('generic')}
 
+        if self._treatment_opt:
+            self._add_treatment_from_opt()
     # def __getattr__(self, name):
     # if name in self.result_methods:
     #         value = getattr(self, 'result_' + name)().v[0]
@@ -218,9 +217,7 @@ class Measurement(object):
         else:
             self.log.error('UNABLE to find measurement << %s >>' % (mtype))
 
-    def add_treatment(self, ttype, tvalue, comment=''):
-        treatment = Generic(ttype=ttype, value=tvalue, comment=comment)
-        self._treatments.append(treatment)
+
 
     @property
     def has_treatment(self):
@@ -274,11 +271,11 @@ class Measurement(object):
     def data(self):
         return self._data
 
-    # @data.setter
-    # def data(self, data):
-    #     for dtype in data:
-    #         setattr(self, dtype, data[dtype])
-    #
+    @data.setter
+    def data(self, data):
+        for dtype in data:
+            setattr(self, dtype, data[dtype])
+
     ### DATA RELATED
     ### Calculation and parameters
     @property
@@ -470,8 +467,7 @@ class Measurement(object):
         treatments = self._get_treatments_from_opt()
 
         for t in treatments:
-            treatment = Treatments.base.Generic(ttype=t[0], value=t[1], unit=t[2])
-            self._treatments.append(treatment)
+            self.add_treatment(ttype=t[0], tval=t[1], unit=t[2])
 
     def _get_treatment(self, ttype=None, tval=None):
         out = [t for t in self.treatments]
@@ -485,6 +481,15 @@ class Measurement(object):
             out = self.ttype_dict[ttype].value
             return out
 
+    def add_treatment(self, ttype, tval, unit=None, comment=''):
+        treatment = Treatments.Generic(ttype=ttype, value=tval, unit=unit, comment=comment)
+        self._treatments.append(treatment)
+        self._add_tval_to_data(treatment)
+
+    def _add_tval_to_data(self, tobj):
+        for dtype in self.data:
+            data = np.ones(len(self.data[dtype]['variable'].v))*tobj.value
+            self.data[dtype] = self.data[dtype].append_columns(column_names=tobj.ttype, data=data)#, unit=tobj.unit)
 
     @classmethod
     def inheritors(cls):

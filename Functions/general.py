@@ -14,7 +14,7 @@ def create_logger(name):
     # fh.setFormatter(formatter)
     # ch = logging.FileHandler('RPV3.log')
     ch = logging.StreamHandler()
-    ch.setLevel(logging.DEBUG)
+    ch.setLevel(logging.WARN)
     ch.setFormatter(formatter)
     # log.addHandler(fh)
     log.addHandler(ch)

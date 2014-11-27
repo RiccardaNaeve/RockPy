@@ -12,9 +12,10 @@ from matplotlib.lines import Line2D
 import copy
 
 
-class Generic(object):
-    RockPy.Functions.general.create_logger('RockPy.VISUALIZE')
+RockPy.Functions.general.create_logger('RockPy.VISUALIZE')
 
+
+class Generic(object):
     def __init__(self, sample_list, norm=None,
                  plot='show', folder=None, name=None,
                  plt_opt={}, style='screen',
@@ -22,34 +23,9 @@ class Generic(object):
                  **options):
         self.log = logging.getLogger('RockPy.VISUALIZE.' + type(self).__name__)
 
-        if plt_opt is None: plt_opt = {}
 
-        params = {'publication': {'backend': 'ps',
-                                  'text.latex.preamble': [r"\usepackage{upgreek}",
-                                                          r"\usepackage[nice]{units}"],
-                                  'axes.labelsize': 12,
-                                  'text.fontsize': 12,
-                                  'legend.fontsize': 8,
-                                  'xtick.labelsize': 10,
-                                  'ytick.labelsize': 10,
-                                  'text.usetex': True,
-                                  'axes.unicode_minus': True},
-
-                  'screen': {'axes.labelsize': 12,
-                             'text.fontsize': 12,
-                             'legend.fontsize': 8,
-                             'xtick.labelsize': 10,
-                             'ytick.labelsize': 10}}
-
-        self.colors = np.tile(['b', 'g', 'r', 'c', 'm', 'y', 'k'], 10)
-        self.linestyles = np.tile(['-', '--', ':', '-.'], 10)
-        self.markers = np.tile(['.', 'v', '^', '<', '>', '1', '2', '3', '4', '8', 's', 'p', '*', 'h',
-                                'H', '+', 'x', 'D', 'd', '|', '_'], 10)
-        self.markersizes = np.tile([5, 4, 4, 4, 4], 10)
 
         # plt.rcParams.update(params[style])
-        self.style = style
-        self.plt_opt = plt_opt
 
         # ## initialize
         self.fig = None
@@ -80,16 +56,18 @@ class Generic(object):
             self.ax = options.get('ax', plt.subplot2grid((1, 1), (0, 0), colspan=1, rowspan=1))
 
     @property
-    def title(self):
-        return type(self).__name__ + ' [' + ','.join(self.sample_names) + ']'
+    def plot_dict(self):
+        pdict = {'colors': np.tile(['b', 'g', 'r', 'c', 'm', 'y', 'k'], 10),
+                 'linestyles': np.tile(['-', '--', ':', '-.'], 10),
+                 'markers': np.tile(['.', 'v', '^', '<', '>', '1', '2', '3', '4', '8', 's', 'p', '*', 'h',
+                                     'H', '+', 'x', 'D', 'd', '|', '_'], 10),
+                 'markersizes': np.tile([5, 4, 4, 4, 4], 10)}
+        return pdict
+
 
     @property
     def sample_names(self):
         return self.sample_group.sample_names
-
-    @property
-    def sample_list(self):
-        return self.sample_group.sample_list
 
     @property
     def samples(self):
@@ -103,7 +81,6 @@ class Generic(object):
     def folder(self, folder):
         if folder is None:
             from os.path import expanduser
-
             self._folder = expanduser("~") + '/Desktop/'
         else:
             self._folder = folder
@@ -122,16 +99,6 @@ class Generic(object):
         if isinstance(s_list, rp.Sample):
             self.log.debug('CONVERTING sample -> list(sample) -> RockPy.SampleGroup(Sample)')
             self.sample_group = rp.SampleGroup(sample_list=[s_list])
-
-    def set_xlim(self, **options):
-        xlim = options.get('xlim', None)
-        if xlim is not None:
-            self.ax.set_xlim(xlim)
-
-    def set_ylim(self, **options):
-        ylim = options.get('ylim', None)
-        if ylim is not None:
-            self.ax.set_ylim(ylim)
 
     def out(self, *args):
         if not self.name:

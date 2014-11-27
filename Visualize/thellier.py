@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import base
 import arai
 from RockPy import Plotting
+import numpy as np
 
 
 class Sample_sheet(base.Generic):
@@ -139,14 +140,16 @@ class Dunlop_Treatments_Difference(base.Generic):
 
         """
 
-        super(Dunlop_Treatments, self).__init__(sample_list, norm=norm,
-                                                plot=plot, folder=folder, name=name,
-                                                plt_opt=plt_opt, style=style,
-                                                create_fig=True, create_ax=False,
-                                                **options)
+        super(Dunlop_Treatments_Difference, self).__init__(sample_list, norm=norm,
+                                                           plot=plot, folder=folder, name=name,
+                                                           plt_opt=plt_opt, style=style,
+                                                           create_fig=False, create_ax=False,
+                                                           **options)
         self.ttype = ttype
         self.component = component
         # self.fig = plt.figure()
+        self.fig = plt.figure(figsize=(11.69, 8.27))
+
         self.ax1 = plt.subplot2grid((4, 1), (0, 0), rowspan=2)
         self.ax2 = plt.subplot2grid((4, 1), (2, 0), rowspan=2)
         self.get_plot_options(**options)
@@ -221,8 +224,8 @@ class Dunlop_Treatments_Difference(base.Generic):
 
         # self.ax2.legend([self.create_dummy_line(**l[1]) for l in ax2_lines],
         # # Line titles
-        #                [l[0] for l in ax2_lines],
-        #                loc='best'
+        # [l[0] for l in ax2_lines],
+        # loc='best'
         # )
         self.ax1.legend([self.create_dummy_line(**l[1]) for l in ax1_lines],
                         # Line titles
@@ -279,6 +282,8 @@ class Dunlop_Treatments_Derivative(base.Generic):
         ax1_lines.append(sum_line)
 
         for i, tval in enumerate(sorted(d.keys())):
+            self.markers[i] = '.'
+            self.markersizes[i] = 1 + tval * 5
             ax1_lines.append(
                 (str(tval) + ' GPa', {'color': 'k', 'linestyle': self.linestyles[i], 'marker': self.markers[i],
                                       'markersize': self.markersizes[i]}))
@@ -302,7 +307,7 @@ class Dunlop_Treatments_Derivative(base.Generic):
                                                norm_factor=norm_factor, diff=1, interpolate=False,
                                                **self.plt_opt)
 
-        self.ax1.set_ylim([0, 1.1])
+        # self.ax1.set_ylim([0, 1.1])
         self.ax2.set_xlim(self.ax1.get_xlim())  # ax1 & ax2 same xlim()
         self.ax1.set_title('Dunlop %s' % self.sample_names)
         self.ax2.set_title('derivatives')
@@ -321,8 +326,7 @@ class Dunlop_Treatments_Derivative(base.Generic):
 
 class Dunlop_vs_Treatment(base.Generic):
     def __init__(self, sample_list, norm='mass',
-                 t_min=20, t_max=700, component='mag',
-                 line=True, check=True,
+                 ttype='pressure', component='mag',
                  plot='show', folder=None, name='arai plot',
                  plt_opt=None, style='screen',
                  **options):
@@ -332,12 +336,113 @@ class Dunlop_vs_Treatment(base.Generic):
            arai_line: adds the line fit to the arai_plot
 
         """
-
+        self.ttype = ttype
+        self.component = component
         super(Dunlop_vs_Treatment, self).__init__(sample_list, norm=norm,
                                                   plot=plot, folder=folder, name=name,
                                                   plt_opt=plt_opt, style=style,
-                                                  create_fig=True, create_ax=True,
+                                                  create_fig=False, create_ax=False,
                                                   **options)
+        self.fig = plt.figure(figsize=(11.69, 8.27))
+        self.th = plt.subplot2grid((6, 1), (0, 0), rowspan=2)
+        self.ptrm = plt.subplot2grid((6, 1), (2, 0), rowspan=2)
+        self.sum = plt.subplot2grid((6, 1), (4, 0), rowspan=2)
+        self.fig.suptitle(self.sample_names)
+        self.show(**options)
+        plt.tight_layout(rect=(0, 0, 0.9, 0.95))
+        self.out('no_legend')
 
-    def show(self):
-        pass
+    def show(self, **options):
+        plottable = ['th', 'ptrm', 'sum']
+
+        for sample in self.sample_list:
+            ddict = self._treatment_variable_transformation(sample, mtype='thellier', ttype=self.ttype)
+            for dtype, data in ddict.iteritems():
+                if dtype in plottable:
+                    values = sorted(list(set(data['variable'].v)))
+                    colors = self.create_heat_color_map(values)
+                    for varval in values:
+                        idx = np.where(data['variable'].v == varval)[0]
+                        plot_data = data.filter_idx(idx)
+                        getattr(self, dtype).plot(plot_data['ttype ' + self.ttype].v, plot_data[self.component].v,
+                                                  '-',
+                                                  color=colors[values.index(varval)],
+                                                  linewidth=0.5,
+                                                  label=varval)
+                        getattr(self, dtype).plot(plot_data['ttype ' + self.ttype].v, plot_data[self.component].v,
+                                                  '.',
+                                                  color=colors[values.index(varval)],
+                        )
+                        getattr(self, dtype).set_title(dtype)
+                        getattr(self, dtype).set_ylabel('M($P_n$) / M(TRM)')
+                        getattr(self, dtype).set_xlabel(self.ttype)
+                        getattr(self, dtype).set_xlim([0, 1.8])
+        self.th.legend(bbox_to_anchor=(1.01, -0.8, 0.3, 0.102), loc=3,
+                       ncol=1, mode="expand", borderaxespad=0., fontsize=10,
+                       frameon=False,
+        )
+
+
+class T0_vs_Tn(base.Generic):
+    def __init__(self, sample_list, norm='mass',
+                 ttype='pressure', component='mag',
+                 plot='show', folder=None, name='arai plot',
+                 plt_opt=None, style='screen',
+                 **options):
+        """
+
+        implemented options:
+           arai_line: adds the line fit to the arai_plot
+
+        """
+        self.ttype = ttype
+        self.component = component
+        super(T0_vs_Tn, self).__init__(sample_list, norm=norm,
+                                       plot=plot, folder=folder, name=name,
+                                       plt_opt=plt_opt, style=style,
+                                       create_fig=False, create_ax=False,
+                                       **options)
+        self.fig = plt.figure(figsize=(11.69, 5.8))
+        self.th = plt.subplot2grid((1, 2), (0, 0))
+        self.ptrm = plt.subplot2grid((1, 2), (0, 1))
+        self.fig.suptitle(self.sample_names)
+
+        self.show(**options)
+        plt.tight_layout()
+        self.out('no_legend')
+
+    def show(self, **options):
+        plottable = ['th', 'ptrm']
+
+        for sample in self.sample_list:
+            ddict = self._treatment_variable_transformation(sample, mtype='thellier', ttype=self.ttype)
+            for dtype, data in ddict.iteritems():
+                if dtype in plottable:
+                    values = sorted(list(set(data['variable'].v)))
+                    colors = self.create_heat_color_map(values)
+                    for varval in values:
+                        tvals = sorted(list(set(data['ttype ' + self.ttype].v)))
+                        for tval in tvals:
+                            idx0 = [i for i in range(len(data['variable'].v))
+                                    if data['ttype ' + self.ttype].v[i] == 0
+                                    if data['variable'].v[i] == varval]
+                            idxn = [i for i in range(len(data['variable'].v))
+                                    if data['ttype ' + self.ttype].v[i] == tval
+                                    if data['variable'].v[i] == varval]
+                            if idx0 and idxn:
+                                T0_data = data.filter_idx(idx0)
+                                Tn_data = data.filter_idx(idxn)
+                                getattr(self, dtype).plot(
+                                    Tn_data[self.component].v,
+                                    T0_data[self.component].v,
+                                    color=colors[values.index(varval)],
+                                    marker='.',
+                                    markersize=1 + tval * 7,
+                                    linestyle='',
+                                    # linewidth=0.5,
+                                    label=varval)
+                    getattr(self, dtype).set_title(dtype)
+                    getattr(self, dtype).set_ylabel('M($P_n$) / M(TRM)')
+                    getattr(self, dtype).set_xlabel('M($P_0$) / M(TRM)')
+                    getattr(self, dtype).grid()
+                    getattr(self, dtype).plot([0, 1.2], [0, 1.2], '--', color='#808080')

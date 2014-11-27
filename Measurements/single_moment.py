@@ -26,7 +26,13 @@ class generic_moment(base.Measurement):
         self._data.define_alias('m', ( 'x', 'y', 'z'))
         self._data = self._data.append_columns('mag', self._data.magnitude('m'))
 
-
+    def format_jr6(self):
+        data =  self.machine_data.get_data()
+        self._data = RockPyData(column_names=['x', 'y', 'z'],
+                                data=data,
+                                units=['A m^2', 'A m^2', 'A m^2'])
+        self._data.define_alias('m', ( 'x', 'y', 'z'))
+        self._data = self._data.append_columns('mag', self._data.magnitude('m'))
 
 class Irm(generic_moment):
     def __init__(self, sample_obj,

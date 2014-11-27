@@ -161,9 +161,10 @@ class Measurement(object):
 
         if self._treatment_opt:
             self._add_treatment_from_opt()
+
     # def __getattr__(self, name):
     # if name in self.result_methods:
-    #         value = getattr(self, 'result_' + name)().v[0]
+    # value = getattr(self, 'result_' + name)().v[0]
     #         return value
     #     else:
     #         try:
@@ -216,7 +217,6 @@ class Measurement(object):
             # self.initial_state = self.initial_state_obj.data
         else:
             self.log.error('UNABLE to find measurement << %s >>' % (mtype))
-
 
 
     @property
@@ -273,6 +273,7 @@ class Measurement(object):
 
     @data.setter
     def data(self, data):
+        print data.keys()
         for dtype in data:
             setattr(self, dtype, data[dtype])
 
@@ -488,8 +489,9 @@ class Measurement(object):
 
     def _add_tval_to_data(self, tobj):
         for dtype in self.data:
-            data = np.ones(len(self.data[dtype]['variable'].v))*tobj.value
-            self.data[dtype] = self.data[dtype].append_columns(column_names=tobj.ttype, data=data)#, unit=tobj.unit)
+            data = np.ones(len(self.data[dtype]['variable'].v)) * tobj.value
+            self.data[dtype] = self.data[dtype].append_columns(column_names='ttype ' + tobj.ttype,
+                                                               data=data)  #, unit=tobj.unit)
 
     @classmethod
     def inheritors(cls):
@@ -523,18 +525,21 @@ class Measurement(object):
         :norm_method: how the norm_factor is generated, could be min
         """
         norm_factor = self._get_norm_factor(reference, rtype, vval, norm_method)
-
         for name, data in self.data.iteritems():
+            ttypes = [i for i in data.column_names if 'ttype' in i]
             self.data[name] = data / norm_factor
+            if ttypes:
+                for tt in ttypes:
+                    self.data[name][tt] = np.ones(len(data['variable'].v))*self.ttype_dict[tt[6:]].value
         return self
 
     def _get_norm_factor(self, reference, rtype, vval, norm_method):
-        norm_factor = 1 #inititalize
+        norm_factor = 1  #inititalize
 
         if reference in self.data:
             norm_factor = self._norm_method(norm_method, vval, rtype, self.data[reference])
 
-        if reference in  ['is', 'initial', 'initial_state']:
+        if reference in ['is', 'initial', 'initial_state']:
             if self.initial_state:
                 norm_factor = self._norm_method(norm_method, vval, rtype, self.initial_state.data)
         if reference == 'mass':
@@ -554,11 +559,11 @@ class Measurement(object):
         methods = {'max': max,
                    'min': min,
                    # 'val': self.get_val_from_data,
-                   }
+        }
 
         if not vval:
             if not norm_method in methods:
-                raise NotImplemented('NORMALIZATION METHOD << %s >>' %norm_method)
+                raise NotImplemented('NORMALIZATION METHOD << %s >>' % norm_method)
                 return
             else:
                 return methods[norm_method](data[rtype].v)

@@ -46,7 +46,7 @@ class Jr6(base.Machine):
             if v == 'NRM':
                 fields[i] = 0.
             if 'A' in v:
-                fields[i] = v[1:]
+                fields[i] = v[1:].strip('-')
         fields = np.array(fields).astype(float)
         out = np.c_[fields, self.get_data()[:, 0], self.get_data()[:, 1], self.get_data()[:, 2]]
         return out

@@ -12,6 +12,34 @@ class MainFrame(wx.Frame):
                  style=wx.DEFAULT_FRAME_STYLE):
         wx.Frame.__init__(self, parent, id, title, pos, size, style)
 
+        # make status bar
+        self.CreateStatusBar()
+        self.SetStatusText("This is RockPy statusbar")
+
+        # make menu bar
+        # Prepare the menu bar
+        menuBar = wx.MenuBar()
+
+        # 1st menu from left
+        filemenu = wx.Menu()
+        filemenu.Append(wx.NewId(), "&Open", "Not implemented")
+        filemenu.AppendSeparator()
+        self.Bind(wx.EVT_MENU, self.OnExit, filemenu.Append(wx.NewId(), "&Exit", "Exit RockPyGui"))
+        # Add menu to the menu bar
+        menuBar.Append(filemenu, "&File")
+
+        # 2nd menu from left
+        menu2 = wx.Menu()
+        menu2.Append(wx.NewId(), "Data1", "Not implemented")
+        menu2.Append(wx.NewId(), "Data2", "Not implemented")
+
+        # Append 2nd menu
+        menuBar.Append(menu2, "&Data")
+
+        self.SetMenuBar(menuBar)
+
+
+        # make aui manager to manage docking window layout
         self._mgr = wx.aui.AuiManager(self)
 
 
@@ -61,16 +89,18 @@ class MainFrame(wx.Frame):
             self.custom_tree.SetItemImage(child, fldropenidx, wx.TreeItemIcon_Expanded)
 
             for y in range(5):
-                last = self.custom_tree.AppendItem(child, "Measurement %d-%s" % (x, chr(ord("a")+y)), ct_type=1)
+                last = self.custom_tree.AppendItem(child, "Sample %d-%s" % (x, chr(ord("a")+y)), ct_type=1)
                 self.custom_tree.SetItemImage(last, fldridx, wx.TreeItemIcon_Normal)
                 self.custom_tree.SetItemImage(last, fldropenidx, wx.TreeItemIcon_Expanded)
 
                 for z in range(5):
-                    item = self.custom_tree.AppendItem(last,  "item %d-%s-%d" % (x, chr(ord("a")+y), z), ct_type=1)
+                    item = self.custom_tree.AppendItem(last,  "Measurement %d-%s-%d" % (x, chr(ord("a")+y), z), ct_type=1)
                     self.custom_tree.SetItemImage(item, fileidx, wx.TreeItemIcon_Normal)
 
         self.custom_tree.Expand(root)
 
+    def OnExit(self, event):
+        self.Close()
     
     def OnClose(self, event):
         # deinitialize the frame manager

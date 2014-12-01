@@ -15,10 +15,12 @@ import copy
 class Generic(object):
     RockPy.Functions.general.create_logger('RockPy.VISUALIZE')
 
-    def __init__(self, sample_list, norm=None,
+    def __init__(self, sample_list,
+                 norm=None, rtype='mag', vval=None, norm_method='max',
                  plot='show', folder=None, name=None,
                  plt_opt={}, style='screen',
                  create_fig=True, create_ax=True,
+
                  **options):
         self.log = logging.getLogger('RockPy.VISUALIZE.' + type(self).__name__)
 
@@ -69,7 +71,12 @@ class Generic(object):
         self.name = name
         self.folder = folder
 
+
+        # ## normalization
         self.norm = norm
+        self.rtype = rtype
+        self.vval = vval
+        self.norm_method = norm_method
 
         # check if a figure is provided, this way multiple plots can be combined into one figure
         if create_fig:

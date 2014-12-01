@@ -319,7 +319,9 @@ class Sample():
         out = [m for m in self.measurements]
 
         if not mtype is None:
-            out = [m for m in out if m.mtype == mtype]
+            if not isinstance(mtype, list):
+                mtype = [mtype]
+            out = [m for m in out if m.mtype in mtype]
 
         if not ttype is None:
             if isinstance(ttype, list):

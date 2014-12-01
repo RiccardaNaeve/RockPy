@@ -63,6 +63,7 @@ class Measurement(object):
         """
         self.log = logging.getLogger('RockPy.MEASUREMENT.' + type(self).__name__)
         self.has_data = True
+        self.is_initial_state = False
         machine = machine.lower()  # for consistency in code
         mtype = mtype.lower()  # for consistency in code
 
@@ -214,6 +215,7 @@ class Measurement(object):
         implemented = {i.__name__.lower(): i for i in Measurement.inheritors()}
         if mtype in implemented:
             self.initial_state = implemented[mtype](self.sample_obj, mtype, mfile, machine)
+            self.initial_state.is_initial_state = True
             # self.initial_state = self.initial_state_obj.data
         else:
             self.log.error('UNABLE to find measurement << %s >>' % (mtype))
@@ -273,9 +275,10 @@ class Measurement(object):
 
     @data.setter
     def data(self, data):
-        print data.keys()
         for dtype in data:
-            setattr(self, dtype, data[dtype])
+            print dtype
+            self.__dict__.update(self, dtype, data[dtype])
+            # setattr(self, dtype, data[dtype])
 
     ### DATA RELATED
     ### Calculation and parameters
@@ -524,6 +527,8 @@ class Measurement(object):
         :vval: variable value, if reference == value then it will search for the point closest to the vval
         :norm_method: how the norm_factor is generated, could be min
         """
+
+        print reference, rtype, vval, norm_method
         norm_factor = self._get_norm_factor(reference, rtype, vval, norm_method)
         for name, data in self.data.iteritems():
             ttypes = [i for i in data.column_names if 'ttype' in i]
@@ -541,7 +546,10 @@ class Measurement(object):
 
         if reference in ['is', 'initial', 'initial_state']:
             if self.initial_state:
-                norm_factor = self._norm_method(norm_method, vval, rtype, self.initial_state.data)
+                norm_factor = self._norm_method(norm_method, vval, rtype, self.initial_state.data['data'])
+            if self.is_initial_state:
+                norm_factor = self._norm_method(norm_method, vval, rtype, self.data['data'])
+
         if reference == 'mass':
             m = self.sample_obj.get_measurements(mtype='mass', ttype=self.ttypes, tval=self.tvals)
             if m is None:

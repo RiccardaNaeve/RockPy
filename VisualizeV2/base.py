@@ -16,7 +16,7 @@ RockPy.Functions.general.create_logger('RockPy.VISUALIZE')
 
 
 class Generic(object):
-    def __init__(self, sample_group=None, norm=None,
+    def __init__(self, plot_samples=None, norm=None,
                  plot='show', folder=None, name=None,
                  create_fig=True, create_ax=True,
                  fig_opt=dict(), plt_opt=dict(),
@@ -24,13 +24,33 @@ class Generic(object):
 
         self.log = logging.getLogger('RockPy.VISUALIZE.' + type(self).__name__)
         self.name = type(self).__name__
-        self.existing_visuals = {i.__name__:i for i in Generic.inheritors()}
+        self.existing_visuals = {i.__name__: i for i in Generic.inheritors()}
 
-        self._group_from_list(sample_group)
+        self._required = {}
+        self._group_from_list(plot_samples)
         self._plots = {}
+
+        self.color_source = options.pop('color_source', self.hierarchy[self.plot_samples_type])
+        self.marker_source = options.pop('marker_source', self.hierarchy[self.plot_samples_type])
+        self.ls_source = options.pop('linestyle_source', self.hierarchy['sample'])
+
         self._fig_opt = fig_opt
+
         self.initialize_plot()
-        self.plotting()
+
+        for sample in self.samples:
+            if self.meets_requirements(sample):
+                self.plotting(sample)
+
+    @property
+    def hierarchy(self):
+        h = {'study': 'sample_group',
+             'sample_group': 'sample',
+             'sample': 'measurement',
+             'measurement': 'treatment',
+             'none': None}
+        return h
+
 
     @property
     def plot_dict(self):
@@ -41,21 +61,51 @@ class Generic(object):
                  'markersizes': np.tile([5, 4, 4, 4, 4], 10)}
         return pdict
 
+    @property
+    def required(self):
+        if isinstance(self._required, dict):
+            return self._required
+        else:
+            return {self.name: self._required}
+
+    @property
+    def require_list(self):
+        return [j for i in self.required for j in self.required[i]]
+
     def initialize_plot(self):
         pass
+
+    def meets_requirements(self, sample_obj):
+        """
+        checks if prerequsits are met for a certain plot
+
+        :param sample_obj:
+        :return:
+        """
+        # measurements = sample_obj.get_measurements(mtype=self.require_list)
+        out = []
+        for i in self.require_list:
+            if i in sample_obj.mtypes:
+                out.append(True)
+            else:
+                out.append(False)
+        if all(out):
+            return True
+        else:
+            return False
 
     # ## TESTED
     @property
     def sample_names(self):
-        return self.sample_group.sample_names
+        return self.plot_samples.sample_names
 
     @property
     def samples(self):
-        return self.sample_group.sample_list
+        return self.plot_samples.sample_list
 
     @property
     def sample_nr(self):
-        return len(self.sample_group.sample_list)
+        return len(self.plot_samples.sample_list)
 
     def add_plot(self, label=None, **fig_opt):
         if not fig_opt:
@@ -73,6 +123,7 @@ class Generic(object):
     def add_fig(self, fig):
         if isinstance(fig, Generic):
             self.plots.update(fig.plots)
+            self._required.update(fig.required)
 
     @property
     def plots(self):
@@ -96,22 +147,27 @@ class Generic(object):
         """
         takes sample_list argument and checks if it is sample, list(samples) or RockPy.sample_group
         """
+        # self.plot_samples_type = ''
         if isinstance(s_list, RockPy.SampleGroup):
-            self.sample_group = s_list
+            self.plot_samples = s_list
+            self.plot_samples_type = 'sample_group'
 
         if isinstance(s_list, list):
             self.log.debug('CONVERTING list(sample) -> RockPy.SampleGroup(Sample)')
-            self.sample_group = rp.SampleGroup(sample_list=s_list)
+            self.plot_samples = rp.SampleGroup(sample_list=s_list)
+            self.plot_samples_type = 'sample'
 
         if isinstance(s_list, rp.Sample):
             self.log.debug('CONVERTING sample -> list(sample) -> RockPy.SampleGroup(Sample)')
-            self.sample_group = rp.SampleGroup(sample_list=[s_list])
+            self.plot_samples = rp.SampleGroup(sample_list=[s_list])
+            self.plot_samples_type = 'sample'
+
 
     def create_fig(self, **fig_opt):
         fig = plt.figure(**fig_opt)
         return fig
 
-    def plotting(self):
+    def plotting(self, sample):
         pass
 
     def show(self):

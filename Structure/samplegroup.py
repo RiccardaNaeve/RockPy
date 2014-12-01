@@ -408,41 +408,51 @@ class SampleGroup(object):
         average_sample = Sample(name=name)
         dict = self.mtype_ttype_tval_mdict
         data = {}
+        is_data = {}
+
         for ttype in dict[mtype]:  #cycle through treatments
             data[ttype] = {}
+            is_data[ttype] = {}
             for tval in dict[mtype][ttype]:  #cycle through treatment values
                 data[ttype][tval] = {}
-                for measurement in dict[mtype][ttype][
-                    tval]:  #cycle through all measurements & samples (all measurements with ttype = ttype & mtype = mtype)
+                is_data[ttype][tval] = {}
+                for measurement in dict[mtype][ttype][tval]:  #cycle through all measurements & samples (all measurements with ttype = ttype & mtype = mtype)
                     m = measurement.normalize(reference=reference, rtype=rtype, vval=vval,
+                                              norm_method=norm_method)  # normalize each individual measurement
+                    if measurement.initial_state: # initial states have to be normalized, too
+                        m_is = measurement.initial_state.normalize(reference=reference, rtype=rtype, vval=vval,
                                               norm_method=norm_method)  # normalize each individual measurement
                     for d in m.data:  # some measurements have multiple data sets, like hysteresis
                         if not d in data[ttype][tval]:
                             data[ttype][tval][d] = []
                         data[ttype][tval][d].append(m.data[d])  # store corresponding dataset in dictionary
+                    for d in m_is.data:
+                        if not d in is_data[ttype][tval]:
+                            is_data[ttype][tval][d] = []
+                        is_data[ttype][tval][d].append(m_is.data[d])  # store corresponding dataset in dictionary
 
-        for ttype in data:
-            for tval in data[ttype]:
-                average_data = {}
-                for dtype in data[ttype][tval]:
-                    var_list = self.__get_variable_list(data[ttype][tval][dtype])
+        for ttype in data: # cycle throu different treatment types
+            for tval in data[ttype]: # cycle through the values
+                average_data = {} # initialize the average data dictionary
+                for dtype in data[ttype][tval]: # average the data types
+                    var_list = self.__get_variable_list(data[ttype][tval][dtype]) # get variable lists
                     if len(var_list) > 1:
                         aux = [m.interpolate(var_list) for m in data[ttype][tval][dtype]]
                     else:
                         aux = [m for m in data[ttype][tval][dtype]]
-                    # if dtype == 'ptrm' and tval == 0.6:
-                    #     for i in aux:
-                    #         print '\t'.join((map(str, i['mag'].v)))
                     rp_data = condense(aux)
                     rp_data = rp_data.sort('temp')
                     average_data.update({dtype: rp_data})
                 measurement = dict[mtype][ttype][tval][0] # set the average to be the first measurement
                 average_measurement = measurement
                 average_measurement.data.update(average_data)
-                # if tval == 0.6:
-                #     print '\t'.join((map(str, average_measurement.data['ptrm']['mag'].v)))
-                #     print '\t'.join((map(str, average_data['ptrm']['mag'].v)))
                 average_sample.measurements.append(average_measurement)
+
+        #### setting average initial states
+        for ttype in is_data:
+            for tval in is_data[ttype]:
+                print ttype, tval
+
         return average_sample
 
 

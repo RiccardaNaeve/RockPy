@@ -325,7 +325,6 @@ class Thellier(base.Measurement):
 
         th_data = self.th.filter(th_steps)  # filtered data for t_min t_max
         ptrm_data = self.ptrm.filter(ptrm_steps)  # filtered data for t_min t_max
-
         # filtering for equal variables
         th_idx = [i for i, v in enumerate(th_data['temp'].v) if v in equal_steps]
         ptrm_idx = [i for i, v in enumerate(ptrm_data['temp'].v) if v in equal_steps]

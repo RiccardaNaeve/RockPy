@@ -6,7 +6,6 @@ def dunlop(ax, thellier_obj, component='mag', norm_factor=None,
     if not norm_factor: norm_factor = [1.0, 1.0]
     c = ['r', 'g', 'b']
     for i, v in enumerate(['sum', 'th', 'ptrm']):
-
         plt_opt.update({'label': v})
         plt_opt.update({'color': c[i]})
         if thellier_obj.treatments:

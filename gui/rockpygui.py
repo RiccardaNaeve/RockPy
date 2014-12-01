@@ -21,20 +21,20 @@ class MainFrame(wx.Frame):
         menuBar = wx.MenuBar()
 
         # 1st menu from left
-        filemenu = wx.Menu()
-        filemenu.Append(wx.NewId(), "&Open", "Not implemented")
-        filemenu.AppendSeparator()
-        self.Bind(wx.EVT_MENU, self.OnExit, filemenu.Append(wx.NewId(), "&Exit", "Exit RockPyGui"))
+        datamenu = wx.Menu()
+        datamenu.Append(wx.NewId(), "New &SampleGroup", "Not implemented")
+        datamenu.AppendSeparator()
+        self.Bind(wx.EVT_MENU, self.OnExit, datamenu.Append(wx.NewId(), "&Exit", "Exit RockPyGui"))
         # Add menu to the menu bar
-        menuBar.Append(filemenu, "&File")
+        menuBar.Append(datamenu, "&Data")
 
         # 2nd menu from left
         menu2 = wx.Menu()
-        menu2.Append(wx.NewId(), "Data1", "Not implemented")
-        menu2.Append(wx.NewId(), "Data2", "Not implemented")
+        menu2.Append(wx.NewId(), "Edit1", "Not implemented")
+        menu2.Append(wx.NewId(), "Edit2", "Not implemented")
 
         # Append 2nd menu
-        menuBar.Append(menu2, "&Data")
+        menuBar.Append(menu2, "&Edit")
 
         self.SetMenuBar(menuBar)
 

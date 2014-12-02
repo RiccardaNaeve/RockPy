@@ -13,4 +13,4 @@ class Study(object):
         :param samplegroups: one or several samplegroups that form the study
         :return:
         """
-        self.sampleroups = samplegroups
+        self.samplegroups = samplegroups

@@ -19,23 +19,23 @@ class Thellier(base.Measurement):
         # # ## initialize data
         self.steps = ['nrm', 'th', 'pt', 'ac', 'tr', 'ck', 'ptrm', 'sum', 'difference']
 
-        ### SUPER
+        # ## SUPER
         super(Thellier, self).__init__(sample_obj, mtype, mfile, machine, **options)
 
         self.standard_parameters['slope'] = {'t_min': 20, 't_max': 700, 'component': 'mag'}
 
         # self._data = {i: getattr(self, i) for i in self.steps[:5]}
         # print self._data
-        # self.reset__data()
+        self.reset__data()
         for i in self.standard_parameters:
             if self.standard_parameters[i] is None:
                 self.standard_parameters[i] = self.standard_parameters['slope']
 
     def reset__data(self):
-        self.ptrm = self._ptrm
-        self.sum = self._sum
-        self.difference = self._difference
-        self._data = {i: getattr(self, i) for i in self.steps}
+        self.data['ptrm'] = self._ptrm
+        self.data['sum'] = self._sum
+        self.data['difference'] = self._difference
+        # self._data = {i: getattr(self, i) for i in self.steps}
 
     @property
     def data(self):
@@ -85,7 +85,8 @@ class Thellier(base.Measurement):
                 rp_data = rp_data.append_columns('mag', rp_data.magnitude('m'))
                 rp_data = rp_data.sort('temp')
                 rp_data.define_alias('variable', 'temp')
-                setattr(self, step, rp_data)
+                # setattr(self, step, rp_data)
+                self._data.update({step:rp_data})
             else:
                 setattr(self, step, None)
 
@@ -317,7 +318,7 @@ class Thellier(base.Measurement):
         component = parameter.get('component', self.standard_parameters['slope']['component'])
 
         self.log.info('CALCULATING\t << %s >> arai line fit << t_min=%.1f , t_max=%.1f >>' % (component, t_min, t_max))
-
+        print self.th
         equal_steps = list(set(self.th['temp'].v) & set(self.ptrm['temp'].v))
         th_steps = (t_min <= self.th['temp'].v) & (self.th['temp'].v <= t_max)  # True if step between t_min, t_max
         ptrm_steps = (t_min <= self.ptrm['temp'].v) & (

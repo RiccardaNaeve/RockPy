@@ -61,12 +61,12 @@ class MainFrame(wx.Frame):
             self.custom_tree.SetItemImage(child, fldropenidx, wx.TreeItemIcon_Expanded)
 
             for y in range(5):
-                last = self.custom_tree.AppendItem(child, "Measurement %d-%s" % (x, chr(ord("a")+y)), ct_type=1)
+                last = self.custom_tree.AppendItem(child, "Sample %d-%s" % (x, chr(ord("a")+y)), ct_type=1)
                 self.custom_tree.SetItemImage(last, fldridx, wx.TreeItemIcon_Normal)
                 self.custom_tree.SetItemImage(last, fldropenidx, wx.TreeItemIcon_Expanded)
 
                 for z in range(5):
-                    item = self.custom_tree.AppendItem(last,  "item %d-%s-%d" % (x, chr(ord("a")+y), z), ct_type=1)
+                    item = self.custom_tree.AppendItem(last,  "measurement %d-%s-%d" % (x, chr(ord("a")+y), z), ct_type=1)
                     self.custom_tree.SetItemImage(item, fileidx, wx.TreeItemIcon_Normal)
 
         self.custom_tree.Expand(root)

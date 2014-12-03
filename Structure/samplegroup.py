@@ -422,6 +422,7 @@ class SampleGroup(object):
                     if measurement.initial_state: # initial states have to be normalized, too
                         m_is = measurement.initial_state.normalize(reference=reference, rtype=rtype, vval=vval,
                                               norm_method=norm_method)  # normalize each individual measurement
+                    # the data has to be ordered according to the data type (e.g. down_field
                     for d in m.data:  # some measurements have multiple data sets, like hysteresis
                         if not d in data[ttype][tval]:
                             data[ttype][tval][d] = []
@@ -441,18 +442,24 @@ class SampleGroup(object):
                     else:
                         aux = [m for m in data[ttype][tval][dtype]]
                     rp_data = condense(aux)
-                    rp_data = rp_data.sort('temp')
+                    rp_data = rp_data.sort('variable')
                     average_data.update({dtype: rp_data})
                 measurement = dict[mtype][ttype][tval][0] # set the average to be the first measurement
                 average_measurement = measurement
-                average_measurement.data.update(average_data)
+                for dtype in average_data:
+                    average_measurement._data[dtype] = average_data[dtype]
                 average_sample.measurements.append(average_measurement)
 
         #### setting average initial states
         for ttype in is_data:
             for tval in is_data[ttype]:
-                print ttype, tval
-
+                m = average_sample.get_measurements(mtype=mtype, ttype=ttype, tval=tval)
+                for dtype in m_is.data:
+                    aux = [m for m in is_data[ttype][tval][dtype]]
+                    m_is._data[dtype] = condense(aux)
+                m.initial_state = m_is
+                if hasattr(m, 'reset_data'):
+                    m.reset_data()
         return average_sample
 
 

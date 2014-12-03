@@ -35,7 +35,6 @@ class Arai(base.Generic):
         measurement_dict = self.get_measurement_dict(mtype='thellier')
         for sample in measurement_dict:
             thellier_objects = measurement_dict[sample]
-            print self.norm
             for thellier in thellier_objects:
                 if self.norm:
                     tt = thellier.normalize(reference = self.norm, rtype = self.rtype,
@@ -45,8 +44,9 @@ class Arai(base.Generic):
                     # print tt.data['th']
                 plt_opt = self.get_plt_opt(sample, thellier_objects, thellier)
                 arai.arai_std(self.ax, tt, self.parameter, **plt_opt)
-                arai.arai_points(self.ax, tt, self.parameter, **plt_opt)
                 arai.arai_line(self.ax, tt, self.parameter, **plt_opt)
+                plt_opt.update({'linewidth': 0.5})
+                arai.arai_points(self.ax, tt, self.parameter, **plt_opt)
 
                 # x.append(max(thellier.ptrm[self.parameter['component']].v))  # append max for x_lim
                 # y.append(max(thellier.th[self.parameter['component']].v))  # append max for y_lim

@@ -63,6 +63,7 @@ class Measurement(object):
         """
         self.log = logging.getLogger('RockPy.MEASUREMENT.' + type(self).__name__)
         self.has_data = True
+        self._data = {}
         self.is_initial_state = False
         machine = machine.lower()  # for consistency in code
         mtype = mtype.lower()  # for consistency in code
@@ -141,7 +142,7 @@ class Measurement(object):
                                not i.endswith('generic')]  # search for implemented results methods
 
         self.results = RockPyData(
-            column_names=self.result_methods)  # dynamic entry creation for all available result methods
+            column_names=self.result_methods, data = [np.nan for i in self.result_methods])  # dynamic entry creation for all available result methods
 
         # ## warning with calculation of results:
         # M.result_slope() -> 1.2
@@ -163,16 +164,12 @@ class Measurement(object):
         if self._treatment_opt:
             self._add_treatment_from_opt()
 
-    # def __getattr__(self, name):
-    # if name in self.result_methods:
-    # value = getattr(self, 'result_' + name)().v[0]
-    #         return value
-    #     else:
-    #         try:
-    #             getattr(self, name)
-    #         except:
-    #             msg = "'{0}' object has no attribute '{1}'"
-    #             raise AttributeError(msg.format(type(self).__name__, name))
+    def __getattr__(self, attr):
+        if attr in self.__getattribute__('data').keys():
+            return self.data[attr]
+        if attr in self.__getattribute__('result_methods'):
+            print attr
+            return getattr(self, 'result_'+attr)().v[0]
 
     def import_data(self, rtn_raw_data=None, **options):
         '''
@@ -273,12 +270,6 @@ class Measurement(object):
     def data(self):
         return self._data
 
-    @data.setter
-    def data(self, data):
-        for dtype in data:
-            print dtype
-            self.__dict__.update(self, dtype, data[dtype])
-            # setattr(self, dtype, data[dtype])
 
     ### DATA RELATED
     ### Calculation and parameters
@@ -489,12 +480,19 @@ class Measurement(object):
         treatment = Treatments.Generic(ttype=ttype, value=tval, unit=unit, comment=comment)
         self._treatments.append(treatment)
         self._add_tval_to_data(treatment)
+        self._add_tval_to_results(treatment)
 
     def _add_tval_to_data(self, tobj):
         for dtype in self.data:
             data = np.ones(len(self.data[dtype]['variable'].v)) * tobj.value
             self.data[dtype] = self.data[dtype].append_columns(column_names='ttype ' + tobj.ttype,
                                                                data=data)  #, unit=tobj.unit)
+
+    def _add_tval_to_results(self, tobj):
+
+        # data = np.ones(len(self.results['variable'].v)) * tobj.value
+        self.results = self.results.append_columns(column_names='ttype ' + tobj.ttype,
+                                                               data=[tobj.value])  #, unit=tobj.unit)
 
     @classmethod
     def inheritors(cls):
@@ -528,14 +526,13 @@ class Measurement(object):
         :norm_method: how the norm_factor is generated, could be min
         """
 
-        print reference, rtype, vval, norm_method
         norm_factor = self._get_norm_factor(reference, rtype, vval, norm_method)
         for name, data in self.data.iteritems():
             ttypes = [i for i in data.column_names if 'ttype' in i]
             self.data[name] = data / norm_factor
             if ttypes:
                 for tt in ttypes:
-                    self.data[name][tt] = np.ones(len(data['variable'].v))*self.ttype_dict[tt[6:]].value
+                    self.data[name][tt] = np.ones(len(data['variable'].v)) * self.ttype_dict[tt[6:]].value
         return self
 
     def _get_norm_factor(self, reference, rtype, vval, norm_method):

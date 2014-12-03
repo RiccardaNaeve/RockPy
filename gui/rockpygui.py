@@ -42,11 +42,12 @@ class MainFrame(wx.Frame):
         self.maintext = wx.TextCtrl(self, -1, 'hier soll mal was Wichtiges rein ....',
                             wx.DefaultPosition, wx.Size(200,150),
                             wx.NO_BORDER | wx.TE_MULTILINE)
+        # add the panes to the manager
+        self.navpanel = self.xrc.LoadPanel(self, "navpanel")
         self.createTree()
 
-        # add the panes to the manager
-        self._mgr.AddPane(self.custom_tree, wx.aui.AuiPaneInfo().
-                          Name("Gadget").Caption("Gadget").Left().
+        self._mgr.AddPane(self.navpanel, wx.aui.AuiPaneInfo().
+                          Name("Navigator").Caption("Navigator").Left().
                           CloseButton(True).MaximizeButton(True).BestSize((300, 500)))
         self._mgr.AddPane(self.text, wx.BOTTOM, 'Text...')
         self._mgr.AddPane(self.maintext, wx.CENTER)
@@ -55,11 +56,15 @@ class MainFrame(wx.Frame):
         self._mgr.Update()
 
     def createTree(self):
-        # Create a CustomTreeCtrl instance
-        self.custom_tree = ctc.CustomTreeCtrl(self, agwStyle=wx.TR_DEFAULT_STYLE)
+        # Create a CustomTreeCtrl instance and putit within a boxsizer in navtreepanel from xrc
+        p = xrc.XRCCTRL(self.navpanel, 'navtreepanel')
+        self.navtree = ctc.CustomTreeCtrl(p, agwStyle=wx.TR_DEFAULT_STYLE)
+        bsizer = wx.BoxSizer()
+        bsizer.Add(self.navtree, 1, wx.EXPAND)
+        p.SetSizerAndFit(bsizer)
 
         # Add a root node to it
-        root = self.custom_tree.AddRoot("Study", ct_type=1)
+        root = self.navtree.AddRoot("Study", ct_type=1)
 
         # Create an image list to add icons next to an item
         il = wx.ImageList(16, 16)
@@ -67,33 +72,34 @@ class MainFrame(wx.Frame):
         fldropenidx = il.Add(wx.ArtProvider.GetBitmap(wx.ART_FILE_OPEN, wx.ART_OTHER, (16, 16)))
         fileidx = il.Add(wx.ArtProvider.GetBitmap(wx.ART_NORMAL_FILE, wx.ART_OTHER, (16, 16)))
 
-        self.custom_tree.SetImageList(il)
+        self.navtree.SetImageList(il)
 
-        self.custom_tree.SetItemImage(root, fldridx, wx.TreeItemIcon_Normal)
-        self.custom_tree.SetItemImage(root, fldropenidx, wx.TreeItemIcon_Expanded)
+        self.navtree.SetItemImage(root, fldridx, wx.TreeItemIcon_Normal)
+        self.navtree.SetItemImage(root, fldropenidx, wx.TreeItemIcon_Expanded)
 
         for x in range(15):
-            child = self.custom_tree.AppendItem(root, "Sample Group %d" % x, ct_type=1)
-            self.custom_tree.SetItemImage(child, fldridx, wx.TreeItemIcon_Normal)
-            self.custom_tree.SetItemImage(child, fldropenidx, wx.TreeItemIcon_Expanded)
+            child = self.navtree.AppendItem(root, "Sample Group %d" % x, ct_type=1)
+            self.navtree.SetItemImage(child, fldridx, wx.TreeItemIcon_Normal)
+            self.navtree.SetItemImage(child, fldropenidx, wx.TreeItemIcon_Expanded)
 
             for y in range(5):
-                last = self.custom_tree.AppendItem(child, "Sample %d-%s" % (x, chr(ord("a")+y)), ct_type=1)
-                self.custom_tree.SetItemImage(last, fldridx, wx.TreeItemIcon_Normal)
-                self.custom_tree.SetItemImage(last, fldropenidx, wx.TreeItemIcon_Expanded)
+                last = self.navtree.AppendItem(child, "Sample %d-%s" % (x, chr(ord("a")+y)), ct_type=1)
+                self.navtree.SetItemImage(last, fldridx, wx.TreeItemIcon_Normal)
+                self.navtree.SetItemImage(last, fldropenidx, wx.TreeItemIcon_Expanded)
 
                 for z in range(5):
-                    item = self.custom_tree.AppendItem(last,  "Measurement %d-%s-%d" % (x, chr(ord("a")+y), z), ct_type=1)
-                    self.custom_tree.SetItemImage(item, fileidx, wx.TreeItemIcon_Normal)
+                    item = self.navtree.AppendItem(last,  "Measurement %d-%s-%d" % (x, chr(ord("a")+y), z), ct_type=1)
+                    self.navtree.SetItemImage(item, fileidx, wx.TreeItemIcon_Normal)
 
-        self.custom_tree.Expand(root)
+        self.navtree.Expand(root)
+
 
     def OnExit(self, event):
         self.Close()
     
     def OnClose(self, event):
         dlg = wx.MessageDialog(self,
-              "Do you really want to close this application?",
+              "Do you really want to close RockPy GUI?",
               "Confirm Exit", wx.OK | wx.CANCEL | wx.ICON_QUESTION)
         result = dlg.ShowModal()
         dlg.Destroy()

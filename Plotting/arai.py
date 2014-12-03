@@ -17,7 +17,7 @@ def arai_points(ax, thellier_obj, parameter, **plt_opt):
 
     ax.plot(ptrm[component].v, th[component].v,
             '.-', zorder=100,
-            label=label)
+            **plt_opt)
 
 
 def arai_std(ax, thellier_obj, parameter, **plt_opt):

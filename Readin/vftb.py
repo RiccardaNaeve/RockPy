@@ -7,7 +7,7 @@ import base
 class Vftb(base.Machine):
     def __init__(self, dfile, sample_name):
         super(Vftb, self).__init__(dfile, sample_name)
-        self.raw_data = [i.strip('\r\n').split('\t') for i in self.reader_object.readlines()]
+        self.raw_data = [i.strip('\r\n').split('\t') for i in open(self.file_name).readlines()]
         self.mass = float(self.raw_data[0][1].split()[1])
         # finding set indices
         idx = [j for j, v2 in enumerate(self.raw_data) for i, v in enumerate(v2) if v.startswith('Set')]

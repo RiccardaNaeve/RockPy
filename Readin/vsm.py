@@ -6,10 +6,9 @@ import base
 
 
 class Vsm(base.Machine):
-    def __init__(self, file, sample=None):
-        super(Vsm, self).__init__(dfile=file, sample_name=sample)
-        file = open(file, 'rU')
-        reader_object = file.readlines()
+    def __init__(self, dfile, sample=None):
+        super(Vsm, self).__init__(dfile=dfile, sample_name=sample)
+        reader_object = open(self.file_name, 'rU').readlines()
         self.measurement_header = self.readMicroMagHeader(reader_object)  # get header
         self.raw_out = [i for i in reader_object][self.measurement_header['meta']['numberoflines']:]  # without header
         self.header_idx = {v:i for i,v in enumerate(self.header)}

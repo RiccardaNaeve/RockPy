@@ -1,6 +1,7 @@
 __author__ = 'mike'
 import logging
 import csv
+from RockPy.Structure.data import RockPyData
 from RockPy.Structure.data import condense
 from RockPy import Sample
 import RockPy.Functions.general
@@ -19,6 +20,7 @@ class SampleGroup(object):
 
         # ## initialize
         self.samples = {}
+        self.results = None
 
         if sample_file:
             self.import_multiple_samples(sample_file, **options)
@@ -65,7 +67,7 @@ class SampleGroup(object):
         return self.slist
 
     # ## components of container
-    #lists
+    # lists
     @property
     def slist(self):
         out = [self.samples[i] for i in sorted(self.samples.keys())]
@@ -90,7 +92,7 @@ class SampleGroup(object):
             out.extend(sample.tvals)
         return sorted(list(set(out)))
 
-    ### sample-stage
+    # ## sample-stage
     @property
     def sname_mdict(self):
         out = {s.name: s.mtype_mdict for s in self.slist}
@@ -257,6 +259,20 @@ class SampleGroup(object):
         """
         return sorted(list(set([t for sample in self.sample_list for t in sample.ttypes])))
 
+    @property
+    def ttype_results(self):
+        if not self.results:
+            self.calc_all()
+        ttypes = [i for i in self.results.column_names if 'ttype' in i]
+        out = {i.split()[1]: {round(j, 2): None for j in self.results[i].v} for i in ttypes}
+
+        for ttype in out:
+            for tval in out[ttype]:
+                key = 'ttype '+ttype
+                idx = np.where(self.results[key].v == tval)[0]
+                out[ttype][tval]= self.results.filter_idx(idx)
+        return out
+
     def _get_measurements_with_treatment(self, ttype, tvalue):
         out = [m
                for sample in self.sample_list
@@ -279,6 +295,20 @@ class SampleGroup(object):
         treatments = list(set([n.ttype for j in self.sample_list for i in j.measurements for n in i.treatments]))
         return sorted(treatments)
 
+
+    def calc_all(self, **parameter):
+        for sample in self.sample_list:
+            label = sample.name
+            sample.calc_all(**parameter)
+            results = sample.results
+            if self.results is None:
+                self.results = RockPyData(column_names=results.column_names,
+                                          data=results.data, row_names=[label for i in results.data])
+            else:
+                rpdata = RockPyData(column_names=results.column_names,
+                                    data=results.data, row_names=[label for i in results.data])
+                self.results = self.results.append_rows(rpdata)
+
     def get_results(self, mtype, **parameter):
         i = 0
         data = []
@@ -294,7 +324,7 @@ class SampleGroup(object):
                 aux += measurement.results.data
                 i += 1
                 data.append(aux)
-            # self.results = RockPyData(column_names=header, data=data)
+                # self.results = RockPyData(column_names=header, data=data)
 
     def __add__(self, other):
         self_copy = SampleGroup(sample_list=self.sample_list)
@@ -378,7 +408,7 @@ class SampleGroup(object):
                 if len(out) == 0:
                     raise KeyError(
                         'RockPy.sample_group does not contain sample with (ttype, tval) pair: << %s, %.2f >>' % (
-                        ttype, t_value))
+                            ttype, t_value))
                     return
 
             if tval_range:
@@ -394,7 +424,7 @@ class SampleGroup(object):
                 if len(out) == 0:
                     raise KeyError(
                         'RockPy.sample_group does not contain sample with (ttype, tval_range) pair: << %s, %.2f >>' % (
-                        ttype, t_value))
+                            ttype, t_value))
                     return
 
         if len(out) == 0:
@@ -416,12 +446,13 @@ class SampleGroup(object):
             for tval in dict[mtype][ttype]:  #cycle through treatment values
                 data[ttype][tval] = {}
                 is_data[ttype][tval] = {}
-                for measurement in dict[mtype][ttype][tval]:  #cycle through all measurements & samples (all measurements with ttype = ttype & mtype = mtype)
+                for measurement in dict[mtype][ttype][
+                    tval]:  #cycle through all measurements & samples (all measurements with ttype = ttype & mtype = mtype)
                     m = measurement.normalize(reference=reference, rtype=rtype, vval=vval,
                                               norm_method=norm_method)  # normalize each individual measurement
-                    if measurement.initial_state: # initial states have to be normalized, too
+                    if measurement.initial_state:  # initial states have to be normalized, too
                         m_is = measurement.initial_state.normalize(reference=reference, rtype=rtype, vval=vval,
-                                              norm_method=norm_method)  # normalize each individual measurement
+                                                                   norm_method=norm_method)  # normalize each individual measurement
                     # the data has to be ordered according to the data type (e.g. down_field
                     for d in m.data:  # some measurements have multiple data sets, like hysteresis
                         if not d in data[ttype][tval]:
@@ -432,11 +463,11 @@ class SampleGroup(object):
                             is_data[ttype][tval][d] = []
                         is_data[ttype][tval][d].append(m_is.data[d])  # store corresponding dataset in dictionary
 
-        for ttype in data: # cycle throu different treatment types
-            for tval in data[ttype]: # cycle through the values
-                average_data = {} # initialize the average data dictionary
-                for dtype in data[ttype][tval]: # average the data types
-                    var_list = self.__get_variable_list(data[ttype][tval][dtype]) # get variable lists
+        for ttype in data:  # cycle throu different treatment types
+            for tval in data[ttype]:  # cycle through the values
+                average_data = {}  # initialize the average data dictionary
+                for dtype in data[ttype][tval]:  # average the data types
+                    var_list = self.__get_variable_list(data[ttype][tval][dtype])  # get variable lists
                     if len(var_list) > 1:
                         aux = [m.interpolate(var_list) for m in data[ttype][tval][dtype]]
                     else:
@@ -444,7 +475,7 @@ class SampleGroup(object):
                     rp_data = condense(aux)
                     rp_data = rp_data.sort('variable')
                     average_data.update({dtype: rp_data})
-                measurement = dict[mtype][ttype][tval][0] # set the average to be the first measurement
+                measurement = dict[mtype][ttype][tval][0]  # set the average to be the first measurement
                 average_measurement = measurement
                 for dtype in average_data:
                     average_measurement._data[dtype] = average_data[dtype]

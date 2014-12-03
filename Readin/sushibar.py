@@ -20,7 +20,7 @@ class SushiBar(base.Machine):
         self.float_header = ['x', 'y', 'z', 'dspin', 'ispin', 'par1', 'dip', 'dipdir', 'geoaz', 'm', 'strat_level',
                              'a95', 'par5', 'par4', 'par3', 'par2', 'sm', 'par6', 'dg', 'is', 'hade', 'dc', 'npos',
                              'bl diff/sample', 'ic', 'ds', 'ig']
-        self.raw_data = np.array([i.strip('\r\n').split('\t') for i in self.reader_object])[1:]
+        self.raw_data = np.array([i.strip('\r\n').split('\t') for i in open(self.file_name)])[1:]
         self.sample_names = list(set([i[0] for i in self.raw_data]))
 
         self.raw_data = np.array([i for i in self.raw_data if i[0] == sample_name

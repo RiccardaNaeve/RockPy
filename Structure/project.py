@@ -160,19 +160,12 @@ class Sample():
                 if not self.results:
                     self.results = RockPyData(column_names=measurement.results.column_names,
                                               data=measurement.results.data, row_names=measurement.suffix)
-                    # if s_type:
-                    # self.results.append_columns(s_type, s_value)
                 else:
                     c_names = measurement.results.column_names
                     data = measurement.results.data
-                    # if s_type:
-                    # c_names = np.append(c_names, s_type)
-                    # data = data[0][:, 0]
-                    # data = np.append(data, s_value)
-                    # print data
-                    # print c_names
                     rpdata = RockPyData(column_names=c_names, data=data, row_names=measurement.suffix)
                     self.results = self.results.append_rows(rpdata)
+        return self.results
 
     @property
     def mass_kg(self):

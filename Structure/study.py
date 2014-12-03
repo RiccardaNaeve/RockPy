@@ -1,5 +1,6 @@
 __author__ = 'wack'
-
+import pickle
+import json
 
 class Study(object):
     """
@@ -14,3 +15,9 @@ class Study(object):
         :return:
         """
         self.samplegroups = samplegroups
+
+    def save_to_file(self, folder, name):
+        print self.samplegroups.sample_list[0]
+        # pickle.dump(self.samplegroups.sample_list[0], open(folder+name+'.rpy', "wb" ))
+        print json.dumps(self.samplegroups.sample_list[0])
+        #todo

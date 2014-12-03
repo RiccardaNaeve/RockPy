@@ -86,7 +86,7 @@ class Thellier(base.Measurement):
                 rp_data = rp_data.sort('temp')
                 rp_data.define_alias('variable', 'temp')
                 # setattr(self, step, rp_data)
-                self._data.update({step:rp_data})
+                self._data.update({step: rp_data})
             else:
                 setattr(self, step, None)
 
@@ -122,12 +122,55 @@ class Thellier(base.Measurement):
                         if v1 == v2])
         return idx
 
-    def correct_last_step(self):
-        idx = [len(self.th['temp'].v) - 1]
-        last_step = self.th.filter_idx(idx)
-        self.th = self.th - last_step
-        # print self.th
+    def _get_idx_step_var_val(self, step, var, val, *args):
+        """
+        returns the index of the closest value with the variable(var) and the step(step) to the value(val)
 
+        option: inverse:
+           returns all indices except this one
+
+        """
+        out = [np.argmin(abs(self.data[step][var].v - val))]
+        return out
+
+    def delete_step(self, step, var, val):
+        """
+        deletes step with var = var and val = val
+        """
+        idx = self._get_idx_step_var_val(step=step, var=var, val=val)
+        self.data[step] = self.data[step].filter_idx(idx, invert=True)
+
+        return self
+
+    def correct_step(self, step='th', var='variable', val='last'):
+        """
+        corrects the remaining moment from the last th_step
+        """
+        try:
+            calc_data = self.data[step]
+        except KeyError:
+            self.log.error('REFERENCE << %s >> can not be found ' % (step))
+
+        if val == 'last':
+            val = calc_data[var].v[-1]
+        if val == 'first':
+            val = calc_data[var].v[0]
+
+        idx = self._get_idx_step_var_val(step=step, var=var, val=val)
+
+        correction = self.th.filter_idx(idx)  # correction step
+
+        for i in self.data:
+            # store variables so calculation does not affect
+            vars = self.data[i]['variable'].v
+            # calculate correction
+            self.data[i].data -= correction.data
+            # refill variables with original data
+            self.data[i]['variable'] = vars
+            # recalc mag for safety
+            self.data[i]['mag'] = self.data[i].magnitude(('x', 'y', 'z'))
+        self.reset__data()
+        return self
     # ## plotting functions
     def plt_dunlop(self):
         plt.plot(self.th['temp'], self.th['mag'], '.-', zorder=1)
@@ -318,7 +361,7 @@ class Thellier(base.Measurement):
         component = parameter.get('component', self.standard_parameters['slope']['component'])
 
         self.log.info('CALCULATING\t << %s >> arai line fit << t_min=%.1f , t_max=%.1f >>' % (component, t_min, t_max))
-        print self.th
+        # print self.th
         equal_steps = list(set(self.th['temp'].v) & set(self.ptrm['temp'].v))
         th_steps = (t_min <= self.th['temp'].v) & (self.th['temp'].v <= t_max)  # True if step between t_min, t_max
         ptrm_steps = (t_min <= self.ptrm['temp'].v) & (

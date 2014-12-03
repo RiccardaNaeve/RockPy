@@ -43,6 +43,8 @@ class Arai(base.Generic):
                     tt = thellier
                     # print tt.data['th']
                 plt_opt = self.get_plt_opt(sample, thellier_objects, thellier)
+                if len(self.sample_list)>1 or len(thellier_objects)>1:
+                    plt_opt.update({'label': sample.name})
                 arai.arai_std(self.ax, tt, self.parameter, **plt_opt)
                 arai.arai_line(self.ax, tt, self.parameter, **plt_opt)
                 plt_opt.update({'linewidth': 0.5})
@@ -51,6 +53,6 @@ class Arai(base.Generic):
                 # x.append(max(thellier.ptrm[self.parameter['component']].v))  # append max for x_lim
                 # y.append(max(thellier.th[self.parameter['component']].v))  # append max for y_lim
         if len(self.sample_list)>1 or len(thellier_objects)>1:
-            plt.legend(loc='best')
+            self.ax.legend(loc='best')
         # self.ax.set_xlim([0, max(x)])
         # self.ax.set_ylim([0, max(y)])

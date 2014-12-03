@@ -10,7 +10,7 @@ class Jr6(base.Machine):
         super(Jr6, self).__init__(dfile=dfile, sample_name=sample_name)
         self.header = ['sample', 'mode', 'x', 'y', 'z', 'exponent']
         self.floats = ['x', 'y', 'z', 'exponent']
-        self.raw_data = [i.strip('\r\n') for i in self.reader_object.readlines()]
+        self.raw_data = [i.strip('\r\n') for i in open(self.file_name).readlines()]
         self.names = [i[:10].strip() for i in self.raw_data]
         self.modes = np.array([i[10:19].strip() for i in self.raw_data])
         x = [float(i[19:25].strip()) for i in self.raw_data]

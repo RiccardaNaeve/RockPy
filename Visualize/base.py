@@ -288,7 +288,7 @@ class Generic(object):
         plt_opt = {'marker': self.markers[self.sample_list.index(sample)],
                    'markersize': self.markersizes[self.sample_list.index(sample)],
                    'color': self.colors[measurements.index(measurement)],
-                   'linestyle': self.linestyles[measurements.index(measurement)],
+                   # 'linestyle': self.linestyles[measurements.index(measurement)],
                    'label': label}
         return plt_opt
 

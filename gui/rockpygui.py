@@ -4,6 +4,7 @@ __author__ = 'wack'
 import wx
 import wx.aui
 import wx.lib.agw.customtreectrl as ctc
+from wx import xrc
 
 class MainFrame(wx.Frame):
 
@@ -12,33 +13,24 @@ class MainFrame(wx.Frame):
                  style=wx.DEFAULT_FRAME_STYLE):
         wx.Frame.__init__(self, parent, id, title, pos, size, style)
 
-        # make status bar
+        # get xrc ressources
+        self.xrc = xrc.XmlResource("rockpygui.xrc")
+
+        self.InitMenu()
+        self.InitStatusBar()
+        self.InitAuiManager()
+
+        self.Bind(wx.EVT_CLOSE, self.OnClose)
+
+    def InitMenu(self):
+        self.SetMenuBar(self.xrc.LoadMenuBar("mainmenubar"))
+        self.Bind(wx.EVT_MENU, self.OnExit, id=xrc.XRCID("ExitMenuItem"))
+
+    def InitStatusBar(self):
         self.CreateStatusBar()
         self.SetStatusText("This is RockPy statusbar")
 
-        # make menu bar
-        # Prepare the menu bar
-        menuBar = wx.MenuBar()
-
-        # 1st menu from left
-        datamenu = wx.Menu()
-        datamenu.Append(wx.NewId(), "New &SampleGroup", "Not implemented")
-        datamenu.AppendSeparator()
-        self.Bind(wx.EVT_MENU, self.OnExit, datamenu.Append(wx.NewId(), "&Exit", "Exit RockPyGui"))
-        # Add menu to the menu bar
-        menuBar.Append(datamenu, "&Data")
-
-        # 2nd menu from left
-        menu2 = wx.Menu()
-        menu2.Append(wx.NewId(), "Edit1", "Not implemented")
-        menu2.Append(wx.NewId(), "Edit2", "Not implemented")
-
-        # Append 2nd menu
-        menuBar.Append(menu2, "&Edit")
-
-        self.SetMenuBar(menuBar)
-
-
+    def InitAuiManager(self):
         # make aui manager to manage docking window layout
         self._mgr = wx.aui.AuiManager(self)
 
@@ -61,9 +53,6 @@ class MainFrame(wx.Frame):
 
         # tell the manager to 'commit' all the changes just made
         self._mgr.Update()
-
-        self.Bind(wx.EVT_CLOSE, self.OnClose)
-
 
     def createTree(self):
         # Create a CustomTreeCtrl instance
@@ -103,13 +92,25 @@ class MainFrame(wx.Frame):
         self.Close()
     
     def OnClose(self, event):
-        # deinitialize the frame manager
-        self._mgr.UnInit()
-        # delete the frame
-        self.Destroy()
+        dlg = wx.MessageDialog(self,
+              "Do you really want to close this application?",
+              "Confirm Exit", wx.OK | wx.CANCEL | wx.ICON_QUESTION)
+        result = dlg.ShowModal()
+        dlg.Destroy()
+        if result == wx.ID_OK:
+            # deinitialize the frame manager
+            self._mgr.UnInit()
+            # delete the frame
+            self.Destroy()
+
+def main():
+    app = wx.App()
+    frame = MainFrame(None)
+    frame.Show()
+    app.MainLoop()
 
 
-app = wx.App()
-frame = MainFrame(None)
-frame.Show()
-app.MainLoop()
+if __name__ == '__main__':
+    main()
+
+

@@ -4,6 +4,7 @@ __author__ = 'wack'
 import wx
 import wx.aui
 import wx.lib.agw.customtreectrl as ctc
+import wx.py.crust
 from wx import xrc
 
 class MainFrame(wx.Frame):
@@ -35,9 +36,9 @@ class MainFrame(wx.Frame):
         self._mgr = wx.aui.AuiManager(self)
 
 
-        self.text = wx.TextCtrl(self, -1, 'und hier auch',
-                            wx.DefaultPosition, wx.Size(200,150),
-                            wx.NO_BORDER | wx.TE_MULTILINE)
+        #self.text = wx.TextCtrl(self, -1, 'und hier auch',
+        #                    wx.DefaultPosition, wx.Size(200,150),
+        #                    wx.NO_BORDER | wx.TE_MULTILINE)
 
         self.maintext = wx.TextCtrl(self, -1, 'hier soll mal was Wichtiges rein ....',
                             wx.DefaultPosition, wx.Size(200,150),
@@ -49,7 +50,8 @@ class MainFrame(wx.Frame):
         self._mgr.AddPane(self.navpanel, wx.aui.AuiPaneInfo().
                           Name("Navigator").Caption("Navigator").Left().
                           CloseButton(True).MaximizeButton(True).BestSize((300, 500)))
-        self._mgr.AddPane(self.text, wx.BOTTOM, 'Text...')
+        self._mgr.AddPane( wx.py.crust.Crust(parent = self), wx.aui.AuiPaneInfo().Bottom().BestSize((300, 400)), 'Shell')
+        #self._mgr.AddPane(self.text, wx.BOTTOM, 'Text...')
         self._mgr.AddPane(self.maintext, wx.CENTER)
 
         # tell the manager to 'commit' all the changes just made

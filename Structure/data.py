@@ -35,6 +35,7 @@ def condense(listofRPD, substfunc='mean'):
     :param substfunc: see eliminate_duplicate_variable_rows
     :return: condensed RockPyData object
     """
+    listofRPD = _to_tuple(listofRPD)
     res = deepcopy(listofRPD[0])
     for rpd in listofRPD[1:]:
         res = res.append_rows(rpd, ignore_row_names=True)

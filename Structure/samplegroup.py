@@ -43,7 +43,7 @@ class SampleGroup(object):
         if item in self.samples:
             return self.samples[item]
         try:
-            return self.sample_list[item].name
+            return self.sample_list[item]
         except KeyError:
             raise KeyError('SampleGroup has no Sample << %s >>' %item)
 
@@ -340,7 +340,7 @@ class SampleGroup(object):
             for tval in sorted(ttype_results[ttype].keys()):
                 aux = ttype_results[ttype][tval]
                 aux.define_alias('variable', 'ttype ' + ttype)
-                aux = aux.eliminate_duplicate_variable_rows(substfunc=substfunc)
+                aux = condense(aux, substfunc=substfunc)
                 if out == None:
                     out = {ttype: aux}
                 else:

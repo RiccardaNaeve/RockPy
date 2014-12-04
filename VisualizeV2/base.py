@@ -10,12 +10,46 @@ import RockPy as rp
 import RockPy.Functions
 from matplotlib.lines import Line2D
 import copy
-
+import RockPy
 
 RockPy.Functions.general.create_logger('RockPy.VISUALIZE')
 
 
 class Generic(object):
+    """
+    You can either give a sample, a samplegroup or a whole study into a plot.
+    The standard behaviour of a plot is as follows:
+
+    Study
+    =====
+    assuming you pass a study into a plot:
+
+        This will plot a mean for each sample_group
+
+        e.g. useful for lots of groups
+        colors = Sample_groups
+        lines = treatments
+
+    Sample_Group
+    ============
+    passing a sample_group into a plot:
+
+       This will plot all samples in sample_group and the average
+
+    Sample
+    ======
+    passing a sample in to a plot:
+
+       This will plot the sample and all the measurements
+       open question:
+       - do we need a average measurement function or is this done through sample groups
+
+
+    OPEN QUESTIONS
+    ==============
+    - passing a measurement ? is that something we want?
+
+    """
     def __init__(self, plot_samples=None, norm=None,
                  plot='show', folder=None, name=None,
                  create_fig=True, create_ax=True,
@@ -27,12 +61,14 @@ class Generic(object):
         self.existing_visuals = {i.__name__: i for i in Generic.inheritors()}
 
         self._required = {}
-        self._group_from_list(plot_samples)
+        # self._group_from_list(plot_samples)
         self._plots = {}
+        self.plot_samples_type = type(plot_samples)
+        self.plot_samples = self._study_from_list(plot_samples)
 
         self.color_source = options.pop('color_source', self.hierarchy[self.plot_samples_type])
         self.marker_source = options.pop('marker_source', self.hierarchy[self.plot_samples_type])
-        self.ls_source = options.pop('linestyle_source', self.hierarchy['sample'])
+        self.ls_source = options.pop('linestyle_source', 'treatment')
 
         self._fig_opt = fig_opt
 
@@ -44,11 +80,9 @@ class Generic(object):
 
     @property
     def hierarchy(self):
-        h = {'study': 'sample_group',
-             'sample_group': 'sample',
-             'sample': 'measurement',
-             'measurement': 'treatment',
-             'none': None}
+        h = {RockPy.Study: 'sample_group',
+             RockPy.SampleGroup: 'sample',
+             RockPy.Sample: 'measurement'}
         return h
 
 
@@ -142,6 +176,16 @@ class Generic(object):
             self._folder = expanduser("~") + '/Desktop/'
         else:
             self._folder = folder
+
+    def _study_from_list(self, slist):
+        """
+        converts list of samples/sample_groups -> study
+        """
+        if not isinstance(slist, RockPy.Study):
+            out = RockPy.Study(slist)
+        else:
+            out = slist
+        return out
 
     def _group_from_list(self, s_list):
         """

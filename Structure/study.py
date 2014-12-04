@@ -25,10 +25,16 @@ class Study(object):
         self.add_samplegroup(samplegroups)
 
     def __getitem__(self, item):
+        """
+        study['all'] returns a sample_group with all samples of all samplegroups
+
+        for group in study: iterates over all samplegroups, excluding 'all'
+
+        """
         if item in self.gdict:
             return self.gdict[item]
         try:
-            return self.samplegroups[item]
+            return self._samplegroups[item]
         except KeyError:
             raise KeyError('Study has no sampleGroup << %s >>' %item)
 
@@ -43,6 +49,10 @@ class Study(object):
             return [self.all_samplegroup] + self._samplegroups
         else:
             return self._samplegroups
+
+    @property
+    def samples(self):
+        return self.all_samplegroup.sample_list
 
     @property
     def gdict(self):

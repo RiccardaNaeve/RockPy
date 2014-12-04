@@ -113,8 +113,8 @@ class Sample():
             self.add_measurement(mtype='height', mfile=None, machine=length_machine,
                                  value=float(height), unit=length_unit)
 
-    def __repr__(self):
-        return '<< %s - Structure.sample.Sample >>' % self.name
+    # def __repr__(self):
+    #     return '<< %s - Structure.sample.Sample >>' % self.name
 
     ''' ADD FUNCTIONS '''
 
@@ -151,6 +151,7 @@ class Sample():
             self.log.error(' << %s >> not implemented, yet' % mtype)
 
     def calc_all(self, **options):
+        self.results = None
         for measurement in self.measurements:
             if not measurement.mtype in ['mass', 'height', 'diameter']:
                 s_type = None

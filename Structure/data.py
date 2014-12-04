@@ -797,6 +797,8 @@ class RockPyData(object):
     calculation is applied to all columns of other operand
     e.g. (V,A,B,C) + (V,A) = (V,A+A)
     e.g. (V,A,B,C) + (V,D) = (V,A+D,B+D,C+D)
+    ?????
+    e.g. (V,A,B,C) + (A,B,C) = (V,A+A,B+B,C+C)
 
 
     open questions / Todo:

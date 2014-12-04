@@ -14,11 +14,22 @@ log = logging.getLogger(__name__)
 
 
 class SampleGroup(object):
-    def __init__(self, sample_list=None, sample_file=None, **options):
+    """
+    Container for Samples, has special calculation methods
+    """
+
+    count = 0
+
+    def __init__(self, name=None, sample_list=None, sample_file=None, **options):
+        SampleGroup.count += 1
+
         self.log = log  # logging.getLogger('RockPy.' + type(self).__name__)
         self.log.info('CRATING new << samplegroup >>')
 
         # ## initialize
+        if name is None:
+            name = 'SampleGroup %04i' % (self.count)
+        self.name = name
         self.samples = {}
         self.results = None
 
@@ -28,6 +39,13 @@ class SampleGroup(object):
         if sample_list:
             self.add_samples(sample_list)
 
+    def __getitem__(self, item):
+        if item in self.samples:
+            return self.samples[item]
+        try:
+            return self.sample_list[item].name
+        except KeyError:
+            raise KeyError('SampleGroup has no Sample << %s >>' %item)
 
     def import_multiple_samples(self, sample_file, length_unit='mm', mass_unit='mg', **options):
         """
@@ -113,9 +131,9 @@ class SampleGroup(object):
         out = {s.name: s.mtype_ttype_tval_mdict for s in self.slist}
         return out
 
-    ### measurement stage
+    # ## measurement stage
 
-    #measurement: samples
+    # measurement: samples
     @property
     def mtype_sdict(self):
         out = {mtype: self.get_samples(mtype=mtype) for mtype in self.mtypes}
@@ -259,18 +277,17 @@ class SampleGroup(object):
         """
         return sorted(list(set([t for sample in self.sample_list for t in sample.ttypes])))
 
-    @property
-    def ttype_results(self):
+    def ttype_results(self, parameter):
         if not self.results:
-            self.calc_all()
+            self.calc_all(**parameter)
         ttypes = [i for i in self.results.column_names if 'ttype' in i]
         out = {i.split()[1]: {round(j, 2): None for j in self.results[i].v} for i in ttypes}
 
         for ttype in out:
             for tval in out[ttype]:
-                key = 'ttype '+ttype
+                key = 'ttype ' + ttype
                 idx = np.where(self.results[key].v == tval)[0]
-                out[ttype][tval]= self.results.filter_idx(idx)
+                out[ttype][tval] = self.results.filter_idx(idx)
         return out
 
     def _get_measurements_with_treatment(self, ttype, tvalue):
@@ -297,6 +314,7 @@ class SampleGroup(object):
 
 
     def calc_all(self, **parameter):
+        self.results = None
         for sample in self.sample_list:
             label = sample.name
             sample.calc_all(**parameter)
@@ -309,22 +327,26 @@ class SampleGroup(object):
                                     data=results.data, row_names=[label for i in results.data])
                 self.results = self.results.append_rows(rpdata)
 
-    def get_results(self, mtype, **parameter):
-        i = 0
-        data = []
-        for sample in self.sample_list:
-            measurements = sample.get_measurements(mtype)
-            for measurement in measurements:
-                aux = []
-                measurement.calc_all(**parameter)
-                if i == 0:
-                    header = ['sample_name']
-                    header = measurement.results.column_names
-                aux = [sample.name + '.' + measurement.suffix]
-                aux += measurement.results.data
-                i += 1
-                data.append(aux)
-                # self.results = RockPyData(column_names=header, data=data)
+    def average_results(self, parameter):
+        """
+        makes averages of all calculations for all samples in group. Only samples with same treatments are averaged
+
+        prams: parameter are calculation parameters, has to be a dictionary
+        """
+        substfunc = parameter.pop('substfunc', 'mean')
+        out = None
+        ttype_results = self.ttype_results(parameter=parameter)
+        for ttype in ttype_results:
+            for tval in sorted(ttype_results[ttype].keys()):
+                aux = ttype_results[ttype][tval]
+                aux.define_alias('variable', 'ttype ' + ttype)
+                aux = aux.eliminate_duplicate_variable_rows(substfunc=substfunc)
+                if out == None:
+                    out = {ttype: aux}
+                else:
+                    out[ttype] = out[ttype].append_rows(aux)
+        return out
+
 
     def __add__(self, other):
         self_copy = SampleGroup(sample_list=self.sample_list)
@@ -440,7 +462,7 @@ class SampleGroup(object):
         data = {}
         is_data = {}
 
-        for ttype in dict[mtype]:  #cycle through treatments
+        for ttype in dict[mtype]:  # cycle through treatments
             data[ttype] = {}
             is_data[ttype] = {}
             for tval in dict[mtype][ttype]:  #cycle through treatment values
@@ -481,7 +503,7 @@ class SampleGroup(object):
                     average_measurement._data[dtype] = average_data[dtype]
                 average_sample.measurements.append(average_measurement)
 
-        #### setting average initial states
+        # ### setting average initial states
         for ttype in is_data:
             for tval in is_data[ttype]:
                 m = average_sample.get_measurements(mtype=mtype, ttype=ttype, tval=tval)

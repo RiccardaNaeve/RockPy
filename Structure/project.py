@@ -11,7 +11,7 @@ from RockPy.Structure.data import RockPyData, condense
 general.create_logger('RockPy.SAMPLE')
 
 
-class Sample():
+class Sample(object):
     """
     Sample in a way a container for measurements
 
@@ -395,7 +395,7 @@ class Sample():
                     measurement.initial_state.data[dtype].define_alias('m', ( 'x', 'y', 'z'))
                     measurement.initial_state.data[dtype]['mag'].v = measurement.initial_state.data[dtype].magnitude(
                         'm')
-        measurement.reset__data(recalc_mag) #todo uncomment after error implemented
+        # measurement.reset__data(recalc_mag) #todo uncomment after error implemented
         return measurement
 
     def __get_variable_list(self, rpdata_list):

@@ -20,43 +20,34 @@ class Plot(base.Generic):
     """
 
 
+class Decay(base.Generic):
+    def initialize_plot(self):
+        super(Decay, self).initialize_plot()
+        self.add_fig()
+
 class Dunlop(base.Generic):
     def initialize_plot(self):
         super(Dunlop, self).initialize_plot()
-        self.std_reference = 'nrm'
-        self.std_parameter = {'t_min': 20, 't_max': 700, 'component': 'mag'}
-        self._required = ['thellier']
-        self.plot = self.add_plot(label='dunlop')
-        self.ax = self.plots['dunlop'].add_subplot(111)
-
+        self.add_fig()
 
     def plotting(self, sample):
-        for m in sample.get_measurements(mtype=self.require_list):
-            Plotting.dunlop.dunlop(self.ax, m)
-
+        print 'dunlop'
 
 class Arai(base.Generic):
     def initialize_plot(self):
         super(Arai, self).initialize_plot()
-        self.std_reference = 'nrm'
-        self.std_parameter = {'t_min': 20, 't_max': 700, 'component': 'mag'}
-        self._required = ['thellier']
-        self.plot = self.add_plot(label='arai')
-        self.ax = self.plots['arai'].add_subplot(111)
+        self.add_fig()
 
     def plotting(self, sample):
-        for m in sample.get_measurements(mtype=self.require_list):
-            # plt_opt = self.get_plt_opt(measurement=m)
-            Plotting.arai.arai_points(self.ax, m, self.parameter)
-
+        print 'arai'
 
 class Multiple(base.Generic):
     def initialize_plot(self):
         arai = Arai(plot_samples=self.study)
         dunlop = Dunlop(plot_samples=self.study)
         super(Multiple, self).initialize_plot()
-        self.add_fig(arai)
-        self.add_fig(dunlop)
+        self.add_fig(fig=arai)
+        self.add_fig(fig=dunlop)
 
 def test():
     sample = RP.Sample(name='test_sample')

@@ -32,10 +32,10 @@ def test():
 
     print('e:\n%s' % e)
 
-    print('e/d:\n%s' % (e/d))
-    print('e*d:\n%s' % (e*d))
     print('e+d:\n%s' % (e+d))
     print('e-d:\n%s' % (e-d))
+    print('e/d:\n%s' % (e/d))
+    print('e*d:\n%s' % (e*d))
 
     print('d/e:\n%s' % (d/e))
     print('d*e:\n%s' % (d*e))

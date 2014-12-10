@@ -50,7 +50,8 @@ class MainFrame(wx.Frame):
         self._mgr.AddPane(self.navpanel, wx.aui.AuiPaneInfo().
                           Name("Navigator").Caption("Navigator").Left().
                           CloseButton(True).MaximizeButton(True).BestSize((300, 500)))
-        self._mgr.AddPane( wx.py.crust.Crust(parent = self), wx.aui.AuiPaneInfo().Bottom().BestSize((300, 400)), 'Shell')
+        self.crust=wx.py.crust.Crust(parent=self)
+        self._mgr.AddPane(self.crust, wx.aui.AuiPaneInfo().Bottom().BestSize((300, 400)), 'Shell')
         #self._mgr.AddPane(self.text, wx.BOTTOM, 'Text...')
         self._mgr.AddPane(self.maintext, wx.CENTER)
 

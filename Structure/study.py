@@ -51,6 +51,10 @@ class Study(object):
             return self._samplegroups
 
     @property
+    def no_all_samplegroups(self):
+        return self._samplegroups
+
+    @property
     def samples(self):
         return self.all_samplegroup.sample_list
 
@@ -98,8 +102,11 @@ class Study(object):
 
     @property
     def all_samplegroup(self):
-        out = np.sum(self._samplegroups)
-        out.name = 'all'
+        if len(self._samplegroups) > 1:
+            out = np.sum(self._samplegroups)
+            out.name = 'all'
+        else:
+            out = self._samplegroups[0]
         return out
 
     def save_to_file(self, folder, name):

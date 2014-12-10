@@ -10,15 +10,16 @@ import matplotlib.pyplot as plt
 __author__ = 'mike'
 
 
-class TestPlot(TestCase):
+
+class TestGeneric(TestCase):
+
     def setUp(self):
         self.sample = RP.Sample(name='test_sample')
-        self.sample.add_measurement(mtype='thellier', mfile='../testing/test_data/NLCRY_Thellier_test.TT', machine='cryomag')
+        self.sample.add_measurement(mtype='thellier', mfile='../testing/test_data/NLCRY_Thellier_test.TT',
+                                    machine='cryomag')
         self.sample_group = RP.SampleGroup(sample_list=self.sample)
         self.Plot = VisualizeV2.base.Generic()
 
-    # def test_plot_dict(self):
-    # self.fail()
 
     def test_sample_names(self):
         self.Plot = VisualizeV2.base.Generic(plot_samples=self.sample)
@@ -30,11 +31,6 @@ class TestPlot(TestCase):
         samples = [self.sample]
         self.assertEqual(samples, self.Plot.samples)
 
-    # def test_folder(self):
-    #     self.fail()
-    #
-    # def test__group_from_list(self):
-    #     self.fail()
 
     def test_sample_nr(self):
         self.Plot = VisualizeV2.base.Generic(plot_samples=self.sample)

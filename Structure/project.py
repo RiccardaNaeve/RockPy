@@ -5,7 +5,8 @@ import logging
 import numpy as np
 from RockPy.Functions import general
 from RockPy.Measurements.base import Measurement
-from RockPy.Structure.data import RockPyData
+from RockPy.Structure.data import RockPyData, condense
+
 
 general.create_logger('RockPy.SAMPLE')
 
@@ -114,7 +115,7 @@ class Sample():
                                  value=float(height), unit=length_unit)
 
     # def __repr__(self):
-    #     return '<< %s - Structure.sample.Sample >>' % self.name
+    # return '<< %s - Structure.sample.Sample >>' % self.name
 
     ''' ADD FUNCTIONS '''
 
@@ -170,11 +171,11 @@ class Sample():
 
     @property
     def mass_kg(self):
-        measurements = self.get_measurements(mtype='mass')
+        measurements = self.get_measurements(mtype='mass', ttype='none')
         if len(measurements) > 1:
             self.log.info('FOUND more than 1 << mass >> measurement. Returning first')
         try:
-            return measurements[0].data['mass'][0]
+            return measurements[0].data['data']['mass'].v
         except IndexError:  # todo fix
             return 1
 
@@ -183,14 +184,15 @@ class Sample():
         measurement = self.get_measurements(mtype='height')
         if len(measurement) > 1:
             self.log.info('FOUND more than 1 << height >> measurement. Returning first')
-        return measurement[0].data['height'][0]
+        return measurements[0].data['data']['height'].v
+
 
     @property
     def diameter_m(self):
         measurement = self.get_measurements(mtype='diameter')
         if len(measurement) > 1:
             self.log.info('FOUND more than 1 << diameter >> measurement. Returning first')
-        return measurement[0].data['diameter'][0]
+        return measurements[0].data['data']['diameter'].v
 
     @property
     def mtypes(self):
@@ -269,13 +271,14 @@ class Sample():
         returns a dictionary of mtypes, with all ttypes in that mtype
         """
         out = {mtype: {ttype: self.get_measurements(mtype=mtype, ttype=ttype)
-        for ttype in self.mtype_ttype_dict[mtype]}
-        for mtype in self.mtypes}
+                       for ttype in self.mtype_ttype_dict[mtype]}
+               for mtype in self.mtypes}
         return out
 
     @property
     def ttype_tval_dict(self):
-        out = {ttype: self.__sort_list_set([m.ttype_dict[ttype].value for m in self.ttype_dict[ttype]]) for ttype in self.ttypes}
+        out = {ttype: self.__sort_list_set([m.ttype_dict[ttype].value for m in self.ttype_dict[ttype]]) for ttype in
+               self.ttypes}
         return out
 
     @property
@@ -300,7 +303,7 @@ class Sample():
         :param mtype:
         :return:
         """
-        if not tval:
+        if tval is None:
             tvalue = np.nan
         else:
             if isinstance(tval, list):
@@ -310,24 +313,18 @@ class Sample():
 
         self.log.debug('SEARCHING\t measurements with  << %s, %s, %s >>' % (mtype, ttype, tvalue))
 
-        out = [m for m in self.measurements]
-
-        if not mtype is None:
-            if not isinstance(mtype, list):
-                mtype = [mtype]
+        out = self.measurements
+        if mtype:
+            mtype = _to_list(mtype)
             out = [m for m in out if m.mtype in mtype]
 
-        if not ttype is None:
-            if isinstance(ttype, list):
-                out = [m for m in out for t in ttype if t in m.ttypes]
-            else:
-                out = [m for m in out if ttype in m.ttypes]
+        if ttype:
+            ttype = _to_list(ttype)
+            out = [m for m in out for t in ttype if t in m.ttypes]
 
-        if not tval is None:
-            if isinstance(tval, list):
-                out = [m for m in out for val in tval if val in m.tvals]
-            else:
-                out = [m for m in out if tval in m.tvals]
+        if tval is not None:
+            tval = _to_list(tval)
+            out = [m for m in out for val in tval if val in m.tvals]
 
         if not tval_range is None:
             if not isinstance(tval_range, list):
@@ -346,6 +343,11 @@ class Sample():
             return
 
         return out
+
+    def delete_measurements(self, mtype=None, ttype=None, tval=None, tval_range=None, **options):
+        measurements_for_del = self.get_measurements(mtype=mtype, ttype=ttype, tval=tval, tval_range=tval_range)
+        if measurements_for_del:
+            self.measurements = [m for m in self.measurements if not m in measurements_for_del]
 
     def get_measurements_with_treatment(self, ttype, **options):
         self.log.debug('SEARCHING\t measurements with treatment type << %s >>' % (ttype.lower()))
@@ -367,3 +369,46 @@ class Sample():
         :return:
         """
         return sorted(list(set(values)))
+
+    def average_measurement(self, mlist, interpolate=False, recalc_mag=False):
+        mlist = _to_list(mlist)
+        measurement = mlist[0]
+        for dtype in measurement.data:
+            aux = [m.data[dtype] for m in mlist]
+
+            if interpolate:
+                varlist = self.__get_variable_list(aux)
+                if len(varlist) > 1:
+                    aux = [m.interpolate(varlist) for m in aux]
+
+            measurement.data[dtype] = condense(aux)
+            measurement.data[dtype] = measurement.data[dtype].sort('variable')
+            if recalc_mag:
+                measurement.data[dtype].define_alias('m', ( 'x', 'y', 'z'))
+                measurement.data[dtype]['mag'].v = measurement.data[dtype].magnitude('m')
+        if measurement.initial_state:
+            for dtype in measurement.initial_state.data:
+                aux = [m.initial_state.data[dtype] for m in mlist if m.initial_state]
+                measurement.initial_state.data[dtype] = condense(aux)
+                measurement.initial_state.data[dtype] = measurement.initial_state.data[dtype].sort('variable')
+                if recalc_mag:
+                    measurement.initial_state.data[dtype].define_alias('m', ( 'x', 'y', 'z'))
+                    measurement.initial_state.data[dtype]['mag'].v = measurement.initial_state.data[dtype].magnitude(
+                        'm')
+        measurement.reset__data(recalc_mag) #todo uncomment after error implemented
+        return measurement
+
+    def __get_variable_list(self, rpdata_list):
+        out = []
+        for rp in rpdata_list:
+            out.extend(rp['variable'].v)
+        return self.__sort_list_set(out)
+
+
+def _to_list(oneormoreitems):
+    """
+    convert argument to tuple of elements
+    :param oneormoreitems: single number or string or list of numbers or strings
+    :return: tuple of elements
+    """
+    return oneormoreitems if hasattr(oneormoreitems, '__iter__') else [oneormoreitems]

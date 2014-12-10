@@ -21,10 +21,10 @@ class Mass(Measurement):
 
         mass_conversion = convert2(unit, 'kg', 'mass')
 
-        self._data = RockPyData(column_names=['mass', 'time', 'std_dev'])
-        self._data['mass'] = value * mass_conversion
-        self._data['time'] = time
-        self._data['std_dev'] = std
+        self._data = {'data': RockPyData(column_names=['mass', 'time', 'std_dev'])}
+        self._data['data']['mass'] = value * mass_conversion
+        self._data['data']['time'] = time
+        self._data['data']['std_dev'] = std
 
 
     def format_generic(self):
@@ -48,10 +48,10 @@ class Length(Measurement):
         self.machine = machine
         length_conversion = convert2(unit, 'm', 'length')
 
-        self._data = RockPyData(column_names=[mtype, 'time', 'std_dev'])
-        self._data[mtype] = value * length_conversion
-        self._data['time'] = time
-        self._data['std_dev'] = std
+        self._data = {'data':RockPyData(column_names=[mtype, 'time', 'std_dev'])}
+        self._data['data'][mtype] = value * length_conversion
+        self._data['data']['time'] = time
+        self._data['data']['std_dev'] = std
 
     def format_generic(self):
         pass

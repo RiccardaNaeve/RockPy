@@ -13,6 +13,7 @@ import copy
 import RockPy
 
 RockPy.Functions.general.create_logger('RockPy.VISUALIZE')
+import RockPy.Measurements.base
 
 
 class Generic(object):
@@ -50,41 +51,119 @@ class Generic(object):
     - passing a measurement ? is that something we want?
 
     """
+
     def __init__(self, plot_samples=None, norm=None,
+                 parameter=dict(),
+                 reference='nrm', rtype='mag', vval=None, norm_method='max',
                  plot='show', folder=None, name=None,
                  create_fig=True, create_ax=True,
+                 plot_all=False,
                  fig_opt=dict(), plt_opt=dict(),
                  **options):
 
         self.log = logging.getLogger('RockPy.VISUALIZE.' + type(self).__name__)
+
+        ## normalization_parameters for normalization of measurement
+        self.norm = {'reference':reference, 'rtype':rtype, 'vval':vval, 'norm_method':norm_method}
         self.name = type(self).__name__
         self.existing_visuals = {i.__name__: i for i in Generic.inheritors()}
 
-        self._required = {}
-        # self._group_from_list(plot_samples)
-        self._plots = {}
-        self.plot_samples_type = type(plot_samples)
-        self.plot_samples = self._study_from_list(plot_samples)
+        self._required = {} #required measurements in a figure
+        self._plots = {} #visual contains ... plots
 
-        self.color_source = options.pop('color_source', self.hierarchy[self.plot_samples_type])
-        self.marker_source = options.pop('marker_source', self.hierarchy[self.plot_samples_type])
+        self.input_type = type(plot_samples)
+        self._hierarchy = self.input_type
+        self.study = self._to_study(plot_samples)
+
+        self._parameter = parameter
+        self.plot_all = plot_all
+
+        self.color_source = options.pop('color_source', self.get_source[self.input_type])
+        self.marker_source = options.pop('marker_source', self.get_source[self.input_type])
         self.ls_source = options.pop('linestyle_source', 'treatment')
 
+        self._figs = {}
         self._fig_opt = fig_opt
 
         self.initialize_plot()
 
-        for sample in self.samples:
-            if self.meets_requirements(sample):
-                self.plotting(sample)
 
     @property
-    def hierarchy(self):
-        h = {RockPy.Study: 'sample_group',
-             RockPy.SampleGroup: 'sample',
-             RockPy.Sample: 'measurement'}
+    def get_source(self):
+        out = {RockPy.Study: 'samplegroup',
+               RockPy.SampleGroup: 'sample',
+               RockPy.Sample: 'measurement',
+        }
+        return out
+
+    def add_samples(self):
+        for plot in self.plot_samples:
+            for sample in self.get_samples_meet_requirements(self.study.all_samplegroup):
+                self.figs[plot].plotting(sample=sample)
+
+    def get_plt_opt(self, measurement, sample_group):
+        out = {'color': color,
+               'marker': marker,
+               'linestyle': line,
+        }
+        return out
+
+    @property
+    def parameter(self):
+        if not self._parameter:
+            parameter = self.std_parameter
+        else:
+            for key in self.std_parameter:
+                if not key in parameter:
+                    parameter.update({key: self.std_parameter[key]})
+        return parameter
+
+    def change_hierarchy(self, new_hierarchy):
+        h = {}
         return h
 
+    @property
+    def figs(self):
+        if self._figs:
+            return self._figs
+        else:
+            return {self.name.lower(): self}
+
+    @property
+    def plot_samples(self):
+        return self.get_plotting_samples()
+
+    def get_plotting_samples(self):
+        """
+        defines the standard plotting behaviour for different input types, can be changed using change_hierarchy method #todo
+
+        :return:
+        """
+        if self._hierarchy == RockPy.Study:
+            # plot sample_group averages
+            out = {}
+            for fig in self.required:  # different figures may have different mtype requirements
+                out.update({fig: []})
+                for mtype in self.required[fig]:
+                    if self.plot_all:
+                        groups = self.study.samplegroups
+                    else:
+                        groups = self.study.no_all_samplegroups
+                    for sg in groups:
+                        samples_meet_req = self.get_samples_meet_requirements(sg)
+                        sampleg = RockPy.SampleGroup(sample_list=samples_meet_req)
+                        s = sampleg.get_average_mtype_sample(mtype=mtype, reference=self.figs[fig].std_reference)
+                        out[fig].append(s)
+
+        if self._hierarchy == RockPy.SampleGroup:
+            # plot samples and sample average
+            pass
+
+        if self._hierarchy == RockPy.Sample:
+            # plot measurements and treatments, ??? average measurement for equal treatment???
+            pass
+
+        return out
 
     @property
     def plot_dict(self):
@@ -100,7 +179,7 @@ class Generic(object):
         if isinstance(self._required, dict):
             return self._required
         else:
-            return {self.name: self._required}
+            return {self.name.lower(): self._required}
 
     @property
     def require_list(self):
@@ -128,6 +207,10 @@ class Generic(object):
         else:
             return False
 
+    def get_samples_meet_requirements(self, sg):
+        out = [sample for sample in sg.sample_list if self.meets_requirements(sample)]
+        return out
+
     # ## TESTED
     @property
     def sample_names(self):
@@ -135,7 +218,8 @@ class Generic(object):
 
     @property
     def samples(self):
-        return self.plot_samples.sample_list
+        pass
+        # return self.plot_samples.sample_list
 
     @property
     def sample_nr(self):
@@ -148,16 +232,17 @@ class Generic(object):
             fig_opt.update({'figsize': (11.69, 8.27)})
         if not label:
             label = len(self._plots)
-        self._plots.update({label: self.create_fig(**fig_opt)})
+        self._plots.update({label.lower(): self.create_fig(**fig_opt)})
         return self.plots[label]
 
     def get_fig(self, label):
         return self.plots[label]
 
     def add_fig(self, fig):
-        if isinstance(fig, Generic):
-            self.plots.update(fig.plots)
-            self._required.update(fig.required)
+        # if isinstance(fig, Generic):
+        self.plots.update(fig.plots)
+        self._required.update(fig.required)
+        self._figs.update({fig.name.lower(): fig})
 
     @property
     def plots(self):
@@ -177,35 +262,38 @@ class Generic(object):
         else:
             self._folder = folder
 
-    def _study_from_list(self, slist):
+    def _to_study(self, slist):
         """
-        converts list of samples/sample_groups -> study
+        converts list of measurements/samples/sample_groups -> study
         """
-        if not isinstance(slist, RockPy.Study):
-            out = RockPy.Study(slist)
-        else:
-            out = slist
+        if not isinstance(slist, list):
+            if isinstance(slist, RockPy.Study):
+                out = slist
+
+            if not isinstance(slist, RockPy.Study):
+                if isinstance(slist, RockPy.SampleGroup) or isinstance(slist, RockPy.Sample):
+                    self.log.debug('CONVERTING %s -> RockPy.Study(%s)' % (type(slist), type(slist)))
+                    out = RockPy.Study(slist)
+                if issubclass(slist, RockPy.Measurements.base):
+                    self.log.debug(
+                        'CONVERTING %s -> RockPy.Sample -> RockPy.Study(Sample(%s))' % (type(slist), type(slist)))
+                    s = RockPy.Sample(name=self.name)
+                    s.measurements.append(slist)
+                    out = RockPy.Study(s)
+
+        if isinstance(slist, list):
+            if all(isinstance(item, RockPy.SampleGroup) for item in slist) or all(
+                    isinstance(item, RockPy.Sample) for item in slist):
+                self.log.debug('CONVERTING %s(%s) -> RockPy.Study(%s(%s))' % (
+                    type(slist), type(slist[0]), type(slist), type(slist[0])))
+                out = RockPy.Study(slist)
+            if all(issubclass(item, RockPy.Measurements.base) for item in slist):
+                self.log.debug(
+                    'CONVERTING %s -> RockPy.Sample -> RockPy.Study(Sample(%s))' % (type(slist), type(slist)))
+                s = RockPy.Sample(name=self.name)
+                s.measurements.extend(slist)
+                out = RockPy.Study(s)
         return out
-
-    def _group_from_list(self, s_list):
-        """
-        takes sample_list argument and checks if it is sample, list(samples) or RockPy.sample_group
-        """
-        # self.plot_samples_type = ''
-        if isinstance(s_list, RockPy.SampleGroup):
-            self.plot_samples = s_list
-            self.plot_samples_type = 'sample_group'
-
-        if isinstance(s_list, list):
-            self.log.debug('CONVERTING list(sample) -> RockPy.SampleGroup(Sample)')
-            self.plot_samples = rp.SampleGroup(sample_list=s_list)
-            self.plot_samples_type = 'sample'
-
-        if isinstance(s_list, rp.Sample):
-            self.log.debug('CONVERTING sample -> list(sample) -> RockPy.SampleGroup(Sample)')
-            self.plot_samples = rp.SampleGroup(sample_list=[s_list])
-            self.plot_samples_type = 'sample'
-
 
     def create_fig(self, **fig_opt):
         fig = plt.figure(**fig_opt)

@@ -11,7 +11,7 @@ import RockPy.Readin.base
 from RockPy.Structure.data import RockPyData
 from RockPy import Treatments
 from RockPy.Readin import *
-
+from copy import deepcopy
 
 RP_functions.create_logger('RockPy.MEASUREMENT')
 # RockPy.Functions.general.create_logger(__name__)
@@ -115,8 +115,8 @@ class Measurement(object):
                     if not self.machine_data.has_data:
                         self.log.error('NO DATA passed: check sample name << %s >>' % sample_obj.name)
             else:
-                self.log.error('UNKNOWN\t MACHINE: << %s >>' % machine)
-                self.log.info('most likely cause is the \"format_%s\" method is missing in the measurement << %s >>' % (
+                self.log.error('UNKNOWN MACHINE: << %s >>' % machine)
+                self.log.error('most likely cause is the \"format_%s\" method is missing in the measurement << %s >>' % (
                     machine, mtype))
         else:
             self.log.error('UNKNOWN\t MTYPE: << %s >>' % mtype)
@@ -160,15 +160,16 @@ class Measurement(object):
         self.calculation_parameters = {i[10:]: None for i in self.calculation_methods}
         self.standard_parameters = {i[10:]: None for i in dir(self) if i.startswith('calculate_') if
                                     not i.endswith('generic')}
-
         if self._treatment_opt:
             self._add_treatment_from_opt()
+
+    def reset__data(self, recalc_mag=False):
+        pass
 
     def __getattr__(self, attr):
         if attr in self.__getattribute__('data').keys():
             return self.data[attr]
         if attr in self.__getattribute__('result_methods'):
-            print attr
             return getattr(self, 'result_'+attr)().v[0]
 
     def import_data(self, rtn_raw_data=None, **options):
@@ -255,6 +256,14 @@ class Measurement(object):
         dictionary of ttype: treatment}
         """
         out = {t.ttype: t for t in self.treatments}
+        return out
+
+    @property
+    def tdict(self):
+        """
+        dictionary of ttype: treatment}
+        """
+        out = {t.ttype: t.value for t in self.treatments}
         return out
 
     @property
@@ -527,12 +536,22 @@ class Measurement(object):
         """
 
         norm_factor = self._get_norm_factor(reference, rtype, vval, norm_method)
-        for name, data in self.data.iteritems():
-            ttypes = [i for i in data.column_names if 'ttype' in i]
-            self.data[name] = data / norm_factor
+        for dtype, dtype_rpd in self.data.iteritems():
+            ttypes = [i for i in dtype_rpd.column_names if 'ttype' in i]
+            self.data[dtype] = dtype_rpd / norm_factor
             if ttypes:
                 for tt in ttypes:
-                    self.data[name][tt] = np.ones(len(data['variable'].v)) * self.ttype_dict[tt[6:]].value
+                    self.data[dtype][tt] = np.ones(len(dtype_rpd['variable'].v)) * self.ttype_dict[tt[6:]].value
+            if 'mag' in self.data[dtype].column_names:
+                self.data[dtype]['mag'] = self.data[dtype].magnitude(('x','y','z'))
+
+
+        if self.initial_state:
+            for dtype, dtype_rpd in self.initial_state.data.iteritems():
+                self.initial_state.data[dtype] = dtype_rpd / norm_factor
+            if 'mag' in self.initial_state.data[dtype].column_names:
+                self.initial_state.data[dtype]['mag'] = self.initial_state.data[dtype].magnitude(('x','y','z'))
+
         return self
 
     def _get_norm_factor(self, reference, rtype, vval, norm_method):

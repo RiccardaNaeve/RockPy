@@ -16,12 +16,16 @@ class Generic(object):
     RockPy.Functions.general.create_logger('RockPy.VISUALIZE')
 
     def __init__(self, sample_list,
+                 # reference='nrm', rtype='mag', vval=None, norm_method='max',
                  norm=None, rtype='mag', vval=None, norm_method='max',
                  plot='show', folder=None, name=None,
                  plt_opt={}, style='screen',
                  create_fig=True, create_ax=True,
-
                  **options):
+
+        ## normalization_parameters for normalization of measurement
+        # self.norm = {'reference':reference, 'rtype':rtype, 'vval':vval, 'norm_method':norm_method}
+
         self.log = logging.getLogger('RockPy.VISUALIZE.' + type(self).__name__)
 
         if plt_opt is None: plt_opt = {}
@@ -81,7 +85,7 @@ class Generic(object):
         # check if a figure is provided, this way multiple plots can be combined into one figure
         if create_fig:
             # self.fig = options.get('fig', plt.figure(figsize=(8, 6), dpi=100))
-            self.fig = options.get('fig', plt.figure(figsize=(11.69, 8.27), dpi=100))
+            self.fig = options.get('fig', plt.figure(figsize=(10, 10), dpi=100))
 
         if create_ax:
             self.ax = options.get('ax', plt.subplot2grid((1, 1), (0, 0), colspan=1, rowspan=1))
@@ -291,6 +295,7 @@ class Generic(object):
                    # 'linestyle': self.linestyles[measurements.index(measurement)],
                    'label': label}
         return plt_opt
+
 
     def create_heat_color_map(self, value_list, reverse=False):
         """

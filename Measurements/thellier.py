@@ -18,7 +18,7 @@ class Thellier(base.Measurement):
 
         # # ## initialize data
         self.steps = ['nrm', 'th', 'pt', 'ac', 'tr', 'ck', 'ptrm', 'sum', 'difference']
-
+        self._data = {}
         # ## SUPER
         super(Thellier, self).__init__(sample_obj, mtype, mfile, machine, **options)
 
@@ -31,10 +31,10 @@ class Thellier(base.Measurement):
             if self.standard_parameters[i] is None:
                 self.standard_parameters[i] = self.standard_parameters['slope']
 
-    def reset__data(self):
-        self.data['ptrm'] = self._ptrm
-        self.data['sum'] = self._sum
-        self.data['difference'] = self._difference
+    def reset__data(self, recalc_m=False):
+        self.data['ptrm'] = self._ptrm(recalc_m)
+        self.data['sum'] = self._sum(recalc_m)
+        self.data['difference'] = self._difference(recalc_m)
         # self._data = {i: getattr(self, i) for i in self.steps}
 
     @property
@@ -85,30 +85,44 @@ class Thellier(base.Measurement):
                 rp_data = rp_data.append_columns('mag', rp_data.magnitude('m'))
                 rp_data = rp_data.sort('temp')
                 rp_data.define_alias('variable', 'temp')
-                # setattr(self, step, rp_data)
                 self._data.update({step: rp_data})
             else:
-                setattr(self, step, None)
+                self._data.update({step: None})
 
-    @property
-    def _ptrm(self):
-        ptrm = self.pt - self.th
-        ptrm.define_alias('m', ( 'x', 'y', 'z'))
-        ptrm['mag'] = ptrm.magnitude('m')
+    def format_generic(self):
+        for step in ['nrm', 'th', 'pt', 'ac', 'tr', 'ck']:
+            self._data.update({step: None})
+        print self._data
+
+    def _ptrm(self, recalc_m=True):
+        idx = self._get_idx_equal_val('pt', 'th')
+        pt = self.data['pt'].filter_idx(idx[:, 0])
+        th = self.data['th'].filter_idx(idx[:, 1])
+        ptrm = pt - th
+        if recalc_m:
+            ptrm.define_alias('m', ( 'x', 'y', 'z'))
+            ptrm['mag'] = ptrm.magnitude('m')
         return ptrm
 
-    @property
-    def _sum(self):
-        sum = self.th + self._ptrm
-        sum.define_alias('m', ( 'x', 'y', 'z'))
-        sum['mag'] = sum.magnitude('m')
+    def _sum(self, recalc_m=True):
+        idx = self._get_idx_equal_val('pt', 'th')
+        pt = self.data['pt'].filter_idx(idx[:, 0])
+        th = self.data['th'].filter_idx(idx[:, 1])
+        sum = th + pt - th
+        if recalc_m:
+            sum.define_alias('m', ( 'x', 'y', 'z'))
+            sum['mag'] = sum.magnitude('m')
         return sum
 
-    @property
-    def _difference(self):
-        difference = self.th - self._ptrm
-        difference.define_alias('m', ( 'x', 'y', 'z'))
-        difference['mag'] = difference.magnitude('m')
+    def _difference(self, recalc_m=True):
+        idx = self._get_idx_equal_val('pt', 'th')
+        pt = self.data['pt'].filter_idx(idx[:, 0])
+        th = self.data['th'].filter_idx(idx[:, 1])
+        ptrm = pt - th
+        difference = th - ptrm
+        if recalc_m:
+            difference.define_alias('m', ( 'x', 'y', 'z'))
+            difference['mag'] = difference.magnitude('m')
         return difference
 
     def _get_idx_tmin_tmax(self, step, t_min, t_max):
@@ -117,8 +131,8 @@ class Thellier(base.Measurement):
 
     def _get_idx_equal_val(self, step_a, step_b, key='temp'):
 
-        idx = np.array([(ix, iy) for iy, v1 in enumerate(getattr(self, step_a)[key].v)
-                        for ix, v2 in enumerate(getattr(self, step_b)[key].v)
+        idx = np.array([(ix, iy) for iy, v1 in enumerate(self.data[step_a][key].v)
+                        for ix, v2 in enumerate(self.data[step_b][key].v)
                         if v1 == v2])
         return idx
 
@@ -139,7 +153,6 @@ class Thellier(base.Measurement):
         """
         idx = self._get_idx_step_var_val(step=step, var=var, val=val)
         self.data[step] = self.data[step].filter_idx(idx, invert=True)
-
         return self
 
     def correct_step(self, step='th', var='variable', val='last'):
@@ -171,6 +184,7 @@ class Thellier(base.Measurement):
             self.data[i]['mag'] = self.data[i].magnitude(('x', 'y', 'z'))
         self.reset__data()
         return self
+
     # ## plotting functions
     def plt_dunlop(self):
         plt.plot(self.th['temp'], self.th['mag'], '.-', zorder=1)

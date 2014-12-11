@@ -1,4 +1,6 @@
 # coding=utf-8
+from Functions.general import _to_list
+
 __author__ = 'Michael Volk'
 # for all project related classes
 import logging
@@ -405,10 +407,3 @@ class Sample(object):
         return self.__sort_list_set(out)
 
 
-def _to_list(oneormoreitems):
-    """
-    convert argument to tuple of elements
-    :param oneormoreitems: single number or string or list of numbers or strings
-    :return: tuple of elements
-    """
-    return oneormoreitems if hasattr(oneormoreitems, '__iter__') else [oneormoreitems]

@@ -3,7 +3,7 @@ import base
 import matplotlib.pyplot as plt
 import Plotting
 import RockPy as RP
-
+import RockPy.Measurements.thellier
 
 class Plot(base.Generic):
     """
@@ -21,33 +21,36 @@ class Plot(base.Generic):
 
 
 class Decay(base.Generic):
-    def initialize_plot(self):
-        super(Decay, self).initialize_plot()
-        self.add_fig()
+    def initialize_visual(self):
+        super(Decay, self).initialize_visual()
+        self.add_plot()
 
 class Dunlop(base.Generic):
-    def initialize_plot(self):
-        super(Dunlop, self).initialize_plot()
-        self.add_fig()
+    def initialize_visual(self):
+        super(Dunlop, self).initialize_visual()
+        self._required = RockPy.Measurements.thellier.Thellier
+        self.add_plot()
 
     def plotting(self, sample):
-        print 'dunlop'
+        pass
 
 class Arai(base.Generic):
-    def initialize_plot(self):
-        super(Arai, self).initialize_plot()
-        self.add_fig()
+    def initialize_visual(self):
+        super(Arai, self).initialize_visual()
+        self._required = RockPy.Measurements.thellier.Thellier
+        self.add_plot()
+        self.add_subplot()
 
     def plotting(self, sample):
-        print 'arai'
+        pass
 
 class Multiple(base.Generic):
-    def initialize_plot(self):
+    def initialize_visual(self):
         arai = Arai(plot_samples=self.study)
         dunlop = Dunlop(plot_samples=self.study)
-        super(Multiple, self).initialize_plot()
-        self.add_fig(fig=arai)
-        self.add_fig(fig=dunlop)
+        super(Multiple, self).initialize_visual()
+        self.add_plot(plot=arai)
+        self.add_plot(plot=dunlop)
 
 def test():
     sample = RP.Sample(name='test_sample')

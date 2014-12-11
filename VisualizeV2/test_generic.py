@@ -40,8 +40,8 @@ class TestGeneric(TestCase):
     def test_add_plot(self):
         for i in range(1):
             self.Plot.add_plot(label='test')
-        self.assertEqual(1, len(self.Plot.plots))
-        self.assertTrue('test' in self.Plot.plots)
+        self.assertEqual(1, len(self.Plot.visuals))
+        self.assertTrue('test' in self.Plot.visuals)
         # self.Plot.plots = None
 
     def test_show(self):

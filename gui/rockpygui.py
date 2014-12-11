@@ -5,6 +5,7 @@ import wx
 import wx.aui
 import wx.lib.agw.customtreectrl as ctc
 import wx.py.crust
+import wx.grid
 from wx import xrc
 
 class MainFrame(wx.Frame):
@@ -41,19 +42,37 @@ class MainFrame(wx.Frame):
         #                    wx.NO_BORDER | wx.TE_MULTILINE)
 
         self.maintext = wx.TextCtrl(self, -1, 'hier soll mal was Wichtiges rein ....',
-                            wx.DefaultPosition, wx.Size(200,150),
+                            wx.DefaultPosition, wx.Size(200, 150),
                             wx.NO_BORDER | wx.TE_MULTILINE)
         # add the panes to the manager
         self.navpanel = self.xrc.LoadPanel(self, "navpanel")
+        self.inspectorpanel = self.xrc.LoadPanel(self, "inspectorpanel")
         self.createTree()
 
         self._mgr.AddPane(self.navpanel, wx.aui.AuiPaneInfo().
                           Name("Navigator").Caption("Navigator").Left().
                           CloseButton(True).MaximizeButton(True).BestSize((300, 500)))
+
+        self._mgr.AddPane(self.inspectorpanel, wx.aui.AuiPaneInfo().
+                          Name("Inspector").Caption("Inspector").Right().
+                          CloseButton(True).MaximizeButton(True).BestSize((300, 500)))
+
         self.crust=wx.py.crust.Crust(parent=self)
         self._mgr.AddPane(self.crust, wx.aui.AuiPaneInfo().Bottom().BestSize((300, 400)), 'Shell')
         #self._mgr.AddPane(self.text, wx.BOTTOM, 'Text...')
-        self._mgr.AddPane(self.maintext, wx.CENTER)
+        #self._mgr.AddPane(self.maintext, wx.CENTER)
+        self.nb = wx.aui.AuiNotebook(self)
+        self.grid = wx.grid.Grid(self.nb)
+        self.grid.CreateGrid(12, 8)
+
+        #sizer = wx.BoxSizer(wx.VERTICAL)
+        #sizer.Add(myGrid, 1, wx.EXPAND)
+        #panel.SetSizer(sizer)
+
+        self.nb.AddPage(self.grid, "Data Table")
+        self.nb.AddPage(self.maintext, "Wichtig")
+
+        self._mgr.AddPane(self.nb, wx.CENTER)
 
         # tell the manager to 'commit' all the changes just made
         self._mgr.Update()

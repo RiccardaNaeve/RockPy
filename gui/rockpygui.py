@@ -41,7 +41,7 @@ class MainFrame(wx.Frame):
         #                    wx.NO_BORDER | wx.TE_MULTILINE)
 
         self.maintext = wx.TextCtrl(self, -1, 'hier soll mal was Wichtiges rein ....',
-                            wx.DefaultPosition, wx.Size(200,150),
+                            wx.DefaultPosition, wx.Size(200, 150),
                             wx.NO_BORDER | wx.TE_MULTILINE)
         # add the panes to the manager
         self.navpanel = self.xrc.LoadPanel(self, "navpanel")
@@ -53,7 +53,11 @@ class MainFrame(wx.Frame):
         self.crust=wx.py.crust.Crust(parent=self)
         self._mgr.AddPane(self.crust, wx.aui.AuiPaneInfo().Bottom().BestSize((300, 400)), 'Shell')
         #self._mgr.AddPane(self.text, wx.BOTTOM, 'Text...')
-        self._mgr.AddPane(self.maintext, wx.CENTER)
+        #self._mgr.AddPane(self.maintext, wx.CENTER)
+        self.nb = wx.aui.AuiNotebook(self)
+        self.nb.AddPage(self.maintext, "Wichtig")
+        self.nb.AddPage(wx.TextCtrl(self, -1, 'auch wichtig'), "Wichtig 2")
+        self._mgr.AddPane(self.nb, wx.CENTER)
 
         # tell the manager to 'commit' all the changes just made
         self._mgr.Update()

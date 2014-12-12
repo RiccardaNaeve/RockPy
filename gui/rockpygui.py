@@ -139,26 +139,25 @@ class MainFrame(wx.Frame):
         # make a panel
         panel = wx.Panel(self.nb)
 
+        # make figure for test
         self.figure = mpl.figure.Figure()
         self.axes = self.figure.add_subplot(111)
         t = np.arange(0.0, 3.0, 0.01)
         s = np.sin(2*np.pi*t)
-
         self.axes.plot(t, s)
         self.canvas = FigureCanvas(panel, -1, self.figure)
 
         # make toolbar
         self.plottoolbar = NavigationToolbar2Wx(self.canvas)
         self.plottoolbar.Realize()
-        #self.SetToolBar(self.plottoolbar)
 
         # Now put all into a sizer
         sizer = wx.BoxSizer(wx.VERTICAL)
         # Best to allow the toolbar to resize!
         sizer.Add(self.plottoolbar, 0, wx.GROW)
         # This way of adding to sizer allows resizing
-        sizer.Add(self.canvas, 1, wx.LEFT|wx.TOP|wx.GROW)
-
+        sizer.Add(self.canvas, 1, wx.LEFT | wx.TOP | wx.GROW)
+        # assign sizer to panel
         panel.SetSizer(sizer)
         panel.Fit()
 

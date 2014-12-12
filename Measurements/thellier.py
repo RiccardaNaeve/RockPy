@@ -18,24 +18,24 @@ class Thellier(base.Measurement):
 
         # # ## initialize data
         self.steps = ['nrm', 'th', 'pt', 'ac', 'tr', 'ck', 'ptrm', 'sum', 'difference']
-
-        ### SUPER
+        self._data = {}
+        # ## SUPER
         super(Thellier, self).__init__(sample_obj, mtype, mfile, machine, **options)
 
         self.standard_parameters['slope'] = {'t_min': 20, 't_max': 700, 'component': 'mag'}
 
         # self._data = {i: getattr(self, i) for i in self.steps[:5]}
         # print self._data
-        # self.reset__data()
+        self.reset__data()
         for i in self.standard_parameters:
             if self.standard_parameters[i] is None:
                 self.standard_parameters[i] = self.standard_parameters['slope']
 
-    def reset__data(self):
-        self.ptrm = self._ptrm
-        self.sum = self._sum
-        self.difference = self._difference
-        self._data = {i: getattr(self, i) for i in self.steps}
+    def reset__data(self, recalc_m=False):
+        self.data['ptrm'] = self._ptrm(recalc_m)
+        self.data['sum'] = self._sum(recalc_m)
+        self.data['difference'] = self._difference(recalc_m)
+        # self._data = {i: getattr(self, i) for i in self.steps}
 
     @property
     def data(self):
@@ -85,29 +85,44 @@ class Thellier(base.Measurement):
                 rp_data = rp_data.append_columns('mag', rp_data.magnitude('m'))
                 rp_data = rp_data.sort('temp')
                 rp_data.define_alias('variable', 'temp')
-                setattr(self, step, rp_data)
+                self._data.update({step: rp_data})
             else:
-                setattr(self, step, None)
+                self._data.update({step: None})
 
-    @property
-    def _ptrm(self):
-        ptrm = self.pt - self.th
-        ptrm.define_alias('m', ( 'x', 'y', 'z'))
-        ptrm['mag'] = ptrm.magnitude('m')
+    def format_generic(self):
+        for step in ['nrm', 'th', 'pt', 'ac', 'tr', 'ck']:
+            self._data.update({step: None})
+        print self._data
+
+    def _ptrm(self, recalc_m=True):
+        idx = self._get_idx_equal_val('pt', 'th')
+        pt = self.data['pt'].filter_idx(idx[:, 0])
+        th = self.data['th'].filter_idx(idx[:, 1])
+        ptrm = pt - th
+        if recalc_m:
+            ptrm.define_alias('m', ( 'x', 'y', 'z'))
+            ptrm['mag'] = ptrm.magnitude('m')
         return ptrm
 
-    @property
-    def _sum(self):
-        sum = self.th + self._ptrm
-        sum.define_alias('m', ( 'x', 'y', 'z'))
-        sum['mag'] = sum.magnitude('m')
+    def _sum(self, recalc_m=True):
+        idx = self._get_idx_equal_val('pt', 'th')
+        pt = self.data['pt'].filter_idx(idx[:, 0])
+        th = self.data['th'].filter_idx(idx[:, 1])
+        sum = th + pt - th
+        if recalc_m:
+            sum.define_alias('m', ( 'x', 'y', 'z'))
+            sum['mag'] = sum.magnitude('m')
         return sum
 
-    @property
-    def _difference(self):
-        difference = self.th - self._ptrm
-        difference.define_alias('m', ( 'x', 'y', 'z'))
-        difference['mag'] = difference.magnitude('m')
+    def _difference(self, recalc_m=True):
+        idx = self._get_idx_equal_val('pt', 'th')
+        pt = self.data['pt'].filter_idx(idx[:, 0])
+        th = self.data['th'].filter_idx(idx[:, 1])
+        ptrm = pt - th
+        difference = th - ptrm
+        if recalc_m:
+            difference.define_alias('m', ( 'x', 'y', 'z'))
+            difference['mag'] = difference.magnitude('m')
         return difference
 
     def _get_idx_tmin_tmax(self, step, t_min, t_max):
@@ -116,16 +131,59 @@ class Thellier(base.Measurement):
 
     def _get_idx_equal_val(self, step_a, step_b, key='temp'):
 
-        idx = np.array([(ix, iy) for iy, v1 in enumerate(getattr(self, step_a)[key].v)
-                        for ix, v2 in enumerate(getattr(self, step_b)[key].v)
+        idx = np.array([(ix, iy) for iy, v1 in enumerate(self.data[step_a][key].v)
+                        for ix, v2 in enumerate(self.data[step_b][key].v)
                         if v1 == v2])
         return idx
 
-    def correct_last_step(self):
-        idx = [len(self.th['temp'].v) - 1]
-        last_step = self.th.filter_idx(idx)
-        self.th = self.th - last_step
-        # print self.th
+    def _get_idx_step_var_val(self, step, var, val, *args):
+        """
+        returns the index of the closest value with the variable(var) and the step(step) to the value(val)
+
+        option: inverse:
+           returns all indices except this one
+
+        """
+        out = [np.argmin(abs(self.data[step][var].v - val))]
+        return out
+
+    def delete_step(self, step, var, val):
+        """
+        deletes step with var = var and val = val
+        """
+        idx = self._get_idx_step_var_val(step=step, var=var, val=val)
+        self.data[step] = self.data[step].filter_idx(idx, invert=True)
+        return self
+
+    def correct_step(self, step='th', var='variable', val='last'):
+        """
+        corrects the remaining moment from the last th_step
+        """
+        try:
+            calc_data = self.data[step]
+        except KeyError:
+            self.log.error('REFERENCE << %s >> can not be found ' % (step))
+
+        if val == 'last':
+            val = calc_data[var].v[-1]
+        if val == 'first':
+            val = calc_data[var].v[0]
+
+        idx = self._get_idx_step_var_val(step=step, var=var, val=val)
+
+        correction = self.th.filter_idx(idx)  # correction step
+
+        for i in self.data:
+            # store variables so calculation does not affect
+            vars = self.data[i]['variable'].v
+            # calculate correction
+            self.data[i].data -= correction.data
+            # refill variables with original data
+            self.data[i]['variable'] = vars
+            # recalc mag for safety
+            self.data[i]['mag'] = self.data[i].magnitude(('x', 'y', 'z'))
+        self.reset__data()
+        return self
 
     # ## plotting functions
     def plt_dunlop(self):
@@ -317,7 +375,7 @@ class Thellier(base.Measurement):
         component = parameter.get('component', self.standard_parameters['slope']['component'])
 
         self.log.info('CALCULATING\t << %s >> arai line fit << t_min=%.1f , t_max=%.1f >>' % (component, t_min, t_max))
-
+        # print self.th
         equal_steps = list(set(self.th['temp'].v) & set(self.ptrm['temp'].v))
         th_steps = (t_min <= self.th['temp'].v) & (self.th['temp'].v <= t_max)  # True if step between t_min, t_max
         ptrm_steps = (t_min <= self.ptrm['temp'].v) & (
@@ -325,7 +383,6 @@ class Thellier(base.Measurement):
 
         th_data = self.th.filter(th_steps)  # filtered data for t_min t_max
         ptrm_data = self.ptrm.filter(ptrm_steps)  # filtered data for t_min t_max
-
         # filtering for equal variables
         th_idx = [i for i, v in enumerate(th_data['temp'].v) if v in equal_steps]
         ptrm_idx = [i for i, v in enumerate(ptrm_data['temp'].v) if v in equal_steps]

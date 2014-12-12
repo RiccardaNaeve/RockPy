@@ -8,7 +8,7 @@ class Machine(object):
         self.log.info('IMPORTING << %s , %s >> file: << %s >>' % (sample_name, type(self).__name__, dfile))
 
         self.sample_name = sample_name
-        self.reader_object = open(dfile)
+        self.file_name = dfile
 
         # ## initialize
         self.raw_data = None

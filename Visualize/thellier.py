@@ -1,7 +1,9 @@
+from Plotting import arai
+from Visualize import base
+
 __author__ = 'mike'
 import matplotlib.pyplot as plt
 import base
-import arai
 from RockPy import Plotting
 import numpy as np
 
@@ -102,6 +104,7 @@ class Dunlop(base.Generic):
             for measurement in measure_dict[sample]:
                 norm_factor = self.get_norm_factor(measurement)
                 plt_opt = self.get_plt_opt(sample=sample, measurements=measure_dict[sample], measurement=measurement)
+                plt_opt.update({'markersize': measurement.tdict['pressure']*4+2})
                 Plotting.dunlop.dunlop(self.ax, measurement, norm_factor=norm_factor, **plt_opt)
 
                 if 'std_fill' in options:
@@ -148,10 +151,10 @@ class Dunlop_Treatments_Difference(base.Generic):
         self.ttype = ttype
         self.component = component
         # self.fig = plt.figure()
-        self.fig = plt.figure(figsize=(11.69, 8.27))
+        self.fig = plt.figure(figsize=(10, 10))
 
-        self.ax1 = plt.subplot2grid((4, 1), (0, 0), rowspan=2)
-        self.ax2 = plt.subplot2grid((4, 1), (2, 0), rowspan=2)
+        # self.ax1 = plt.subplot2grid((4, 1), (0, 0), rowspan=2)
+        self.ax2 = plt.subplot2grid((1, 1), (0, 0), rowspan=1)
         self.get_plot_options(**options)
         self.show(**options)
         plt.tight_layout()
@@ -169,27 +172,27 @@ class Dunlop_Treatments_Difference(base.Generic):
         ptrm_line = ('PTRM', {'color': 'b', 'linestyle': '-', 'marker': '.'})
         sum_line = ('SUM', {'color': 'r', 'linestyle': '-', 'marker': '.'})
 
-        ax1_lines = []
-        ax1_lines.append(th_line)
-        ax1_lines.append(ptrm_line)
-        ax1_lines.append(sum_line)
-        for i, tval in enumerate(sorted(d.keys())):
-            self.markers[i] = '.'
-            self.markersizes[i] = 1 + tval * 5
-            ax1_lines.append(
-                (str(tval) + ' GPa', {'color': 'k', 'linestyle': self.linestyles[i], 'marker': self.markers[i],
-                                      'markersize': self.markersizes[i]}))
-            for j, m in enumerate(d[tval]):
-                if m.mtype == 'thellier':
-                    self.plt_opt.update({'linestyle': self.linestyles[i],
-                                         'marker': self.markers[i],
-                                         'markersize': self.markersizes[i]})
-                    norm_factor = [1, 1]  # m.initial_state.data['mag'].v[0]]
-                    Plotting.dunlop.dunlop(self.ax1, thellier_obj=m, component=self.component, norm_factor=norm_factor,
-                                           **self.plt_opt)
-                    if self.std_fill:
-                        Plotting.dunlop.dunlop_std(self.ax1, thellier_obj=m, component=self.component,
-                                                   norm_factor=norm_factor, **self.plt_opt)
+        # ax1_lines = []
+        # ax1_lines.append(th_line)
+        # ax1_lines.append(ptrm_line)
+        # ax1_lines.append(sum_line)
+        # for i, tval in enumerate(sorted(d.keys())):
+        #     self.markers[i] = '.'
+        #     self.markersizes[i] = 1 + tval * 5
+        #     ax1_lines.append(
+        #         (str(tval) + ' GPa', {'color': 'k', 'linestyle': self.linestyles[i], 'marker': self.markers[i],
+        #                               'markersize': self.markersizes[i]}))
+        #     for j, m in enumerate(d[tval]):
+        #         if m.mtype == 'thellier':
+        #             self.plt_opt.update({'linestyle': self.linestyles[i],
+        #                                  'marker': self.markers[i],
+        #                                  'markersize': self.markersizes[i]})
+        #             norm_factor = [1, 1]  # m.initial_state.data['mag'].v[0]]
+        #             Plotting.dunlop.dunlop(self.ax1, thellier_obj=m, component=self.component, norm_factor=norm_factor,
+        #                                    **self.plt_opt)
+        #             if self.std_fill:
+        #                 Plotting.dunlop.dunlop_std(self.ax1, thellier_obj=m, component=self.component,
+        #                                            norm_factor=norm_factor, **self.plt_opt)
 
         treats = sorted(d.keys())
         initial = min(treats)
@@ -219,7 +222,7 @@ class Dunlop_Treatments_Difference(base.Generic):
                         Plotting.dunlop.difference_std(self.ax2, a, b, component=self.component,
                                                        norm_factor=norm_factor, **self.plt_opt)
 
-        self.ax1.set_title('Dunlop %s' % self.sample_names)
+        # self.ax1.set_title('Dunlop %s' % self.sample_names)
         self.ax2.set_title('differences')
 
         # self.ax2.legend([self.create_dummy_line(**l[1]) for l in ax2_lines],
@@ -227,14 +230,14 @@ class Dunlop_Treatments_Difference(base.Generic):
         # [l[0] for l in ax2_lines],
         # loc='best'
         # )
-        self.ax1.legend([self.create_dummy_line(**l[1]) for l in ax1_lines],
-                        # Line titles
-                        [l[0] for l in ax1_lines],
-                        loc='best',
-                        fontsize=8,
-        )
+        # self.ax1.legend([self.create_dummy_line(**l[1]) for l in ax1_lines],
+        #                 Line titles
+                        # [l[0] for l in ax1_lines],
+                        # loc='best',
+                        # fontsize=8,
+        # )
         self.ax2.set_xlabel = 'Temperature [$^\\circ C$]'
-        self.ax1.set_ylabel = 'Magnetic Moment'
+        # self.ax1.set_ylabel = 'Magnetic Moment'
         self.ax2.set_ylabel = 'M($P_0)-M($P_n$)'
 
 
@@ -446,3 +449,58 @@ class T0_vs_Tn(base.Generic):
                     getattr(self, dtype).set_xlabel('M($P_0$) / M(TRM)')
                     getattr(self, dtype).grid()
                     getattr(self, dtype).plot([0, 1.2], [0, 1.2], '--', color='#808080')
+
+
+class Arai(base.Generic):
+    def __init__(self, sample_list, norm=None,
+                 t_min=20, t_max=700, component='mag',
+                 line=True, check=True,
+                 plot='show', folder=None, name=None,
+                 plt_opt=None, style='screen',
+                 **options):
+
+        super(Arai, self).__init__(sample_list, norm=norm,
+                                   plot=plot, folder=folder, name=name,
+                                   plt_opt=plt_opt, style=style,
+                                   **options)
+
+        self.parameter = {'t_min': t_min,
+                          't_max': t_max,
+                          'component': component}
+
+        self.show()
+        self.x_label = 'pTRM gained [%s]' % ('Am^2')  # todo get_unit
+        self.y_label = 'NRM remaining [%s]' % ('Am^2')  # todo get_unit
+        self.ax.set_title('%s'%self.sample_names)
+        if style == 'publication':
+            self.setFigLinesBW()
+
+        self.out()
+
+    def show(self):
+        x = []
+        y = []
+        measurement_dict = self.get_measurement_dict(mtype='thellier')
+        for sample in measurement_dict:
+            thellier_objects = measurement_dict[sample]
+            for thellier in thellier_objects:
+                if self.norm:
+                    tt = thellier.normalize(reference = self.norm, rtype = self.rtype,
+                                            vval = self.vval, norm_method = self.norm_method)
+                else:
+                    tt = thellier
+                    # print tt.data['th']
+                plt_opt = self.get_plt_opt(sample, thellier_objects, thellier)
+                if len(self.sample_list)>1 or len(thellier_objects)>1:
+                    plt_opt.update({'label': sample.name})
+                arai.arai_std(self.ax, tt, self.parameter, **plt_opt)
+                arai.arai_line(self.ax, tt, self.parameter, **plt_opt)
+                plt_opt.update({'linewidth': 0.5})
+                arai.arai_points(self.ax, tt, self.parameter, **plt_opt)
+
+                # x.append(max(thellier.ptrm[self.parameter['component']].v))  # append max for x_lim
+                # y.append(max(thellier.th[self.parameter['component']].v))  # append max for y_lim
+        if len(self.sample_list)>1 or len(thellier_objects)>1:
+            self.ax.legend(loc='best')
+        # self.ax.set_xlim([0, max(x)])
+        # self.ax.set_ylim([0, max(y)])

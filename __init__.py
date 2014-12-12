@@ -3,5 +3,6 @@ import RockPy.Functions.general
 import Plotting
 from RockPy.Structure.project import Sample
 from RockPy.Structure.samplegroup import SampleGroup
-
+from RockPy.Structure.study import Study
+from RockPy.Structure.data import RockPyData, condense
 # RockPy.Functions.general.create_logger('RockPy')

@@ -1,2 +1,2 @@
 __author__ = 'mike'
-import base
+import Paleointensity

@@ -35,6 +35,7 @@ def condense(listofRPD, substfunc='mean'):
     :param substfunc: see eliminate_duplicate_variable_rows
     :return: condensed RockPyData object
     """
+    listofRPD = _to_tuple(listofRPD)
     res = deepcopy(listofRPD[0])
     for rpd in listofRPD[1:]:
         res = res.append_rows(rpd, ignore_row_names=True)
@@ -797,6 +798,8 @@ class RockPyData(object):
     calculation is applied to all columns of other operand
     e.g. (V,A,B,C) + (V,A) = (V,A+A)
     e.g. (V,A,B,C) + (V,D) = (V,A+D,B+D,C+D)
+    ?????
+    e.g. (V,A,B,C) + (A,B,C) = (V,A+A,B+B,C+C)
 
 
     open questions / Todo:
@@ -815,7 +818,10 @@ class RockPyData(object):
 
 
 
-    Todo: what to do with errors?
+    Error propagation
+    =================
+    for addition and subtraction the absolute errors are added
+    for division and multiplication the relative errors are added
     """
 
     def __sub__(self, other):
@@ -956,28 +962,39 @@ class RockPyData(object):
         mridx = np.array(np.all((d1[:, None, :] == d2[None, :, :]), axis=-1).nonzero()).T
 
         result_c_names = self.column_names_from_key('variable') + self.column_indices_to_names(mcidx[:, 0])
-        results_variable = d1[mridx[:, 0],
-                           :]  # all columns of variable but only those lines which match in both rockpydata objects
+        #results_variable = d1[mridx[:, 0], :]  # all columns of variable but only those lines which match in both rockpydata objects
 
         # data for calculation of both objects with reordered columns according to mcidx
-        rd1 = self.data[mridx[:, 0], :][:, mcidx[:, 0]][:, :, 0]
-        rd2 = other.data[mridx[:, 1], :][:, mcidx[:, 1]][:, :, 0]
+        rd1v = self.data[mridx[:, 0], :][:, mcidx[:, 0]][:, :, 0]   # values
+        rd2v = other.data[mridx[:, 1], :][:, mcidx[:, 1]][:, :, 0]  # values
+        rd1e = self.data[mridx[:, 0], :][:, mcidx[:, 0]][:, :, 1]  # errors
+        rd2e = other.data[mridx[:, 1], :][:, mcidx[:, 1]][:, :, 1] # errors
 
         # todo: care about errors
         if op == '+':
-            result_data = rd1 + rd2
+            result_values = rd1v + rd2v
+            result_errors = rd1e + rd2e  # add absolute errors
         elif op == '-':
-            result_data = rd1 - rd2
+            result_values = rd1v - rd2v
+            result_errors = rd1e + rd2e  # add absolute errors
         elif op == '*':
-            result_data = rd1 * rd2
+            result_values = rd1v * rd2v
+            result_errors = (rd1e/rd1v + rd2e/rd2v) * result_values  # add relative errors and convert to absolute errors
         elif op == '/':
-            result_data = rd1 / rd2
+            result_values = rd1v / rd2v
+            result_errors = (rd1e/rd1v + rd2e/rd2v) * result_values  # add relative errors and convert to absolute errors
         else:
             raise RuntimeError('unknown operand %s' % op)
 
+        result_values = result_values[:, :, np.newaxis]  # add 3rd data dimension
+        result_errors = result_errors[:, :, np.newaxis]  # add 3rd data dimension
+
+        result_data = np.concatenate((result_values, result_errors), axis=2)  # put values and results back together
+
         # todo: get column_names and units right
-        results_rpd_data = np.append(results_variable, result_data,
-                                     axis=1)  # variable columns + calculated data columns
+        results_variable = self['variable'].data[mridx[:, 0], :, :]
+
+        results_rpd_data = np.append(results_variable, result_data, axis=1)  # variable columns + calculated data columns
 
         return RockPyData(column_names=result_c_names, row_names=None, data=results_rpd_data)
 

@@ -1,6 +1,6 @@
 from unittest import TestCase
 import RockPy as RP
-import VisualizeV2.base
+from RockPy import VisualizeV2.base
 import matplotlib.pyplot as plt
 __author__ = 'mike'
 

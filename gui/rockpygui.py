@@ -6,6 +6,17 @@ import wx.aui
 import wx.lib.agw.customtreectrl as ctc
 import wx.py.crust
 import wx.grid
+import matplotlib as mpl
+import numpy as np
+# uncomment the following to use wx rather than wxagg
+#matplotlib.use('WX')
+#from matplotlib.backends.backend_wx import FigureCanvasWx as FigureCanvas
+
+# comment out the following to use wx rather than wxagg
+mpl.use('WXAgg')
+from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg as FigureCanvas
+from matplotlib.backends.backend_wx import NavigationToolbar2Wx
+
 from wx import xrc
 
 class MainFrame(wx.Frame):
@@ -72,6 +83,8 @@ class MainFrame(wx.Frame):
         self.nb.AddPage(self.grid, "Data Table")
         self.nb.AddPage(self.maintext, "Wichtig")
 
+        self.createTestPlot()
+
         self._mgr.AddPane(self.nb, wx.CENTER)
 
         # Bind aui manager events
@@ -121,6 +134,37 @@ class MainFrame(wx.Frame):
                     self.navtree.SetItemImage(item, fileidx, wx.TreeItemIcon_Normal)
 
         self.navtree.Expand(root)
+
+    def createTestPlot(self):
+        # make a panel
+        panel = wx.Panel(self.nb)
+
+        self.figure = mpl.figure.Figure()
+        self.axes = self.figure.add_subplot(111)
+        t = np.arange(0.0, 3.0, 0.01)
+        s = np.sin(2*np.pi*t)
+
+        self.axes.plot(t, s)
+        self.canvas = FigureCanvas(panel, -1, self.figure)
+
+        # make toolbar
+        self.plottoolbar = NavigationToolbar2Wx(self.canvas)
+        self.plottoolbar.Realize()
+        #self.SetToolBar(self.plottoolbar)
+
+        # Now put all into a sizer
+        sizer = wx.BoxSizer(wx.VERTICAL)
+        # Best to allow the toolbar to resize!
+        sizer.Add(self.plottoolbar, 0, wx.GROW)
+        # This way of adding to sizer allows resizing
+        sizer.Add(self.canvas, 1, wx.LEFT|wx.TOP|wx.GROW)
+
+        panel.SetSizer(sizer)
+        panel.Fit()
+
+        self.nb.AddPage(panel, "Plot")
+
+
 
     # data menu handlers
     def OnExit(self, event):

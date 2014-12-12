@@ -26,7 +26,18 @@ class MainFrame(wx.Frame):
 
     def InitMenu(self):
         self.SetMenuBar(self.xrc.LoadMenuBar("mainmenubar"))
+        # initial check of menu items
+        self.GetMenuBar().FindItemById(xrc.XRCID("PythonConsoleMenuItem")).Check(False)
+        self.GetMenuBar().FindItemById(xrc.XRCID("NavigatorMenuItem")).Check(True)
+        self.GetMenuBar().FindItemById(xrc.XRCID("InspectorMenuItem")).Check(True)
+
+        # Data
         self.Bind(wx.EVT_MENU, self.OnExit, id=xrc.XRCID("ExitMenuItem"))
+        # View
+        self.Bind(wx.EVT_MENU, self.OnTogglePane, id=xrc.XRCID("PythonConsoleMenuItem"))
+        self.Bind(wx.EVT_MENU, self.OnTogglePane, id=xrc.XRCID("NavigatorMenuItem"))
+        self.Bind(wx.EVT_MENU, self.OnTogglePane, id=xrc.XRCID("InspectorMenuItem"))
+        # Help
 
     def InitStatusBar(self):
         self.CreateStatusBar()
@@ -35,11 +46,6 @@ class MainFrame(wx.Frame):
     def InitAuiManager(self):
         # make aui manager to manage docking window layout
         self._mgr = wx.aui.AuiManager(self)
-
-
-        #self.text = wx.TextCtrl(self, -1, 'und hier auch',
-        #                    wx.DefaultPosition, wx.Size(200,150),
-        #                    wx.NO_BORDER | wx.TE_MULTILINE)
 
         self.maintext = wx.TextCtrl(self, -1, 'hier soll mal was Wichtiges rein ....',
                             wx.DefaultPosition, wx.Size(200, 150),
@@ -58,24 +64,25 @@ class MainFrame(wx.Frame):
                           CloseButton(True).MaximizeButton(True).BestSize((300, 500)))
 
         self.crust=wx.py.crust.Crust(parent=self)
-        self._mgr.AddPane(self.crust, wx.aui.AuiPaneInfo().Bottom().BestSize((300, 400)), 'Shell')
-        #self._mgr.AddPane(self.text, wx.BOTTOM, 'Text...')
-        #self._mgr.AddPane(self.maintext, wx.CENTER)
+        self._mgr.AddPane(self.crust, wx.aui.AuiPaneInfo().Name("Console").Bottom().BestSize((300, 400)).Hide(), 'Console')
         self.nb = wx.aui.AuiNotebook(self)
         self.grid = wx.grid.Grid(self.nb)
         self.grid.CreateGrid(12, 8)
-
-        #sizer = wx.BoxSizer(wx.VERTICAL)
-        #sizer.Add(myGrid, 1, wx.EXPAND)
-        #panel.SetSizer(sizer)
 
         self.nb.AddPage(self.grid, "Data Table")
         self.nb.AddPage(self.maintext, "Wichtig")
 
         self._mgr.AddPane(self.nb, wx.CENTER)
 
+        # Bind aui manager events
+        self._mgr.Bind(wx.aui.EVT_AUI_PANE_CLOSE, self.OnAuiPaneClose)
+
         # tell the manager to 'commit' all the changes just made
         self._mgr.Update()
+
+        # define panes to toggle as dict menuitemid: panename
+        self.toggle_panes = {xrc.XRCID("PythonConsoleMenuItem"): "Console", xrc.XRCID("InspectorMenuItem"): "Inspector",
+                 xrc.XRCID("NavigatorMenuItem"): "Navigator"}
 
     def createTree(self):
         # Create a CustomTreeCtrl instance and putit within a boxsizer in navtreepanel from xrc
@@ -115,11 +122,25 @@ class MainFrame(wx.Frame):
 
         self.navtree.Expand(root)
 
-
+    # data menu handlers
     def OnExit(self, event):
         self.Close()
-    
+
+    # view menu handlers
+    def OnTogglePane(self, event):
+        pane = self._mgr.GetPane(self.toggle_panes[event.GetId()])
+        if pane.IsShown() and not event.IsChecked():
+            pane.Hide()
+        if not pane.IsShown() and event.IsChecked():
+            pane.Show()
+        self._mgr.Update()
+
     def OnClose(self, event):
+        '''
+        called when user tries to close the main frame
+        :param event:
+        :return:
+        '''
         dlg = wx.MessageDialog(self,
               "Do you really want to close RockPy GUI?",
               "Confirm Exit", wx.OK | wx.CANCEL | wx.ICON_QUESTION)
@@ -130,6 +151,23 @@ class MainFrame(wx.Frame):
             self._mgr.UnInit()
             # delete the frame
             self.Destroy()
+
+    def OnAuiPaneClose(self, event):
+        '''
+        called when an AUI Pane gets closed
+        :param event:
+        :return:
+        '''
+        pane = event.GetPane()
+        rev_toggle_panes = {v: k for k, v in self.toggle_panes.iteritems()}
+        try:
+            menuitemid = rev_toggle_panes[pane.name]
+        except IndexError:
+            print("no matching menu item for pane %s" % pane.name)
+        else:
+            self.GetMenuBar().FindItemById(menuitemid).Check(False)  # uncheck corresponding menu item
+
+
 
 def main():
     app = wx.App()

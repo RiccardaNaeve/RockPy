@@ -142,9 +142,9 @@ class MainFrame(wx.Frame):
         # make figure for test
         self.figure = mpl.figure.Figure()
         self.axes = self.figure.add_subplot(111)
-        t = np.arange(0.0, 3.0, 0.01)
+        t = np.arange(0.0, 3.0, 0.1)
         s = np.sin(2*np.pi*t)
-        self.axes.plot(t, s)
+        self.axes.scatter(t, s, c=[(1.0, 0, 0, 1.0) for i in range(len(t))], marker="o", picker=5)
         self.canvas = FigureCanvas(panel, -1, self.figure)
 
         # make toolbar
@@ -161,7 +161,22 @@ class MainFrame(wx.Frame):
         panel.SetSizer(sizer)
         panel.Fit()
 
+        self.figure.canvas.mpl_connect('pick_event', self.on_pick)
+
         self.nb.AddPage(panel, "Plot")
+
+    def on_pick(self, event):
+        artist = event.artist
+        #print artist
+        #print event.ind
+        fc = artist.get_facecolors()
+        fc = [(1.0, 0, 0, 1.0) for i in range(len(fc))]
+        fc[event.ind[0]] = (0, 1.0, 0, 1.0)
+        artist.set_facecolors(fc)
+
+        #artist.set_color(np.random.random(3))
+        self.figure.canvas.draw()
+
 
 
 
@@ -209,7 +224,6 @@ class MainFrame(wx.Frame):
             print("no matching menu item for pane %s" % pane.name)
         else:
             self.GetMenuBar().FindItemById(menuitemid).Check(False)  # uncheck corresponding menu item
-
 
 
 def main():

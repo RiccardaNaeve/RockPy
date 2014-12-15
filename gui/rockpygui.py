@@ -8,6 +8,7 @@ import wx.py.crust
 import wx.grid
 import matplotlib as mpl
 import numpy as np
+from wx.py.shell import Shell
 # uncomment the following to use wx rather than wxagg
 #matplotlib.use('WX')
 #from matplotlib.backends.backend_wx import FigureCanvasWx as FigureCanvas
@@ -74,8 +75,12 @@ class MainFrame(wx.Frame):
                           Name("Inspector").Caption("Inspector").Right().
                           CloseButton(True).MaximizeButton(True).BestSize((300, 500)))
 
-        self.crust=wx.py.crust.Crust(parent=self)
-        self._mgr.AddPane(self.crust, wx.aui.AuiPaneInfo().Name("Console").Bottom().BestSize((300, 400)).Hide(), 'Console')
+        #self.shell=wx.py.crust.Crust(parent=self)
+        locals = {"ShowFigure": self.ShowFigure}
+        self.shell = Shell(parent=self, introText='Welcome to the RockPy shell ...', locals=locals)
+        #self.shell.issplit=True
+        #self.shell.ToggleTools()  #broken
+        self._mgr.AddPane(self.shell, wx.aui.AuiPaneInfo().Name("Console").Bottom().BestSize((300, 400)).Hide(), 'Console')
         self.nb = wx.aui.AuiNotebook(self)
         self.grid = wx.grid.Grid(self.nb)
         self.grid.CreateGrid(12, 8)
@@ -135,17 +140,11 @@ class MainFrame(wx.Frame):
 
         self.navtree.Expand(root)
 
-    def createTestPlot(self):
+    def ShowFigure(self, figure, title='plot'):
         # make a panel
         panel = wx.Panel(self.nb)
 
-        # make figure for test
-        self.figure = mpl.figure.Figure()
-        self.axes = self.figure.add_subplot(111)
-        t = np.arange(0.0, 3.0, 0.1)
-        s = np.sin(2*np.pi*t)
-        self.axes.scatter(t, s, c=[(1.0, 0, 0, 1.0) for i in range(len(t))], marker="o", picker=5)
-        self.canvas = FigureCanvas(panel, -1, self.figure)
+        self.canvas = FigureCanvas(panel, -1, figure)
 
         # make toolbar
         self.plottoolbar = NavigationToolbar2Wx(self.canvas)
@@ -163,7 +162,16 @@ class MainFrame(wx.Frame):
 
         self.figure.canvas.mpl_connect('pick_event', self.on_pick)
 
-        self.nb.AddPage(panel, "Plot")
+        self.nb.AddPage(panel, title)
+
+    def createTestPlot(self):
+        # make figure for test
+        self.figure = mpl.figure.Figure()
+        self.axes = self.figure.add_subplot(111)
+        t = np.arange(0.0, 3.0, 0.1)
+        s = np.sin(2*np.pi*t)
+        self.axes.scatter(t, s, c=[(1.0, 0, 0, 1.0) for i in range(len(t))], marker="o", picker=5)
+        self.ShowFigure(self.figure)
 
     def on_pick(self, event):
         artist = event.artist
@@ -176,8 +184,6 @@ class MainFrame(wx.Frame):
 
         #artist.set_color(np.random.random(3))
         self.figure.canvas.draw()
-
-
 
 
     # data menu handlers

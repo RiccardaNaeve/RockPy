@@ -1,5 +1,5 @@
 # coding=utf-8
-from Functions.general import _to_list
+from RockPy.Functions.general import _to_list
 
 __author__ = 'Michael Volk'
 # for all project related classes

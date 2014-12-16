@@ -6,6 +6,8 @@ from RockPy.Structure.data import RockPyData, condense
 # script to test data objects
 
 import numpy as np
+import jsonpickle as jp
+import numpyson
 
 from copy import deepcopy
 
@@ -22,6 +24,13 @@ def test():
     # create a rockpydata object with named columns and filled with testdata
     d = RockPyData(column_names=('F', 'Mx', 'My', 'Mz'), row_names=('1.Zeile', '2.Zeile', '3.Zeile'),
                    units=('T', 'mT', 'fT', 'pT'), data=testdata)
+
+    d_json = numpyson.dumps(d)
+    print d_json
+    dd = numpyson.loads(d_json)
+    print repr(dd)
+
+    print "dd:", dd
 
     #d = d.eliminate_duplicate_variable_rows(substfunc='last')
     #print d._find_unique_variable_rows()

@@ -1,4 +1,6 @@
 __author__ = 'volk'
+import numpyson
+
 from RockPy.Structure.project import Sample
 def test():
     # define measurement data file
@@ -9,6 +11,9 @@ def test():
 
     # add measurement
     M = sample.add_measurement(mtype='backfield', mfile=vftb_file, machine='vftb')
+    #print M
+    d = numpyson.dumps( M)
+    print d
 
     # get bcr
     M.calculate_bcr()  # prints the linear interpolation of the value (internal calculation)

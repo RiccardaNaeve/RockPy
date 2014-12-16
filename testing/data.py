@@ -6,16 +6,16 @@ from RockPy.Structure.data import RockPyData, condense
 # script to test data objects
 
 import numpy as np
-import jsonpickle as jp
 import numpyson
 
 from copy import deepcopy
 
+
 def test():
     # define some data for testing
     testdata = ((1, 2, 3, 4),
-                 (2, 6, 7, 8),
-                 (9, 10, 11, 12))
+                (2, 6, 7, 8),
+                (9, 10, 11, 12))
 
     testdata2 = ((1, 1),
                  (2, 2),

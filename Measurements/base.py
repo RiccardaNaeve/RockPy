@@ -163,6 +163,12 @@ class Measurement(object):
         if self._treatment_opt:
             self._add_treatment_from_opt()
 
+    def __getnewargs__(self):
+        return None
+
+    def __getinitargs__(self):
+        return None
+
     def reset__data(self, recalc_mag=False):
         pass
 

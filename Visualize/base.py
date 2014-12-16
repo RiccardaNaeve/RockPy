@@ -194,7 +194,7 @@ class Generic(object):
         return self.ax
 
     def get_fig(self):
-        return self.fig1
+        return self.fig
 
     def save_fig(self):
         plt.savefig(self.folder + self.name, dpi=300)

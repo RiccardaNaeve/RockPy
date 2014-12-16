@@ -343,7 +343,7 @@ class SampleGroup(object):
                                     data=results.data, row_names=[label for i in results.data])
                 self.results = self.results.append_rows(rpdata)
 
-    def average_results(self, parameter):
+    def average_results(self, **parameter):
         """
         makes averages of all calculations for all samples in group. Only samples with same treatments are averaged
 
@@ -351,7 +351,7 @@ class SampleGroup(object):
         """
         substfunc = parameter.pop('substfunc', 'mean')
         out = None
-        ttype_results = self.ttype_results(parameter=parameter)
+        ttype_results = self.ttype_results(**parameter)
         for ttype in ttype_results:
             for tval in sorted(ttype_results[ttype].keys()):
                 aux = ttype_results[ttype][tval]

@@ -34,9 +34,9 @@ class Study(object):
         if item in self.gdict:
             return self.gdict[item]
         try:
-            return self._samplegroups[item]
+            return self.samplegroups[item]
         except KeyError:
-            raise KeyError('Study has no sampleGroup << %s >>' %item)
+            raise KeyError('Study has no SampleGroup << %s >>' %item)
 
 
     @property

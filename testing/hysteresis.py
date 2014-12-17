@@ -9,11 +9,11 @@ def test():
     sample2 = Sample(name='vsm_test_sample')
 
     M = sample.add_measurement(mtype='hysteresis', mfile=vftb_file, machine='vftb')
-    print M.result_ms()
-    M.plt_hys()
+    # print M.result_ms()
+    # M.plt_hys()
 
     M = sample.add_measurement(mtype='hysteresis', mfile=vsm_file, machine='vsm')
-    print M.result_ms(from_field=20)
+    print M.result_ms(from_field=80)
     # M.calc_all()
     # print M.results
     M.plt_hys()

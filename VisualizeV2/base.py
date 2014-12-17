@@ -83,7 +83,7 @@ class Generic(object):
                  fig_opt=dict(),
                  **options):
 
-        self.log = logging.getLogger('RockPy.VISUALIZE.' + type(self).__name__)
+        #self.log = logging.getLogger('RockPy.VISUALIZE.' + type(self).__name__)
         self.options = options
 
         # # normalization_parameters for normalization of measurement
@@ -238,10 +238,11 @@ class Generic(object):
                 out = slist
             if not isinstance(slist, RockPy.Study):
                 if isinstance(slist, RockPy.SampleGroup) or isinstance(slist, RockPy.Sample):
-                    self.log.debug('CONVERTING %s -> RockPy.Study(%s)' % (type(slist), type(slist)))
+                    #self.log.debug('CONVERTING %s -> RockPy.Study(%s)' % (type(slist), type(slist)))
                     out = RockPy.Study(slist)
                 if type(slist) in RockPy.Measurements.base.Measurement.inheritors():
-                    self.log.debug(
+                    #self.log.debug(
+                    print(
                         'CONVERTING %s -> RockPy.Sample -> RockPy.Study(Sample(%s))' % (type(slist), type(slist)))
                     s = RockPy.Sample(name=self.name)
                     s.measurements.append(slist)
@@ -250,19 +251,22 @@ class Generic(object):
 
         if isinstance(slist, list):
             if all(isinstance(item, RockPy.SampleGroup) for item in slist):
-                self.log.debug('CONVERTING %s(%s) -> RockPy.Study(%s(%s))' % (
+                #self.log.debug('CONVERTING %s(%s) -> RockPy.Study(%s(%s))' % (
+                print('CONVERTING %s(%s) -> RockPy.Study(%s(%s))' % (
                     type(slist), type(slist[0]), type(slist), type(slist[0])))
                 self.input_type = RockPy.Study
                 out = RockPy.Study(slist)
 
             if all(isinstance(item, RockPy.Sample) for item in slist):
-                self.log.debug('CONVERTING %s(%s) -> RockPy.Study(%s(%s))' % (
+                #self.log.debug('CONVERTING %s(%s) -> RockPy.Study(%s(%s))' % (
+                print('CONVERTING %s(%s) -> RockPy.Study(%s(%s))' % (
                     type(slist), type(slist[0]), type(slist), type(slist[0])))
                 self.input_type = RockPy.SampleGroup
                 out = RockPy.Study(slist)
 
             if all(type(item) in RockPy.Measurements.base.Measurement.inheritors() for item in slist):
-                self.log.debug(
+                # self.log.debug(
+                print(
                     'CONVERTING %s -> RockPy.Sample -> RockPy.Study(Sample(%s))' % (type(slist), type(slist)))
                 self.input_type = RockPy.Sample
                 s = RockPy.Sample(name=self.name)

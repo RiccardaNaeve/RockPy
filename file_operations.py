@@ -8,11 +8,13 @@ def save(smthg, file_name, folder=None):
     if not folder:
         folder = default_folder
     with open(join(folder, file_name), 'wb') as f:
+
         dump = numpyson.dumps(smthg)
         f.write(dump)
         f.close()
 
 def load(file_name, folder = None):
+    # print 'loading: %s' %join(folder, file_name)
     if not folder:
         folder = default_folder
     with open(join(folder, file_name), 'rb') as f:

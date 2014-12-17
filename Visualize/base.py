@@ -26,7 +26,7 @@ class Generic(object):
         ## normalization_parameters for normalization of measurement
         # self.norm = {'reference':reference, 'rtype':rtype, 'vval':vval, 'norm_method':norm_method}
 
-        self.log = logging.getLogger('RockPy.VISUALIZE.' + type(self).__name__)
+        #self.log = logging.getLogger('RockPy.VISUALIZE.' + type(self).__name__)
 
         if plt_opt is None: plt_opt = {}
 
@@ -67,7 +67,7 @@ class Generic(object):
 
         self.plot = plot
 
-        self.log = logging.getLogger('RockPy.VISUALIZE.' + type(self).__name__)
+        #self.log = logging.getLogger('RockPy.VISUALIZE.' + type(self).__name__)
 
         self.sample_group = None
         self._group_from_list(sample_list)
@@ -127,11 +127,11 @@ class Generic(object):
             self.sample_group = s_list
 
         if isinstance(s_list, list):
-            self.log.debug('CONVERTING list(sample) -> RockPy.SampleGroup(Sample)')
+            #self.log.debug('CONVERTING list(sample) -> RockPy.SampleGroup(Sample)')
             self.sample_group = rp.SampleGroup(sample_list=s_list)
 
         if isinstance(s_list, rp.Sample):
-            self.log.debug('CONVERTING sample -> list(sample) -> RockPy.SampleGroup(Sample)')
+            #self.log.debug('CONVERTING sample -> list(sample) -> RockPy.SampleGroup(Sample)')
             self.sample_group = rp.SampleGroup(sample_list=[s_list])
 
     def set_xlim(self, **options):
@@ -166,7 +166,7 @@ class Generic(object):
                         self.ax.set_xlabel(self.x_label)
                         self.ax.set_ylabel(self.y_label)
                 except AttributeError:
-                    self.log.info('NO label set for axis')
+                    #self.log.info('NO label set for axis')
             if not 'no_legend' in args:
                 plt.legend(loc='best', fontsize=8)
 
@@ -177,7 +177,7 @@ class Generic(object):
             if self.ax:
                 self.ax.set_title(self.title)
         except AttributeError:
-            self.log.info('NO title set for figure')
+            #self.log.info('NO title set for figure')
         out_options[self.plot]()
 
     def plt_save_script_folder(self):

@@ -9,8 +9,8 @@ class Generic(object):
     create_logger('RockPy.TREATMENT')
 
     def __init__(self, ttype, value, unit, comment=None):
-        self.log = logging.getLogger('RockPy.TREATMENT.' + type(self).__name__)
-        self.log.info('CREATING treatment << %s >>' % ttype)
+        #self.log = logging.getLogger('RockPy.TREATMENT.' + type(self).__name__)
+        #self.log.info('CREATING treatment << %s >>' % ttype)
         self.ttype = ttype.lower()
         self.value = value
         self.data = RockPyData(column_names=ttype, data=value)

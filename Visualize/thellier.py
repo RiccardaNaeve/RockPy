@@ -62,7 +62,7 @@ class Sample_sheet(base.Generic):
         self.stereo_ptrm.set_title('TH')
 
         if len(self.sample_list) > 1:
-            self.log.warning('MORE than one sample, using first')
+            #self.log.warning('MORE than one sample, using first')
 
         sample = self.sample_list[0]
         # thellier_objs = sample.get_measurements(mtype='thellier')
@@ -116,7 +116,7 @@ class Dunlop(base.Generic):
         try:
             out = [1.0, implemented[self.norm](measurement)]
         except KeyError:
-            self.log.error('NORMALIZATION method << %s >> not implemented' % self.norm)
+            #self.log.error('NORMALIZATION method << %s >> not implemented' % self.norm)
             out = [1.0, 1.0]
         return out
 

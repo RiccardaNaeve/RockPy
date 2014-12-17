@@ -161,7 +161,8 @@ class Thellier(base.Measurement):
         try:
             calc_data = self.data[step]
         except KeyError:
-            self.log.error('REFERENCE << %s >> can not be found ' % (step))
+            print('REFERENCE << %s >> can not be found ' % (step))
+            #self.log.error('REFERENCE << %s >> can not be found ' % (step))
 
         if val == 'last':
             val = calc_data[var].v[-1]
@@ -214,11 +215,13 @@ class Thellier(base.Measurement):
             o_len = len(getattr(self, step)['temp'].v)
             idx = [i for i, v in enumerate(getattr(self, step)['temp'].v) if v != temp]
             if o_len - len(idx) != 0:
-                self.log.info(
+                # self.log.info(
+                print(
                     'DELETING << %i, %s >> entries for << %.2f >> temperature' % (o_len - len(idx), step, temp))
                 setattr(self, step, getattr(self, step).filter_idx(idx))
             else:
-                self.log.debug('UNABLE to find entriy for << %s, %.2f >> temperature' % (step, temp))
+                print('UNABLE to find entriy for << %s, %.2f >> temperature' % (step, temp))
+                #self.log.debug('UNABLE to find entriy for << %s, %.2f >> temperature' % (step, temp))
 
 
     ''' RESULT SECTION '''
@@ -373,7 +376,7 @@ class Thellier(base.Measurement):
         t_max = parameter.get('t_max', self.standard_parameters['slope']['t_max'])
         component = parameter.get('component', self.standard_parameters['slope']['component'])
 
-        self.log.info('CALCULATING\t << %s >> arai line fit << t_min=%.1f , t_max=%.1f >>' % (component, t_min, t_max))
+        #self.log.info('CALCULATING\t << %s >> arai line fit << t_min=%.1f , t_max=%.1f >>' % (component, t_min, t_max))
         # print self.th
         equal_steps = list(set(self.th['temp'].v) & set(self.ptrm['temp'].v))
         th_steps = (t_min <= self.th['temp'].v) & (self.th['temp'].v <= t_max)  # True if step between t_min, t_max
@@ -485,7 +488,7 @@ class Thellier(base.Measurement):
         t_min = parameter.get('t_min', self.standard_parameters['x_dash']['t_min'])
         t_max = parameter.get('t_max', self.standard_parameters['x_dash']['t_max'])
         component = parameter.get('component', self.standard_parameters['x_dash']['component'])
-        self.log.info('CALCULATING\t << %s >> x_dash << t_min=%.1f , t_max=%.1f >>' % (component, t_min, t_max))
+        #self.log.info('CALCULATING\t << %s >> x_dash << t_min=%.1f , t_max=%.1f >>' % (component, t_min, t_max))
 
         idx = (self.th['temp'] <= t_max) & (t_min <= self.th['temp'])  # filtering for t_min/t_max
         y = self.th.filter(idx)
@@ -525,7 +528,7 @@ class Thellier(base.Measurement):
         t_max = parameter.get('t_max', self.standard_parameters['y_dash']['t_max'])
         component = parameter.get('component', self.standard_parameters['y_dash']['component'])
 
-        self.log.info('CALCULATING\t << %s >> y_dash << t_min=%.1f , t_max=%.1f >>' % (component, t_min, t_max))
+        #self.log.info('CALCULATING\t << %s >> y_dash << t_min=%.1f , t_max=%.1f >>' % (component, t_min, t_max))
 
         idx = self._get_idx_tmin_tmax('th', t_min, t_max)  # filtering for t_min/t_max
         y = self.th.filter(idx)
@@ -579,7 +582,7 @@ class Thellier(base.Measurement):
 
         """
 
-        self.log.debug('CALCULATING\t f parameter')
+        #self.log.debug('CALCULATING\t f parameter')
         delta_y_dash = self.calculate_delta_y_dash(**parameter)
         y_int = self.results['y_int'].v
         self.results['f'] = delta_y_dash / abs(y_int)
@@ -686,7 +689,7 @@ class Thellier(base.Measurement):
         :return:
 
         """
-        self.log.debug('CALCULATING\t quality parameter')
+        #self.log.debug('CALCULATING\t quality parameter')
 
         beta = self.result_beta(**parameter).v
         f = self.result_f(**parameter).v

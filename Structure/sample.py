@@ -85,6 +85,7 @@ class Sample(object):
                 'height': {'none': {0: [<RockPy.Measurements.parameters.Height object at 0x10e1bda50>]}}}
 
     """
+    logger = logging.getLogger('RockPy.SAMPLE')
 
     def __init__(self, name,
                  mass=1, mass_unit='kg', mass_machine='generic',
@@ -100,8 +101,7 @@ class Sample(object):
         :param length_unit: str - if not 'm' please specify
         """
         self.name = name
-        self.log = logging.getLogger('RockPy.SAMPLE')
-        self.log.info('CREATING\t new sample << %s >>' % self.name)
+        Sample.logger.info('CREATING\t new sample << %s >>' % self.name)
 
         self.measurements = []
         self.results = None
@@ -141,7 +141,7 @@ class Sample(object):
 
         implemented = {i.__name__.lower(): i for i in Measurement.inheritors()}
         if mtype in implemented:
-            self.log.info(' ADDING\t << measurement >> %s' % mtype)
+            Sample.logger.info(' ADDING\t << measurement >> %s' % mtype)
             measurement = implemented[mtype](self,
                                              mtype=mtype, mfile=mfile, machine=machine,
                                              **options)
@@ -151,7 +151,9 @@ class Sample(object):
             else:
                 return None
         else:
-            self.log.error(' << %s >> not implemented, yet' % mtype)
+            
+            Sample.logger.error(' << %s >> not implemented, yet' % mtype)
+            Sample.logger.error(' << %s >> not implemented, yet' % mtype)
 
     def calc_all(self, **options):
         self.results = None
@@ -184,7 +186,7 @@ class Sample(object):
     def mass_kg(self):
         measurements = self.get_measurements(mtype='mass', ttype='none')
         if len(measurements) > 1:
-            self.log.info('FOUND more than 1 << mass >> measurement. Returning first')
+            Sample.logger.info('FOUND more than 1 << mass >> measurement. Returning first')
         try:
             return measurements[0].data['data']['mass'].v
         except IndexError:  # todo fix
@@ -194,7 +196,7 @@ class Sample(object):
     def height_m(self):
         measurement = self.get_measurements(mtype='height')
         if len(measurement) > 1:
-            self.log.info('FOUND more than 1 << height >> measurement. Returning first')
+            Sample.logger.info('FOUND more than 1 << height >> measurement. Returning first')
         return measurements[0].data['data']['height'].v
 
 
@@ -202,7 +204,7 @@ class Sample(object):
     def diameter_m(self):
         measurement = self.get_measurements(mtype='diameter')
         if len(measurement) > 1:
-            self.log.info('FOUND more than 1 << diameter >> measurement. Returning first')
+            Sample.logger.info('FOUND more than 1 << diameter >> measurement. Returning first')
         return measurements[0].data['data']['diameter'].v
 
     @property
@@ -322,7 +324,7 @@ class Sample(object):
             else:
                 tvalue = str(tval)
 
-        self.log.debug('SEARCHING\t measurements with  << %s, %s, %s >>' % (mtype, ttype, tvalue))
+        Sample.logger.debug('SEARCHING\t measurements with  << %s, %s, %s >>' % (mtype, ttype, tvalue))
 
         out = self.measurements
         if mtype:
@@ -348,7 +350,7 @@ class Sample(object):
                    if val >= min(tval_range)]
 
         if len(out) == 0:
-            self.log.error(
+            Sample.logger.error(
                 'UNKNOWN\t << %s, %s, %s >> or no measurement found for sample << %s >>' % (
                     mtype, ttype, tvalue, self.name))
             return
@@ -361,14 +363,14 @@ class Sample(object):
             self.measurements = [m for m in self.measurements if not m in measurements_for_del]
 
     def get_measurements_with_treatment(self, ttype, **options):
-        self.log.debug('SEARCHING\t measurements with treatment type << %s >>' % (ttype.lower()))
+        Sample.logger.debug('SEARCHING\t measurements with treatment type << %s >>' % (ttype.lower()))
         out = [m for m in self.measurements for t in m.treatments if t.ttype == ttype.lower()]
 
         if len(out) != 0:
-            self.log.info('FOUND\t sample << %s >> has %i measurements with treatment << %s >>' % (
+            Sample.logger.info('FOUND\t sample << %s >> has %i measurements with treatment << %s >>' % (
                 self.name, len(out), ttype.lower()))
         else:
-            self.log.error(
+            Sample.logger.error(
                 'UNKNOWN\t treatment << %s >> or no measurement found for sample << %s >>' % (ttype.lower(), self.name))
             return []
         return out

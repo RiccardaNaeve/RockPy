@@ -1,4 +1,5 @@
 __author__ = 'mike'
+import numpy as np
 import base
 import RockPy.Functions.general
 import RockPy.Measurements.hysteresis
@@ -15,14 +16,13 @@ class Day1977(base.Generic):
         self.add_plot()
         self.ax = self.figs[self.name][0].gca()
         RockPy.Plotting.day_plot.grid(self.ax)
-        # self.ax.set_xlim([0, 6])
+        self.ax.set_xlim([0, 8])
         # self.ax.set_ylim([0, 0.6])
         self.ax.set_xlabel('$B_{cr} / B_c$')
         self.ax.set_ylabel('$M_{rs} / M_{s}$')
 
     def plotting(self, samples, **plt_opt):
         samples = self._to_sample_list(samples)
-
         for sample in samples:
             hys = sample.get_measurements(mtype='hysteresis')[0]
             coe = sample.get_measurements(mtype='backfield')[0]
@@ -30,7 +30,42 @@ class Day1977(base.Generic):
             coe.calc_all()
             mrs_ms = hys.results['mrs'].v / hys.results['ms'].v
             bcr_bc = coe.results['bcr'].v / hys.results['bc'].v
-            self.ax.plot(bcr_bc,mrs_ms, '.')
+            self.ax.plot(bcr_bc, mrs_ms, '.')
+
+    def add_mixing_lines(self, mix_lines=None, **plt_opt):
+        """
+        MD/SD Mixing lines after Dunlup2002a
+        """
+        color = plt_opt.pop('color', 'k')
+        zorder = plt_opt.pop('zorder', 0)
+        marker = plt_opt.pop('marker', '.')
+        ls = plt_opt.pop('ls', '--')
+
+        if not mix_lines: mix_lines = ['all']
+        else: mix_lines = RockPy.Functions.general._to_list(mix_lines)
+
+
+        mix_line_data = {
+            'sd_md1': np.array(
+                [[1.259, 0.500], [1.296, 0.448], [1.337, 0.404], [1.404, 0.353], [1.473, 0.305], [1.569, 0.259],
+                 [1.704, 0.211], [1.913, 0.163], [2.275, 0.114], [2.556, 0.090], [3.012, 0.067], [3.767, 0.043],
+                 [4.155, 0.036], [4.601, 0.029], [5.366, 0.019]]),
+            'langevin': np.array(
+                [[1.259, 0.498], [1.412, 0.472], [1.619, 0.444], [1.941, 0.407], [2.351, 0.371], [2.715, 0.348],
+                 [3.151, 0.324], [3.628, 0.302], [4.172, 0.281], [4.862, 0.261], [5.629, 0.239], [6.610, 0.217],
+                 [7.823, 0.194], [9.424, 0.171], [11.432, 0.150], [14.353, 0.125], [18.754, 0.100]]),
+            'sd_md2': np.array(
+                [[1.431, 0.378], [1.508, 0.341], [1.601, 0.306], [1.702, 0.270], [1.810, 0.234], [1.973, 0.198],
+                 [2.186, 0.161], [2.494, 0.125], [2.928, 0.090], [3.214, 0.072], [3.646, 0.053], [4.151, 0.036],
+                 [5.025, 0.018]]),
+            'sd_sp_93': np.array(
+                [[2.820, 0.100], [4.035, 0.091], [6.375, 0.075], [13.641, 0.050], [35.278, 0.025], [99.429, 0.010]])}
+
+        if 'all' in mix_lines:
+            for name, data in mix_line_data.iteritems():
+                self.ax.plot(data[:,0], data[:,1], color=color, marker=marker, ls=ls, zorder=zorder, **plt_opt)
+
+
 
 class Fabian2010(base.Generic):
     def initialize_visual(self):

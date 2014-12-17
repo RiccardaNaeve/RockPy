@@ -163,11 +163,21 @@ class Measurement(object):
         if self._treatment_opt:
             self._add_treatment_from_opt()
 
-    #def __getnewargs__(self):
-    #    return None
+    def __getstate__(self):
+        '''
+        returned dict will be pickled
+        :return:
+        '''
+        pickle_me = {k: v for k, v in self.__dict__.iteritems() if k in ('machine_data', 'is_machine_data')}
+        return pickle_me
 
-    #def __getinitargs__(self):
-    #    return None
+    def __setstate__(self, d):
+        '''
+        d is unpickled data
+        :param d:
+        :return:
+        '''
+        self.__dict__.update(d)
 
     def reset__data(self, recalc_mag=False):
         pass

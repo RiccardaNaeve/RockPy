@@ -12,9 +12,10 @@ def test():
     # add measurement
     M = sample.add_measurement(mtype='backfield', mfile=vftb_file, machine='vftb')
     print M
-    d = numpyson.dumps( M)
+    d = numpyson.dumps(M)
+
     print d
-    M2 = numpyson.loads( d)
+    M2 = numpyson.loads(d)
     print M2
 
     # get bcr

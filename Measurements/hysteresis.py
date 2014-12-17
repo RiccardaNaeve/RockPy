@@ -383,7 +383,7 @@ class Hysteresis(base.Measurement):
         plt.grid()
         plt.title('Hysteresis %s' % (self.sample_obj.name))
         plt.xlabel('Field [%s]' % ('T'))  # todo replace with data unit
-        plt.ylabel('Moment [%s]' % ('Am^2'))  # todo replace with data unit
+        plt.ylabel('Moment [%s]' % ('Am2'))  # todo replace with data unit
         plt.show()
 
     def plt_hysteresis(self):

@@ -195,7 +195,7 @@ class Thellier(base.Measurement):
         plt.grid()
         plt.title('Dunlop Plot %s' % (self.sample_obj.name))
         plt.xlabel('Temperature [%s]' % ('C'))
-        plt.ylabel('Moment [%s]' % ('Am^2'))
+        plt.ylabel('Moment [%s]' % ('Am2'))
         plt.xlim([min(self.th['temp']), max(self.th['temp'])])
         plt.show()
 
@@ -207,7 +207,7 @@ class Thellier(base.Measurement):
         plt.grid()
         plt.title('Arai Diagram %s' % (self.sample_obj.name))
         plt.xlabel('NRM remaining [%s]' % ('C'))
-        plt.ylabel('pTRM gained [%s]' % ('Am^2'))
+        plt.ylabel('pTRM gained [%s]' % ('Am2'))
         plt.show()
 
     def delete_temp(self, temp):

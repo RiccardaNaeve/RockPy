@@ -31,7 +31,7 @@ class AfDemag(base.Generic):
         self.show(**options)
 
         self.x_label = 'AF-Field [%s]' % ('mT')  # todo get_unit
-        self.y_label = 'Magnetic Moment [%s]' % ('Am^2')  # todo get_unit
+        self.y_label = 'Magnetic Moment [%s]' % ('Am2')  # todo get_unit
         plt.title('%s' % " ,".join(self.sample_names))
         # plt.ylim([0, 1])
         if style == 'publication':

@@ -34,6 +34,6 @@ class T_v_Hys(base.Generic):
                 Plotting.hysteresis.down_field_branch(self.ax, measurement, color = colors[i], linewidth=0.5)
 
         self.ax.set_xlabel('field [T]')
-        self.ax.set_ylabel('Moment [Am^2]')
+        self.ax.set_ylabel('Moment [Am2]')
         self.ax.set_xlim([-1,1])
         plt.tight_layout()

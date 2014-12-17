@@ -1,5 +1,5 @@
 __author__ = 'volk'
-from Structure.project import Sample
+from Structure.sample import Sample
 
 def test():
     dfile = 'test_data/MUCVFTB_test.rmp'

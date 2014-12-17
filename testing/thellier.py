@@ -1,5 +1,5 @@
 __author__ = 'volk'
-from RockPy.Structure.project import Sample
+from RockPy.Structure.sample import Sample
 # thellier output file from cryomag
 
 def test():

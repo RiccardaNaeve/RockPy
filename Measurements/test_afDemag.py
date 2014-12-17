@@ -1,7 +1,7 @@
 from unittest import TestCase
 
 __author__ = 'mike'
-from Structure.project import Sample
+from Structure.sample import Sample
 import numpy as np
 
 

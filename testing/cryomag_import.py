@@ -1,5 +1,5 @@
 __author__ = 'volk'
-from Structure.project import Sample
+from Structure.sample import Sample
 from Readin.cryomag import CryoMag
 # thellier output file from cryomag
 import time

@@ -1,13 +1,13 @@
 __author__ = 'volk'
 
-import Structure.project
+import Structure.sample
 
 
 def test():
     mfile1 = '../testing/test_data/MUCVSM_test.hys'
     mfile2 = '../testing/test_data/MUCVFTB_test2.coe'
 
-    S = Structure.project.Sample(name='test_sample',
+    S = Structure.sample.Sample(name='test_sample',
                                  mass=14.2, mass_unit='mg',
                                  diameter=5.4, length_unit='nm',
                                  height=23.8,

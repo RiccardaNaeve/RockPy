@@ -77,7 +77,7 @@ class SushiBar(base.Machine):
 
 
 def test():
-    from Structure.project import Sample
+    from Structure.sample import Sample
 
     test_file = '../testing/test_data/MUCSUSH_afdemag_trm.af'
     S = Sample(name='3e')

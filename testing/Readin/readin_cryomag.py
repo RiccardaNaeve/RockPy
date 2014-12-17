@@ -1,5 +1,5 @@
 __author__ = 'volk'
-from Structure.project import Sample
+from Structure.sample import Sample
 from Readin.cryo_mag import CryoMag
 import matplotlib.pyplot as plt
 

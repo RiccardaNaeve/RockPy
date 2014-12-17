@@ -1,6 +1,6 @@
 __author__ = 'wack'
 
-from RockPy.Structure.project import Sample
+from RockPy.Structure.sample import Sample
 from RockPy.Visualize import demag
 import matplotlib.pyplot as plt
 

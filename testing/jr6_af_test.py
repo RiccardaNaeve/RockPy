@@ -1,5 +1,5 @@
 __author__ = 'mike'
-from Structure.project import Sample
+from Structure.sample import Sample
 
 def test():
     data = 'test_data/MUCSPN_afdemag.jr6'

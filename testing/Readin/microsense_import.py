@@ -1,5 +1,5 @@
 __author__ = 'volk'
-from Structure.project import Sample
+from Structure.sample import Sample
 import matplotlib.pyplot as plt
 import numpy as np
 

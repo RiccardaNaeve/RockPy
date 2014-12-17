@@ -1,7 +1,7 @@
 __author__ = 'volk'
 import numpyson
 import RockPy
-from RockPy.Structure.project import Sample
+from RockPy.Structure.sample import Sample
 def test():
     # define measurement data file
     vftb_file = 'test_data/MUCVFTB_test2.coe'

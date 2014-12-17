@@ -84,7 +84,7 @@ class Backfield(base.Measurement):
         :return:
 
         .. doctest::
-           >>> from Structure.project import Sample
+           >>> from Structure.sample import Sample
            >>> vftb_file = 'testing/test_data/MUCVFTB_test2.coe'
            >>> sample = Sample(name='vftb_test_sample')
            >>> M = sample.add_measurement(mtype='backfield', mfile=vftb_file, machine='vftb')

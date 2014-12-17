@@ -162,13 +162,14 @@ class Sample(object):
                 if measurement.suffix:
                     s_type, s_value, s_unit = measurement._get_treatment_from_suffix()
                 if not self.results:
-                    self.results = RockPyData(column_names=measurement.results.column_names,
-                                              data=measurement.results.data, row_names=measurement.suffix)
+                    self.results = RockPyData(
+                        column_names=[i +'_'+ measurement.mtype for i in measurement.results.column_names],
+                        data=measurement.results.data, row_names=measurement.suffix)
                 else:
-                    c_names = measurement.results.column_names
+                    c_names = [i + '_' + measurement.mtype for i in measurement.results.column_names]
                     data = measurement.results.data
-                    rpdata = RockPyData(column_names=c_names, data=data, row_names=measurement.suffix)
-                    self.results = self.results.append_rows(rpdata)
+                    # rpdata = RockPyData(column_names=c_names, data=data, row_names=measurement.suffix)
+                    self.results = self.results.append_columns(c_names, data)
         return self.results
 
     @property

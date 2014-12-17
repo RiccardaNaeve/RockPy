@@ -17,7 +17,7 @@ RockPy.Functions.general.create_logger('RockPy.VISUALIZE')
 import RockPy.Measurements.base
 from Functions.general import _to_list
 from matplotlib import gridspec
-
+from matplotlib.backends.backend_pdf import PdfPages
 
 class Generic(object):
     """
@@ -84,6 +84,7 @@ class Generic(object):
                  **options):
 
         self.log = logging.getLogger('RockPy.VISUALIZE.' + type(self).__name__)
+        self.options = options
 
         # # normalization_parameters for normalization of measurement
         self.name = type(self).__name__.lower()
@@ -269,6 +270,21 @@ class Generic(object):
                 out = RockPy.Study(s)
         return out
 
+    def _to_sample_list(self, slist):
+        out = None
+        if isinstance(slist, RockPy.Study):
+            out = slist.samples
+        if isinstance(slist, RockPy.SampleGroup):
+            out = slist.sample_list
+        if isinstance(slist, RockPy.Sample):
+            out = [slist]
+
+        if isinstance(slist, list):
+            if all(isinstance(item, RockPy.SampleGroup) for item in slist):
+                out = sum(slist).sample_list
+            if all(isinstance(item, RockPy.Sample) for item in slist):
+                out = slist
+        return out
 
     def plot_measurements(self):
         pass
@@ -279,12 +295,26 @@ class Generic(object):
             self.visuals[i].plotting('test')
 
     def show(self):
-        for label, figs in self.figs.iteritems():
-            for fig in figs:
-                axes = fig.gca()
-                axes.set_title(label)
+        # for label, figs in self.figs.iteritems():
+        #     for fig in figs:
+        #         axes = fig.gca()
+        #         axes.set_title(label)
 
         plt.show()
+
+    def save(self, folder=None, name=None):
+        if folder is None:
+            from os.path import expanduser
+            folder = expanduser("~") + '/Desktop/'
+        if name is None:
+            name = self.name
+        if not '.pdf' in name:
+            name += '.pdf'
+        loc = folder+name
+
+        with PdfPages(loc) as pdf:
+            for fig in self.figs:
+                pdf.savefig()
 
     ''' Add smth. to plot '''
 
@@ -297,5 +327,13 @@ class Generic(object):
                     fig.gca().grid()
 
 
+    def set_xlim(self, limits):
+        for plot in self.visuals:
+            for fig in self.figs[plot]:
+                fig.gca().set_xlim(limits)
 
+    def set_title(self, title):
+        for plot in self.visuals:
+            for fig in self.figs[plot]:
+                fig.gca().set_title(title)
 

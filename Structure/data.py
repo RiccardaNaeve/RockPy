@@ -467,6 +467,7 @@ class RockPyData(object):
         idx = self._column_names.index(old_cname)
         self._column_names[idx] = new_cname
         self._update_column_dictionary(self._column_names)
+        self._column_dict.pop(old_cname)
 
     def append_rows(self, data, row_names=None, ignore_row_names=False):
         """

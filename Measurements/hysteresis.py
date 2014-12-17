@@ -37,8 +37,8 @@ class Hysteresis(base.Measurement):
         header = self.machine_data.header
         self.induced = RockPyData(column_names=header, data=data[0])
         dfield = np.diff(self.induced['field'].v)
-
-        idx = [i for i in range(len(dfield)) if dfield[i] < 0]
+        idx = [i for i in range(len(dfield)) if dfield[i] <= 0]
+        idx += [max(idx)+1]
         virgin_idx = range(0, idx[0])
         down_field_idx = idx
         up_field_idx = range(idx[-1], len(dfield) + 1)
@@ -46,6 +46,7 @@ class Hysteresis(base.Measurement):
         self.virgin = self.induced.filter_idx(virgin_idx)
         self.down_field = self.induced.filter_idx(down_field_idx)
         self.up_field = self.induced.filter_idx(up_field_idx)
+        self.msi = None
 
     def format_vsm(self):
         header = self.machine_data.header
@@ -59,6 +60,7 @@ class Hysteresis(base.Measurement):
             header[header.index('moment')] = 'uncorrected moment'
             header[header.index('adjusted moment')] = 'moment'
 
+        self.msi = None
         if len(segments['segment number'].v) == 3:
             self.virgin = RockPyData(column_names=header, data=self.machine_data.out_hysteresis()[0])
             self.down_field = RockPyData(column_names=header, data=self.machine_data.out_hysteresis()[1])
@@ -246,6 +248,12 @@ class Hysteresis(base.Measurement):
         self.calc_result(dict(), recalc)
         return self.results['brh']
 
+    def result_paramag_slope(self, from_field=80, recalc=False, **options):
+        parameter = {'from_field': from_field
+        }
+        self.calc_result(parameter, recalc, force_caller='ms')
+        return self.results['paramag_slope']
+
     # ## calculations
 
     def calculate_ms(self, **parameters):
@@ -254,7 +262,7 @@ class Hysteresis(base.Measurement):
         :param parameters: from_field: from % of this value a linear interpolation will be calculated for all branches (+ & -)
         :return:
         """
-        from_field = parameters.get('from_field', 80) / 100.0
+        from_field = parameters.get('from_field', 70) / 100.0
         df_fields = self.down_field['field'].v / max(self.down_field['field'].v)
         uf_fields = self.up_field['field'].v / max(self.up_field['field'].v)
 
@@ -263,20 +271,21 @@ class Hysteresis(base.Measurement):
         df_minus = [i for i, v in enumerate(df_fields) if v <= -from_field]
         uf_plus = [i for i, v in enumerate(uf_fields) if v >= from_field]
         uf_minus = [i for i, v in enumerate(uf_fields) if v <= -from_field]
-
         dfp = self.down_field.filter_idx(df_plus).lin_regress(column_name_x='field', column_name_y='mag')
         dfm = self.down_field.filter_idx(df_minus).lin_regress(column_name_x='field', column_name_y='mag')
         ufp = self.down_field.filter_idx(uf_plus).lin_regress(column_name_x='field', column_name_y='mag')
         ufm = self.down_field.filter_idx(uf_minus).lin_regress(column_name_x='field', column_name_y='mag')
-
-        ms_all = [abs(dfp[2]), abs(dfm[2]), abs(ufp[2]), abs(ufm[2])]  # todo fix
-
-        self.results['ms'] = np.max(ms_all)
-        self.results['sigma_ms'] = np.std(ms_all)
-
         self.paramag_correction = np.array([dfp, dfm, ufp, ufm])
 
+        ms_all = [abs(dfp[2]), abs(dfm[2]), abs(ufp[2]), abs(ufm[2])]
+        slope_all = [abs(dfp[0]), abs(dfm[0]), abs(ufp[0]), abs(ufm[0])]
+
+        self.results['ms'] = np.median(ms_all)
+        self.results['sigma_ms'] = np.std(ms_all)
+        self.results['paramag_slope'] = np.median(slope_all)
+
         self.calculation_parameters['ms'] = parameters
+        self.calculation_parameters['paramag_slope'] = parameters
 
     def calculate_mrs(self, **parameters):
 
@@ -391,6 +400,19 @@ class Hysteresis(base.Measurement):
         y_new = f(x_new)
         return x_new, y_new
 
+    def simple_paramag_cor(self, **parameters):
+
+        if self.paramag_correction is None:
+            self.calculate_ms(**parameters)
+
+        slope = np.mean(self.paramag_correction[:, 0])
+        intercept = np.mean(self.paramag_correction[:, 2])
+
+        for dtype in self.data:
+            if self.data[dtype]:
+                d = self.data[dtype].v
+                d[:,1] -= d[:,0]*slope
+
     # ## plotting functions
     def plt_hys(self):
         '''
@@ -408,8 +430,8 @@ class Hysteresis(base.Measurement):
             slopes = self.paramag_correction[:, 0]
             intercepts = self.paramag_correction[:, 2]
             # downfield paramag_correction_line
-            xdf = np.array([0, max(self.down_field['field'].v)])  #get x
-            xuf = np.array([min(self.down_field['field'].v), 0])  #get x
+            xdf = np.array([0, max(self.down_field['field'].v)])  # get x
+            xuf = np.array([min(self.down_field['field'].v), 0])  # get x
             ydf = xdf * np.mean(slopes) + np.mean(np.fabs(intercepts))
             yuf = xuf * np.mean(slopes) - np.mean(np.fabs(intercepts))
 

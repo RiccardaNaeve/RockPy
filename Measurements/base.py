@@ -163,11 +163,11 @@ class Measurement(object):
         if self._treatment_opt:
             self._add_treatment_from_opt()
 
-    def __getnewargs__(self):
-        return None
+    #def __getnewargs__(self):
+    #    return None
 
-    def __getinitargs__(self):
-        return None
+    #def __getinitargs__(self):
+    #    return None
 
     def reset__data(self, recalc_mag=False):
         pass
@@ -177,6 +177,7 @@ class Measurement(object):
             return self.data[attr]
         if attr in self.__getattribute__('result_methods'):
             return getattr(self, 'result_'+attr)().v[0]
+        raise AttributeError
 
     def import_data(self, rtn_raw_data=None, **options):
         '''

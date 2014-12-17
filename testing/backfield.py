@@ -11,9 +11,11 @@ def test():
 
     # add measurement
     M = sample.add_measurement(mtype='backfield', mfile=vftb_file, machine='vftb')
-    #print M
+    print M
     d = numpyson.dumps( M)
     print d
+    M2 = numpyson.loads( d)
+    print M2
 
     # get bcr
     M.calculate_bcr()  # prints the linear interpolation of the value (internal calculation)

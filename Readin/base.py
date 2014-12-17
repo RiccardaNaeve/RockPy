@@ -3,10 +3,10 @@ import logging
 
 
 class Machine(object):
-    def __init__(self, dfile, sample_name):
-        self.log = logging.getLogger('RockPy.READIN.' + type(self).__name__)
-        self.log.info('IMPORTING << %s , %s >> file: << %s >>' % (sample_name, type(self).__name__, dfile))
+    log = logging.getLogger('RockPy.READIN')
 
+    def __init__(self, dfile, sample_name):
+        Machine.log.info('IMPORTING << %s , %s >> file: << %s >>' % (sample_name, type(self).__name__, dfile))
         self.sample_name = sample_name
         self.file_name = dfile
 
@@ -14,6 +14,11 @@ class Machine(object):
         self.raw_data = None
         self.data = None
 
+    # def __getstate__(self):
+    #     pass
+    #
+    # def __setstate__(self, state):
+    #     pass
 
     @property
     def file_header(self):

@@ -160,11 +160,19 @@ class Sample(object):
                 s_type = None
                 measurement.calc_all(**options)
                 if measurement.suffix:
-                    s_type, s_value, s_unit = measurement._get_treatment_from_suffix()
+                    try:
+                        s_type, s_value, s_unit = measurement._get_treatment_from_suffix()
+                    except:
+                        pass
                 if not self.results:
+                    if measurement.suffix:
+                        row_name = measurement.suffix
+                    else:
+                        row_name = ''
+
                     self.results = RockPyData(
                         column_names=[i +'_'+ measurement.mtype for i in measurement.results.column_names],
-                        data=measurement.results.data, row_names=measurement.suffix)
+                        data=measurement.results.data)
                 else:
                     c_names = [i + '_' + measurement.mtype for i in measurement.results.column_names]
                     data = measurement.results.data

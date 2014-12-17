@@ -15,22 +15,23 @@ class AfDemag(base.Measurement):
                  **options):
 
         self.demag_type = demag_type
+        self.mag_method = mag_method
+        self._data = {'data':None}
 
         super(AfDemag, self).__init__(sample_obj,
                                       mtype, mfile, machine,
                                       **options)
-        self.mag_method = mag_method
 
     def format_jr6(self):
         data = RockPyData(column_names=['field', 'x', 'y', 'z'], data=self.machine_data.out_afdemag())
         data.define_alias('m', ( 'x', 'y', 'z'))
-        self._data = {'data': data.append_columns('mag', data.magnitude('m'))}
+        self._data['data'] = data.append_columns('mag', data.magnitude('m'))
 
     def format_sushibar(self):
         data = RockPyData(column_names=['field', 'x', 'y', 'z'],
                                data=self.machine_data.out_afdemag())  # , units=['mT', 'Am^2', 'Am^2', 'Am^2'])
         data.define_alias('m', ( 'x', 'y', 'z'))
-        self._data = {'data': data.append_columns('mag', data.magnitude('m'))}
+        self._data['data'] = data.append_columns('mag', data.magnitude('m'))
 
     def format_cryomag(self):
         data = RockPyData(column_names=self.machine_data.float_header,
@@ -39,7 +40,7 @@ class AfDemag(base.Measurement):
             idx = [i for i, v in enumerate(self.machine_data.steps) if v == self.demag_type]
             data = data.filter_idx(idx)
         data.define_alias('m', ( 'x', 'y', 'z'))
-        self._data = {'data': data.append_columns('mag', data.magnitude('m'))}
+        self._data['data'] = data.append_columns('mag', data.magnitude('m'))
         self._data['data'].rename_column('step', 'field')
 
     def result_mdf(self, component='mag', interpolation='linear', recalc=False):

@@ -10,21 +10,20 @@ import copy
 
 
 RockPy.Functions.general.create_logger(__name__)
-log = logging.getLogger(__name__)
 
 
 class SampleGroup(object):
     """
     Container for Samples, has special calculation methods
     """
+    log = logging.getLogger(__name__)
 
     count = 0
 
     def __init__(self, name=None, sample_list=None, sample_file=None, **options):
         SampleGroup.count += 1
 
-        self.log = log  # logging.getLogger('RockPy.' + type(self).__name__)
-        self.log.info('CRATING new << samplegroup >>')
+        SampleGroup.log.info('CRATING new << samplegroup >>')
 
         # ## initialize
         if name is None:
@@ -470,7 +469,7 @@ class SampleGroup(object):
                 return
 
         if len(out) == 0:
-            self.log.error('UNABLE to find sample with << %s, %s, %s, %.2f >>' % (snames, mtypes, ttypes, t_value))
+            SampleGroup.log.error('UNABLE to find sample with << %s, %s, %s, %.2f >>' % (snames, mtypes, ttypes, t_value))
 
         return out
 

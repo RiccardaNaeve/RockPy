@@ -1,12 +1,14 @@
 __author__ = 'volk'
 import matplotlib.pyplot as plt
 import numpy as np
-
+import logging
 from RockPy.Structure.data import RockPyData
 import base
 
 
 class Backfield(base.Measurement):
+
+    logger = logging.getLogger('RockPy.MEASUREMENT.Backfield')
     """
     A Backfield Curve can give information on:
        Bcr: the remanence coercivity
@@ -29,12 +31,13 @@ class Backfield(base.Measurement):
     def __init__(self, sample_obj,
                  mtype, mfile, machine,
                  **options):
+        
+        self._data = {'remanence': None,
+                      'induced': None}
+
         super(Backfield, self).__init__(sample_obj,
                                         mtype, mfile, machine,
                                         **options)
-
-        self._data = {'remanence': self._remanence,
-                      'induced': self._induced}
 
     def format_vftb(self):
         '''
@@ -43,8 +46,7 @@ class Backfield(base.Measurement):
         '''
         data = self.machine_data.out_backfield()
         header = self.machine_data.header
-        self._remanence = RockPyData(column_names=header, data=data[0])
-        self._induced = None
+        self._data['remanence'] = RockPyData(column_names=header, data=data[0])
 
     def format_vsm(self):
         """
@@ -53,8 +55,8 @@ class Backfield(base.Measurement):
         """
         data = self.machine_data.out_backfield()
         header = self.machine_data.header
-        self._remanence = RockPyData(column_names=['field', 'mag'], data=data[0][:, [0, 1]])
-        self._induced = RockPyData(column_names=['field', 'mag'], data=data[0][:, [0, 2]])
+        self._data['remanence'] = RockPyData(column_names=['field', 'mag'], data=data[0][:, [0, 1]])
+        self._data['induced'] = RockPyData(column_names=['field', 'mag'], data=data[0][:, [0, 2]])
 
 
     @property
@@ -125,12 +127,12 @@ class Backfield(base.Measurement):
         :return: float
                calculated bcr value
         '''
-        self.log.info('CALCULATING << Bcr >> parameter from linear interpolation')
-        self.log.info('               ---    If sample is not saturated, value could be too low')
+        Backfield.logger.info('CALCULATING << Bcr >> parameter from linear interpolation')
+        Backfield.logger.info('               ---    If sample is not saturated, value could be too low')
 
-        idx = np.argmin(np.abs(self._remanence['mag'].v))  # index of closest to 0
+        idx = np.argmin(np.abs(self._data['remanence']['mag'].v))  # index of closest to 0
 
-        if self._remanence['mag'].v[idx] < 0:
+        if self._data['remanence']['mag'].v[idx] < 0:
             idx1 = idx
             idx2 = idx - 1
         else:
@@ -138,8 +140,8 @@ class Backfield(base.Measurement):
             idx2 = idx
 
         i = [idx1, idx2]
-        tf_array = [True if x in i else False for x in range(len(self._remanence['mag'].v))]
-        d = self._remanence.filter(tf_array=tf_array)
+        tf_array = [True if x in i else False for x in range(len(self._data['remanence']['mag'].v))]
+        d = self._data['remanence'].filter(tf_array=tf_array)
         slope, sigma, y_intercept, x_intercept = d.lin_regress('field', 'mag')
         bcr = - y_intercept / slope
         self.results['bcr'] = abs(bcr)
@@ -150,14 +152,14 @@ class Backfield(base.Measurement):
 
         :return: result
         '''
-        self.log.info('CALCULATING << S300 >> parameter, assuming measurement started in saturation remanence')
-        idx = np.argmin(np.abs(self._remanence['field'].v + 0.300))
+        Backfield.logger.info('CALCULATING << S300 >> parameter, assuming measurement started in saturation remanence')
+        idx = np.argmin(np.abs(self._data['remanence']['field'].v + 0.300))
 
-        if self._remanence['field'].v.all() < 0.300:
+        if self._data['remanence']['field'].v.all() < 0.300:
             self.results['s300'] = np.nan
             return
 
-        if abs(self._remanence['field'].v[idx]) < 0.300:
+        if abs(self._data['remanence']['field'].v[idx]) < 0.300:
             idx2 = idx
             idx1 = idx + 1
         else:
@@ -165,21 +167,21 @@ class Backfield(base.Measurement):
             idx2 = idx - 1
 
         i = [idx1, idx2]
-        tf_array = [True if x in i else False for x in range(len(self._remanence['mag'].v))]
+        tf_array = [True if x in i else False for x in range(len(self._data['remanence']['mag'].v))]
 
-        d = self._remanence.filter(tf_array=tf_array)
+        d = self._data['remanence'].filter(tf_array=tf_array)
         slope, sigma, y_intercept, x_intercept = d.lin_regress('field', 'mag')
 
         m300 = y_intercept + (slope * 0.3)
-        mrs = self._remanence['mag'].v[0]
+        mrs = self._data['remanence']['mag'].v[0]
 
         s300 = (1 - ( m300 / mrs)) / 2
 
         self.results['s300'] = s300
 
     def calculate_mrs(self, **parameter):
-        start = self._remanence['mag'].v[0]
-        end = self._remanence['mag'].v[-1]
+        start = self._data['remanence']['mag'].v[0]
+        end = self._data['remanence']['mag'].v[-1]
         self.results['mrs'] = np.mean(np.fabs([end]))
         self.results['sigma_mrs'] = np.std(np.fabs([end]))
 
@@ -187,11 +189,11 @@ class Backfield(base.Measurement):
         self.results['ms'] = None
 
     def plt_backfield(self):
-        plt.plot(self._remanence['field'].v, self._remanence['mag'].v, '.-', zorder=1)
+        plt.plot(self._data['remanence']['field'].v, self._data['remanence']['mag'].v, '.-', zorder=1)
         plt.plot(-self.bcr, 0.0, 'x', color='k')
 
-        if self._induced:
-            plt.plot(self._induced['field'].v, self._induced['mag'].v, zorder=1)
+        if self._data['induced']:
+            plt.plot(self._data['induced']['field'].v, self._data['induced']['mag'].v, zorder=1)
 
         plt.axhline(0, color='#808080')
         plt.axvline(0, color='#808080')

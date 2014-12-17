@@ -47,6 +47,42 @@ class Measurement(object):
 
 
     """
+    logger = logging.getLogger('RockPy.MEASUREMENT')
+
+    @classmethod
+    def implemented_machines(cls):
+        # setting implemented machines
+        # looking for all subclasses of RockPy.Readin.base.Machine
+        # generating a dictionary of implemented machines : {implemented out_* method : machine_class}
+        implemented_machines = {cl.__name__.lower(): cl for cl in RockPy.Readin.base.Machine.__subclasses__()}
+        return implemented_machines
+
+    @classmethod
+    def inheritors(cls):
+        subclasses = set()
+        work = [cls]
+        while work:
+            parent = work.pop()
+            for child in parent.__subclasses__():
+                if child not in subclasses:
+                    subclasses.add(child)
+                    work.append(child)
+        return subclasses
+
+    @classmethod
+    def measurement_formatters(cls):
+        # measurement formatters are important!
+        # if they are not inside the measurement class, the measurement has not been implemented for this machine.
+        # the following machine formatters:
+        # 1. looks through all implemented measurements
+        # 2. for each measurement stores the machine and the applicable readin class in a dictonary
+
+        measurement_formatters = {cl.__name__.lower():
+                                      {'_'.join(i.split('_')[1:]).lower():
+                                           Measurement.implemented_machines()['_'.join(i.split('_')[1:]).lower()]
+                                       for i in dir(cl) if i.startswith('format_')}
+                                  for cl in Measurement.inheritors()}
+        return measurement_formatters
 
     def __init__(self, sample_obj,
                  mtype, mfile, machine,
@@ -61,30 +97,14 @@ class Measurement(object):
         :param options:
         :return:
         """
-        self.log = logging.getLogger('RockPy.MEASUREMENT.' + type(self).__name__)
+
+
         self.has_data = True
         self._data = {}
         self.is_initial_state = False
+
         machine = machine.lower()  # for consistency in code
         mtype = mtype.lower()  # for consistency in code
-
-        # setting implemented machines
-        # looking for all subclasses of Readin.base.Machine
-        # generating a dictionary of implemented machines : {implemented out_* method : machine_class}
-        self.implemented_machines = {cls.__name__.lower(): cls for cls in RockPy.Readin.base.Machine.__subclasses__()}
-        self.implemented_measurements = [i for i in Measurement.inheritors()]
-
-        # measurement formatters are important!
-        # if they are not inside the measurement class, the measurement has not been implemented for this machine.
-        # the following machine formatters:
-        # 1. looks through all implemented measurements
-        # 2. for each measurement stores the machine and the applicable readin class in a dictonary
-
-        self.measurement_formatters = {cls.__name__.lower():
-                                           {'_'.join(i.split('_')[1:]).lower():
-                                                self.implemented_machines['_'.join(i.split('_')[1:]).lower()]
-                                            for i in dir(cls) if i.startswith('format_')}
-                                       for cls in self.implemented_measurements}
 
         ''' initialize parameters '''
         self.machine_data = None  # returned data from Readin.machines()
@@ -98,43 +118,48 @@ class Measurement(object):
         self.is_machine_data = None  # returned data from Readin.machines()
         self.initial_state = None
 
-        if mtype in self.measurement_formatters:
-            self.log.debug('MTYPE << %s >> implemented' % mtype)
+
+        if mtype in self.measurement_formatters():
+            Measurement.logger.debug('MTYPE << %s >> implemented' % mtype)
             self.mtype = mtype  # set mtype
-            if machine in self.measurement_formatters[mtype]:
-                self.log.debug('MACHINE << %s >> implemented' % machine)
+            if machine in self.measurement_formatters()[mtype]:
+                Measurement.logger.debug('MACHINE << %s >> implemented' % machine)
                 self.machine = machine  # set machine
                 self.sample_obj = sample_obj  # set sample_obj
                 if not mfile:
-                    self.log.debug('NO machine or mfile passed -> no raw_data will be generated')
+                    Measurement.logger.debug('NO machine or mfile passed -> no raw_data will be generated')
                     return
                 else:
                     self.mfile = mfile
                     self.import_data()
                     self.has_data = self.machine_data.has_data
                     if not self.machine_data.has_data:
-                        self.log.error('NO DATA passed: check sample name << %s >>' % sample_obj.name)
+                        Measurement.logger.error('NO DATA passed: check sample name << %s >>' % sample_obj.name)
             else:
-                self.log.error('UNKNOWN MACHINE: << %s >>' % machine)
-                self.log.error('most likely cause is the \"format_%s\" method is missing in the measurement << %s >>' % (
-                    machine, mtype))
+                Measurement.logger.error('UNKNOWN MACHINE: << %s >>' % machine)
+                Measurement.logger.error(
+                    'most likely cause is the \"format_%s\" method is missing in the measurement << %s >>' % (
+                        machine, mtype))
         else:
-            self.log.error('UNKNOWN\t MTYPE: << %s >>' % mtype)
+            Measurement.logger.error('UNKNOWN\t MTYPE: << %s >>' % mtype)
 
 
         # dynamic data formatting
         # checks is format_'machine_name' exists. If exists it formats self.raw_data according to format_'machine_name'
         if callable(getattr(self, 'format_' + machine)):
             if self.has_data:
-                self.log.debug('FORMATTING raw data from << %s >>' % machine)
+                Measurement.logger.debug('FORMATTING raw data from << %s >>' % machine)
                 getattr(self, 'format_' + machine)()
             else:
-                self.log.debug('NO raw data transfered << %s >>' % machine)
+                Measurement.logger.debug('NO raw data transfered << %s >>' % machine)
 
         else:
-            self.log.error(
+            Measurement.logger.error(
                 'FORMATTING raw data from << %s >> not possible, probably not implemented, yet.' % machine)
 
+        self.__initialize()
+
+    def __initialize(self):
         # dynamical creation of entries in results data. One column for each results_* method.
         # calculation_* methods are not creating columns -> if a result is calculated a result_* method
         # has to be written
@@ -142,7 +167,8 @@ class Measurement(object):
                                not i.endswith('generic')]  # search for implemented results methods
 
         self.results = RockPyData(
-            column_names=self.result_methods, data = [np.nan for i in self.result_methods])  # dynamic entry creation for all available result methods
+            column_names=self.result_methods,
+            data=[np.nan for i in self.result_methods])  # dynamic entry creation for all available result methods
 
         # ## warning with calculation of results:
         # M.result_slope() -> 1.2
@@ -163,12 +189,14 @@ class Measurement(object):
         if self._treatment_opt:
             self._add_treatment_from_opt()
 
+
     def __getstate__(self):
         '''
         returned dict will be pickled
         :return:
         '''
-        pickle_me = {k: v for k, v in self.__dict__.iteritems() if k in ('machine_data', 'is_machine_data')}
+        pickle_me = {k: v for k, v in self.__dict__.iteritems() if k in
+                     ('machine_data', 'is_machine_data', '_data',  'has_data', 'mtype', 'sample_obj', 'mfile', '_treatment_opt', 'suffix')}
         return pickle_me
 
     def __setstate__(self, d):
@@ -178,6 +206,7 @@ class Measurement(object):
         :return:
         '''
         self.__dict__.update(d)
+        self.__initialize()
 
     def reset__data(self, recalc_mag=False):
         pass
@@ -186,7 +215,7 @@ class Measurement(object):
         if attr in self.__getattribute__('data').keys():
             return self.data[attr]
         if attr in self.__getattribute__('result_methods'):
-            return getattr(self, 'result_'+attr)().v[0]
+            return getattr(self, 'result_' + attr)().v[0]
         raise AttributeError
 
     def import_data(self, rtn_raw_data=None, **options):
@@ -197,18 +226,18 @@ class Measurement(object):
         :return:
         '''
 
-        self.log.info(' IMPORTING << %s , %s >> data' % (self.machine, self.mtype))
+        Measurement.logger.info(' IMPORTING << %s , %s >> data' % (self.machine, self.mtype))
 
         machine = options.get('machine', self.machine)
         mtype = options.get('mtype', self.mtype)
         mfile = options.get('mfile', self.mfile)
-        raw_data = self.measurement_formatters[mtype][machine](mfile, self.sample_obj.name)
+        raw_data = self.measurement_formatters()[mtype][machine](mfile, self.sample_obj.name)
         if raw_data is None:
-            self.log.error('IMPORTING\t did not transfer data - CHECK sample name and data file')
+            Measurement.logger.error('IMPORTING\t did not transfer data - CHECK sample name and data file')
             return
         else:
             if rtn_raw_data:
-                self.log.info(' RETURNING raw_data for << %s , %s >> data' % (machine, mtype))
+                Measurement.logger.info(' RETURNING raw_data for << %s , %s >> data' % (machine, mtype))
                 return raw_data
             else:
                 self.machine_data = raw_data
@@ -226,14 +255,14 @@ class Measurement(object):
         :param options:
         :return:
         """
-        self.log.info('CREATING << %s >> initial state measurement << %s >> data' % (mtype, self.mtype))
+        Measurement.logger.info('CREATING << %s >> initial state measurement << %s >> data' % (mtype, self.mtype))
         implemented = {i.__name__.lower(): i for i in Measurement.inheritors()}
         if mtype in implemented:
             self.initial_state = implemented[mtype](self.sample_obj, mtype, mfile, machine)
             self.initial_state.is_initial_state = True
             # self.initial_state = self.initial_state_obj.data
         else:
-            self.log.error('UNABLE to find measurement << %s >>' % (mtype))
+            Measurement.logger.error('UNABLE to find measurement << %s >>' % (mtype))
 
 
     @property
@@ -297,7 +326,7 @@ class Measurement(object):
         return self._data
 
 
-    ### DATA RELATED
+    # ## DATA RELATED
     ### Calculation and parameters
     @property
     def generic(self):
@@ -375,19 +404,19 @@ class Measurement(object):
             if self.results[caller] is None or self.results[
                 caller] == np.nan or recalc:  # if results dont exist or force recalc #todo exchange 0.000 with np.nan
                 if recalc:
-                    self.log.debug('FORCED recalculation of << %s >>' % (caller))
+                    Measurement.logger.debug('FORCED recalculation of << %s >>' % (caller))
                 else:
-                    self.log.debug('CANNOT find result << %s >> -> calculating' % (caller))
+                    Measurement.logger.debug('CANNOT find result << %s >> -> calculating' % (caller))
                 getattr(self, 'calculate_' + caller)(**parameter)  # calling calculation method
             else:
-                self.log.debug('FOUND previous << %s >> parameters' % (caller))
+                Measurement.logger.debug('FOUND previous << %s >> parameters' % (caller))
                 if self.check_parameters(caller, parameter):  # are parameters equal to previous parameters
-                    self.log.debug('RESULT parameters different from previous calculation -> recalculating')
+                    Measurement.logger.debug('RESULT parameters different from previous calculation -> recalculating')
                     getattr(self, 'calculate_' + caller)(**parameter)  # recalculating if parameters different
                 else:
-                    self.log.debug('RESULT parameters equal to previous calculation')
+                    Measurement.logger.debug('RESULT parameters equal to previous calculation')
         else:
-            self.log.error(
+            Measurement.logger.error(
                 'CALCULATION of << %s >> not possible, probably not implemented, yet.' % caller)
 
     def calc_all(self, **parameter):
@@ -518,19 +547,9 @@ class Measurement(object):
 
         # data = np.ones(len(self.results['variable'].v)) * tobj.value
         self.results = self.results.append_columns(column_names='ttype ' + tobj.ttype,
-                                                               data=[tobj.value])  #, unit=tobj.unit)
+                                                   data=[tobj.value])  #, unit=tobj.unit)
 
-    @classmethod
-    def inheritors(cls):
-        subclasses = set()
-        work = [cls]
-        while work:
-            parent = work.pop()
-            for child in parent.__subclasses__():
-                if child not in subclasses:
-                    subclasses.add(child)
-                    work.append(child)
-        return subclasses
+
 
     def __sort_list_set(self, values):
         """
@@ -560,14 +579,13 @@ class Measurement(object):
                 for tt in ttypes:
                     self.data[dtype][tt] = np.ones(len(dtype_rpd['variable'].v)) * self.ttype_dict[tt[6:]].value
             if 'mag' in self.data[dtype].column_names:
-                self.data[dtype]['mag'] = self.data[dtype].magnitude(('x','y','z'))
-
+                self.data[dtype]['mag'] = self.data[dtype].magnitude(('x', 'y', 'z'))
 
         if self.initial_state:
             for dtype, dtype_rpd in self.initial_state.data.iteritems():
                 self.initial_state.data[dtype] = dtype_rpd / norm_factor
             if 'mag' in self.initial_state.data[dtype].column_names:
-                self.initial_state.data[dtype]['mag'] = self.initial_state.data[dtype].magnitude(('x','y','z'))
+                self.initial_state.data[dtype]['mag'] = self.initial_state.data[dtype].magnitude(('x', 'y', 'z'))
 
         return self
 

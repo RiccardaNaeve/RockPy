@@ -108,10 +108,3 @@ class Study(object):
         else:
             out = self._samplegroups[0]
         return out
-
-    def save_to_file(self, folder, name):
-        pass
-        # print self.samplegroups.sample_list[0]
-        # pickle.dump(self.samplegroups.sample_list[0], open(folder+name+'.rpy', "wb" ))
-        # print json.dumps(self.samplegroups.sample_list[0])
-        # todo

@@ -13,7 +13,7 @@ class TestStudy(TestCase):
         self.study = RockPy.Study(self.sample_group)
 
     def test_save_to_file(self):
-        self.study.save_to_file(folder='/Users/mike/Desktop/', name='test')
+        self.study.save_study(folder='/Users/mike/Desktop/', name='test')
 
 
     def test__check_samplegroup_list(self):

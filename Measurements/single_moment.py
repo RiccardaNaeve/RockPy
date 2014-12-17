@@ -23,7 +23,7 @@ class generic_moment(base.Measurement):
 
     def format_sushibar(self):
         data = RockPyData(column_names=['field', 'x', 'y', 'z'],
-                               data=self.machine_data.out_trm())  # , units=['mT', 'Am^2', 'Am^2', 'Am^2'])
+                               data=self.machine_data.out_trm())  # , units=['mT', 'Am2', 'Am2', 'Am2'])
         data.define_alias('m', ( 'x', 'y', 'z'))
         # data = data.append_columns('mag', data.magnitude('m'))
         self._data = {'data': data.append_columns('mag', data.magnitude('m'))}
@@ -32,7 +32,7 @@ class generic_moment(base.Measurement):
         data =  self.machine_data.get_data()
         data = RockPyData(column_names=['x', 'y', 'z'],
                                 data=data,
-                                units=['A m^2', 'A m^2', 'A m^2'])
+                                units=['Am2', 'Am2', 'Am2'])
         data.define_alias('m', ( 'x', 'y', 'z'))
         self._data = {'data': data.append_columns('mag', data.magnitude('m'))}
 

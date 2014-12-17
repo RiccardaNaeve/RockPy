@@ -15,7 +15,7 @@ class Backfield(base.Generic):
 
         self.show()
         self.x_label = 'Field [%s]' % ('T')  # todo get_unit
-        self.y_label = 'Magnetic Moment [%s]' % ('Am^2')  # todo get_unit
+        self.y_label = 'Magnetic Moment [%s]' % ('Am2')  # todo get_unit
 
         if style == 'publication':
             self.setFigLinesBW()

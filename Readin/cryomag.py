@@ -33,7 +33,7 @@ class CryoMag(base.Machine):
         return self.get_float_data()
 
     def get_header(self):
-        header = [i.split('[Am^2]')[0] for i in self.raw_data[1]]
+        header = [i.split('[Am2]')[0] for i in self.raw_data[1]]
         header = map(str.strip, header)
         header = map(str.lower, header)
         header = np.array(header)

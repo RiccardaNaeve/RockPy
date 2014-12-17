@@ -200,5 +200,5 @@ class Backfield(base.Measurement):
         plt.grid()
         plt.title('Backfield %s' % (self.sample_obj.name))
         plt.xlabel('Field [%s]' % ('T'))  # todo replace with data unit
-        plt.ylabel('Moment [%s]' % ('Am^2'))  # todo replace with data unit
+        plt.ylabel('Moment [%s]' % ('Am2'))  # todo replace with data unit
         plt.show()

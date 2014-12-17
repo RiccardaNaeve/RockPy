@@ -39,7 +39,7 @@ class Fabian2010(base.Generic):
         self.add_plot()
         self.ax = self.figs['fabian2010'][0].gca()
         self.ax.set_xlabel('Field [T]')
-        self.ax.set_ylabel('Moment [$Am^2$]')
+        self.ax.set_ylabel('Moment [$Am2$]')
         self.ax.ticklabel_format(axis='both', style='sci', scilimits=(-2, 2))
 
     def plotting(self, sample):

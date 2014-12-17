@@ -29,7 +29,7 @@ class AfDemag(base.Measurement):
 
     def format_sushibar(self):
         data = RockPyData(column_names=['field', 'x', 'y', 'z'],
-                               data=self.machine_data.out_afdemag())  # , units=['mT', 'Am^2', 'Am^2', 'Am^2'])
+                               data=self.machine_data.out_afdemag())  # , units=['mT', 'Am2', 'Am2', 'Am2'])
         data.define_alias('m', ( 'x', 'y', 'z'))
         self._data['data'] = data.append_columns('mag', data.magnitude('m'))
 
@@ -120,6 +120,6 @@ class AfDemag(base.Measurement):
         plt.title('%s' % self.sample_obj.name)
         plt.plot(self._data['data']['field'].v, self._data['data']['mag'].v / norm_factor, '.-')
         plt.xlabel('field [%s]' % 'mT')
-        plt.ylabel('Moment [%s]' % 'Am^2')
+        plt.ylabel('Moment [%s]' % 'Am2')
         plt.grid()
         plt.show()

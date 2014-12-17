@@ -469,8 +469,8 @@ class Arai(base.Generic):
                           'component': component}
 
         self.show()
-        self.x_label = 'pTRM gained [%s]' % ('Am^2')  # todo get_unit
-        self.y_label = 'NRM remaining [%s]' % ('Am^2')  # todo get_unit
+        self.x_label = 'pTRM gained [%s]' % ('Am2')  # todo get_unit
+        self.y_label = 'NRM remaining [%s]' % ('Am2')  # todo get_unit
         self.ax.set_title('%s'%self.sample_names)
         if style == 'publication':
             self.setFigLinesBW()

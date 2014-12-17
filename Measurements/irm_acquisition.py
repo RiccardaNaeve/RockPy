@@ -40,5 +40,5 @@ class Irm_Acquisition(base.Measurement):
         plt.axhline(0, color='#808080')
         plt.axvline(0, color='#808080')
         plt.xlabel('Field [%s]' % ('T'))  # todo data.unit
-        plt.ylabel('Magnetic Moment [%s]' % ('Am^2'))  # todo data.unit
+        plt.ylabel('Magnetic Moment [%s]' % ('Am2'))  # todo data.unit
         plt.show()

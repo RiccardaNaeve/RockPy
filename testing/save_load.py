@@ -11,7 +11,7 @@ def test():
     M = sample.add_measurement(mtype='hysteresis', mfile=vftb_file, machine='vftb')
     M = sample2.add_measurement(mtype='hysteresis', mfile=vsm_file, machine='vsm')
 
-    study = RockPy.Study(samplegroups=[sample, sample2])
+    study = RockPy.Study(samplegroups=[sample2])
 
     RockPy.save(study, file_name='test.rpy')
 

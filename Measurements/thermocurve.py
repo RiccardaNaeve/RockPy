@@ -82,7 +82,7 @@ class ThermoCurve(base.Measurement):
 
                 )
         ax.set_xlabel('Temperature [%s]' % ('C'))  # todo data.unit
-        ax.set_ylabel('Magnetic Moment [%s]' % ('Am^2'))  # todo data.unit
+        ax.set_ylabel('Magnetic Moment [%s]' % ('Am2'))  # todo data.unit
         ax.set_title('Thermocurve %s' %self.sample_obj.name)
 
         plt.show()

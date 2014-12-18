@@ -1,7 +1,7 @@
 __author__ = 'mike'
 import base
 import matplotlib.pyplot as plt
-import Plotting
+import RockPy.Plotting
 import RockPy as RP
 import RockPy.Measurements.thellier
 

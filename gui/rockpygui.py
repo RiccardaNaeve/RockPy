@@ -220,7 +220,7 @@ class MainFrame(wx.Frame):
         """
 
         # get some entries
-        items = ('a', 'b', 'c')
+        items = ('a', 'plots', 'delete')
 
         # make dict with unique ids
         self.popupnavtreeids = {i: wx.NewId() for i in items}

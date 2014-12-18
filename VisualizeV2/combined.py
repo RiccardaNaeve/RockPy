@@ -8,12 +8,13 @@ import RockPy.Measurements.backfield
 import RockPy.Plotting.hysteresis
 import RockPy.Plotting.backfield
 import RockPy.Plotting.day_plot
-
+from Features import day
 
 class Day1977(base.Generic):
     def initialize_visual(self):
         # super(Day1977, self).initialize_visual()
         self._required = ['hysteresis', 'backfield']
+        self.standard_features = ['grid']
         self.add_plot()
         self.ax = self.figs[self.name][0].gca()
         RockPy.Plotting.day_plot.grid(self.ax)
@@ -33,65 +34,31 @@ class Day1977(base.Generic):
             bcr_bc = coe.results['bcr'].v / hys.results['bc'].v
             self.ax.plot(bcr_bc, mrs_ms, '.')
 
-    def toggle_mixing_lines(self, mix_lines=None, **plt_opt):
-        """
-        MD/SD Mixing lines after Dunlup2002a
-        """
-        name = inspect.stack()[0][3]
+    ''' PLOT FEATURES '''
+    def feature_sd_md1(self, **plt_opt):
+        lines, texts = day.sd_md_mixline_1(self.ax, **plt_opt)
+        self._add_line_text_dict(lines, texts)
 
-        color = plt_opt.pop('color', 'k')
-        zorder = plt_opt.pop('zorder', 0)
-        marker = plt_opt.pop('marker', '.')
-        ls = plt_opt.pop('ls', '--')
+    def feature_sd_md2(self, **plt_opt):
+        lines, texts = day.sd_md_mixline_2(self.ax, **plt_opt)
+        self._add_line_text_dict(lines, texts)
 
-        lines = [] #for addition to line_dict
-        texts = [] #for addition to text_dict
+    def feature_langevin(self, **plt_opt):
+        lines, texts = day.langevine_mixline(self.ax, **plt_opt)
+        self._add_line_text_dict(lines, texts)
 
-        mix_line_data = {
-            'sd_md1': np.array(
-                [[1.259, 0.500], [1.296, 0.448], [1.337, 0.404], [1.404, 0.353], [1.473, 0.305], [1.569, 0.259],
-                 [1.704, 0.211], [1.913, 0.163], [2.275, 0.114], [2.556, 0.090], [3.012, 0.067], [3.767, 0.043],
-                 [4.155, 0.036], [4.601, 0.029], [5.366, 0.019]]),
-            'langevin': np.array(
-                [[1.259, 0.498], [1.412, 0.472], [1.619, 0.444], [1.941, 0.407], [2.351, 0.371], [2.715, 0.348],
-                 [3.151, 0.324], [3.628, 0.302], [4.172, 0.281], [4.862, 0.261], [5.629, 0.239], [6.610, 0.217],
-                 [7.823, 0.194], [9.424, 0.171], [11.432, 0.150], [14.353, 0.125], [18.754, 0.100]]),
-            'sd_md2': np.array(
-                [[1.431, 0.378], [1.508, 0.341], [1.601, 0.306], [1.702, 0.270], [1.810, 0.234], [1.973, 0.198],
-                 [2.186, 0.161], [2.494, 0.125], [2.928, 0.090], [3.214, 0.072], [3.646, 0.053], [4.151, 0.036],
-                 [5.025, 0.018]]),
-            'sd_sp_93': np.array(
-                [[2.820, 0.100], [4.035, 0.091], [6.375, 0.075], [13.641, 0.050], [35.278, 0.025], [99.429, 0.010]]),
-            'SP_saturation_envelope': np.array(
-                [[1.255, 0.498], [1.414, 0.473], [1.622, 0.450], [1.945, 0.426], [2.512, 0.402], [3.764, 0.376],
-                 [7.411, 0.352], [8.874, 0.350], [17.269, 0.343], [34.897, 0.338], [57.714, 0.336]])
-        }
+    def feature_sd_sp_10nm(self, **plt_opt):
+        lines, texts = day.sd_sp_10nm(self.ax, **plt_opt)
+        self._add_line_text_dict(lines, texts)
 
-        mix_line_text = {
-            'sd_md1': {'texts': ['0%', '20%', '40%', '60%', '80%', '90%', '95%', '100%'],
-                       'positions': [[1.259, 0.500], [1.337, 0.404], [1.473, 0.305], [1.704, 0.211], [2.275, 0.114],
-                                     [3.012, 0.067], [4.155, 0.036], [5.366, 0.019]]},
-            'sd_md2': {'texts': [], 'positions':[]},
-            'langevin': {'texts': [], 'positions':[]},
-            'sd_sp_93': {'texts': [], 'positions':[]},
-            'SP_saturation_envelope': {'texts': [], 'positions':[]}
-        }
-        if not mix_lines:
-            mix_lines = mix_line_data.keys()
-        else:
-            mix_lines = RockPy.Functions.general._to_list(mix_lines)
+    def feature_sd_sp_15nm(self, **plt_opt):
+        lines, texts = day.sd_sp_15nm(self.ax, **plt_opt)
+        self._add_line_text_dict(lines, texts)
 
-        for line in mix_lines:
-            if line in mix_line_data:
-                data = mix_line_data[line]
-                lines.extend(self.ax.plot(data[:, 0], data[:, 1], color=color, marker=marker, ls=ls, zorder=zorder, **plt_opt))
-                for idx, text in enumerate(mix_line_text[line]['texts']):
-                    texts.append(self.ax.text(mix_line_text[line]['positions'][idx][0], mix_line_text[line]['positions'][idx][1], text,
-                            verticalalignment='top', horizontalalignment='right',
-                            color='k', fontsize=10))
+    def feature_sp_envelope(self, **plt_opt):
+        lines, texts = day.sp_envelope(self.ax, **plt_opt)
+        self._add_line_text_dict(lines, texts)
 
-        self._change_visible('line', name, lines)
-        self._change_visible('text', name, texts)
 
 
 

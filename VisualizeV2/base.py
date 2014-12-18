@@ -2,6 +2,7 @@ __author__ = 'volk'
 import logging
 import os
 import sys
+import inspect
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -15,7 +16,8 @@ import inspect
 
 RockPy.Functions.general.create_logger('RockPy.VISUALIZE')
 import RockPy.Measurements.base
-from Functions.general import _to_list
+# from matplotlib import rc
+from RockPy.Functions.general import _to_list
 from matplotlib import gridspec
 from matplotlib.backends.backend_pdf import PdfPages
 
@@ -83,7 +85,8 @@ class Generic(object):
                  fig_opt=dict(),
                  **options):
 
-        #self.log = logging.getLogger('RockPy.VISUALIZE.' + type(self).__name__)
+        # self.log = logging.getLogger('RockPy.VISUALIZE.' + type(self).__name__)
+        self.tex = options.pop('tex', False)
         self.options = options
 
         # # normalization_parameters for normalization of measurement
@@ -92,9 +95,11 @@ class Generic(object):
 
         self._required = {}  # required measurements in a figure
 
+        self.input = plot_samples
         self.input_type = type(plot_samples)
-        self._hierarchy = self.input_type
+
         self.study = self._to_study(plot_samples)
+        self._hierarchy = self.input_type
 
         # self.color_source = options.pop('color_source', self.get_source[self.input_type])
         # self.marker_source = options.pop('marker_source', self.get_source[self.input_type])
@@ -104,8 +109,12 @@ class Generic(object):
         self._figs = []
         self._fig_opt = fig_opt
 
-        self.line_dict = {}
-        self.text_dict = {}
+        self.standard_features = []
+        self.features = {i[0][8:]: i[1] for i in inspect.getmembers(self, predicate=inspect.ismethod) if
+                         i[0].startswith('feature_')}
+
+        self.line_dict = {i: None for i in self.features}
+        self.text_dict = {i: None for i in self.features}
 
         self.initialize_visual()
 
@@ -137,7 +146,16 @@ class Generic(object):
                RockPy.Measurements.base.Measurement: 'measurement'
         }
         return out
-
+    #
+    # def plotting_levels(self):
+    #     """
+    #     All possible plottings
+    #     :return:
+    #     """
+    #
+    #     out = {'Study_standard' : self.input.get_samplegroup_means,
+    #            'Group_standard' : self.input.get_measurement_means
+    #            }
 
     ''' PLOTTING REQUIREMENTS '''
 
@@ -186,7 +204,7 @@ class Generic(object):
 
     @property
     def figs(self):
-        out = {name : visual._figs for name, visual in self.visuals.iteritems()}
+        out = {name: visual._figs for name, visual in self.visuals.iteritems()}
         return out
 
     @property
@@ -211,18 +229,21 @@ class Generic(object):
     def add_subplot(self, name=None):
         if name is None:
             name = self.name
-        self.gs = gridspec.GridSpec(1,2)
+        self.gs = gridspec.GridSpec(1, 2)
         for ax in self.figs[name][0].as_list():
             ax.set_position(self.gs[0])
         self.figs[name][0].add_subplot(self.gs[1])
 
     def _create_fig(self, **fig_opt):
         fig = plt.figure(**fig_opt)
-        gs = gridspec.GridSpec(1,1)
+        gs = gridspec.GridSpec(1, 1)
         ax1 = fig.add_subplot(gs[0])
         return fig, gs
 
     ''' SAMPLE RELATED '''
+    def get_plotting_samples(self):
+        print self.input_type
+
 
     def _to_study(self, slist):
         """
@@ -235,15 +256,15 @@ class Generic(object):
         if single measurement -> self.input_type = RockPy.Measurements.base.Measurement
 
         """
-        if not isinstance(slist, list):  #check if list
-            if isinstance(slist, RockPy.Study):  #if study keep study
+        if not isinstance(slist, list):  # check if list
+            if isinstance(slist, RockPy.Study):  # if study keep study
                 out = slist
             if not isinstance(slist, RockPy.Study):
                 if isinstance(slist, RockPy.SampleGroup) or isinstance(slist, RockPy.Sample):
-                    #self.log.debug('CONVERTING %s -> RockPy.Study(%s)' % (type(slist), type(slist)))
+                    # self.log.debug('CONVERTING %s -> RockPy.Study(%s)' % (type(slist), type(slist)))
                     out = RockPy.Study(slist)
                 if type(slist) in RockPy.Measurements.base.Measurement.inheritors():
-                    #self.log.debug(
+                    # self.log.debug(
                     print(
                         'CONVERTING %s -> RockPy.Sample -> RockPy.Study(Sample(%s))' % (type(slist), type(slist)))
                     s = RockPy.Sample(name=self.name)
@@ -253,14 +274,14 @@ class Generic(object):
 
         if isinstance(slist, list):
             if all(isinstance(item, RockPy.SampleGroup) for item in slist):
-                #self.log.debug('CONVERTING %s(%s) -> RockPy.Study(%s(%s))' % (
+                # self.log.debug('CONVERTING %s(%s) -> RockPy.Study(%s(%s))' % (
                 print('CONVERTING %s(%s) -> RockPy.Study(%s(%s))' % (
                     type(slist), type(slist[0]), type(slist), type(slist[0])))
                 self.input_type = RockPy.Study
                 out = RockPy.Study(slist)
 
             if all(isinstance(item, RockPy.Sample) for item in slist):
-                #self.log.debug('CONVERTING %s(%s) -> RockPy.Study(%s(%s))' % (
+                # self.log.debug('CONVERTING %s(%s) -> RockPy.Study(%s(%s))' % (
                 print('CONVERTING %s(%s) -> RockPy.Study(%s(%s))' % (
                     type(slist), type(slist[0]), type(slist), type(slist[0])))
                 self.input_type = RockPy.SampleGroup
@@ -302,8 +323,8 @@ class Generic(object):
 
     def show(self):
         # for label, figs in self.figs.iteritems():
-        #     for fig in figs:
-        #         axes = fig.gca()
+        # for fig in figs:
+        # axes = fig.gca()
         #         axes.set_title(label)
 
         plt.show()
@@ -312,14 +333,16 @@ class Generic(object):
         pass
 
     def save(self, folder=None, name=None):
+        # rc('text', usetex=True)
         if folder is None:
             from os.path import expanduser
+
             folder = expanduser("~") + '/Desktop/'
         if name is None:
             name = self.name
         if not '.pdf' in name:
             name += '.pdf'
-        loc = folder+name
+        loc = folder + name
 
         with PdfPages(loc) as pdf:
             for fig in self.figs:
@@ -355,18 +378,18 @@ class Generic(object):
     def _change_visible(self, text_or_line, caller, lines):
         tol = {'line': self.line_dict,
                'text': self.text_dict}
-        print text_or_line, caller, lines
-        print tol[text_or_line]
         if not text_or_line in tol:
-            print 'updating'
-            tol_dict.update({caller:lines})
-        else:
-            print 'toggling'
             tol_dict = tol[text_or_line]
             if caller in tol_dict:
+                tol_dict.update({caller: lines})
+            else:
                 tols = tol_dict[caller]
                 for line in tols:
                     bool = line.get_visible()
                     line.set_visible(not bool)
 
 
+    def _add_line_text_dict(self, lines, texts):
+        caller = inspect.stack()[1][3][8:]
+        self.line_dict[caller] = lines
+        self.text_dict[caller] = texts

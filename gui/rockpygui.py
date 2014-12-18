@@ -19,7 +19,7 @@ import RockPy.file_operations as rfo
 #from matplotlib.backends.backend_wx import FigureCanvasWx as FigureCanvas
 
 # comment out the following to use wx rather than wxagg
-mpl.use('WXAgg')
+#mpl.use('WXAgg')
 from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg as FigureCanvas
 from matplotlib.backends.backend_wx import NavigationToolbar2Wx
 
@@ -153,6 +153,39 @@ class MainFrame(wx.Frame):
 
         self.navtree.Expand(root)
 
+    def UpdateStudyNavTree(self):
+        self.navtree.DeleteAllItems()  # clear the tree
+        if self.study == None:
+            # no study do nothing
+            return
+
+        # Add a study as root node
+        root = self.navtree.AddRoot("Study", ct_type=1)
+
+        self.navtree.SetItemImage(root, 0, wx.TreeItemIcon_Normal)
+        self.navtree.SetItemImage(root, 1, wx.TreeItemIcon_Expanded)
+
+        # iterate over all samplegroups
+        for sg in self.study.samplegroups:
+            child = self.navtree.AppendItem(root, sg.name, ct_type=1)
+            self.navtree.SetItemImage(child, 0, wx.TreeItemIcon_Normal)
+            self.navtree.SetItemImage(child, 1, wx.TreeItemIcon_Expanded)
+
+            # iterate over all samples of each samplegroup
+            for s in sg:
+                last = self.navtree.AppendItem(child, s.name, ct_type=1)
+                self.navtree.SetItemImage(last, 0, wx.TreeItemIcon_Normal)
+                self.navtree.SetItemImage(last, 1, wx.TreeItemIcon_Expanded)
+
+                # iterate over all measurements of each sample
+                for m in s.measurements:
+                    item = self.navtree.AppendItem(last, m.mtype, ct_type=1)
+                    self.navtree.SetItemImage(item, 2, wx.TreeItemIcon_Normal)
+
+        self.navtree.Expand(root)
+
+
+
     def ShowFigure(self, figure, title='plot'):
         # make a panel
         panel = wx.Panel(self.nb)
@@ -222,6 +255,8 @@ class MainFrame(wx.Frame):
                 self.shell.interp.locals['study'] = self.study
 
                 self.SetStatusText("%s loaded" % filename)
+
+                self.UpdateStudyNavTree()
 
         dlg.Destroy()
 

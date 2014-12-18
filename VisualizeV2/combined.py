@@ -66,9 +66,30 @@ class Day1977(base.Generic):
                  [7.411, 0.352], [8.874, 0.350], [17.269, 0.343], [34.897, 0.338], [57.714, 0.336]])
         }
 
+        mix_line_text = {
+            'sd_md1': {'texts': ['0%', '20%', '40%', '60%', '80%', '90%', '95%', '100%'],
+                       'positions': [[1.259, 0.500], [1.337, 0.404], [1.473, 0.305], [1.704, 0.211], [2.275, 0.114],
+                                     [3.012, 0.067], [4.155, 0.036], [5.366, 0.019]]},
+            'sd_md2': {'texts': [], 'positions':[]},
+            'langevin': {'texts': [], 'positions':[]},
+            'sd_sp_93': {'texts': [], 'positions':[]},
+            'SP_saturation_envelope': {'texts': [], 'positions':[]}
+        }
+
         if 'all' in mix_lines:
             for name, data in mix_line_data.iteritems():
                 self.ax.plot(data[:, 0], data[:, 1], color=color, marker=marker, ls=ls, zorder=zorder, **plt_opt)
+                for idx, text in enumerate(mix_line_text[name]['texts']):
+                    self.ax.text(mix_line_text[name]['positions'][idx][0], mix_line_text[name]['positions'][idx][1], text,
+                            verticalalignment='top', horizontalalignment='right',
+                            transform=self.ax.transAxes,
+                            color='k', fontsize=15)
+
+                else:
+                    for line in mix_lines:
+                        if line in mix_line_data:
+                            data = mix_line_data[line]
+                            self.ax.plot(data[:, 0], data[:, 1], color=color, marker=marker, ls=ls, zorder=zorder, **plt_opt)
 
 
 class Fabian2010(base.Generic):

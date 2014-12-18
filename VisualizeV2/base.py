@@ -341,3 +341,8 @@ class Generic(object):
             for fig in self.figs[plot]:
                 fig.gca().set_title(title)
 
+
+    ''' GET FUNCTIONS '''
+
+    def get_single_fig(self):
+        pass

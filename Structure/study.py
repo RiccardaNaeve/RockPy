@@ -19,7 +19,7 @@ class Study(object):
         :param samplegroups: one or several samplegroups that form the study
         :return:
         """
-        self.log = log  # logging.getLogger('RockPy.' + type(self).__name__)
+        #self.log = log  # logging.getLogger('RockPy.' + type(self).__name__)
         self.name = name
         self._samplegroups = []
         self.add_samplegroup(samplegroups)
@@ -91,7 +91,7 @@ class Study(object):
             if all(isinstance(item, RockPy.SampleGroup) for item in samplegroup):
                 samplegroup = samplegroup
             else:
-                self.log.error('MIXED lists not allowed or no Sample/SampleGroup instance found')
+                #self.log.error('MIXED lists not allowed or no Sample/SampleGroup instance found')
                 return None
         if isinstance(samplegroup, RockPy.Sample):
             samplegroup = [RockPy.SampleGroup(sample_list=samplegroup)]

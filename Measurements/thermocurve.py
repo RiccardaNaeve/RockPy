@@ -20,12 +20,14 @@ class ThermoCurve(base.Measurement):
         data = self.machine_data.out_thermocurve()
         header = self.machine_data.header
         if len(data) > 2:
-            self.log.warning('LENGTH of machine.out_thermocurve =! 2. Assuming data[0] = heating data[1] = cooling')
+            print('LENGTH of machine.out_thermocurve =! 2. Assuming data[0] = heating data[1] = cooling')
+            # self.log.warning('LENGTH of machine.out_thermocurve =! 2. Assuming data[0] = heating data[1] = cooling')
         if len(data) > 1:
             self.up_temp = RockPyData(column_names=header, data=data[0])
             self.down_temp = RockPyData(column_names=header, data=data[1])
         else:
-            self.log.error('LENGTH of machine.out_thermocurve < 2.')
+            print('LENGTH of machine.out_thermocurve < 2.')
+            #self.log.error('LENGTH of machine.out_thermocurve < 2.')
 
     def format_vsm(self):
         data = self.machine_data.out_thermocurve()

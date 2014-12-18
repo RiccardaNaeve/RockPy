@@ -28,7 +28,8 @@ class SushiBar(base.Machine):
                                   and i[8] != '-'])  # filter for sample and missing data
 
         if len(self.raw_data) == 0:
-            self.log.error('SAMPLE NAME not recognized: SAMPLES: %s' % str(self.sample_names))
+            print('SAMPLE NAME not recognized: SAMPLES: %s' % str(self.sample_names))
+            # Sample.logger.error('SAMPLE NAME not recognized: SAMPLES: %s' % str(self.sample_names))
 
         self.raw_data = np.array([self.__replace_none(self.raw_data)])[0]
 

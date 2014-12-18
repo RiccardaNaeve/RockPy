@@ -1,7 +1,7 @@
 __author__ = 'volk'
 import numpy as np
 import matplotlib.pyplot as plt
-
+import logging
 import base
 from RockPy.Structure.data import RockPyData
 from scipy import stats
@@ -20,6 +20,8 @@ class Hysteresis(base.Measurement):
 
     """
 
+    # logger = logging.getLogger('RockPy.MEASUREMENT.hysteresis')
+
     def __init__(self, sample_obj,
                  mtype, mfile, machine,
                  **options):
@@ -27,27 +29,27 @@ class Hysteresis(base.Measurement):
         self._data = {'up_field': None,
                       'down_field': None,
                       'virgin': None,
-                      'msi': None}
+                      'msi': None,
+                      'all':None}
 
         super(Hysteresis, self).__init__(sample_obj, mtype, mfile, machine, **options)
         self.paramag_correction = None
-        self.standard_parameters.update({'ms': {'from_field': 70}})
 
     # ## formatting functions
     def format_vftb(self):
         data = self.machine_data.out_hysteresis()
         header = self.machine_data.header
-        self.induced = RockPyData(column_names=header, data=data[0])
-        dfield = np.diff(self.induced['field'].v)
+        self._data['all'] = RockPyData(column_names=header, data=data[0])
+        dfield = np.diff(self._data['all']['field'].v)
         idx = [i for i in range(len(dfield)) if dfield[i] <= 0]
         idx += [max(idx) + 1]
         virgin_idx = range(0, idx[0])
         down_field_idx = idx
         up_field_idx = range(idx[-1], len(dfield) + 1)
 
-        self.data['virgin'] = self.induced.filter_idx(virgin_idx)
-        self.data['down_field'] = self.induced.filter_idx(down_field_idx)
-        self.data['up_field'] = self.induced.filter_idx(up_field_idx)
+        self._data['virgin'] = self._data['all'].filter_idx(virgin_idx)
+        self._data['down_field'] = self._data['all'].filter_idx(down_field_idx)
+        self._data['up_field'] = self._data['all'].filter_idx(up_field_idx)
 
     def format_vsm(self):
         header = self.machine_data.header
@@ -62,19 +64,19 @@ class Hysteresis(base.Measurement):
             header[header.index('adjusted moment')] = 'moment'
 
         if len(segments['segment number'].v) == 3:
-            self.data['virgin'] = RockPyData(column_names=header, data=self.machine_data.out_hysteresis()[0])
-            self.data['down_field'] = RockPyData(column_names=header, data=self.machine_data.out_hysteresis()[1])
-            self.data['up_field'] = RockPyData(column_names=header, data=self.machine_data.out_hysteresis()[2])
+            self._data['virgin'] = RockPyData(column_names=header, data=self.machine_data.out_hysteresis()[0])
+            self._data['down_field'] = RockPyData(column_names=header, data=self.machine_data.out_hysteresis()[1])
+            self._data['up_field'] = RockPyData(column_names=header, data=self.machine_data.out_hysteresis()[2])
 
         if len(segments['segment number'].v) == 2:
-            self.data['virgin'] = None
-            self.data['down_field'] = RockPyData(column_names=header, data=self.machine_data.out_hysteresis()[0])
-            self.data['up_field'] = RockPyData(column_names=header, data=self.machine_data.out_hysteresis()[1])
+            self._data['virgin'] = None
+            self._data['down_field'] = RockPyData(column_names=header, data=self.machine_data.out_hysteresis()[0])
+            self._data['up_field'] = RockPyData(column_names=header, data=self.machine_data.out_hysteresis()[1])
 
         if len(segments['segment number'].v) == 1:
-            self.data['virgin'] = RockPyData(column_names=header, data=self.machine_data.out_hysteresis()[0])
-            self.data['down_field'] = None
-            self.data['up_field'] = None
+            self._data['virgin'] = RockPyData(column_names=header, data=self.machine_data.out_hysteresis()[0])
+            self._data['down_field'] = None
+            self._data['up_field'] = None
 
         try:
             self.data['virgin'].rename_column('moment', 'mag')
@@ -95,20 +97,20 @@ class Hysteresis(base.Measurement):
         data = self.machine_data.out_hys()
         header = self.machine_data.header
 
-        self.raw_data = RockPyData(column_names=header, data=data)
-        dfield = np.diff(self.raw_data['raw_applied_field_for_plot_'])
+        self._data['all'] = RockPyData(column_names=header, data=data)
+        dfield = np.diff(self._data['all']['raw_applied_field_for_plot_'])
         down_field_idx = [i for i in range(len(dfield)) if dfield[i] < 0]
         up_field_idx = [i for i in range(len(dfield)) if dfield[i] > 0]
 
-        self.data['down_field'] = self.raw_data.filter_idx(down_field_idx)
-        self.data['down_field'].define_alias('field', 'raw_applied_field_for_plot_')
-        self.data['down_field'].define_alias('mag', 'raw_signal_mx')
-        self.data['down_field']['field'] *= 0.1 * 1e-3  # conversion Oe to Tesla
+        self._data['down_field'] = self.raw_data.filter_idx(down_field_idx)
+        self._data['down_field'].define_alias('field', 'raw_applied_field_for_plot_')
+        self._data['down_field'].define_alias('mag', 'raw_signal_mx')
+        self._data['down_field']['field'] *= 0.1 * 1e-3  # conversion Oe to Tesla
 
-        self.data['up_field'] = self.raw_data.filter_idx(up_field_idx)
-        self.data['up_field'].define_alias('field', 'raw_applied_field_for_plot_')
-        self.data['up_field'].define_alias('mag', 'raw_signal_mx')
-        self.data['up_field']['field'] *= 0.1 * 1e-3  # conversion Oe to Tesla
+        self._data['up_field'] = self.raw_data.filter_idx(up_field_idx)
+        self._data['up_field'].define_alias('field', 'raw_applied_field_for_plot_')
+        self._data['up_field'].define_alias('mag', 'raw_signal_mx')
+        self._data['up_field']['field'] *= 0.1 * 1e-3  # conversion Oe to Tesla
 
     # ## calculations
 
@@ -182,8 +184,7 @@ class Hysteresis(base.Measurement):
         return self.results['brh']
 
     def result_paramag_slope(self, from_field=80, recalc=False, **options):
-        parameter = {'from_field': from_field
-        }
+        parameter = {'from_field': from_field}
         self.calc_result(parameter, recalc, force_caller='ms')
         return self.results['paramag_slope']
 
@@ -195,7 +196,7 @@ class Hysteresis(base.Measurement):
         :param parameters: from_field: from % of this value a linear interpolation will be calculated for all branches (+ & -)
         :return:
         """
-        from_field = parameters.get('from_field', self.standard_parameters['ms']['from_field']) / 100.0
+        from_field = parameters.get('from_field', 75) / 100.0
         df_fields = self.data['down_field']['field'].v / max(self.data['down_field']['field'].v)
         uf_fields = self.data['up_field']['field'].v / max(self.data['up_field']['field'].v)
 
@@ -260,7 +261,7 @@ class Hysteresis(base.Measurement):
 
         :return:
         '''
-        self.log.info('CALCULATING << Bc >> parameter from linear interpolation between points closest to m=0')
+        # Hysteresis.logger.info('CALCULATING << Bc >> parameter from linear interpolation between points closest to m=0')
 
         def calc(direction):
             d = getattr(self, direction)
@@ -369,17 +370,8 @@ class Hysteresis(base.Measurement):
             ydf = xdf * np.mean(slopes) + np.mean(np.fabs(intercepts))
             yuf = xuf * np.mean(slopes) - np.mean(np.fabs(intercepts))
 
-            print np.mean(np.fabs(intercepts))
-            print intercepts
             plt.plot(xdf, ydf, 'g--', alpha=0.5)
             plt.plot(xuf, yuf, 'g--', alpha=0.5)
-        # plotting interpolated data
-        # plt.plot(self.data['down_field']_interp()[0], self.data['down_field']_interp()[1], '--',
-        # color=std.get_color(),
-        # zorder=1)
-        # plt.plot(self.data['up_field']_interp()[0], self.data['up_field']_interp()[1], '--',
-        # color=std.get_color(),
-        # zorder=1)
 
         if not self.data['virgin'] is None:
             plt.plot(self.data['virgin']['field'].v, self.data['virgin']['mag'].v, color=std.get_color(), zorder=1)

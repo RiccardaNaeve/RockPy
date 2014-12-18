@@ -100,7 +100,7 @@ class Vsm(base.Machine):
             lc += 1
             sl = l.strip()  # take away any leading and trailing whitespaces
             if lc == 1 and not sl.startswith("MicroMag 2900/3900 Data File"):  # check first line
-                self.log.error("No valid MicroMag file. Header not found in first line.")
+                #self.log.error("No valid MicroMag file. Header not found in first line.")
                 return None
 
             if len(sl) == 0:  # empty line

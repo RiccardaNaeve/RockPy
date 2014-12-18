@@ -118,6 +118,7 @@ class Measurement(object):
         self.is_machine_data = None  # returned data from Readin.machines()
         self.initial_state = None
 
+        self.__initialize()
 
         if mtype in self.measurement_formatters():
             Measurement.logger.debug('MTYPE << %s >> implemented' % mtype)
@@ -157,7 +158,6 @@ class Measurement(object):
             Measurement.logger.error(
                 'FORMATTING raw data from << %s >> not possible, probably not implemented, yet.' % machine)
 
-        self.__initialize()
 
     def __initialize(self):
         # dynamical creation of entries in results data. One column for each results_* method.

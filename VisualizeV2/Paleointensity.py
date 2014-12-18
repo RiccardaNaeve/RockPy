@@ -5,7 +5,9 @@ import RockPy.Plotting
 import RockPy as RP
 import RockPy.Measurements.thellier
 
-class Plot(base.Generic):
+
+class Tutorial(base.Generic):
+    _required = None
     """
     Tutorial class for how to create your own plot
 
@@ -21,11 +23,15 @@ class Plot(base.Generic):
 
 
 class Decay(base.Generic):
+    _required = ['thellier']
+
     def initialize_visual(self):
-        super(Decay, self).initialize_visual()
         self.add_plot()
 
+
 class Dunlop(base.Generic):
+    _required = ['thellier']
+
     def initialize_visual(self):
         super(Dunlop, self).initialize_visual()
         self._required = RockPy.Measurements.thellier.Thellier
@@ -34,15 +40,17 @@ class Dunlop(base.Generic):
     def plotting(self, sample):
         pass
 
+
 class Arai(base.Generic):
+    _required = ['thellier']
     def initialize_visual(self):
         super(Arai, self).initialize_visual()
         self._required = RockPy.Measurements.thellier.Thellier
         self.add_plot()
-        self.add_subplot()
 
     def plotting(self, sample):
         pass
+
 
 class Multiple(base.Generic):
     def initialize_visual(self):
@@ -51,6 +59,7 @@ class Multiple(base.Generic):
         super(Multiple, self).initialize_visual()
         self.add_plot(plot=arai)
         self.add_plot(plot=dunlop)
+
 
 def test():
     sample = RP.Sample(name='test_sample')

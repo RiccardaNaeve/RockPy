@@ -8,7 +8,7 @@ import numpy as np
 from RockPy.Functions import general
 from RockPy.Measurements.base import Measurement
 from RockPy.Structure.data import RockPyData, condense
-
+import RockPy.VisualizeV2.base
 
 general.create_logger('RockPy.SAMPLE')
 
@@ -151,7 +151,7 @@ class Sample(object):
             else:
                 return None
         else:
-            
+
             Sample.logger.error(' << %s >> not implemented, yet' % mtype)
             Sample.logger.error(' << %s >> not implemented, yet' % mtype)
 
@@ -173,7 +173,7 @@ class Sample(object):
                         row_name = ''
 
                     self.results = RockPyData(
-                        column_names=[i +'_'+ measurement.mtype for i in measurement.results.column_names],
+                        column_names=[i + '_' + measurement.mtype for i in measurement.results.column_names],
                         data=measurement.results.data)
                 else:
                     c_names = [i + '_' + measurement.mtype for i in measurement.results.column_names]
@@ -386,6 +386,7 @@ class Sample(object):
     def average_measurement(self, mlist, interpolate=False, recalc_mag=False):
         mlist = _to_list(mlist)
         measurement = mlist[0]
+
         for dtype in measurement.data:
             aux = [m.data[dtype] for m in mlist]
 
@@ -408,7 +409,6 @@ class Sample(object):
                     measurement.initial_state.data[dtype].define_alias('m', ( 'x', 'y', 'z'))
                     measurement.initial_state.data[dtype]['mag'].v = measurement.initial_state.data[dtype].magnitude(
                         'm')
-        # measurement.reset__data(recalc_mag) #todo uncomment after error implemented
         return measurement
 
     def __get_variable_list(self, rpdata_list):
@@ -417,4 +417,25 @@ class Sample(object):
             out.extend(rp['variable'].v)
         return self.__sort_list_set(out)
 
+    @property
+    def plottable(self):
+        out = {}
+        for visual in RockPy.VisualizeV2.base.Generic.inheritors():
+            if self.meets_requirements(visual._required):
+                out.update({visual.__name__: visual})
+        return out
 
+    def meets_requirements(self, require_list):
+        out = []
+        if require_list is None:
+            return False
+
+        for i in require_list:
+            if i in self.mtypes:
+                out.append(True)
+            else:
+                out.append(False)
+        if all(out):
+            return True
+        else:
+            return False

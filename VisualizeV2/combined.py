@@ -10,10 +10,12 @@ import RockPy.Plotting.backfield
 import RockPy.Plotting.day_plot
 from Features import day
 
+
 class Day1977(base.Generic):
+    _required = ['hysteresis', 'backfield']
+
     def initialize_visual(self):
         # super(Day1977, self).initialize_visual()
-        self._required = ['hysteresis', 'backfield']
         self.standard_features = ['grid']
         self.add_plot()
         self.ax = self.figs[self.name][0].gca()
@@ -35,6 +37,7 @@ class Day1977(base.Generic):
             self.ax.plot(bcr_bc, mrs_ms, '.')
 
     ''' PLOT FEATURES '''
+
     def feature_sd_md1(self, **plt_opt):
         lines, texts = day.sd_md_mixline_1(self.ax, **plt_opt)
         self._add_line_text_dict(lines, texts)
@@ -59,13 +62,15 @@ class Day1977(base.Generic):
         lines, texts = day.sp_envelope(self.ax, **plt_opt)
         self._add_line_text_dict(lines, texts)
 
-
+    def feature_data(self):
+        print self.get_required_measurements()
 
 
 class Fabian2010(base.Generic):
+    _required = ['hysteresis', 'backfield']
+
     def initialize_visual(self):
         super(Fabian2010, self).initialize_visual()
-        self._required = ['hysteresis', 'backfield']
         self.add_plot()
         self.ax = self.figs['fabian2010'][0].gca()
         self.ax.set_xlabel('Field [T]')

@@ -81,7 +81,7 @@ class MainFrame(wx.Frame):
         # add the panes to the manager
         self.navpanel = self.xrc.LoadPanel(self, "navpanel")
         self.inspectorpanel = self.xrc.LoadPanel(self, "inspectorpanel")
-        self.createTree()
+        self.CreateNavTree()
 
         self._mgr.AddPane(self.navpanel, wx.aui.AuiPaneInfo().
                           Name("Navigator").Caption("Navigator").Left().
@@ -115,7 +115,7 @@ class MainFrame(wx.Frame):
         self.toggle_panes = {xrc.XRCID("PythonConsoleMenuItem"): "Console", xrc.XRCID("InspectorMenuItem"): "Inspector",
                  xrc.XRCID("NavigatorMenuItem"): "Navigator"}
 
-    def createTree(self):
+    def CreateNavTree(self):
         # Create a CustomTreeCtrl instance and putit within a boxsizer in navtreepanel from xrc
         p = xrc.XRCCTRL(self.navpanel, 'navtreepanel')
         self.navtree = ctc.CustomTreeCtrl(p, agwStyle=wx.TR_DEFAULT_STYLE)
@@ -123,35 +123,17 @@ class MainFrame(wx.Frame):
         bsizer.Add(self.navtree, 1, wx.EXPAND)
         p.SetSizerAndFit(bsizer)
 
-        # Add a root node to it
-        root = self.navtree.AddRoot("Study", ct_type=1)
-
         # Create an image list to add icons next to an item
         il = wx.ImageList(16, 16)
-        fldridx = il.Add(wx.ArtProvider.GetBitmap(wx.ART_FOLDER, wx.ART_OTHER, (16, 16)))
-        fldropenidx = il.Add(wx.ArtProvider.GetBitmap(wx.ART_FILE_OPEN, wx.ART_OTHER, (16, 16)))
-        fileidx = il.Add(wx.ArtProvider.GetBitmap(wx.ART_NORMAL_FILE, wx.ART_OTHER, (16, 16)))
+        il.Add(wx.ArtProvider.GetBitmap(wx.ART_FOLDER, wx.ART_OTHER, (16, 16)))
+        il.Add(wx.ArtProvider.GetBitmap(wx.ART_FILE_OPEN, wx.ART_OTHER, (16, 16)))
+        il.Add(wx.ArtProvider.GetBitmap(wx.ART_NORMAL_FILE, wx.ART_OTHER, (16, 16)))
 
         self.navtree.SetImageList(il)
 
-        self.navtree.SetItemImage(root, fldridx, wx.TreeItemIcon_Normal)
-        self.navtree.SetItemImage(root, fldropenidx, wx.TreeItemIcon_Expanded)
+        # register context menu
+        self.navtree.Bind(wx.EVT_CONTEXT_MENU, self.onNavTreeContext)
 
-        for x in range(15):
-            child = self.navtree.AppendItem(root, "Sample Group %d" % x, ct_type=1)
-            self.navtree.SetItemImage(child, fldridx, wx.TreeItemIcon_Normal)
-            self.navtree.SetItemImage(child, fldropenidx, wx.TreeItemIcon_Expanded)
-
-            for y in range(5):
-                last = self.navtree.AppendItem(child, "Sample %d-%s" % (x, chr(ord("a")+y)), ct_type=1)
-                self.navtree.SetItemImage(last, fldridx, wx.TreeItemIcon_Normal)
-                self.navtree.SetItemImage(last, fldropenidx, wx.TreeItemIcon_Expanded)
-
-                for z in range(5):
-                    item = self.navtree.AppendItem(last,  "Measurement %d-%s-%d" % (x, chr(ord("a")+y), z), ct_type=1)
-                    self.navtree.SetItemImage(item, fileidx, wx.TreeItemIcon_Normal)
-
-        self.navtree.Expand(root)
 
     def UpdateStudyNavTree(self):
         self.navtree.DeleteAllItems()  # clear the tree
@@ -231,6 +213,34 @@ class MainFrame(wx.Frame):
 
         #artist.set_color(np.random.random(3))
         self.figure.canvas.draw()
+
+    def onNavTreeContext(self, event):
+        """
+        Create and show dynamic context menu
+        """
+
+        # get some entries
+        items = ('a', 'b', 'c')
+
+        # make dict with unique ids
+        self.popupnavtreeids = {i: wx.NewId() for i in items}
+
+        # build the menu
+        menu = wx.Menu()
+
+        for item, id in self.popupnavtreeids.items():
+            menu.Append(id, item)
+            self.Bind(wx.EVT_MENU, self.onNavTreePopup, id=id)
+
+        # show the popup menu
+        self.PopupMenu(menu)
+        self.popupnavtreeids = None
+        menu.Destroy()
+
+    def onNavTreePopup(self, event):
+        l = event.GetEventObject().FindItemById(event.GetId()).GetLabel()
+
+        wx.MessageBox('Context Menu %s selected' % l)
 
 
     # data menu handlers

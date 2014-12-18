@@ -91,8 +91,8 @@ class MainFrame(wx.Frame):
         self._mgr.AddPane(self.shell, wx.aui.AuiPaneInfo().Name("Console").Bottom().BestSize((300, 400)).Hide(), 'Console')
 
 
-        # navigation notebook
-        self.nav_nb = wx.aui.AuiNotebook(self)
+        # navigation notebook (no close buttons on tabs)
+        self.nav_nb = wx.aui.AuiNotebook(self, style = wx.aui.AUI_NB_DEFAULT_STYLE & ~(wx.aui.AUI_NB_CLOSE_ON_ACTIVE_TAB))
 
         self.CreateNavTree()
 

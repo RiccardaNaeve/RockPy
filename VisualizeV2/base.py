@@ -104,6 +104,8 @@ class Generic(object):
         self._figs = []
         self._fig_opt = fig_opt
 
+        self.line_dict = {}
+        self.text_dict = {}
 
         self.initialize_visual()
 
@@ -349,3 +351,22 @@ class Generic(object):
 
     def get_single_fig(self):
         pass
+
+    def _change_visible(self, text_or_line, caller, lines):
+        tol = {'line': self.line_dict,
+               'text': self.text_dict}
+        print text_or_line, caller, lines
+        print tol[text_or_line]
+        if not text_or_line in tol:
+            print 'updating'
+            tol_dict.update({caller:lines})
+        else:
+            print 'toggling'
+            tol_dict = tol[text_or_line]
+            if caller in tol_dict:
+                tols = tol_dict[caller]
+                for line in tols:
+                    bool = line.get_visible()
+                    line.set_visible(not bool)
+
+

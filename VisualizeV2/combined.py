@@ -1,4 +1,5 @@
 __author__ = 'mike'
+import inspect
 import numpy as np
 import base
 import RockPy.Functions.general
@@ -32,19 +33,19 @@ class Day1977(base.Generic):
             bcr_bc = coe.results['bcr'].v / hys.results['bc'].v
             self.ax.plot(bcr_bc, mrs_ms, '.')
 
-    def add_mixing_lines(self, mix_lines=None, **plt_opt):
+    def toggle_mixing_lines(self, mix_lines=None, **plt_opt):
         """
         MD/SD Mixing lines after Dunlup2002a
         """
+        name = inspect.stack()[0][3]
+
         color = plt_opt.pop('color', 'k')
         zorder = plt_opt.pop('zorder', 0)
         marker = plt_opt.pop('marker', '.')
         ls = plt_opt.pop('ls', '--')
 
-        if not mix_lines:
-            mix_lines = ['all']
-        else:
-            mix_lines = RockPy.Functions.general._to_list(mix_lines)
+        lines = [] #for addition to line_dict
+        texts = [] #for addition to text_dict
 
         mix_line_data = {
             'sd_md1': np.array(
@@ -75,22 +76,23 @@ class Day1977(base.Generic):
             'sd_sp_93': {'texts': [], 'positions':[]},
             'SP_saturation_envelope': {'texts': [], 'positions':[]}
         }
+        if not mix_lines:
+            mix_lines = mix_line_data.keys()
+        else:
+            mix_lines = RockPy.Functions.general._to_list(mix_lines)
 
-        if 'all' in mix_lines:
-            for name, data in mix_line_data.iteritems():
-                self.ax.plot(data[:, 0], data[:, 1], color=color, marker=marker, ls=ls, zorder=zorder, **plt_opt)
-                for idx, text in enumerate(mix_line_text[name]['texts']):
-                    print text, mix_line_text[name]['positions'][idx]
-                    self.ax.text(mix_line_text[name]['positions'][idx][0], mix_line_text[name]['positions'][idx][1], text,
+        for line in mix_lines:
+            if line in mix_line_data:
+                data = mix_line_data[line]
+                lines.extend(self.ax.plot(data[:, 0], data[:, 1], color=color, marker=marker, ls=ls, zorder=zorder, **plt_opt))
+                for idx, text in enumerate(mix_line_text[line]['texts']):
+                    texts.append(self.ax.text(mix_line_text[line]['positions'][idx][0], mix_line_text[line]['positions'][idx][1], text,
                             verticalalignment='top', horizontalalignment='right',
-                            # transform=self.ax.transAxes,
-                            color='k', fontsize=10)
+                            color='k', fontsize=10))
 
-                else:
-                    for line in mix_lines:
-                        if line in mix_line_data:
-                            data = mix_line_data[line]
-                            self.ax.plot(data[:, 0], data[:, 1], color=color, marker=marker, ls=ls, zorder=zorder, **plt_opt)
+        self._change_visible('line', name, lines)
+        self._change_visible('text', name, texts)
+
 
 
 class Fabian2010(base.Generic):

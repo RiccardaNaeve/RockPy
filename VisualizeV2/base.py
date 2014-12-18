@@ -306,6 +306,9 @@ class Generic(object):
 
         plt.show()
 
+    def showfigure(self):
+        pass
+
     def save(self, folder=None, name=None):
         if folder is None:
             from os.path import expanduser

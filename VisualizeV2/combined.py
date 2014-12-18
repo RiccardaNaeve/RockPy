@@ -80,10 +80,11 @@ class Day1977(base.Generic):
             for name, data in mix_line_data.iteritems():
                 self.ax.plot(data[:, 0], data[:, 1], color=color, marker=marker, ls=ls, zorder=zorder, **plt_opt)
                 for idx, text in enumerate(mix_line_text[name]['texts']):
+                    print text, mix_line_text[name]['positions'][idx]
                     self.ax.text(mix_line_text[name]['positions'][idx][0], mix_line_text[name]['positions'][idx][1], text,
                             verticalalignment='top', horizontalalignment='right',
-                            transform=self.ax.transAxes,
-                            color='k', fontsize=15)
+                            # transform=self.ax.transAxes,
+                            color='k', fontsize=10)
 
                 else:
                     for line in mix_lines:

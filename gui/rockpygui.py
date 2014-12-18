@@ -179,8 +179,9 @@ class MainFrame(wx.Frame):
 
                 # iterate over all measurements of each sample
                 for m in s.measurements:
-                    item = self.navtree.AppendItem(last, m.mtype, ct_type=1)
-                    self.navtree.SetItemImage(item, 2, wx.TreeItemIcon_Normal)
+                    if not 'parameters' in type(m).__module__:
+                        item = self.navtree.AppendItem(last, m.mtype, ct_type=1)
+                        self.navtree.SetItemImage(item, 2, wx.TreeItemIcon_Normal)
 
         self.navtree.Expand(root)
 

@@ -41,6 +41,7 @@ class MainFrame(wx.Frame):
         # last file directory used
         self.lastdir = rfo.default_folder
 
+        self.Maximize(True)
 
         self.InitMenu()
         self.InitStatusBar()
@@ -75,35 +76,45 @@ class MainFrame(wx.Frame):
         # make aui manager to manage docking window layout
         self._mgr = wx.aui.AuiManager(self)
 
-        self.maintext = wx.TextCtrl(self, -1, 'hier soll mal was Wichtiges rein ....',
-                            wx.DefaultPosition, wx.Size(200, 150),
-                            wx.NO_BORDER | wx.TE_MULTILINE)
         # add the panes to the manager
-        self.navpanel = self.xrc.LoadPanel(self, "navpanel")
-        self.inspectorpanel = self.xrc.LoadPanel(self, "inspectorpanel")
-        self.CreateNavTree()
 
-        self._mgr.AddPane(self.navpanel, wx.aui.AuiPaneInfo().
-                          Name("Navigator").Caption("Navigator").Left().
-                          CloseButton(True).MaximizeButton(True).BestSize((300, 500)))
+        # inspector panel
+        self.inspectorpanel = self.xrc.LoadPanel(self, "inspectorpanel")
 
         self._mgr.AddPane(self.inspectorpanel, wx.aui.AuiPaneInfo().
                           Name("Inspector").Caption("Inspector").Right().
                           CloseButton(True).MaximizeButton(True).BestSize((300, 500)))
 
+        # shell panel
         locals = {"ShowFigure": self.ShowFigure, "study": self.study}
         self.shell = Shell(parent=self, introText='Welcome to the RockPy shell ...', locals=locals)
         self._mgr.AddPane(self.shell, wx.aui.AuiPaneInfo().Name("Console").Bottom().BestSize((300, 400)).Hide(), 'Console')
-        self.nb = wx.aui.AuiNotebook(self)
-        self.grid = wx.grid.Grid(self.nb)
+
+
+        # navigation notebook
+        self.nav_nb = wx.aui.AuiNotebook(self)
+
+        self.CreateNavTree()
+
+        self.nav_nb.AddPage(self.nav_tree, "Samples")
+        self.nav_nb.AddPage(wx.Panel(self.nav_nb), "Measurements")
+        self.nav_nb.AddPage(wx.Panel(self.nav_nb), "Treatments")
+
+
+        self._mgr.AddPane(self.nav_nb, wx.aui.AuiPaneInfo().
+                          Name("Navigator").Caption("Navigator").Left().
+                          CloseButton(True).MaximizeButton(True).MinSize((350, 100)))
+
+        # plotting notebook
+        self.plot_nb = wx.aui.AuiNotebook(self)
+        self.grid = wx.grid.Grid(self.plot_nb)
         self.grid.CreateGrid(12, 8)
 
-        self.nb.AddPage(self.grid, "Data Table")
-        self.nb.AddPage(self.maintext, "Wichtig")
+        self.plot_nb.AddPage(self.grid, "Data Table")
 
-        self.createTestPlot()
+        self.CreateTestPlot()
 
-        self._mgr.AddPane(self.nb, wx.CENTER)
+        self._mgr.AddPane(self.plot_nb, wx.CENTER)
 
         # Bind aui manager events
         self._mgr.Bind(wx.aui.EVT_AUI_PANE_CLOSE, self.OnAuiPaneClose)
@@ -117,11 +128,11 @@ class MainFrame(wx.Frame):
 
     def CreateNavTree(self):
         # Create a CustomTreeCtrl instance and putit within a boxsizer in navtreepanel from xrc
-        p = xrc.XRCCTRL(self.navpanel, 'navtreepanel')
-        self.navtree = ctc.CustomTreeCtrl(p, agwStyle=wx.TR_DEFAULT_STYLE)
-        bsizer = wx.BoxSizer()
-        bsizer.Add(self.navtree, 1, wx.EXPAND)
-        p.SetSizerAndFit(bsizer)
+        #p = xrc.XRCCTRL(self.navpanel, 'navtreepanel')
+        self.nav_tree = ctc.CustomTreeCtrl(self.nav_nb, agwStyle=wx.TR_DEFAULT_STYLE)
+        #bsizer = wx.BoxSizer()
+        #bsizer.Add(self.nav_tree, 1, wx.EXPAND)
+        #p.SetSizerAndFit(bsizer)
 
         # Create an image list to add icons next to an item
         il = wx.ImageList(16, 16)
@@ -129,49 +140,49 @@ class MainFrame(wx.Frame):
         il.Add(wx.ArtProvider.GetBitmap(wx.ART_FILE_OPEN, wx.ART_OTHER, (16, 16)))
         il.Add(wx.ArtProvider.GetBitmap(wx.ART_NORMAL_FILE, wx.ART_OTHER, (16, 16)))
 
-        self.navtree.SetImageList(il)
+        self.nav_tree.SetImageList(il)
 
         # register context menu
-        self.navtree.Bind(wx.EVT_CONTEXT_MENU, self.onNavTreeContext)
+        self.nav_tree.Bind(wx.EVT_CONTEXT_MENU, self.onNavTreeContext)
 
 
     def UpdateStudyNavTree(self):
-        self.navtree.DeleteAllItems()  # clear the tree
+        self.nav_tree.DeleteAllItems()  # clear the tree
         if self.study == None:
             # no study do nothing
             return
 
         # Add a study as root node
-        root = self.navtree.AddRoot("Study", ct_type=1)
+        root = self.nav_tree.AddRoot("Study", ct_type=1)
 
-        self.navtree.SetItemImage(root, 0, wx.TreeItemIcon_Normal)
-        self.navtree.SetItemImage(root, 1, wx.TreeItemIcon_Expanded)
+        self.nav_tree.SetItemImage(root, 0, wx.TreeItemIcon_Normal)
+        self.nav_tree.SetItemImage(root, 1, wx.TreeItemIcon_Expanded)
 
         # iterate over all samplegroups
         for sg in self.study.samplegroups:
-            child = self.navtree.AppendItem(root, sg.name, ct_type=1)
-            self.navtree.SetItemImage(child, 0, wx.TreeItemIcon_Normal)
-            self.navtree.SetItemImage(child, 1, wx.TreeItemIcon_Expanded)
+            child = self.nav_tree.AppendItem(root, sg.name, ct_type=1)
+            self.nav_tree.SetItemImage(child, 0, wx.TreeItemIcon_Normal)
+            self.nav_tree.SetItemImage(child, 1, wx.TreeItemIcon_Expanded)
 
             # iterate over all samples of each samplegroup
             for s in sg:
-                last = self.navtree.AppendItem(child, s.name, ct_type=1)
-                self.navtree.SetItemImage(last, 0, wx.TreeItemIcon_Normal)
-                self.navtree.SetItemImage(last, 1, wx.TreeItemIcon_Expanded)
+                last = self.nav_tree.AppendItem(child, s.name, ct_type=1)
+                self.nav_tree.SetItemImage(last, 0, wx.TreeItemIcon_Normal)
+                self.nav_tree.SetItemImage(last, 1, wx.TreeItemIcon_Expanded)
 
                 # iterate over all measurements of each sample
                 for m in s.measurements:
                     if not 'parameters' in type(m).__module__:
-                        item = self.navtree.AppendItem(last, m.mtype, ct_type=1)
-                        self.navtree.SetItemImage(item, 2, wx.TreeItemIcon_Normal)
+                        item = self.nav_tree.AppendItem(last, m.mtype, ct_type=1)
+                        self.nav_tree.SetItemImage(item, 2, wx.TreeItemIcon_Normal)
 
-        self.navtree.Expand(root)
+        self.nav_tree.Expand(root)
 
 
 
     def ShowFigure(self, figure, title='plot'):
         # make a panel
-        panel = wx.Panel(self.nb)
+        panel = wx.Panel(self.plot_nb)
 
         self.canvas = FigureCanvas(panel, -1, figure)
 
@@ -191,9 +202,9 @@ class MainFrame(wx.Frame):
 
         self.figure.canvas.mpl_connect('pick_event', self.on_pick)
 
-        self.nb.AddPage(panel, title)
+        self.plot_nb.AddPage(panel, title)
 
-    def createTestPlot(self):
+    def CreateTestPlot(self):
         # make figure for test
         self.figure = mpl.figure.Figure()
         self.axes = self.figure.add_subplot(111)
@@ -270,7 +281,6 @@ class MainFrame(wx.Frame):
                 self.UpdateStudyNavTree()
 
         dlg.Destroy()
-
 
 
     def OnSaveFile(self, event):

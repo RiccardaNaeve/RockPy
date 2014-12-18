@@ -9,6 +9,11 @@ import wx.grid
 import matplotlib as mpl
 import numpy as np
 from wx.py.shell import Shell
+
+import RockPy
+import RockPy.file_operations as rfo
+
+
 # uncomment the following to use wx rather than wxagg
 #matplotlib.use('WX')
 #from matplotlib.backends.backend_wx import FigureCanvasWx as FigureCanvas
@@ -30,20 +35,31 @@ class MainFrame(wx.Frame):
         # get xrc ressources
         self.xrc = xrc.XmlResource("rockpygui.xrc")
 
+        # main study object
+        self.study = None
+
+        # last file directory used
+        self.lastdir = rfo.default_folder
+
+
         self.InitMenu()
         self.InitStatusBar()
         self.InitAuiManager()
 
         self.Bind(wx.EVT_CLOSE, self.OnClose)
 
+
     def InitMenu(self):
         self.SetMenuBar(self.xrc.LoadMenuBar("mainmenubar"))
+
         # initial check of menu items
         self.GetMenuBar().FindItemById(xrc.XRCID("PythonConsoleMenuItem")).Check(False)
         self.GetMenuBar().FindItemById(xrc.XRCID("NavigatorMenuItem")).Check(True)
         self.GetMenuBar().FindItemById(xrc.XRCID("InspectorMenuItem")).Check(True)
 
         # Data
+        self.Bind(wx.EVT_MENU, self.OnLoadFile, id=xrc.XRCID("LoadFileMenuItem"))
+        self.Bind(wx.EVT_MENU, self.OnSaveFile, id=xrc.XRCID("SaveFileMenuItem"))
         self.Bind(wx.EVT_MENU, self.OnExit, id=xrc.XRCID("ExitMenuItem"))
         # View
         self.Bind(wx.EVT_MENU, self.OnTogglePane, id=xrc.XRCID("PythonConsoleMenuItem"))
@@ -53,7 +69,7 @@ class MainFrame(wx.Frame):
 
     def InitStatusBar(self):
         self.CreateStatusBar()
-        self.SetStatusText("This is RockPy statusbar")
+        self.SetStatusText("Welcome to RockPy")
 
     def InitAuiManager(self):
         # make aui manager to manage docking window layout
@@ -75,11 +91,8 @@ class MainFrame(wx.Frame):
                           Name("Inspector").Caption("Inspector").Right().
                           CloseButton(True).MaximizeButton(True).BestSize((300, 500)))
 
-        #self.shell=wx.py.crust.Crust(parent=self)
-        locals = {"ShowFigure": self.ShowFigure}
+        locals = {"ShowFigure": self.ShowFigure, "study": self.study}
         self.shell = Shell(parent=self, introText='Welcome to the RockPy shell ...', locals=locals)
-        #self.shell.issplit=True
-        #self.shell.ToggleTools()  #broken
         self._mgr.AddPane(self.shell, wx.aui.AuiPaneInfo().Name("Console").Bottom().BestSize((300, 400)).Hide(), 'Console')
         self.nb = wx.aui.AuiNotebook(self)
         self.grid = wx.grid.Grid(self.nb)
@@ -187,6 +200,58 @@ class MainFrame(wx.Frame):
 
 
     # data menu handlers
+    def OnLoadFile(self, event):
+        '''
+        called when user clicks on Load from file menu item
+        :param event:
+        :return:
+        '''
+        dlg = wx.FileDialog(self, "Choose a RockPy file", self.lastdir, "", "*.rpy", wx.OPEN)
+        if dlg.ShowModal() == wx.ID_OK:
+            filename = dlg.GetFilename()
+            dirname = dlg.GetDirectory()
+            self.lastdir = dirname
+
+            obj = rfo.load(filename, dirname)
+            if not isinstance(obj, RockPy.Study):
+                wx.MessageBox('Could not read study from file', 'Error', wx.OK | wx.ICON_ERROR)
+            else:  # got a proper Study object from the file
+                # set the loaded study as the main study
+                self.study = obj
+                # update study object in shell window
+                self.shell.interp.locals['study'] = self.study
+
+                self.SetStatusText("%s loaded" % filename)
+
+        dlg.Destroy()
+
+
+
+    def OnSaveFile(self, event):
+        '''
+        called when user clicks on Save to file menu item
+        :param event:
+        :return:
+        '''
+
+        if self.study == None:
+            wx.MessageBox('No study to save', 'Error', wx.OK | wx.ICON_ERROR)
+
+        dlg = wx.FileDialog(self, "Choose a file", self.lastdir, "", "*.rpy", wx.SAVE | wx.OVERWRITE_PROMPT)
+
+        if dlg.ShowModal() == wx.ID_OK:
+            filename = dlg.GetFilename()
+            dirname = dlg.GetDirectory()
+            self.lastdir = dirname
+
+            rfo.save(self.study, filename, dirname)
+
+            self.SetStatusText("%s saved" % filename)
+
+        # Get rid of the dialog to keep things tidy
+        dlg.Destroy()
+
+
     def OnExit(self, event):
         self.Close()
 

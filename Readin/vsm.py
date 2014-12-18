@@ -11,7 +11,7 @@ class Vsm(base.Machine):
         reader_object = open(self.file_name, 'rU').readlines()
         self.measurement_header = self.readMicroMagHeader(reader_object)  # get header
         self.raw_out = [i for i in reader_object][self.measurement_header['meta']['numberoflines']:]  # without header
-        self.header_idx = {v:i for i,v in enumerate(self.header)}
+        self.header_idx = {v: i for i, v in enumerate(self.header)}
 
     @property
     def header(self):

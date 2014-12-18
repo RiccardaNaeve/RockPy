@@ -41,9 +41,10 @@ class Day1977(base.Generic):
         marker = plt_opt.pop('marker', '.')
         ls = plt_opt.pop('ls', '--')
 
-        if not mix_lines: mix_lines = ['all']
-        else: mix_lines = RockPy.Functions.general._to_list(mix_lines)
-
+        if not mix_lines:
+            mix_lines = ['all']
+        else:
+            mix_lines = RockPy.Functions.general._to_list(mix_lines)
 
         mix_line_data = {
             'sd_md1': np.array(
@@ -59,12 +60,15 @@ class Day1977(base.Generic):
                  [2.186, 0.161], [2.494, 0.125], [2.928, 0.090], [3.214, 0.072], [3.646, 0.053], [4.151, 0.036],
                  [5.025, 0.018]]),
             'sd_sp_93': np.array(
-                [[2.820, 0.100], [4.035, 0.091], [6.375, 0.075], [13.641, 0.050], [35.278, 0.025], [99.429, 0.010]])}
+                [[2.820, 0.100], [4.035, 0.091], [6.375, 0.075], [13.641, 0.050], [35.278, 0.025], [99.429, 0.010]]),
+            'SP_saturation_envelope': np.array(
+                [[1.255, 0.498], [1.414, 0.473], [1.622, 0.450], [1.945, 0.426], [2.512, 0.402], [3.764, 0.376],
+                 [7.411, 0.352], [8.874, 0.350], [17.269, 0.343], [34.897, 0.338], [57.714, 0.336]])
+        }
 
         if 'all' in mix_lines:
             for name, data in mix_line_data.iteritems():
-                self.ax.plot(data[:,0], data[:,1], color=color, marker=marker, ls=ls, zorder=zorder, **plt_opt)
-
+                self.ax.plot(data[:, 0], data[:, 1], color=color, marker=marker, ls=ls, zorder=zorder, **plt_opt)
 
 
 class Fabian2010(base.Generic):

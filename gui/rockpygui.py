@@ -129,11 +129,7 @@ class MainFrame(wx.Frame):
 
     def CreateNavTree(self):
         # Create a CustomTreeCtrl instance and putit within a boxsizer in navtreepanel from xrc
-        #p = xrc.XRCCTRL(self.navpanel, 'navtreepanel')
         self.nav_tree = ctc.CustomTreeCtrl(self.nav_nb, agwStyle=wx.TR_DEFAULT_STYLE)
-        #bsizer = wx.BoxSizer()
-        #bsizer.Add(self.nav_tree, 1, wx.EXPAND)
-        #p.SetSizerAndFit(bsizer)
 
         # Create an image list to add icons next to an item
         il = wx.ImageList(16, 16)

@@ -399,6 +399,14 @@ class Sample(object):
         """
         return sorted(list(set(values)))
 
+    def _sort_ttype_tval(self, mlist):
+        """
+        sorts a list of measurements according to their tvals and ttypes
+        :param mlist:
+        :return:
+        """
+
+
     ''' FOR PLOTTING FUNCTIONS '''
     @property
     def plottable(self):

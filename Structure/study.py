@@ -82,7 +82,6 @@ class Study(object):
         :param samplegroup:
         :return:
         """
-
         # check for list
         if isinstance(samplegroup, list):
             # check for sample_group
@@ -91,7 +90,7 @@ class Study(object):
             if all(isinstance(item, RockPy.SampleGroup) for item in samplegroup):
                 samplegroup = samplegroup
             else:
-                #self.log.error('MIXED lists not allowed or no Sample/SampleGroup instance found')
+                log.error('MIXED lists not allowed or no Sample/SampleGroup instance found')
                 return None
         if isinstance(samplegroup, RockPy.Sample):
             samplegroup = [RockPy.SampleGroup(sample_list=samplegroup)]

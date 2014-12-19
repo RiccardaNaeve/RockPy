@@ -8,5 +8,3 @@ import vftb
 import vsm
 import spinner
 import sushibar
-
-RockPy.Functions.general.create_logger('RockPy.READIN')

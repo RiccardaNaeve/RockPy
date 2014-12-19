@@ -1,2 +1,2 @@
 __author__ = 'mike'
-import paleointensity
+import paleointensity, hysteresis, combined

@@ -3,6 +3,7 @@ import RockPy
 import RockPy.Tutorials.sample_group
 import RockPy.VisualizeV2.paleointensity
 import RockPy.VisualizeV2.combined
+import RockPy.VisualizeV2.base
 
 def Day1977():
 

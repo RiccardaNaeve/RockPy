@@ -8,11 +8,11 @@ import wx.py.crust
 import wx.grid
 import matplotlib as mpl
 import numpy as np
-from wx.py.shell import Shell
+
 
 import RockPy
 import RockPy.file_operations as rfo
-
+from rpshell import RPShell
 
 # uncomment the following to use wx rather than wxagg
 #matplotlib.use('WX')
@@ -87,7 +87,8 @@ class MainFrame(wx.Frame):
 
         # shell panel
         locals = {"ShowFigure": self.ShowFigure, "study": self.study}
-        self.shell = Shell(parent=self, introText='Welcome to the RockPy shell ...', locals=locals)
+        self.shell = RPShell(parent=self, introText='Welcome to the RockPy shell ...', locals=locals)
+        self.shell.registerPushCallBack(self.OnShellPush)
         self._mgr.AddPane(self.shell, wx.aui.AuiPaneInfo().Name("Console").Bottom().BestSize((300, 400)).Hide(), 'Console')
 
 
@@ -128,11 +129,7 @@ class MainFrame(wx.Frame):
 
     def CreateNavTree(self):
         # Create a CustomTreeCtrl instance and putit within a boxsizer in navtreepanel from xrc
-        #p = xrc.XRCCTRL(self.navpanel, 'navtreepanel')
         self.nav_tree = ctc.CustomTreeCtrl(self.nav_nb, agwStyle=wx.TR_DEFAULT_STYLE)
-        #bsizer = wx.BoxSizer()
-        #bsizer.Add(self.nav_tree, 1, wx.EXPAND)
-        #p.SetSizerAndFit(bsizer)
 
         # Create an image list to add icons next to an item
         il = wx.ImageList(16, 16)
@@ -141,6 +138,8 @@ class MainFrame(wx.Frame):
         il.Add(wx.ArtProvider.GetBitmap(wx.ART_NORMAL_FILE, wx.ART_OTHER, (16, 16)))
 
         self.nav_tree.SetImageList(il)
+
+        self.UpdateStudyNavTree()
 
         # register context menu
         self.nav_tree.Bind(wx.EVT_CONTEXT_MENU, self.onNavTreeContext)
@@ -225,6 +224,10 @@ class MainFrame(wx.Frame):
 
         #artist.set_color(np.random.random(3))
         self.figure.canvas.draw()
+
+    def OnShellPush(self, command):
+        print "%s executed in shell window" % command
+
 
     def onNavTreeContext(self, event):
         """

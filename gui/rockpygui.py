@@ -214,26 +214,19 @@ class MainFrame(wx.Frame):
         self.measurements_nav_tree.SetItemImage(root, 0, wx.TreeItemIcon_Normal)
         self.measurements_nav_tree.SetItemImage(root, 1, wx.TreeItemIcon_Expanded)
 
-        # iterate over all samplegroups
-        for sg in self.study.samplegroups:
-            sg_item = self.measurements_nav_tree.AppendItem(root, sg.name, ct_type=1)
-            sg_item.SetData(sg)
-            self.measurements_nav_tree.SetItemImage(sg_item, 0, wx.TreeItemIcon_Normal)
-            self.measurements_nav_tree.SetItemImage(sg_item, 1, wx.TreeItemIcon_Expanded)
+        # iterate over all mtypes
+        for mt in self.study.all_samplegroup.mtypes:
+            mt_item = self.measurements_nav_tree.AppendItem(root, mt, ct_type=1)
+            #sg_item.SetData(sg)
+            self.measurements_nav_tree.SetItemImage(mt_item, 0, wx.TreeItemIcon_Normal)
+            self.measurements_nav_tree.SetItemImage(mt_item, 1, wx.TreeItemIcon_Expanded)
 
-            # iterate over all samples of each samplegroup
-            for s in sg:
-                s_item = self.measurements_nav_tree.AppendItem(sg_item, s.name, ct_type=1)
+            # iterate over all samples which have this mtype
+            for s in self.study.all_samplegroup.get_samples(mtypes=mt):
+                s_item = self.measurements_nav_tree.AppendItem(mt_item, s.name, ct_type=1)
                 s_item.SetData(s)
                 self.measurements_nav_tree.SetItemImage(s_item, 0, wx.TreeItemIcon_Normal)
                 self.measurements_nav_tree.SetItemImage(s_item, 1, wx.TreeItemIcon_Expanded)
-
-                # iterate over all measurements of each sample
-                for m in s.measurements:
-                    if not 'parameters' in type(m).__module__:
-                        m_item = self.measurements_nav_tree.AppendItem(s_item, m.mtype, ct_type=1)
-                        m_item.SetData(m)
-                        self.measurements_nav_tree.SetItemImage(m_item, 2, wx.TreeItemIcon_Normal)
 
         self.measurements_nav_tree.Expand(root)
     
@@ -276,8 +269,6 @@ class MainFrame(wx.Frame):
 
     def on_pick(self, event):
         artist = event.artist
-        #print artist
-        #print event.ind
         fc = artist.get_facecolors()
         fc = [(1.0, 0, 0, 1.0) for i in range(len(fc))]
         fc[event.ind[0]] = (0, 1.0, 0, 1.0)
@@ -301,8 +292,6 @@ class MainFrame(wx.Frame):
             #print hitobj.GetData()
             # get some entries
 
-            items = None
-
             data = hitobj.GetData()
             if data is not None:
                 # build the menu
@@ -313,9 +302,7 @@ class MainFrame(wx.Frame):
                     pass
                 elif isinstance(data, RockPy.Sample):
                     plotmenu = wx.Menu()
-                    print data.plottable
                     plots = data.plottable
-                    # plots = ('a', 'b')
                     for p in plots:
                         plotmenu.Append(wx.NewId(), p)  # append entries to plot submenu
                     if plotmenu.GetMenuItemCount() > 0:

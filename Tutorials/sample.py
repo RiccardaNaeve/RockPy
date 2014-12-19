@@ -30,7 +30,7 @@ def test():
     study = RockPy.Study("study", samplegroups=S)
     #RockPy.save(study, 'hys_coe_irm_rmp.rpy')
     #print S.plottable
-    #print study.mtypes
+    print study.all_samplegroup.mtypes
 
 if __name__ == '__main__':
     test()

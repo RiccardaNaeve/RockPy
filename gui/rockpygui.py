@@ -57,6 +57,7 @@ class MainFrame(wx.Frame):
         self.GetMenuBar().FindItemById(xrc.XRCID("PythonConsoleMenuItem")).Check(False)
         self.GetMenuBar().FindItemById(xrc.XRCID("NavigatorMenuItem")).Check(True)
         self.GetMenuBar().FindItemById(xrc.XRCID("InspectorMenuItem")).Check(True)
+        self.GetMenuBar().FindItemById(xrc.XRCID("LogMenuItem")).Check(False)
 
         # Data
         self.Bind(wx.EVT_MENU, self.OnLoadFile, id=xrc.XRCID("LoadFileMenuItem"))
@@ -66,6 +67,7 @@ class MainFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self.OnTogglePane, id=xrc.XRCID("PythonConsoleMenuItem"))
         self.Bind(wx.EVT_MENU, self.OnTogglePane, id=xrc.XRCID("NavigatorMenuItem"))
         self.Bind(wx.EVT_MENU, self.OnTogglePane, id=xrc.XRCID("InspectorMenuItem"))
+        self.Bind(wx.EVT_MENU, self.OnTogglePane, id=xrc.XRCID("LogMenuItem"))
         # Help
 
     def InitStatusBar(self):
@@ -85,6 +87,14 @@ class MainFrame(wx.Frame):
                           Name("Inspector").Caption("Inspector").Right().
                           CloseButton(True).MaximizeButton(True).BestSize((300, 500)))
 
+
+        # log panel
+        self.logtextctrl = wx.TextCtrl(self, value = 'Hier wird mal geloggt', style=wx.TE_MULTILINE|wx.TE_READONLY|wx.TE_AUTO_URL)
+
+        self._mgr.AddPane(self.logtextctrl, wx.aui.AuiPaneInfo().
+                          Name("Log").Caption("Log").Bottom().
+                          CloseButton(True).MaximizeButton(True).BestSize((300, 500)).Hide())
+
         # shell panel
         locals = {"ShowFigure": self.ShowFigure, "study": self.study}
         self.shell = RPShell(parent=self, introText='Welcome to the RockPy shell ...', locals=locals)
@@ -93,7 +103,7 @@ class MainFrame(wx.Frame):
 
 
         # navigation notebook (no close buttons on tabs)
-        self.nav_nb = wx.aui.AuiNotebook(self, style = wx.aui.AUI_NB_DEFAULT_STYLE & ~(wx.aui.AUI_NB_CLOSE_ON_ACTIVE_TAB))
+        self.nav_nb = wx.aui.AuiNotebook(self, style=wx.aui.AUI_NB_DEFAULT_STYLE & ~wx.aui.AUI_NB_CLOSE_ON_ACTIVE_TAB)
 
         self.CreateNavTree()
 
@@ -125,7 +135,7 @@ class MainFrame(wx.Frame):
 
         # define panes to toggle as dict menuitemid: panename
         self.toggle_panes = {xrc.XRCID("PythonConsoleMenuItem"): "Console", xrc.XRCID("InspectorMenuItem"): "Inspector",
-                 xrc.XRCID("NavigatorMenuItem"): "Navigator"}
+                 xrc.XRCID("NavigatorMenuItem"): "Navigator", xrc.XRCID("LogMenuItem"): "Log"}
 
     def CreateNavTree(self):
         # Create a CustomTreeCtrl instance and putit within a boxsizer in navtreepanel from xrc
@@ -155,29 +165,34 @@ class MainFrame(wx.Frame):
             # no study do nothing
             return
 
+        # associate study with the root item
+        root.SetData(self.study)
+
         self.nav_tree.SetItemImage(root, 0, wx.TreeItemIcon_Normal)
         self.nav_tree.SetItemImage(root, 1, wx.TreeItemIcon_Expanded)
 
         # iterate over all samplegroups
         for sg in self.study.samplegroups:
-            child = self.nav_tree.AppendItem(root, sg.name, ct_type=1)
-            self.nav_tree.SetItemImage(child, 0, wx.TreeItemIcon_Normal)
-            self.nav_tree.SetItemImage(child, 1, wx.TreeItemIcon_Expanded)
+            sg_item = self.nav_tree.AppendItem(root, sg.name, ct_type=1)
+            sg_item.SetData(sg)
+            self.nav_tree.SetItemImage(sg_item, 0, wx.TreeItemIcon_Normal)
+            self.nav_tree.SetItemImage(sg_item, 1, wx.TreeItemIcon_Expanded)
 
             # iterate over all samples of each samplegroup
             for s in sg:
-                last = self.nav_tree.AppendItem(child, s.name, ct_type=1)
-                self.nav_tree.SetItemImage(last, 0, wx.TreeItemIcon_Normal)
-                self.nav_tree.SetItemImage(last, 1, wx.TreeItemIcon_Expanded)
+                s_item = self.nav_tree.AppendItem(sg_item, s.name, ct_type=1)
+                s_item.SetData(s)
+                self.nav_tree.SetItemImage(s_item, 0, wx.TreeItemIcon_Normal)
+                self.nav_tree.SetItemImage(s_item, 1, wx.TreeItemIcon_Expanded)
 
                 # iterate over all measurements of each sample
                 for m in s.measurements:
                     if not 'parameters' in type(m).__module__:
-                        item = self.nav_tree.AppendItem(last, m.mtype, ct_type=1)
-                        self.nav_tree.SetItemImage(item, 2, wx.TreeItemIcon_Normal)
+                        m_item = self.nav_tree.AppendItem(s_item, m.mtype, ct_type=1)
+                        m_item.SetData(m)
+                        self.nav_tree.SetItemImage(m_item, 2, wx.TreeItemIcon_Normal)
 
         self.nav_tree.Expand(root)
-
 
 
     def ShowFigure(self, figure, title='plot'):
@@ -233,29 +248,50 @@ class MainFrame(wx.Frame):
         """
         Create and show dynamic context menu
         """
-
         # identify tree item
         hitobj, flags = self.nav_tree.HitTest(self.nav_tree.ScreenToClient(event.GetPosition()))
-        if isinstance( hitobj, ctc.GenericTreeItem):
-            print hitobj.GetText()
+        if isinstance(hitobj, ctc.GenericTreeItem):
+            #print hitobj.GetText()
+            #print hitobj.GetData()
+            # get some entries
 
-        # get some entries
-        items = ('a', 'plots', 'delete')
+            items = None
 
-        # make dict with unique ids
-        self.popupnavtreeids = {i: wx.NewId() for i in items}
+            data = hitobj.GetData()
+            if data is not None:
+                # build the menu
+                menu = wx.Menu()
+                if isinstance(data, RockPy.Study):
+                    pass
+                elif isinstance(data, RockPy.SampleGroup):
+                    pass
+                elif isinstance(data, RockPy.Sample):
+                    plotmenu = wx.Menu()
+                    #print data.plottable()
+                    #plots = data.plottable()
+                    plots = ('a', 'b')
+                    for p in plots:
+                        plotmenu.Append(wx.NewId(), p)  # append entries to plot submenu
+                    if plotmenu.GetMenuItemCount() > 0:
+                        menu.AppendMenu(wx.NewId(), 'Plot', plotmenu)
 
-        # build the menu
-        menu = wx.Menu()
+                elif isinstance(data, RockPy.Measurement):
+                    pass
+                else:
+                    print("unknown data in nav tree item")
 
-        for item, id in self.popupnavtreeids.items():
-            menu.Append(id, item)
-            self.Bind(wx.EVT_MENU, self.onNavTreePopup, id=id)
+                # make dict with unique ids
+                #self.popupnavtreeids = {i: wx.NewId() for i in items}
 
-        # show the popup menu
-        self.PopupMenu(menu)
-        self.popupnavtreeids = None
-        menu.Destroy()
+                #for item, id in self.popupnavtreeids.items():
+                #    menu.Append(id, item)
+                #    self.Bind(wx.EVT_MENU, self.onNavTreePopup, id=id)
+
+                # show the popup menu
+                if menu.GetMenuItemCount() > 0:
+                    self.PopupMenu(menu)
+                    #self.popupnavtreeids = None
+                menu.Destroy()
 
     def onNavTreePopup(self, event):
         l = event.GetEventObject().FindItemById(event.GetId()).GetLabel()
@@ -265,11 +301,11 @@ class MainFrame(wx.Frame):
 
     # data menu handlers
     def OnLoadFile(self, event):
-        '''
+        """
         called when user clicks on Load from file menu item
         :param event:
         :return:
-        '''
+        """
         dlg = wx.FileDialog(self, "Choose a RockPy file", self.lastdir, "", "*.rpy", wx.OPEN)
         if dlg.ShowModal() == wx.ID_OK:
             filename = dlg.GetFilename()
@@ -293,11 +329,11 @@ class MainFrame(wx.Frame):
 
 
     def OnSaveFile(self, event):
-        '''
+        """
         called when user clicks on Save to file menu item
         :param event:
         :return:
-        '''
+        """
 
         if self.study == None:
             wx.MessageBox('No study to save', 'Error', wx.OK | wx.ICON_ERROR)
@@ -330,11 +366,11 @@ class MainFrame(wx.Frame):
         self._mgr.Update()
 
     def OnClose(self, event):
-        '''
+        """
         called when user tries to close the main frame
         :param event:
         :return:
-        '''
+        """
         dlg = wx.MessageDialog(self,
               "Do you really want to close RockPy GUI?",
               "Confirm Exit", wx.OK | wx.CANCEL | wx.ICON_QUESTION)
@@ -347,11 +383,11 @@ class MainFrame(wx.Frame):
             self.Destroy()
 
     def OnAuiPaneClose(self, event):
-        '''
+        """
         called when an AUI Pane gets closed
         :param event:
         :return:
-        '''
+        """
         pane = event.GetPane()
         rev_toggle_panes = {v: k for k, v in self.toggle_panes.iteritems()}
         try:

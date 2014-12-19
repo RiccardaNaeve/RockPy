@@ -53,7 +53,7 @@ class Arai(base.Generic):
 
 
 class Multiple(base.Generic):
-    _required = {['thellier']}
+    _required = ['thellier']
     def initialize_visual(self):
         arai = Arai(plot_samples=self.study)
         dunlop = Dunlop(plot_samples=self.study)

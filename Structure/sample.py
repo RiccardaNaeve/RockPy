@@ -88,8 +88,8 @@ class Sample(object):
     logger = logging.getLogger('RockPy.SAMPLE')
 
     def __init__(self, name,
-                 mass=1, mass_unit='kg', mass_machine='generic',
-                 height=1, diameter=1, length_unit='mm', length_machine='generic',
+                 mass=None, mass_unit='kg', mass_machine='generic',
+                 height=None, diameter=None, length_unit='mm', length_machine='generic',
                  **options):
         """
 
@@ -105,6 +105,8 @@ class Sample(object):
 
         self.measurements = []
         self.results = None
+
+        self.is_average = False
 
         if mass is not None:
             self.add_measurement(mtype='mass', mfile=None, machine=mass_machine,
@@ -181,31 +183,6 @@ class Sample(object):
                     # rpdata = RockPyData(column_names=c_names, data=data, row_names=measurement.suffix)
                     self.results = self.results.append_columns(c_names, data)
         return self.results
-
-    @property
-    def mass_kg(self):
-        measurements = self.get_measurements(mtype='mass', ttype='none')
-        if len(measurements) > 1:
-            Sample.logger.info('FOUND more than 1 << mass >> measurement. Returning first')
-        try:
-            return measurements[0].data['data']['mass'].v
-        except IndexError:  # todo fix
-            return 1
-
-    @property
-    def height_m(self):
-        measurement = self.get_measurements(mtype='height')
-        if len(measurement) > 1:
-            Sample.logger.info('FOUND more than 1 << height >> measurement. Returning first')
-        return measurements[0].data['data']['height'].v
-
-
-    @property
-    def diameter_m(self):
-        measurement = self.get_measurements(mtype='diameter')
-        if len(measurement) > 1:
-            Sample.logger.info('FOUND more than 1 << diameter >> measurement. Returning first')
-        return measurements[0].data['data']['diameter'].v
 
     @property
     def mtypes(self):
@@ -375,15 +352,11 @@ class Sample(object):
             return []
         return out
 
-    def __sort_list_set(self, values):
-        """
-        returns a sorted list of non duplicate values
-        :param values:
-        :return:
-        """
-        return sorted(list(set(values)))
+    ''' MISC FUNTIONS '''
+    def average_all_measurements(self):
+        pass
 
-    def average_measurement(self, mlist, interpolate=False, recalc_mag=False):
+    def mean_measurement_from_list(self, mlist, interpolate=False, recalc_mag=False):
         mlist = _to_list(mlist)
         measurement = mlist[0]
 
@@ -417,6 +390,15 @@ class Sample(object):
             out.extend(rp['variable'].v)
         return self.__sort_list_set(out)
 
+    def __sort_list_set(self, values):
+        """
+        returns a sorted list of non duplicate values
+        :param values:
+        :return:
+        """
+        return sorted(list(set(values)))
+
+    ''' FOR PLOTTING FUNCTIONS '''
     @property
     def plottable(self):
         out = {}

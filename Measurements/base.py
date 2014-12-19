@@ -631,3 +631,11 @@ class Measurement(object):
             idx = np.argmin(abs(data['variable'].v - vval))
             out = data.filter_idx([idx])[rtype].v[0]
             return out
+
+    def mtype_prior_to(self, mtype):
+        """
+        search for last mtype prior to self
+        :param mtype:
+        :return:
+        """
+        pass #todo

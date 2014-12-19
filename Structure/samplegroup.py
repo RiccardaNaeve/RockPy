@@ -331,7 +331,6 @@ class SampleGroup(object):
     def get_samples(self, snames=None, mtypes=None, ttypes=None, tvals=None, tval_range=None):
         """
         Primary search function for all parameters
-
         """
         if tvals is None:
             t_value = np.nan

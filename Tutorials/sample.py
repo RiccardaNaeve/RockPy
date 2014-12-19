@@ -13,7 +13,6 @@ def get_hys_all_sample():
     return S
 
 
-
 def get_hys_coe_irm_rmp_sample():
     S = RockPy.Sample(name='test_sample')
     hys = 'RockPy/Tutorials/test_data/MUCVFTB_test.hys'
@@ -29,8 +28,10 @@ def get_hys_coe_irm_rmp_sample():
 
 def test():
     S = get_hys_coe_irm_rmp_sample()
-    study = RockPy.Study([S])
-    RockPy.save(study, 'hys_coe_irm_rmp.rpy')
+    study = RockPy.Study("study", samplegroups=S)
+    #RockPy.save(study, 'hys_coe_irm_rmp.rpy')
+    #print S.plottable
+    print study.all_samplegroup.mtypes
 
 if __name__ == '__main__':
     test()

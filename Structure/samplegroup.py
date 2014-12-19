@@ -87,6 +87,14 @@ class SampleGroup(object):
     def sample_list(self):
         return self.slist
 
+    @property
+    def sample_names(self):
+        return sorted(self.samples.keys())
+
+
+    def add_samples(self, s_list):
+        self.samples.update(self._sdict_from_slist(s_list=s_list))
+
     # ## components of container
     # lists
     @property
@@ -111,7 +119,7 @@ class SampleGroup(object):
         out = []
         for sample in self.sample_list:
             out.extend(sample.tvals)
-        return sorted(list(set(out)))
+        return self.__sort_list_set(out)
 
     # ## sample-stage
     @property
@@ -157,31 +165,6 @@ class SampleGroup(object):
             out.update({mtype: self.__sort_list_set(aux)})
         return out
 
-    @property
-    def mtype_ttype_mdict(self):
-        """
-        returns a list of tratment types within a certain measurement type
-        """
-        out = {}
-        for mtype in self.mtypes:
-            for s in self.get_samples(mtypes=mtype):
-                for t in s.mtype_ttype_dict[mtype]:
-                    aux = {t: s.mtype_ttype_mdict[mtype][t]}
-            out.update({mtype: aux})
-        return out
-
-    @property
-    def mtype_ttype_sdict(self):
-        """
-        returns a list of tratment types within a certain measurement type
-        """
-        out = {}
-        for mtype in self.mtypes:
-            for s in self.get_samples(mtypes=mtype):
-                for t in s.mtype_ttype_dict[mtype]:
-                    aux = {t: self.get_samples(mtypes=mtype, ttypes=t)}
-            out.update({mtype: aux})
-        return out
 
     # mtype: tvals
     @property
@@ -198,19 +181,6 @@ class SampleGroup(object):
             out.update({mtype: self.__sort_list_set(aux)})
         return out
 
-    @property
-    def sample_names(self):
-        return sorted(self.samples.keys())
-
-    @property
-    def treatment_dict(self):
-        """
-        returns all treatments and lust of values as dictionaty
-        """
-        t_dict = {i: {j: self._get_measurements_with_treatment(i, j) for j in self._get_all_treatment_values(i)} for i
-                  in
-                  self.treatment_types}
-        return t_dict
 
     @property
     def ttype_dict(self):
@@ -226,48 +196,6 @@ class SampleGroup(object):
     def ttype_tval_dict(self):
         ttype_tval_dict = {i: self._get_all_treatment_values(i) for i in self.ttypes}
         return ttype_tval_dict
-
-    @property
-    def sample_mtype_ttype_dict(self):
-        """
-        generates a dictionary with sample: measurement: treatment: treatment_value: measurement(sample, mtype, ttype, tval)
-        """
-        out = {name: object.mtype_ttype_tval_mdict for name, object in self.samples.iteritems()}
-        return out
-
-    @property
-    def mtype_sample_dict(self):
-        out = {mtype: {sample.name: {ttype: {tval: sample.get_measurements(ttype=ttype, tval=tval, mtype=mtype)
-                                             for tval in sample.ttype_tval_dict[ttype]}
-                                     for ttype in sample.ttype_tval_dict}
-                       for sample in self.get_samples(mtypes=mtype)}
-               for mtype in self.mtypes}
-        return out
-
-    @property
-    def mtype_ttype_sample_dict(self):
-        out = {mtype: {ttype: {sample.name: {tval: sample.get_measurements(ttype=ttype, tval=tval, mtype=mtype)
-                                             for tval in sample.ttype_tval_dict[ttype]}
-                               for sample in self.get_samples(mtypes=mtype, ttypes=ttype)}
-                       for ttype in self.ttypes}
-               for mtype in self.mtypes}
-        return out
-
-    @property
-    def mtype_ttype_tval_mdict(self):
-        out = {mtype: {ttype: {tval: self.get_measurements(ttype=ttype, tval=tval, mtype=mtype)
-                               for tval in self.ttype_dict[ttype]
-        }
-                       for ttype in self.mtype_ttype_mdict[mtype]}
-               for mtype in self.mtypes}
-        return out
-
-    @property
-    def mtype_ttype_tval_dict(self):
-        out = {mtype: {ttype: tval
-                       for ttype in self.mtype_ttype_mdict[mtype]}
-               for mtype in self.mtypes}
-        return out
 
     @property
     def mtype_dict(self):
@@ -319,8 +247,6 @@ class SampleGroup(object):
         out = {s.name: s for s in s_list}
         return out
 
-    def add_samples(self, s_list):
-        self.samples.update(self._sdict_from_slist(s_list=s_list))
 
     @property
     def treatment_types(self):  # todo delete
@@ -474,15 +400,14 @@ class SampleGroup(object):
         return out
 
     def average_sample(self, reference='nrm', name='average_sample_group',
-                       rtype='mag', vval=None, norm_method='max'):
+                       rtype='mag', vval=None, norm_method='max', interpolate=True):
 
         average_sample = Sample(name='average ' + self.name)
         for mtype in ['diameter', 'height', 'mass']:
             for ttype in self.mtype_ttype_dict[mtype]:
                 for tval in self.ttype_tval_dict[ttype]:
                     measurements = self.get_measurements(mtype=mtype, ttype=ttype, tval=tval)
-                    M = average_sample.average_measurement(measurements)
-
+                    M = average_sample.mean_measurement_from_list(measurements)
                     average_sample.measurements.append(M)
 
         for mtype in self.mtypes:
@@ -493,76 +418,10 @@ class SampleGroup(object):
                         measurements = [m.normalize(reference=reference, rtype=rtype,
                                                     vval=vval, norm_method=norm_method)
                                         for m in measurements]
-                        M = average_sample.average_measurement(measurements, interpolate=True)
+                        M = average_sample.mean_measurement_from_list(measurements, interpolate=interpolate)
                         average_sample.measurements.append(M)
 
         return average_sample
-
-    def get_average_mtype_sample(self, mtype, reference, name='average_sample_group',
-                                 rtype='mag', vval=None, norm_method='max'):
-
-        average_sample = Sample(name=name)
-        m_is_exists = False
-        dict = self.mtype_ttype_tval_mdict
-        data = {}
-        is_data = {}
-        for ttype in dict[mtype]:  # cycle through treatments
-            data[ttype] = {}
-            is_data[ttype] = {}
-            for tval in dict[mtype][ttype]:  # cycle through treatment values
-                data[ttype][tval] = {}
-                is_data[ttype][tval] = {}
-                for measurement in dict[mtype][ttype][
-                    tval]:  # cycle through all measurements & samples (all measurements with ttype = ttype & mtype = mtype)
-                    m = measurement.normalize(reference=reference, rtype=rtype, vval=vval,
-                                              norm_method=norm_method)  # normalize each individual measurement
-                    if measurement.initial_state:  # initial states have to be normalized, too
-                        m_is_exists = True
-                        m_is = measurement.initial_state.normalize(reference=reference, rtype=rtype, vval=vval,
-                                                                   norm_method=norm_method)  # normalize each individual measurement
-                    # the data has to be ordered according to the data type (e.g. down_field
-                    for d in m.data:  # some measurements have multiple data sets, like hysteresis
-                        if not d in data[ttype][tval]:
-                            data[ttype][tval][d] = []
-                        data[ttype][tval][d].append(m.data[d])  # store corresponding dataset in dictionary
-                    if m_is_exists:
-                        for d in m_is.data:
-                            if not d in is_data[ttype][tval]:
-                                is_data[ttype][tval][d] = []
-                            is_data[ttype][tval][d].append(m_is.data[d])  # store corresponding dataset in dictionary
-
-        for ttype in data:  # cycle throu different treatment types
-            for tval in data[ttype]:  # cycle through the values
-                average_data = {}  # initialize the average data dictionary
-                for dtype in data[ttype][tval]:  # average the data types
-                    var_list = self.__get_variable_list(data[ttype][tval][dtype])  # get variable lists
-                    if len(var_list) > 1:
-                        aux = [m.interpolate(var_list) for m in data[ttype][tval][dtype]]
-                    else:
-                        aux = [m for m in data[ttype][tval][dtype]]
-                    rp_data = condense(aux)
-                    rp_data = rp_data.sort('variable')
-                    average_data.update({dtype: rp_data})
-                measurement = dict[mtype][ttype][tval][0]  # set the average to be the first measurement
-                average_measurement = measurement
-                for dtype in average_data:
-                    average_measurement._data[dtype] = average_data[dtype]
-                average_sample.measurements.append(average_measurement)
-
-        # ### setting average initial states
-        if m_is_exists:
-            for ttype in is_data:
-                for tval in is_data[ttype]:
-                    m = average_sample.get_measurements(mtype=mtype, ttype=ttype, tval=tval)
-                    for dtype in m_is.data:
-                        aux = [m for m in is_data[ttype][tval][dtype]]
-                        m_is._data[dtype] = condense(aux)
-                    m.initial_state = m_is
-                    if hasattr(m, 'reset_data'):
-                        m.reset_data()
-        average_sample.name = 'average(' + self.name + ')'
-        return average_sample
-
 
     def __get_variable_list(self, rpdata_list):
         out = []

@@ -1,38 +1,35 @@
-RockPy.Structure package
-========================
+Structure Package
+=================
 
-Submodules
-----------
+:mod:`Structure` Package
+------------------------
 
-RockPy.Structure.data module
-----------------------------
+.. automodule:: RockPy.Structure
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+:mod:`data` Module
+------------------
 
 .. automodule:: RockPy.Structure.data
     :members:
     :undoc-members:
     :show-inheritance:
 
-RockPy.Structure.project module
--------------------------------
+:mod:`project` Module
+---------------------
 
 .. automodule:: RockPy.Structure.project
     :members:
     :undoc-members:
     :show-inheritance:
 
-RockPy.Structure.samplegroup module
------------------------------------
+:mod:`samplegroup` Module
+-------------------------
 
 .. automodule:: RockPy.Structure.samplegroup
     :members:
     :undoc-members:
     :show-inheritance:
 
-
-Module contents
----------------
-
-.. automodule:: RockPy.Structure
-    :members:
-    :undoc-members:
-    :show-inheritance:

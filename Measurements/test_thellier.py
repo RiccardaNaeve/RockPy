@@ -6,7 +6,7 @@ __author__ = 'mike'
 
 class TestThellier(TestCase):
     def setUp(self):
-        cryomag_file = '../testing/test_data/NLCRY_Thellier_test.TT'
+        cryomag_file = '../Tutorials/test_data/NLCRY_Thellier_test.TT'
         self.test_sample_cryomag = Sample(name='1a')
         self.thellier_cryomag = self.test_sample_cryomag.add_measurement(mtype='thellier', mfile=cryomag_file, machine='cryomag')
     #

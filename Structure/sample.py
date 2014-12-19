@@ -10,7 +10,7 @@ from RockPy.Measurements.base import Measurement
 from RockPy.Structure.data import RockPyData, condense
 import RockPy.VisualizeV2.base
 
-general.create_logger('RockPy.SAMPLE')
+logging.getLogger('RockPy.SAMPLE')
 
 
 class Sample(object):
@@ -146,6 +146,7 @@ class Sample(object):
             Sample.logger.info(' ADDING\t << measurement >> %s' % mtype)
             measurement = implemented[mtype](self,
                                              mtype=mtype, mfile=mfile, machine=machine,
+                                             m_idx=len(self.measurements),
                                              **options)
             if measurement.has_data:
                 self.measurements.append(measurement)

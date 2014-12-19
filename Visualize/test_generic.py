@@ -26,7 +26,7 @@ class TestGeneric(TestCase):
     def add_measurements_treatments(self):
         from os import listdir
         from os.path import join
-        folder = '../testing/test_data/treatments'
+        folder = '../Tutorials/test_data/treatments'
         pressures = ['0.0, GPa', '0.6, GPa', '1.2, GPa', '1.8, GPa']
 
         for i, v in enumerate(['P0', 'P1', 'P2', 'P3']):

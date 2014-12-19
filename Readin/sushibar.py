@@ -80,7 +80,7 @@ class SushiBar(base.Machine):
 def test():
     from Structure.sample import Sample
 
-    test_file = '../testing/test_data/MUCSUSH_afdemag_trm.af'
+    test_file = '../Tutorials/test_data/MUCSUSH_afdemag_trm.af'
     S = Sample(name='3e')
     S.add_measurement(mtype='afdemag', mfile=test_file, machine='sushibar')
 

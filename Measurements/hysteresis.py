@@ -13,8 +13,7 @@ class Hysteresis(base.Measurement):
     .. testsetup:: *
 
        >>> from Structure.sample import Sample
-       >>> vftb_file = '../testing/test_data/MUCVFTB_test.hys'
-       >>> sample = Sample(name='vftb_test_sample')
+       >>> vftb_file = TutoTutorials      >>> sample = Sample(name='vftb_test_sample')
        >>> M = sample.add_measurement(mtype='hysteresis', mfile=vftb_file, machine='vftb')
 
 

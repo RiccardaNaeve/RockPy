@@ -12,10 +12,7 @@ from RockPy.Structure.data import RockPyData
 from RockPy import Treatments
 from RockPy.Readin import *
 from copy import deepcopy
-
-RP_functions.create_logger('RockPy.MEASUREMENT')
-# RockPy.Functions.general.create_logger(__name__)
-# log = logging.getLogger(__name__)
+import inspect
 
 class Measurement(object):
     """
@@ -47,6 +44,7 @@ class Measurement(object):
 
 
     """
+
     logger = logging.getLogger('RockPy.MEASUREMENT')
 
     @classmethod
@@ -97,7 +95,7 @@ class Measurement(object):
         :param options:
         :return:
         """
-
+        Measurement.logger
 
         self.has_data = True
         self._data = {}
@@ -157,7 +155,9 @@ class Measurement(object):
         else:
             Measurement.logger.error(
                 'FORMATTING raw data from << %s >> not possible, probably not implemented, yet.' % machine)
-
+    @property
+    def m_idx(self):
+        return self.sample_obj.measurements.index(self)
 
     def __initialize(self):
         # dynamical creation of entries in results data. One column for each results_* method.
@@ -632,10 +632,16 @@ class Measurement(object):
             out = data.filter_idx([idx])[rtype].v[0]
             return out
 
-    def mtype_prior_to(self, mtype):
+    def get_mtype_prior_to(self, mtype):
         """
         search for last mtype prior to self
         :param mtype:
         :return:
         """
-        pass #todo
+        measurements = self.sample_obj.get_measurements(mtype)
+        if measurements:
+            out = np.array([[i, i.m_idx] for i in measurements if i.m_idx < self.m_idx])
+            out = np.max(out, axis=0)[0]
+            return out
+        else:
+            return None

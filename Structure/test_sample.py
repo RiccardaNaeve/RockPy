@@ -11,8 +11,8 @@ class TestSample(TestCase):
                                 diameter=5.4, height=4.3, length_unit='mm',
                                 treatment='pressure, 0.0, GPa; temperature, 300.0, C')
 
-        self.cryomag_thellier_file = '../testing/test_data/NLCRY_Thellier_test.TT'
-        self.cryomag_thellier_is_file = '../testing/test_data/NLCRY_Thellier_is_test.TT'
+        self.cryomag_thellier_file = '../Tutorials/test_data/NLCRY_Thellier_test.TT'
+        self.cryomag_thellier_is_file = '../Tutorials/test_data/NLCRY_Thellier_is_test.TT'
 
         #vftb
         self.vftb_hys_file = ''

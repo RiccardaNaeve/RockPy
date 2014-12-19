@@ -1,28 +1,27 @@
-RockPy.Functions package
-========================
+Functions Package
+=================
 
+:mod:`Functions` Package
+------------------------
 
-RockPy.Functions.convert module
--------------------------------
+.. automodule:: RockPy.Functions
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+:mod:`convert` Module
+---------------------
 
 .. automodule:: RockPy.Functions.convert
     :members:
     :undoc-members:
     :show-inheritance:
 
-RockPy.Functions.general module
--------------------------------
+:mod:`general` Module
+---------------------
 
 .. automodule:: RockPy.Functions.general
     :members:
     :undoc-members:
     :show-inheritance:
 
-
-Module contents
----------------
-
-.. automodule:: RockPy.Functions
-    :members:
-    :undoc-members:
-    :show-inheritance:

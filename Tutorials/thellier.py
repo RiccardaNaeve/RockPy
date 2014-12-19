@@ -4,7 +4,7 @@ from RockPy.Structure.sample import Sample
 
 def test():
     cryomag_file = 'test_data/NLCRY_Thellier_test.TT'
-    cryomag_file = '/Users/mike/PycharmProjects/RockPy/testing/test_data/NLCRY_Thellier_test.TT'
+    cryomag_file = '/Users/mike/PycharmProjects/RockPy/Tutorials/test_data/NLCRY_Thellier_test.TT'
 
     # creating a sample
     sample = Sample(name='1a')

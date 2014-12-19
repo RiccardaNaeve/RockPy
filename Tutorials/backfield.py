@@ -4,7 +4,7 @@ import RockPy
 from RockPy.Structure.sample import Sample
 def test():
     # define measurement data file
-    vftb_file = 'test_data/MUCVFTB_test2.coe'
+    vftb_file = 'test_data/MUCVFTB_test.coe'
 
     # create a sample
     sample = Sample(name='vftb_test_sample')

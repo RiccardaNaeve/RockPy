@@ -10,16 +10,16 @@ class Irm_Acquisition(base.Measurement):
     def __init__(self, sample_obj,
                  mtype, mfile, machine,
                  **options):
+        self._data = {'remanence': None,
+                      'induced': None}
         super(Irm_Acquisition, self).__init__(sample_obj, mtype, mfile, machine)
 
-        self._data = {'remanence': self.remanence,
-                      'induced': self.induced}
 
     def format_vftb(self):
-        data = self.machine_data.out_irm()
+        data = self.machine_data.get_data()
         header = self.machine_data.header
-        #self.log.debug('FORMATTING << %s >> raw_data for << VFTB >> data structure' % (self.mtype))
-        self.remanence = RockPyData(column_names=header, data=data[0])
+        # self.log.debug('FORMATTING << %s >> raw_data for << VFTB >> data structure' % (self.mtype))
+        self._data['remanence'] = RockPyData(column_names=header, data=data[0])
 
     def format_vsm(self):
         raise NotImplemented

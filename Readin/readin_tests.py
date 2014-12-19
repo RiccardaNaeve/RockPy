@@ -4,7 +4,7 @@ import cryomag
 
 class TestCryoMag(TestCase):
     def setUp(self):
-        self.file = '../testing/test_data/NLCRYO_test.af'
+        self.file = '../Tutorials/test_data/NLCRYO_test.af'
 
     def test___init__(self):
         self.CMag_obj = cryomag.CryoMag(dfile=self.file, sample_name='DA6B')

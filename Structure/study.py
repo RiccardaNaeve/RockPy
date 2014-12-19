@@ -108,3 +108,10 @@ class Study(object):
         else:
             out = self._samplegroups[0]
         return out
+
+    @property
+    def mtypes(self):
+        """
+        looks through all samplegroups and return measurement types
+        """
+        return sorted(list(set([i for j in self.samplegroups for i in j.mtypes])))

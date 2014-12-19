@@ -105,10 +105,10 @@ class MainFrame(wx.Frame):
         # navigation notebook (no close buttons on tabs)
         self.nav_nb = wx.aui.AuiNotebook(self, style=wx.aui.AUI_NB_DEFAULT_STYLE & ~wx.aui.AUI_NB_CLOSE_ON_ACTIVE_TAB)
 
-        self.CreateNavTree()
+        self.CreateNavTrees()
 
-        self.nav_nb.AddPage(self.nav_tree, "Samples")
-        self.nav_nb.AddPage(wx.Panel(self.nav_nb), "Measurements")
+        self.nav_nb.AddPage(self.samples_nav_tree, "Samples")
+        self.nav_nb.AddPage(self.measurements_nav_tree, "Measurements")
         self.nav_nb.AddPage(wx.Panel(self.nav_nb), "Treatments")
 
 
@@ -137,9 +137,11 @@ class MainFrame(wx.Frame):
         self.toggle_panes = {xrc.XRCID("PythonConsoleMenuItem"): "Console", xrc.XRCID("InspectorMenuItem"): "Inspector",
                  xrc.XRCID("NavigatorMenuItem"): "Navigator", xrc.XRCID("LogMenuItem"): "Log"}
 
-    def CreateNavTree(self):
-        # Create a CustomTreeCtrl instance and putit within a boxsizer in navtreepanel from xrc
-        self.nav_tree = ctc.CustomTreeCtrl(self.nav_nb, agwStyle=wx.TR_DEFAULT_STYLE)
+
+    def CreateNavTrees(self):
+        # Create a CustomTreeCtrl instance
+        self.samples_nav_tree = ctc.CustomTreeCtrl(self.nav_nb, agwStyle=wx.TR_DEFAULT_STYLE)
+        self.measurements_nav_tree = ctc.CustomTreeCtrl(self.nav_nb, agwStyle=wx.TR_DEFAULT_STYLE)
 
         # Create an image list to add icons next to an item
         il = wx.ImageList(16, 16)
@@ -147,19 +149,20 @@ class MainFrame(wx.Frame):
         il.Add(wx.ArtProvider.GetBitmap(wx.ART_FILE_OPEN, wx.ART_OTHER, (16, 16)))
         il.Add(wx.ArtProvider.GetBitmap(wx.ART_NORMAL_FILE, wx.ART_OTHER, (16, 16)))
 
-        self.nav_tree.SetImageList(il)
+        self.samples_nav_tree.SetImageList(il)
+        self.measurements_nav_tree.SetImageList(il)
 
-        self.UpdateStudyNavTree()
+        self.UpdateGUI()
 
         # register context menu
-        self.nav_tree.Bind(wx.EVT_CONTEXT_MENU, self.onNavTreeContext)
+        self.samples_nav_tree.Bind(wx.EVT_CONTEXT_MENU, self.onNavTreeContext)
+        
 
-
-    def UpdateStudyNavTree(self):
-        self.nav_tree.DeleteAllItems()  # clear the tree
+    def UpdateSamplesNavTree(self):
+        self.samples_nav_tree.DeleteAllItems()  # clear the tree
 
         # Add a study as root node
-        root = self.nav_tree.AddRoot("Study", ct_type=1)
+        root = self.samples_nav_tree.AddRoot("Study", ct_type=1)
 
         if self.study == None:
             # no study do nothing
@@ -168,32 +171,75 @@ class MainFrame(wx.Frame):
         # associate study with the root item
         root.SetData(self.study)
 
-        self.nav_tree.SetItemImage(root, 0, wx.TreeItemIcon_Normal)
-        self.nav_tree.SetItemImage(root, 1, wx.TreeItemIcon_Expanded)
+        self.samples_nav_tree.SetItemImage(root, 0, wx.TreeItemIcon_Normal)
+        self.samples_nav_tree.SetItemImage(root, 1, wx.TreeItemIcon_Expanded)
 
         # iterate over all samplegroups
         for sg in self.study.samplegroups:
-            sg_item = self.nav_tree.AppendItem(root, sg.name, ct_type=1)
+            sg_item = self.samples_nav_tree.AppendItem(root, sg.name, ct_type=1)
             sg_item.SetData(sg)
-            self.nav_tree.SetItemImage(sg_item, 0, wx.TreeItemIcon_Normal)
-            self.nav_tree.SetItemImage(sg_item, 1, wx.TreeItemIcon_Expanded)
+            self.samples_nav_tree.SetItemImage(sg_item, 0, wx.TreeItemIcon_Normal)
+            self.samples_nav_tree.SetItemImage(sg_item, 1, wx.TreeItemIcon_Expanded)
 
             # iterate over all samples of each samplegroup
             for s in sg:
-                s_item = self.nav_tree.AppendItem(sg_item, s.name, ct_type=1)
+                s_item = self.samples_nav_tree.AppendItem(sg_item, s.name, ct_type=1)
                 s_item.SetData(s)
-                self.nav_tree.SetItemImage(s_item, 0, wx.TreeItemIcon_Normal)
-                self.nav_tree.SetItemImage(s_item, 1, wx.TreeItemIcon_Expanded)
+                self.samples_nav_tree.SetItemImage(s_item, 0, wx.TreeItemIcon_Normal)
+                self.samples_nav_tree.SetItemImage(s_item, 1, wx.TreeItemIcon_Expanded)
 
                 # iterate over all measurements of each sample
                 for m in s.measurements:
                     if not 'parameters' in type(m).__module__:
-                        m_item = self.nav_tree.AppendItem(s_item, m.mtype, ct_type=1)
+                        m_item = self.samples_nav_tree.AppendItem(s_item, m.mtype, ct_type=1)
                         m_item.SetData(m)
-                        self.nav_tree.SetItemImage(m_item, 2, wx.TreeItemIcon_Normal)
+                        self.samples_nav_tree.SetItemImage(m_item, 2, wx.TreeItemIcon_Normal)
 
-        self.nav_tree.Expand(root)
+        self.samples_nav_tree.Expand(root)
+        
+        
+    def UpdateMeasurementsNavTree(self):
+        self.measurements_nav_tree.DeleteAllItems()  # clear the tree
 
+        # Add a study as root node
+        root = self.measurements_nav_tree.AddRoot("Study", ct_type=1)
+
+        if self.study == None:
+            # no study do nothing
+            return
+
+        # associate study with the root item
+        root.SetData(self.study)
+
+        self.measurements_nav_tree.SetItemImage(root, 0, wx.TreeItemIcon_Normal)
+        self.measurements_nav_tree.SetItemImage(root, 1, wx.TreeItemIcon_Expanded)
+
+        # iterate over all samplegroups
+        for sg in self.study.samplegroups:
+            sg_item = self.measurements_nav_tree.AppendItem(root, sg.name, ct_type=1)
+            sg_item.SetData(sg)
+            self.measurements_nav_tree.SetItemImage(sg_item, 0, wx.TreeItemIcon_Normal)
+            self.measurements_nav_tree.SetItemImage(sg_item, 1, wx.TreeItemIcon_Expanded)
+
+            # iterate over all samples of each samplegroup
+            for s in sg:
+                s_item = self.measurements_nav_tree.AppendItem(sg_item, s.name, ct_type=1)
+                s_item.SetData(s)
+                self.measurements_nav_tree.SetItemImage(s_item, 0, wx.TreeItemIcon_Normal)
+                self.measurements_nav_tree.SetItemImage(s_item, 1, wx.TreeItemIcon_Expanded)
+
+                # iterate over all measurements of each sample
+                for m in s.measurements:
+                    if not 'parameters' in type(m).__module__:
+                        m_item = self.measurements_nav_tree.AppendItem(s_item, m.mtype, ct_type=1)
+                        m_item.SetData(m)
+                        self.measurements_nav_tree.SetItemImage(m_item, 2, wx.TreeItemIcon_Normal)
+
+        self.measurements_nav_tree.Expand(root)
+    
+    def UpdateGUI(self):
+        self.UpdateSamplesNavTree()
+        self.UpdateMeasurementsNavTree()
 
     def ShowFigure(self, figure, title='plot'):
         # make a panel
@@ -249,7 +295,7 @@ class MainFrame(wx.Frame):
         Create and show dynamic context menu
         """
         # identify tree item
-        hitobj, flags = self.nav_tree.HitTest(self.nav_tree.ScreenToClient(event.GetPosition()))
+        hitobj, flags = self.samples_nav_tree.HitTest(self.samples_nav_tree.ScreenToClient(event.GetPosition()))
         if isinstance(hitobj, ctc.GenericTreeItem):
             #print hitobj.GetText()
             #print hitobj.GetData()
@@ -323,7 +369,7 @@ class MainFrame(wx.Frame):
 
                 self.SetStatusText("%s loaded" % filename)
 
-                self.UpdateStudyNavTree()
+                self.UpdateGUI()
 
         dlg.Destroy()
 

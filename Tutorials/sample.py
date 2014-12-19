@@ -27,9 +27,10 @@ def get_hys_coe_irm_rmp_sample():
 
 def test():
     S = get_hys_coe_irm_rmp_sample()
-    study = RockPy.Study( "study", samplegroups=S)
+    study = RockPy.Study("study", samplegroups=S)
     #RockPy.save(study, 'hys_coe_irm_rmp.rpy')
-    print S.plottable
+    #print S.plottable
+    #print study.mtypes
 
 if __name__ == '__main__':
     test()

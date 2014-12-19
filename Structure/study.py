@@ -91,7 +91,7 @@ class Study(object):
             if all(isinstance(item, RockPy.SampleGroup) for item in samplegroup):
                 samplegroup = samplegroup
             else:
-                #self.log.error('MIXED lists not allowed or no Sample/SampleGroup instance found')
+                log.error('MIXED lists not allowed or no Sample/SampleGroup instance found')
                 return None
         if isinstance(samplegroup, RockPy.Sample):
             samplegroup = [RockPy.SampleGroup(sample_list=samplegroup)]
@@ -108,3 +108,10 @@ class Study(object):
         else:
             out = self._samplegroups[0]
         return out
+
+    @property
+    def mtypes(self):
+        """
+        looks through all samplegroups and return measurement types
+        """
+        return sorted(list(set([i for j in self.samplegroups for i in j.mtypes])))

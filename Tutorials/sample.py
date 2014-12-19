@@ -15,11 +15,12 @@ def get_hys_all_sample():
 
 def get_hys_coe_irm_rmp_sample():
     S = RockPy.Sample(name='test_sample')
-    hys = './test_data/MUCVFTB_test.hys'
-    coe = './test_data/MUCVFTB_test.coe'
-    irm = './test_data/MUCVFTB_test.irm'
-    rmp = './test_data/MUCVFTB_test.rmp'
-    S.add_measurement(mtype='hysteresis', mfile=hys, machine='vftb')
+    hys = 'RockPy/Tutorials/test_data/MUCVFTB_test.hys'
+    coe = 'RockPy/Tutorials/test_data/MUCVFTB_test.coe'
+    irm = 'RockPy/Tutorials/test_data/MUCVFTB_test.irm'
+    rmp = 'RockPy/Tutorials/test_data/MUCVFTB_test.rmp'
+    S.add_measurement(mtype='hysteresis', mfile=hys, machine='vftb', treatment='temp, 20, C; pressure, 1, GPa')
+    S.add_measurement(mtype='hysteresis', mfile=hys, machine='vftb', treatment='temp, 20, C')
     S.add_measurement(mtype='backfield', mfile=coe, machine='vftb')
     S.add_measurement(mtype='irm_acquisition', mfile=irm, machine='vftb')
     S.add_measurement(mtype='thermocurve', mfile=rmp, machine='vftb')

@@ -1,78 +1,75 @@
-RockPy.Readin package
-=====================
+Readin Package
+==============
 
-Submodules
-----------
+:mod:`Readin` Package
+---------------------
 
-RockPy.Readin.base module
--------------------------
+.. automodule:: RockPy.Readin
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+:mod:`base` Module
+------------------
 
 .. automodule:: RockPy.Readin.base
     :members:
     :undoc-members:
     :show-inheritance:
 
-RockPy.Readin.cryomag module
-----------------------------
+:mod:`cryomag` Module
+---------------------
 
 .. automodule:: RockPy.Readin.cryomag
     :members:
     :undoc-members:
     :show-inheritance:
 
-RockPy.Readin.generic module
-----------------------------
+:mod:`generic` Module
+---------------------
 
 .. automodule:: RockPy.Readin.generic
     :members:
     :undoc-members:
     :show-inheritance:
 
-RockPy.Readin.machines module
------------------------------
+:mod:`machines` Module
+----------------------
 
 .. automodule:: RockPy.Readin.machines
     :members:
     :undoc-members:
     :show-inheritance:
 
-RockPy.Readin.microsense module
--------------------------------
+:mod:`microsense` Module
+------------------------
 
 .. automodule:: RockPy.Readin.microsense
     :members:
     :undoc-members:
     :show-inheritance:
 
-RockPy.Readin.spinner module
-----------------------------
+:mod:`spinner` Module
+---------------------
 
 .. automodule:: RockPy.Readin.spinner
     :members:
     :undoc-members:
     :show-inheritance:
 
-RockPy.Readin.vftb module
--------------------------
+:mod:`vftb` Module
+------------------
 
 .. automodule:: RockPy.Readin.vftb
     :members:
     :undoc-members:
     :show-inheritance:
 
-RockPy.Readin.vsm module
-------------------------
+:mod:`vsm` Module
+-----------------
 
 .. automodule:: RockPy.Readin.vsm
     :members:
     :undoc-members:
     :show-inheritance:
 
-
-Module contents
----------------
-
-.. automodule:: RockPy.Readin
-    :members:
-    :undoc-members:
-    :show-inheritance:

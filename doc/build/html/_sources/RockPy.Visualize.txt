@@ -1,54 +1,51 @@
-RockPy.Visualize package
-========================
+Visualize Package
+=================
 
-Submodules
-----------
+:mod:`Visualize` Package
+------------------------
 
-RockPy.Visualize.arai module
-----------------------------
+.. automodule:: RockPy.Visualize
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+:mod:`arai` Module
+------------------
 
 .. automodule:: RockPy.Visualize.arai
     :members:
     :undoc-members:
     :show-inheritance:
 
-RockPy.Visualize.backfield module
----------------------------------
+:mod:`backfield` Module
+-----------------------
 
 .. automodule:: RockPy.Visualize.backfield
     :members:
     :undoc-members:
     :show-inheritance:
 
-RockPy.Visualize.base module
-----------------------------
+:mod:`base` Module
+------------------
 
 .. automodule:: RockPy.Visualize.base
     :members:
     :undoc-members:
     :show-inheritance:
 
-RockPy.Visualize.demag module
------------------------------
+:mod:`demag` Module
+-------------------
 
 .. automodule:: RockPy.Visualize.demag
     :members:
     :undoc-members:
     :show-inheritance:
 
-RockPy.Visualize.thellier module
---------------------------------
+:mod:`thellier` Module
+----------------------
 
 .. automodule:: RockPy.Visualize.thellier
     :members:
     :undoc-members:
     :show-inheritance:
 
-
-Module contents
----------------
-
-.. automodule:: RockPy.Visualize
-    :members:
-    :undoc-members:
-    :show-inheritance:

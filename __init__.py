@@ -8,3 +8,6 @@ from RockPy.Structure.data import RockPyData, condense
 from RockPy.Measurements.base import Measurement
 from file_operations import save, load
 RockPy.Functions.general.create_logger('RockPy')
+
+#import os
+#os.chdir(default_path)

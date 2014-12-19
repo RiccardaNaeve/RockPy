@@ -91,8 +91,8 @@ class MainFrame(wx.Frame):
         self._mgr.AddPane(self.shell, wx.aui.AuiPaneInfo().Name("Console").Bottom().BestSize((300, 400)).Hide(), 'Console')
 
 
-        # navigation notebook
-        self.nav_nb = wx.aui.AuiNotebook(self)
+        # navigation notebook (no close buttons on tabs)
+        self.nav_nb = wx.aui.AuiNotebook(self, style = wx.aui.AUI_NB_DEFAULT_STYLE & ~(wx.aui.AUI_NB_CLOSE_ON_ACTIVE_TAB))
 
         self.CreateNavTree()
 
@@ -148,12 +148,13 @@ class MainFrame(wx.Frame):
 
     def UpdateStudyNavTree(self):
         self.nav_tree.DeleteAllItems()  # clear the tree
-        if self.study == None:
-            # no study do nothing
-            return
 
         # Add a study as root node
         root = self.nav_tree.AddRoot("Study", ct_type=1)
+
+        if self.study == None:
+            # no study do nothing
+            return
 
         self.nav_tree.SetItemImage(root, 0, wx.TreeItemIcon_Normal)
         self.nav_tree.SetItemImage(root, 1, wx.TreeItemIcon_Expanded)
@@ -229,6 +230,11 @@ class MainFrame(wx.Frame):
         """
         Create and show dynamic context menu
         """
+
+        # identify tree item
+        hitobj, flags = self.nav_tree.HitTest(self.nav_tree.ScreenToClient(event.GetPosition()))
+        if isinstance( hitobj, ctc.GenericTreeItem):
+            print hitobj.GetText()
 
         # get some entries
         items = ('a', 'plots', 'delete')

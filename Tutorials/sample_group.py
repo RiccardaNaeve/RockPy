@@ -17,10 +17,14 @@ def get_thellier_samplegroup():
 def get_hys_cor_irm_rmp_sample_group():
     S = sample.get_hys_coe_irm_rmp_sample()
     SG = RockPy.SampleGroup(name='hys/coe/irm/rmp', sample_list=S)
+    study = RockPy.Study(SG)
+    RockPy.save(study, file_name='hys_coe_irm_rmp.rpy')
     return SG
 
 def test():
-    SG = get_thellier_samplegroup()
+    # SG = get_thellier_samplegroup()
+    # SG = get_hys_cor_irm_rmp_sample_group()
+    S = RockPy.load('hys_coe_irm_rmp.rpy', '/Users/mike/Desktop/')
 
 if __name__ == '__main__':
     test()

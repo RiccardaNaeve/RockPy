@@ -1,7 +1,7 @@
 __author__ = 'mike'
 import RockPy
 import RockPy.Tutorials.sample_group
-import RockPy.VisualizeV2.Paleointensity
+import RockPy.VisualizeV2.paleointensity
 import RockPy.VisualizeV2.combined
 
 def Day1977():

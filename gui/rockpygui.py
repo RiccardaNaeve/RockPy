@@ -267,9 +267,9 @@ class MainFrame(wx.Frame):
                     pass
                 elif isinstance(data, RockPy.Sample):
                     plotmenu = wx.Menu()
-                    #print data.plottable()
-                    #plots = data.plottable()
-                    plots = ('a', 'b')
+                    print data.plottable
+                    plots = data.plottable
+                    # plots = ('a', 'b')
                     for p in plots:
                         plotmenu.Append(wx.NewId(), p)  # append entries to plot submenu
                     if plotmenu.GetMenuItemCount() > 0:

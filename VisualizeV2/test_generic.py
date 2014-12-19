@@ -51,5 +51,5 @@ class TestGeneric(TestCase):
         pass
 
     def test_meets_requirements(self):
-        Plot = VisualizeV2.Paleointensity.Arai(self.sample)
+        Plot = VisualizeV2.paleointensity.Arai(self.sample)
         self.assertTrue(Plot.meets_requirements(self.sample))

@@ -53,6 +53,7 @@ class Arai(base.Generic):
 
 
 class Multiple(base.Generic):
+    _required = {}
     def initialize_visual(self):
         arai = Arai(plot_samples=self.study)
         dunlop = Dunlop(plot_samples=self.study)
@@ -63,7 +64,7 @@ class Multiple(base.Generic):
 
 def test():
     sample = RP.Sample(name='test_sample')
-    sample.add_measurement(mtype='thellier', mfile='../testing/test_data/NLCRY_Thellier_test.TT', machine='cryomag')
+    sample.add_measurement(mtype='thellier', mfile='../Tutorials/test_data/NLCRY_Thellier_test.TT', machine='cryomag')
     Plot = Multiple(plot_samples=sample)
     Plot.show()
     # print 'test', Plot.ls_source

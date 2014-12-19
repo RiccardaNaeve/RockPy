@@ -6,7 +6,7 @@ __author__ = 'mike'
 
 class TestHysteresis(TestCase):
     def setUp(self):
-        vsm_file = '../testing/test_data/MUCVSM_test.hys'
+        vsm_file = '../Tutorials/test_data/MUCVSM_test.hys'
         self.VSM_test = rp.Sample('test')
         self.VSM_hys = self.VSM_test.add_measurement(mtype='hysteresis', mfile=vsm_file, machine='vsm')
 

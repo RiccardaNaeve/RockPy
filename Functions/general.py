@@ -9,7 +9,7 @@ from math import sin, cos, tan
 def create_logger(name):
     log = logging.getLogger(name=name)
     log.setLevel(logging.DEBUG)
-    formatter = logging.Formatter('%(asctime)s - %(name)s \t %(levelname)s - %(message)s')
+    formatter = logging.Formatter('%(asctime)s: %(levelname)-10s %(name)-20s %(message)s')
     # fh = logging.FileHandler('RPV3.log')
     # fh.setFormatter(formatter)
     # ch = logging.FileHandler('RPV3.log')

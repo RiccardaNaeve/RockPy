@@ -8,9 +8,9 @@ import numpy as np
 class TestAfDemag(TestCase):
     def setUp(self):
         # sample data files
-        self.jr6_file = '../testing/test_data/MUCSPN_afdemag.jr6'
-        self.cryomag_file = '../testing/test_data/NLCRYO_test.af'
-        self.sushibar_file = '../testing/test_data/MUCSUSH_af_test.af'
+        self.jr6_file = '../Tutorials/test_data/MUCSPN_afdemag.jr6'
+        self.cryomag_file = '../Tutorials/test_data/NLCRYO_test.af'
+        self.sushibar_file = '../Tutorials/test_data/MUCSUSH_af_test.af'
 
         # creating samples
         self.jr6_sample = Sample(name='VA')

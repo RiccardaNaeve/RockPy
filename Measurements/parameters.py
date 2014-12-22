@@ -1,10 +1,8 @@
-from Structure.rockpydata import rockpydata
-from Structure.data import data
+from ..Structure.data import RockPyData
 
 __author__ = 'volk'
 from base import Measurement
-from Functions.convert import convert2
-import numpy as np
+from RockPy.Functions.convert import convert2
 
 
 class Mass(Measurement):
@@ -23,23 +21,23 @@ class Mass(Measurement):
 
         mass_conversion = convert2(unit, 'kg', 'mass')
 
-        self.data = rockpydata(column_names=['mass', 'time', 'std_dev'])
-        self.data['mass'] = value * mass_conversion
-        self.data['time'] = time
-        self.data['std_dev'] = std
+        self._data = {'data': RockPyData(column_names=['mass', 'time', 'std_dev'])}
+        self._data['data']['mass'] = value * mass_conversion
+        self._data['data']['time'] = time
+        self._data['data']['std_dev'] = std
 
-        # self.data = data(variable=np.array(0.0), measurement=np.array(value * mass_conversion),
-        # var_unit='idx', measure_unit='kg',
-        #                  time=time, std_dev=std)
+
+    def format_generic(self):
+        pass
 
 
 class Length(Measurement):
     """
-    simple 1d measurement for mass
+    simple 1d measurement for Length
     """
 
     def __init__(self, sample_obj,
-                 mtype, mfile=None, machine=None,
+                 mtype, mfile=None, machine='generic',
                  value=1.0, unit='m',
                  std=None, time=None,
                  **options):
@@ -50,7 +48,24 @@ class Length(Measurement):
         self.machine = machine
         length_conversion = convert2(unit, 'm', 'length')
 
-        self.data = rockpydata(column_names=[mtype, 'time', 'std_dev'])
-        self.data[mtype] = value * length_conversion
-        self.data['time'] = time
-        self.data['std_dev'] = std
+        self._data = {'data':RockPyData(column_names=[mtype, 'time', 'std_dev'])}
+        self._data['data'][mtype] = value * length_conversion
+        self._data['data']['time'] = time
+        self._data['data']['std_dev'] = std
+
+    def format_generic(self):
+        pass
+
+
+class Diameter(Length):
+    """
+    simple 1d measurement for Length
+    """
+    pass
+
+
+class Height(Length):
+    """
+    simple 1d measurement for Length
+    """
+    pass

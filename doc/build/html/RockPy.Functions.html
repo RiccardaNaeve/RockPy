@@ -1,0 +1,346 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Functions Package &mdash; RockPy pyrite documentation</title>
+  
+
+  
+  
+
+  
+  <link href='https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700' rel='stylesheet' type='text/css'>
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+    <link rel="top" title="RockPy pyrite documentation" href="index.html"/>
+        <link rel="next" title="Measurements Package" href="RockPy.Measurements.html"/>
+        <link rel="prev" title="RockPy.testing package" href="RockPy.testing.html"/> 
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.6.2/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-nav-search">
+        <a href="index.html" class="fa fa-home"> RockPy</a>
+        <div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+        
+        
+            <ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="RockPy.html">RockPy package</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="RockPy.html#subpackages">Subpackages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.html#module-RockPy">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="reference internal" href="RockPy.html">RockPy package</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="RockPy.html#subpackages">Subpackages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.html#module-RockPy">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="current reference internal" href="">Functions Package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#id1"><tt class="docutils literal"><span class="pre">Functions</span></tt> Package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-RockPy.Functions.convert"><tt class="docutils literal"><span class="pre">convert</span></tt> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-RockPy.Functions.general"><tt class="docutils literal"><span class="pre">general</span></tt> Module</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="RockPy.Measurements.html">Measurements Package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Measurements.html#id1"><tt class="docutils literal"><span class="pre">Measurements</span></tt> Package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Measurements.html#module-RockPy.Measurements.af_demag"><tt class="docutils literal"><span class="pre">af_demag</span></tt> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Measurements.html#module-RockPy.Measurements.backfield"><tt class="docutils literal"><span class="pre">backfield</span></tt> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Measurements.html#module-RockPy.Measurements.base"><tt class="docutils literal"><span class="pre">base</span></tt> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Measurements.html#module-RockPy.Measurements.forc"><tt class="docutils literal"><span class="pre">forc</span></tt> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Measurements.html#module-RockPy.Measurements.hysteresis"><tt class="docutils literal"><span class="pre">hysteresis</span></tt> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Measurements.html#irm-module"><tt class="docutils literal"><span class="pre">irm</span></tt> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Measurements.html#module-RockPy.Measurements.nrm"><tt class="docutils literal"><span class="pre">nrm</span></tt> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Measurements.html#module-RockPy.Measurements.parameters"><tt class="docutils literal"><span class="pre">parameters</span></tt> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Measurements.html#module-RockPy.Measurements.thellier"><tt class="docutils literal"><span class="pre">thellier</span></tt> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Measurements.html#module-RockPy.Measurements.thermocurve"><tt class="docutils literal"><span class="pre">thermocurve</span></tt> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Measurements.html#module-RockPy.Measurements.trm"><tt class="docutils literal"><span class="pre">trm</span></tt> Module</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="RockPy.Readin.html">Readin Package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Readin.html#id1"><tt class="docutils literal"><span class="pre">Readin</span></tt> Package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Readin.html#module-RockPy.Readin.base"><tt class="docutils literal"><span class="pre">base</span></tt> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Readin.html#module-RockPy.Readin.cryomag"><tt class="docutils literal"><span class="pre">cryomag</span></tt> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Readin.html#module-RockPy.Readin.generic"><tt class="docutils literal"><span class="pre">generic</span></tt> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Readin.html#machines-module"><tt class="docutils literal"><span class="pre">machines</span></tt> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Readin.html#module-RockPy.Readin.microsense"><tt class="docutils literal"><span class="pre">microsense</span></tt> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Readin.html#module-RockPy.Readin.spinner"><tt class="docutils literal"><span class="pre">spinner</span></tt> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Readin.html#module-RockPy.Readin.vftb"><tt class="docutils literal"><span class="pre">vftb</span></tt> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Readin.html#module-RockPy.Readin.vsm"><tt class="docutils literal"><span class="pre">vsm</span></tt> Module</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="RockPy.Structure.html">Structure Package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Structure.html#id1"><tt class="docutils literal"><span class="pre">Structure</span></tt> Package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Structure.html#module-RockPy.Structure.data"><tt class="docutils literal"><span class="pre">data</span></tt> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Structure.html#project-module"><tt class="docutils literal"><span class="pre">project</span></tt> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Structure.html#module-RockPy.Structure.samplegroup"><tt class="docutils literal"><span class="pre">samplegroup</span></tt> Module</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="RockPy.Treatments.html">Treatments Package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Treatments.html#id1"><tt class="docutils literal"><span class="pre">Treatments</span></tt> Package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Treatments.html#module-RockPy.Treatments.base"><tt class="docutils literal"><span class="pre">base</span></tt> Module</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="RockPy.Visualize.html">Visualize Package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Visualize.html#id1"><tt class="docutils literal"><span class="pre">Visualize</span></tt> Package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Visualize.html#arai-module"><tt class="docutils literal"><span class="pre">arai</span></tt> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Visualize.html#backfield-module"><tt class="docutils literal"><span class="pre">backfield</span></tt> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Visualize.html#base-module"><tt class="docutils literal"><span class="pre">base</span></tt> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Visualize.html#demag-module"><tt class="docutils literal"><span class="pre">demag</span></tt> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Visualize.html#thellier-module"><tt class="docutils literal"><span class="pre">thellier</span></tt> Module</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="RockPy.Plotting.html">Plotting Package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Plotting.html#id1"><tt class="docutils literal"><span class="pre">Plotting</span></tt> Package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Plotting.html#af-demag-module"><tt class="docutils literal"><span class="pre">af_demag</span></tt> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Plotting.html#module-RockPy.Plotting.arai"><tt class="docutils literal"><span class="pre">arai</span></tt> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Plotting.html#module-RockPy.Plotting.backfield"><tt class="docutils literal"><span class="pre">backfield</span></tt> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Plotting.html#module-RockPy.Plotting.dunlop"><tt class="docutils literal"><span class="pre">dunlop</span></tt> Module</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="guidlines.html">Programming Guidlines:</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="guidlines.html#adding-a-measurement">Adding a measurement</a></li>
+<li class="toctree-l2"><a class="reference internal" href="guidlines.html#adding-a-machine">Adding a machine</a></li>
+<li class="toctree-l2"><a class="reference internal" href="guidlines.html#adding-a-visualization">Adding a Visualization</a></li>
+</ul>
+</li>
+</ul>
+
+        
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">RockPy</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+    <li>Functions Package</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          <a href="_sources/RockPy.Functions.txt" rel="nofollow"> View page source</a>
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main">
+            
+  <div class="section" id="functions-package">
+<h1>Functions Package<a class="headerlink" href="#functions-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="id1">
+<h2><tt class="xref py py-mod docutils literal"><span class="pre">Functions</span></tt> Package<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-RockPy.Functions"></span></div>
+<div class="section" id="module-RockPy.Functions.convert">
+<span id="convert-module"></span><h2><tt class="xref py py-mod docutils literal"><span class="pre">convert</span></tt> Module<a class="headerlink" href="#module-RockPy.Functions.convert" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="RockPy.Functions.convert.conversion">
+<tt class="descclassname">RockPy.Functions.convert.</tt><tt class="descname">conversion</tt><big>(</big><em>unit</em><big>)</big><a class="headerlink" href="#RockPy.Functions.convert.conversion" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is a conversion table. Ask for the unit like:
+conversion[&#8216;mass&#8217;] returns the appropriate conversion factor</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>unit</strong> &#8211; str</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="RockPy.Functions.convert.convert2">
+<tt class="descclassname">RockPy.Functions.convert.</tt><tt class="descname">convert2</tt><big>(</big><em>in_unit</em>, <em>out_unit</em>, <em>unit_type</em><big>)</big><a class="headerlink" href="#RockPy.Functions.convert.convert2" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>in_unit</strong> &#8211; str the input unit</li>
+<li><strong>out_unit</strong> &#8211; str the desired output unit</li>
+<li><strong>unit_type</strong> &#8211; what kind of units they are.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">conversion factor</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Example:</th><td class="field-body"><p class="first">assume you want to convert a samples mass from <em>mg</em> to <em>kg</em></p>
+<p><tt class="docutils literal"><span class="pre">sample_mass</span> <span class="pre">=</span> <span class="pre">0.00345</span>&nbsp; <span class="pre">#</span> <span class="pre">sample</span> <span class="pre">weight</span> <span class="pre">in</span> <span class="pre">kg</span></tt></p>
+<p><tt class="docutils literal"><span class="pre">sample_mass</span> <span class="pre">*=</span> <span class="pre">convert2('kg',</span> <span class="pre">'mg',</span> <span class="pre">'mass')</span>&nbsp; <span class="pre">#</span> <span class="pre">gives</span> <span class="pre">new</span> <span class="pre">mass</span> <span class="pre">in</span> <span class="pre">mg</span></tt></p>
+<p><tt class="docutils literal"><span class="pre">&gt;&gt;</span> <span class="pre">sample_mass</span> <span class="pre">=</span> <span class="pre">3450.0</span></tt></p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Implemented units:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><ul class="first last simple">
+<li>&#8216;volume&#8217; [only metric units]</li>
+<li>&#8216;pressure&#8217;</li>
+<li>&#8216;length&#8217; [only metric units]</li>
+<li>&#8216;mass&#8217; [only metric units]</li>
+<li>&#8216;area&#8217; [only metric units]</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="module-RockPy.Functions.general">
+<span id="general-module"></span><h2><tt class="xref py py-mod docutils literal"><span class="pre">general</span></tt> Module<a class="headerlink" href="#module-RockPy.Functions.general" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="RockPy.Functions.general.create_logger">
+<tt class="descclassname">RockPy.Functions.general.</tt><tt class="descname">create_logger</tt><big>(</big><em>name</em><big>)</big><a class="headerlink" href="#RockPy.Functions.general.create_logger" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="RockPy.Functions.general.differentiate">
+<tt class="descclassname">RockPy.Functions.general.</tt><tt class="descname">differentiate</tt><big>(</big><em>data_list</em>, <em>diff=1</em>, <em>smoothing=1</em>, <em>norm=False</em>, <em>check=False</em><big>)</big><a class="headerlink" href="#RockPy.Functions.general.differentiate" title="Permalink to this definition">¶</a></dt>
+<dd><p>caclulates a smoothed (if smoothing &gt; 1) derivative of the data</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>data_list</strong> &#8211; ndarray - 2D array with xy[:,0] = x_data, xy[:,1] = y_data</li>
+<li><strong>diff</strong> &#8211; int - the derivative to be calculated f&#8217; -&gt; diff=1; f&#8217;&#8217; -&gt; diff=2
+default = 1</li>
+<li><strong>smoothing</strong> &#8211; int - smoothing factor</li>
+<li><strong>norm</strong> &#8211; </li>
+<li><strong>check</strong> &#8211; </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="RockPy.Functions.general.rotate">
+<tt class="descclassname">RockPy.Functions.general.</tt><tt class="descname">rotate</tt><big>(</big><em>xyz</em>, <em>axis='x'</em>, <em>degree=0</em>, <em>*args</em><big>)</big><a class="headerlink" href="#RockPy.Functions.general.rotate" title="Permalink to this definition">¶</a></dt>
+<dd><p>:rtype : object
+:param x:
+:param y:
+:param z:
+:param axis:
+:param degree:
+:return:</p>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="RockPy.Measurements.html" class="btn btn-neutral float-right" title="Measurements Package"/>Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="RockPy.testing.html" class="btn btn-neutral" title="RockPy.testing package"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2014, Michael Volk, Michael Wack.
+    </p>
+  </div>
+
+  <a href="https://github.com/snide/sphinx_rtd_theme">Sphinx theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'pyrite',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+      <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

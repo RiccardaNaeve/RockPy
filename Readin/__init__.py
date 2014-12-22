@@ -1,5 +1,10 @@
 __author__ = 'volk'
-import Functions.general
-import microsense, cryo_mag
-
-Functions.general.create_logger('RockPy.READIN')
+import RockPy
+import RockPy.Functions.general
+import microsense
+import cryomag
+import generic
+import vftb
+import vsm
+import spinner
+import sushibar

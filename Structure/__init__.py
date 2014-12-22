@@ -1,1 +1,3 @@
-__author__ = 'volk'
+__author__ = 'wack'
+import pint
+ureg = pint.UnitRegistry()

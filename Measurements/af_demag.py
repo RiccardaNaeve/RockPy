@@ -16,7 +16,7 @@ class AfDemag(base.Measurement):
 
         self.demag_type = demag_type
         self.mag_method = mag_method
-        self._data = {'data':None}
+        self._data = {'data': None}
 
         super(AfDemag, self).__init__(sample_obj,
                                       mtype, mfile, machine,

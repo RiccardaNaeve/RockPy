@@ -1,5 +1,5 @@
 from Plotting import arai
-from Visualize import base
+from VisualizeOLD import base
 
 __author__ = 'mike'
 import matplotlib.pyplot as plt
@@ -62,7 +62,7 @@ class Sample_sheet(base.Generic):
         self.stereo_ptrm.set_title('TH')
 
         if len(self.sample_list) > 1:
-            #self.log.warning('MORE than one sample, using first')
+        # self.log.warning('MORE than one sample, using first')
 
         sample = self.sample_list[0]
         # thellier_objs = sample.get_measurements(mtype='thellier')
@@ -104,7 +104,7 @@ class Dunlop(base.Generic):
             for measurement in measure_dict[sample]:
                 norm_factor = self.get_norm_factor(measurement)
                 plt_opt = self.get_plt_opt(sample=sample, measurements=measure_dict[sample], measurement=measurement)
-                plt_opt.update({'markersize': measurement.tdict['pressure']*4+2})
+                plt_opt.update({'markersize': measurement.tdict['pressure'] * 4 + 2})
                 Plotting.dunlop.dunlop(self.ax, measurement, norm_factor=norm_factor, **plt_opt)
 
                 if 'std_fill' in options:
@@ -116,7 +116,7 @@ class Dunlop(base.Generic):
         try:
             out = [1.0, implemented[self.norm](measurement)]
         except KeyError:
-            #self.log.error('NORMALIZATION method << %s >> not implemented' % self.norm)
+            # self.log.error('NORMALIZATION method << %s >> not implemented' % self.norm)
             out = [1.0, 1.0]
         return out
 
@@ -177,7 +177,7 @@ class Dunlop_Treatments_Difference(base.Generic):
         # ax1_lines.append(ptrm_line)
         # ax1_lines.append(sum_line)
         # for i, tval in enumerate(sorted(d.keys())):
-        #     self.markers[i] = '.'
+        # self.markers[i] = '.'
         #     self.markersizes[i] = 1 + tval * 5
         #     ax1_lines.append(
         #         (str(tval) + ' GPa', {'color': 'k', 'linestyle': self.linestyles[i], 'marker': self.markers[i],
@@ -232,9 +232,9 @@ class Dunlop_Treatments_Difference(base.Generic):
         # )
         # self.ax1.legend([self.create_dummy_line(**l[1]) for l in ax1_lines],
         #                 Line titles
-                        # [l[0] for l in ax1_lines],
-                        # loc='best',
-                        # fontsize=8,
+        # [l[0] for l in ax1_lines],
+        # loc='best',
+        # fontsize=8,
         # )
         self.ax2.set_xlabel = 'Temperature [$^\\circ C$]'
         # self.ax1.set_ylabel = 'Magnetic Moment'
@@ -471,7 +471,7 @@ class Arai(base.Generic):
         self.show()
         self.x_label = 'pTRM gained [%s]' % ('Am2')  # todo get_unit
         self.y_label = 'NRM remaining [%s]' % ('Am2')  # todo get_unit
-        self.ax.set_title('%s'%self.sample_names)
+        self.ax.set_title('%s' % self.sample_names)
         if style == 'publication':
             self.setFigLinesBW()
 
@@ -485,13 +485,13 @@ class Arai(base.Generic):
             thellier_objects = measurement_dict[sample]
             for thellier in thellier_objects:
                 if self.norm:
-                    tt = thellier.normalize(reference = self.norm, rtype = self.rtype,
-                                            vval = self.vval, norm_method = self.norm_method)
+                    tt = thellier.normalize(reference=self.norm, rtype=self.rtype,
+                                            vval=self.vval, norm_method=self.norm_method)
                 else:
                     tt = thellier
                     # print tt.data['th']
                 plt_opt = self.get_plt_opt(sample, thellier_objects, thellier)
-                if len(self.sample_list)>1 or len(thellier_objects)>1:
+                if len(self.sample_list) > 1 or len(thellier_objects) > 1:
                     plt_opt.update({'label': sample.name})
                 arai.arai_std(self.ax, tt, self.parameter, **plt_opt)
                 arai.arai_line(self.ax, tt, self.parameter, **plt_opt)
@@ -500,7 +500,7 @@ class Arai(base.Generic):
 
                 # x.append(max(thellier.ptrm[self.parameter['component']].v))  # append max for x_lim
                 # y.append(max(thellier.th[self.parameter['component']].v))  # append max for y_lim
-        if len(self.sample_list)>1 or len(thellier_objects)>1:
+        if len(self.sample_list) > 1 or len(thellier_objects) > 1:
             self.ax.legend(loc='best')
-        # self.ax.set_xlim([0, max(x)])
-        # self.ax.set_ylim([0, max(y)])
+            # self.ax.set_xlim([0, max(x)])
+            # self.ax.set_ylim([0, max(y)])

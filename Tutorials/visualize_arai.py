@@ -1,6 +1,7 @@
 __author__ = 'volk'
 from Structure.sample import Sample
-from Visualize.arai import Arai
+from VisualizeOLD.arai import Arai
+
 
 def test():
     # thellier output file from cryomag
@@ -17,6 +18,7 @@ def test():
     M.delete_temp(450)
 
     S = Arai([sample, sample2], style='publication')
+
 
 if __name__ == '__main__':
     test()

@@ -5,13 +5,11 @@ __author__ = 'Michael Volk'
 # for all project related classes
 import logging
 import numpy as np
-from RockPy.Functions import general
 from RockPy.Measurements.base import Measurement
 from RockPy.Structure.data import RockPyData, condense
 import RockPy.VisualizeV2.base
 
-logging.getLogger('RockPy.SAMPLE')
-
+RockPy.Functions.general.create_logger(__name__)
 
 class Sample(object):
     """
@@ -85,7 +83,7 @@ class Sample(object):
                 'height': {'none': {0: [<RockPy.Measurements.parameters.Height object at 0x10e1bda50>]}}}
 
     """
-    logger = logging.getLogger('RockPy.SAMPLE')
+    logger = logging.getLogger(__name__)
 
     def __init__(self, name,
                  mass=None, mass_unit='kg', mass_machine='generic',

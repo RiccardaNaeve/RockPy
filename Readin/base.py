@@ -14,12 +14,6 @@ class Machine(object):
         self.raw_data = None
         self.data = None
 
-    # def __getstate__(self):
-    #     pass
-    #
-    # def __setstate__(self, state):
-    #     pass
-
     @property
     def file_header(self):
         header = []

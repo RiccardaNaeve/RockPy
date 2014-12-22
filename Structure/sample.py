@@ -154,7 +154,6 @@ class Sample(object):
         else:
 
             Sample.logger.error(' << %s >> not implemented, yet' % mtype)
-            Sample.logger.error(' << %s >> not implemented, yet' % mtype)
 
     def calc_all(self, **options):
         self.results = None

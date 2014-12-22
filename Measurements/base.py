@@ -118,10 +118,10 @@ class Measurement(object):
 
         self.__initialize()
 
-        if mtype in self.measurement_formatters():
+        if mtype in Measurement.measurement_formatters():
             Measurement.logger.debug('MTYPE << %s >> implemented' % mtype)
             self.mtype = mtype  # set mtype
-            if machine in self.measurement_formatters()[mtype]:
+            if machine in Measurement.measurement_formatters()[mtype]:
                 Measurement.logger.debug('MACHINE << %s >> implemented' % machine)
                 self.machine = machine  # set machine
                 self.sample_obj = sample_obj  # set sample_obj

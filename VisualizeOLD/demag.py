@@ -6,6 +6,7 @@ from RockPy.Plotting import af_demagnetization
 import base
 import numpy as np
 
+
 class AfDemag(base.Generic):
     """
     Basic visualization for af_demag measurement class:
@@ -17,6 +18,7 @@ class AfDemag(base.Generic):
        diff_fill
        smoothing
     """
+
     def __init__(self, sample_list, norm='mass',
                  component='mag',
                  plot='show', folder=None, name='af-demagnetization',
@@ -49,25 +51,25 @@ class AfDemag(base.Generic):
         for sample, measurements in self.get_measurement_dict(mtype='afdemag').iteritems():
             for measurement in measurements:
                 plt_opt = self.get_plt_opt(sample, measurements, measurement)
-                plt_opt.update({'zorder':10})
+                plt_opt.update({'zorder': 10})
                 norm_factor = self.get_norm_factor(measurement)
                 RockPy.Plotting.af_demagnetization.field_mom(self.ax, measurement,
-                                            component=self.component, norm_factor=norm_factor,
-                                            **plt_opt)
+                                                             component=self.component, norm_factor=norm_factor,
+                                                             **plt_opt)
                 if mdf_line:
                     RockPy.Plotting.af_demagnetization.mdf_line(self.ax, measurement,
-                                               component=self.component, norm_factor=norm_factor,
-                                               **plt_opt)
+                                                                component=self.component, norm_factor=norm_factor,
+                                                                **plt_opt)
                 if mdf_text:
                     RockPy.Plotting.af_demagnetization.mdf_txt(self.ax, measurement,
-                                               component=self.component, norm_factor=norm_factor,
-                                               y_shift = shift,
-                                               **plt_opt)
+                                                               component=self.component, norm_factor=norm_factor,
+                                                               y_shift=shift,
+                                                               **plt_opt)
                 if diff_fill:
                     RockPy.Plotting.af_demagnetization.diff_fill(self.ax, measurement,
-                                component=self.component, norm_factor=norm_factor,
-                                smoothing=smoothing, diff=diff,
-                                **plt_opt)
+                                                                 component=self.component, norm_factor=norm_factor,
+                                                                 smoothing=smoothing, diff=diff,
+                                                                 **plt_opt)
                 shift += 0.1
         plt.grid()
 
@@ -83,7 +85,7 @@ class AfDemag(base.Generic):
 
         if self.norm == 'mass':
             # return [1, measurement.sample_obj.mass_kg.v]
-            return [1,1]
+            return [1, 1]
 
         if self.norm == 'is':
             if measurement.initial_state:

@@ -1,2 +1,2 @@
-__author__ = 'volk'
-import demag, thellier
+__author__ = 'mike'
+import paleointensity, hysteresis, combined

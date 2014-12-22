@@ -43,6 +43,7 @@ class Dunlop(base.Generic):
 
 class Arai(base.Generic):
     _required = ['thellier']
+
     def initialize_visual(self):
         super(Arai, self).initialize_visual()
         self._required = RockPy.Measurements.thellier.Thellier
@@ -54,6 +55,7 @@ class Arai(base.Generic):
 
 class Multiple(base.Generic):
     _required = ['thellier']
+
     def initialize_visual(self):
         arai = Arai(plot_samples=self.study)
         dunlop = Dunlop(plot_samples=self.study)

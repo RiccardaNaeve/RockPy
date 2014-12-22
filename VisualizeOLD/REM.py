@@ -29,8 +29,8 @@ class REM_dash_log(base.Generic):
         af_demagnetization.d_log_iso_lines(ax=self.ax)
 
         self.ax.set_title('REM\' %s' % [i.name for i in self.sample_list])
-        self.x_label = 'dM(%s)/dB(AF)' %self.suffix_1.upper()
-        self.y_label = 'dM(%s)/dB(AF)' %self.suffix_2.upper()
+        self.x_label = 'dM(%s)/dB(AF)' % self.suffix_1.upper()
+        self.y_label = 'dM(%s)/dB(AF)' % self.suffix_2.upper()
 
         if len(self.sample_list) > 1:
             plt.legend(loc='best')

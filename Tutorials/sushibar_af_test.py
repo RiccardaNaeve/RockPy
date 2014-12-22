@@ -1,6 +1,6 @@
 __author__ = 'mike'
 from Structure.sample import Sample
-from Visualize import demag
+from VisualizeOLD import demag
 
 
 def test():

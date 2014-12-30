@@ -82,6 +82,7 @@ class Study(object):
         :param samplegroup:
         :return:
         """
+
         # check for list
         if isinstance(samplegroup, list):
             # check for sample_group

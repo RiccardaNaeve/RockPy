@@ -26,12 +26,18 @@ def get_hys_coe_irm_rmp_sample():
     S.add_measurement(mtype='thermocurve', mfile=rmp, machine='vftb')
     return S
 
+def get_pmd_demag():
+    S = RockPy.Sample(name='test_sample')
+    dm = 'RockPy/Tutorials/test_data/HA2A.pmd'
+    S.add_measurement(mtype='afdemag', mfile=dm, machine='pmd')
+    return S
+
 def test():
-    S = get_hys_coe_irm_rmp_sample()
+    S = get_pmd_demag()
     study = RockPy.Study("study", samplegroups=S)
-    #RockPy.save(study, 'hys_coe_irm_rmp.rpy')
+    RockPy.save(study, 'hys_coe_irm_rmp.rpy')
     #print S.plottable
-    print study.all_samplegroup.mtypes
+    #print study.all_samplegroup.mtypes
 
 if __name__ == '__main__':
     test()

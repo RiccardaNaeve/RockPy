@@ -1,37 +1,53 @@
 from unittest import TestCase
-import RockPy as rp
-import Visualize.base
+
+__author__ = 'mike'
+
+from unittest import TestCase
+import RockPy as RP
+from RockPy import VisualizeV2.base
+import matplotlib.pyplot as plt
 
 __author__ = 'mike'
 
 
 class TestGeneric(TestCase):
     def setUp(self):
-        self.sample = rp.Sample('test_sample')
-        self.Plot = Visualize.base.Generic(self.sample)
-
-    def test_create_heat_color_map(self):
-        list = range(10)
-        colors = ['#0000ff', '#1c00e2', '#3800c6', '#5500aa', '#71008d', '#8d0071', '#aa0055', '#c60038', '#e2001c',
-                  '#ff0000']
-        self.assertEqual(self.Plot.create_heat_color_map(list), colors)
+        self.sample = RP.Sample(name='test_sample')
+        self.sample.add_measurement(mtype='thellier', mfile='../Tutorials/test_data/NLCRY_Thellier_test.TT',
+                                    machine='cryomag')
+        self.sample_group = RP.SampleGroup(sample_list=self.sample)
+        self.Plot = VisualizeV2.base.Generic()
 
 
-    def test___treatment_variable_transformation(self):
-        from pprint import pprint
-        self.add_measurements_treatments()
-        ddict = self.Plot._treatment_variable_transformation(self.Plot.sample_group.sample_list[0], mtype='thellier', ttype='pressure')
-        self.assertIsInstance(ddict, dict)
+    def test_sample_names(self):
+        self.Plot = VisualizeV2.base.Generic(plot_samples=self.sample)
+        samples = ['test_sample']
+        self.assertEqual(samples, self.Plot.sample_names)
 
-    def add_measurements_treatments(self):
-        from os import listdir
-        from os.path import join
-        folder = '../Tutorials/test_data/treatments'
-        pressures = ['0.0, GPa', '0.6, GPa', '1.2, GPa', '1.8, GPa']
+    def test_samples(self):
+        self.Plot = VisualizeV2.base.Generic(plot_samples=self.sample)
+        samples = [self.sample]
+        self.assertEqual(samples, self.Plot.samples)
 
-        for i, v in enumerate(['P0', 'P1', 'P2', 'P3']):
-            tt_data = [join(folder+'/', f) for f in listdir(folder) if 'tt' in f if v in f]
-            trm_data = [join(folder+'/', f) for f in listdir(folder) if 'trm' in f if v in f]
-            M = self.sample.add_measurement(mtype='thellier', mfile=tt_data[0], machine='cryomag',
-                                   treatments='Pressure, ' + pressures[i])
-            M.set_initial_state(mtype='trm', mfile=trm_data[0], machine='cryomag')
+
+    def test_sample_nr(self):
+        self.Plot = VisualizeV2.base.Generic(plot_samples=self.sample)
+        self.assertEqual(1, self.Plot.sample_nr)
+
+
+    def test_add_plot(self):
+        for i in range(1):
+            self.Plot.add_plot(label='test')
+        self.assertEqual(1, len(self.Plot.visuals))
+        self.assertTrue('test' in self.Plot.visuals)
+        # self.Plot.plots = None
+
+    def test_show(self):
+        # for i in range(1):
+        # self.Plot.add_plot(label='test')
+        # self.Plot.show()
+        pass
+
+    def test_meets_requirements(self):
+        Plot = VisualizeV2.paleointensity.Arai(self.sample)
+        self.assertTrue(Plot.meets_requirements(self.sample))

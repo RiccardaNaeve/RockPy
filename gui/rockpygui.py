@@ -140,8 +140,8 @@ class MainFrame(wx.Frame):
 
     def CreateNavTrees(self):
         # Create a CustomTreeCtrl instance
-        self.samples_nav_tree = ctc.CustomTreeCtrl(self.nav_nb, agwStyle=wx.TR_DEFAULT_STYLE)
-        self.measurements_nav_tree = ctc.CustomTreeCtrl(self.nav_nb, agwStyle=wx.TR_DEFAULT_STYLE)
+        self.samples_nav_tree = ctc.CustomTreeCtrl(self.nav_nb, agwStyle=wx.TR_DEFAULT_STYLE | ctc.TR_AUTO_CHECK_CHILD)
+        self.measurements_nav_tree = ctc.CustomTreeCtrl(self.nav_nb, agwStyle=wx.TR_DEFAULT_STYLE | ctc.TR_AUTO_CHECK_CHILD)
 
         # Create an image list to add icons next to an item
         il = wx.ImageList(16, 16)
@@ -190,8 +190,9 @@ class MainFrame(wx.Frame):
 
                 # iterate over all measurements of each sample
                 for m in s.measurements:
-                    if not 'parameters' in type(m).__module__:
-                        m_item = self.samples_nav_tree.AppendItem(s_item, m.mtype, ct_type=1)
+                    if 1:  #not 'parameters' in type(m).__module__:
+                        m_item_title = "%s (%s)[%s]" % (m.mtype, type(m.machine_data).__name__, getattr(m, "treatments", ""))
+                        m_item = self.samples_nav_tree.AppendItem(s_item, m_item_title, ct_type=1)
                         m_item.SetData(m)
                         self.samples_nav_tree.SetItemImage(m_item, 2, wx.TreeItemIcon_Normal)
 
@@ -299,8 +300,9 @@ class MainFrame(wx.Frame):
                 if isinstance(data, RockPy.Study):
                     pass
                 elif isinstance(data, RockPy.SampleGroup):
-                    pass
+                    menu.Append(wx.NewId(), 'Delete %s' % hitobj.GetText())
                 elif isinstance(data, RockPy.Sample):
+                    menu.Append(wx.NewId(), 'Delete %s' % hitobj.GetText())
                     plotmenu = wx.Menu()
                     plots = data.plottable
                     for p in plots:
@@ -309,7 +311,7 @@ class MainFrame(wx.Frame):
                         menu.AppendMenu(wx.NewId(), 'Plot', plotmenu)
 
                 elif isinstance(data, RockPy.Measurement):
-                    pass
+                    menu.Append(wx.NewId(), 'Delete %s' % hitobj.GetText())
                 else:
                     print("unknown data in nav tree item")
 

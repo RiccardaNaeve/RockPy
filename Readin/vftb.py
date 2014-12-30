@@ -20,12 +20,12 @@ class Vftb(base.Machine):
 
     def get_header(self):
         header = self.raw_data[self.set_idx[0][0] + 1]
-        header = ['_'.join(i.split(' / ')[0].split()) for i in header]  # only getting the columnname without the unit
+        header = ['_'.join(i.split(' / ')[0].split()) for i in header]  # only getting the column name without the unit
         return header
 
     def get_units(self):
         units = self.raw_data[self.set_idx[0][0] + 1]
-        units = ['/'.join(i.split(' / ')[1:]) for i in units]  # only getting the columnname without the unit
+        units = ['/'.join(i.split(' / ')[1:]) for i in units]  # only getting the column name without the unit
         return units
 
     def get_data(self):

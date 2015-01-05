@@ -7,7 +7,7 @@ import logging
 import numpy as np
 from RockPy.Measurements.base import Measurement
 from RockPy.Structure.data import RockPyData, condense
-import RockPy.VisualizeV2.base
+import RockPy.Visualize.base
 
 RockPy.Functions.general.create_logger(__name__)
 
@@ -173,13 +173,14 @@ class Sample(object):
                         row_name = ''
 
                     self.results = RockPyData(
-                        column_names=[i + '_' + measurement.mtype for i in measurement.results.column_names],
-                        data=measurement.results.data)
+                        column_names=[i for i in measurement.results.column_names],
+                        data=measurement.results.data,
+                        row_names=measurement.suffix)
                 else:
-                    c_names = [i + '_' + measurement.mtype for i in measurement.results.column_names]
+                    c_names = [i for i in measurement.results.column_names]
                     data = measurement.results.data
-                    # rpdata = RockPyData(column_names=c_names, data=data, row_names=measurement.suffix)
-                    self.results = self.results.append_columns(c_names, data)
+                    rpdata = RockPyData(column_names=c_names, data=data, row_names=measurement.suffix)
+                    self.results = self.results.append_rows(rpdata)
         return self.results
 
     @property

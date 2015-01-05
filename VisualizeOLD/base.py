@@ -166,7 +166,7 @@ class Generic(object):
                         self.ax.set_xlabel(self.x_label)
                         self.ax.set_ylabel(self.y_label)
                 except AttributeError:
-            # self.log.info('NO label set for axis')
+                    self.log.info('NO label set for axis')
             if not 'no_legend' in args:
                 plt.legend(loc='best', fontsize=8)
 
@@ -177,7 +177,7 @@ class Generic(object):
             if self.ax:
                 self.ax.set_title(self.title)
         except AttributeError:
-        # self.log.info('NO title set for figure')
+            self.log.info('NO title set for figure')
         out_options[self.plot]()
 
     def plt_save_script_folder(self):

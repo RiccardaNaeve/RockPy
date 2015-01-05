@@ -5,6 +5,7 @@ __author__ = 'mike'
 import matplotlib.pyplot as plt
 import base
 from RockPy import Plotting
+from RockPy.Visualize import Features
 import numpy as np
 
 
@@ -497,7 +498,7 @@ class Arai(base.Generic):
                 arai.arai_line(self.ax, tt, self.parameter, **plt_opt)
                 plt_opt.update({'linewidth': 0.5})
                 arai.arai_points(self.ax, tt, self.parameter, **plt_opt)
-
+                Features.arai.add_ck_check(self.ax, tt)
                 # x.append(max(thellier.ptrm[self.parameter['component']].v))  # append max for x_lim
                 # y.append(max(thellier.th[self.parameter['component']].v))  # append max for y_lim
         if len(self.sample_list) > 1 or len(thellier_objects) > 1:

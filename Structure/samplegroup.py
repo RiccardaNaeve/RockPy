@@ -372,10 +372,10 @@ class SampleGroup(object):
             tvals = _to_list(tvals)
             out = [s for s in out for tval in tvals for ttype in ttypes if tval in s.ttype_tval_dict[ttype]]
             if len(out) == 0:
-                raise KeyError(
-                    'RockPy.sample_group does not contain sample with (ttypes, tvals) pair: << %s, %.2f >>' % (
-                        ttypes, t_value))
-                return
+                self.log.error(
+                    'RockPy.sample_group does not contain sample with (ttypes, tvals) pair: << %s, %s >>' % (
+                        str(ttypes), str(t_value)))
+                return []
 
         if tval_range:
             if not isinstance(tval_range, list):
@@ -387,6 +387,7 @@ class SampleGroup(object):
             out = [s for s in out for tv in s.ttype_tval_dict[ttype] for ttype in ttypes
                    if tv <= max(tval_range)
                    if tv >= min(tval_range)]
+
             if len(out) == 0:
                 raise KeyError(
                     'RockPy.sample_group does not contain sample with (ttypes, tval_range) pair: << %s, %.2f >>' % (

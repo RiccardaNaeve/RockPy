@@ -1094,6 +1094,7 @@ class RockPyData(object):
         :return: rockpydata
                filtered data
         """
+        index_list = _to_tuple(index_list)
         if invert:
             tf_array = [False if x in index_list else True for x in range(len(self.data))]
         else:

@@ -292,13 +292,11 @@ class Sample(object):
         :param mtype:
         :return:
         """
+
         if tval is None:
             tvalue = np.nan
         else:
-            if isinstance(tval, list):
-                tvalue = ''.join(map(str, tval))
-            else:
-                tvalue = str(tval)
+            tvalue = str(tval)
 
         Sample.logger.debug('SEARCHING\t measurements with  << %s, %s, %s >>' % (mtype, ttype, tvalue))
 
@@ -329,7 +327,7 @@ class Sample(object):
             Sample.logger.error(
                 'UNKNOWN\t << %s, %s, %s >> or no measurement found for sample << %s >>' % (
                     mtype, ttype, tvalue, self.name))
-            return
+            return []
 
         return out
 

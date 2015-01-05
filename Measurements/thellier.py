@@ -66,9 +66,8 @@ class Thellier(base.Measurement):
                                    row_names=row_labels)
 
         self.all_data.rename_column('step', 'temp')
-        self.all_data.append_columns('time', self.machine_data.get_time_data())
+        self.all_data = self.all_data.append_columns('time', self.machine_data.get_time_data())
         nrm_idx = [i for i, v in enumerate(steps) if v == 'nrm']
-
         self.machine_data.get_time_data()
         # generating the palint data for all steps
         for step in ['nrm', 'th', 'pt', 'ac', 'tr', 'ck']:
@@ -162,7 +161,7 @@ class Thellier(base.Measurement):
             calc_data = self.data[step]
         except KeyError:
             print('REFERENCE << %s >> can not be found ' % (step))
-            #self.log.error('REFERENCE << %s >> can not be found ' % (step))
+            # self.log.error('REFERENCE << %s >> can not be found ' % (step))
 
         if val == 'last':
             val = calc_data[var].v[-1]
@@ -221,7 +220,7 @@ class Thellier(base.Measurement):
                 setattr(self, step, getattr(self, step).filter_idx(idx))
             else:
                 print('UNABLE to find entriy for << %s, %.2f >> temperature' % (step, temp))
-                #self.log.debug('UNABLE to find entriy for << %s, %.2f >> temperature' % (step, temp))
+                # self.log.debug('UNABLE to find entriy for << %s, %.2f >> temperature' % (step, temp))
 
 
     ''' RESULT SECTION '''
@@ -376,7 +375,7 @@ class Thellier(base.Measurement):
         t_max = parameter.get('t_max', self.standard_parameters['slope']['t_max'])
         component = parameter.get('component', self.standard_parameters['slope']['component'])
 
-        #self.log.info('CALCULATING\t << %s >> arai line fit << t_min=%.1f , t_max=%.1f >>' % (component, t_min, t_max))
+        # self.log.info('CALCULATING\t << %s >> arai line fit << t_min=%.1f , t_max=%.1f >>' % (component, t_min, t_max))
         # print self.th
         equal_steps = list(set(self.th['temp'].v) & set(self.ptrm['temp'].v))
         th_steps = (t_min <= self.th['temp'].v) & (self.th['temp'].v <= t_max)  # True if step between t_min, t_max
@@ -488,7 +487,7 @@ class Thellier(base.Measurement):
         t_min = parameter.get('t_min', self.standard_parameters['x_dash']['t_min'])
         t_max = parameter.get('t_max', self.standard_parameters['x_dash']['t_max'])
         component = parameter.get('component', self.standard_parameters['x_dash']['component'])
-        #self.log.info('CALCULATING\t << %s >> x_dash << t_min=%.1f , t_max=%.1f >>' % (component, t_min, t_max))
+        # self.log.info('CALCULATING\t << %s >> x_dash << t_min=%.1f , t_max=%.1f >>' % (component, t_min, t_max))
 
         idx = (self.th['temp'] <= t_max) & (t_min <= self.th['temp'])  # filtering for t_min/t_max
         y = self.th.filter(idx)
@@ -528,7 +527,7 @@ class Thellier(base.Measurement):
         t_max = parameter.get('t_max', self.standard_parameters['y_dash']['t_max'])
         component = parameter.get('component', self.standard_parameters['y_dash']['component'])
 
-        #self.log.info('CALCULATING\t << %s >> y_dash << t_min=%.1f , t_max=%.1f >>' % (component, t_min, t_max))
+        # self.log.info('CALCULATING\t << %s >> y_dash << t_min=%.1f , t_max=%.1f >>' % (component, t_min, t_max))
 
         idx = self._get_idx_tmin_tmax('th', t_min, t_max)  # filtering for t_min/t_max
         y = self.th.filter(idx)
@@ -582,7 +581,7 @@ class Thellier(base.Measurement):
 
         """
 
-        #self.log.debug('CALCULATING\t f parameter')
+        # self.log.debug('CALCULATING\t f parameter')
         delta_y_dash = self.calculate_delta_y_dash(**parameter)
         y_int = self.results['y_int'].v
         self.results['f'] = delta_y_dash / abs(y_int)
@@ -689,7 +688,7 @@ class Thellier(base.Measurement):
         :return:
 
         """
-        #self.log.debug('CALCULATING\t quality parameter')
+        # self.log.debug('CALCULATING\t quality parameter')
 
         beta = self.result_beta(**parameter).v
         f = self.result_f(**parameter).v
@@ -725,6 +724,109 @@ class Thellier(base.Measurement):
         n = self.result_n(**parameter).v
         self.results['w'] = q / np.sqrt((n - 2))
 
+    """
+    PTRM CHECK statistics
+    =====================
+
+    A pTRM check is a repeat TRM acquisition step to test for changes in a specimen’s ability to acquire TRM at
+    blocking temperatures below the temperature of the check. The difference between a pTRM check and the original TRM
+    is calculated as the scalar intensity difference. That is,
+
+    :math:
+
+    δpTRMi,j = pTRM checki,j −TRMi = pTRM checki,j −xi,
+
+    where pTRM checki,j is the pTRM check to the ith temperature step after heating to the jth tem- perature step.
+    The order of the difference is such that pTRM checks smaller than the original TRM yield negative δpTRMi,j and pTRM
+    checks larger than the original TRM give positive δpTRMi,j. For a pTRM check to be included in the analysis,
+    both Ti and Tj must be less than or equal to Tmax.
+    """
+
+    def result_n_ptrm(self, t_min=None, t_max=None, recalc=False, **options):
+        parameter = {'t_min': t_min,
+                     't_max': t_max,
+        }
+        self.calc_result(parameter, recalc)
+        return self.results['n_ptrm']
+
+    def calculate_n_ptrm(self, **parameter):
+        """
+        The number of pTRM checks (CK) used to analyze the best-fit segment on the Arai plot
+        (i.e., the number of pTRMi,j with Ti ≤ Tmax and Tj ≤ Tmax).
+        :param parameter:
+
+        """
+        t_min = parameter.get('t_min', self.standard_parameters['slope']['t_min'])
+        t_max = parameter.get('t_max', self.standard_parameters['slope']['t_max'])
+
+        temps = self.ck['temp'].v
+        out = [i for i in temps
+               if i >= t_min
+               if i <= t_max]
+
+        self.results['n_ptrm'] = len(out)
+
+    def result_ck_check_percent(self, t_min=None, t_max=None, recalc=False, **options):
+        parameter = {'t_min': t_min,
+                     't_max': t_max,
+        }
+        self.calc_result(parameter, recalc)
+        return self.results['ck_check_percent']
+
+    def get_d_ptrm(self, **parameter):
+        """
+        The difference between a pTRM check and the original TRM is calculated as the scalar intensity difference
+
+        :math:
+
+           \delta pTRM_{i,j} = pTRM_{check i,j} − TRM_i = pTRM_{check i,j} − TH_i
+
+        :param parameter:
+        :return: RockPy data object of CK - TH
+        """
+        t_min = parameter.get('t_min', self.standard_parameters['slope']['t_min'])
+        t_max = parameter.get('t_max', self.standard_parameters['slope']['t_max'])
+
+        temps = self.ck['temp'].v
+        th_temps = self.th['temp'].v
+        out = np.array([(v, i, i2) for i, v in enumerate(temps) for i2, v2 in enumerate(th_temps)
+                        if v == v2
+                        if v >= t_min
+                        if v <= t_max])
+
+        ck_data = self.ck.filter_idx(out[:, 1])
+        th_data = self.th.filter_idx(out[:, 2])
+        print(ck_data)
+        print(th_data)
+        out = ck_data - th_data
+        out['mag'] = out.magnitude(('x', 'y', 'z'))
+
+        return out
+
+    def calculate_ck_check_percent(self, **parameter):
+        """
+        The number of pTRM checks (CK) used to analyze the best-fit segment on the Arai plot
+        (i.e., the number of pTRMi,j with Ti ≤ Tmax and Tj ≤ Tmax).
+        :param parameter:
+
+        """
+        t_min = parameter.get('t_min', self.standard_parameters['slope']['t_min'])
+        t_max = parameter.get('t_max', self.standard_parameters['slope']['t_max'])
+
+        dptrm = self.get_d_ptrm(**parameter)
+
+        temps = dptrm['temp'].v
+        th_temps = self.th['temp'].v
+        out = np.array([(v, i, i2) for i, v in enumerate(temps) for i2, v2 in enumerate(th_temps)
+                        if v == v2
+                        if v >= t_min
+                        if v <= t_max])
+        th_data = self.th.filter_idx(out[:, 2])
+        print(dptrm)
+        print(th_data)
+        print(dptrm / th_data) * 100
+        # self.results['ck_check_percent'] = len(out)
+
     ''' CHECK SECTION '''
 
     def _get_ck_data(self):
@@ -732,34 +834,44 @@ class Thellier(base.Measurement):
         Helper function, returns the preceding th steps to each ck step
 
         :returns: list [ck_ij, th_i, ptrm_j, th_j]
-           where ck_ij = the ptrm check to the ith temperature after heating to the jth temperature
+           where ck_ij  = the ptrm check to the ith temperature after heating to the jth temperature
+                 th_i   = the th step at temeprtature i
+                 ptrm_j = the ptrm step at temeprtature j
+                 th_j = the th step at temeprtature j
         '''
         out = []
-
-        for ck in self.ck:
-            th_j = [0, 0, 0, 0, 0]
+        print(self.ptrm)
+        for ck in self.ck.v:
+            th_j = [0, 0, 0, 0, 0, 0]
             for th in self.th.v:
-                if ck[-1] - th[-1] > 0:  # if the time diff >0 => ck past th step
-                    if th_j[-1] < th[-1]:
-                        th_j = th.v
+                if ck[-2] - th[-2] > 0:  # if the time diff >0 => ck past th step
+                    if th_j[-2] < th[-2]:
+                        th_j = th
                 if ck[0] == th[0]:
                     th_i = th
-            for ptrm in self.ptrm:
+            for ptrm in self.ptrm.v:
                 if ptrm[0] == th_j[0]:
                     ptrm_j = ptrm
-            for pt in self.pt:
+            for pt in self.pt.v:
                 if pt[0] == th_i[0]:
                     pt_i = pt
-                    # print ptrm
             d_ck = ck[1:4] - th_j[1:4]
             d_ck_m = np.linalg.norm(d_ck)
-            d_ck = np.array([ck[0], d_ck[0], d_ck[1], d_ck[2], d_ck_m, ck[-1]])
+            d_ck = np.array([ck[0], d_ck[0], d_ck[1], d_ck[2], ck[4] + th_j[4], ck[-2], d_ck_m])
 
             out.append([d_ck, th_i, ptrm_j, th_j])
+        for i in out:
+            from pprint import pprint
 
-        # for i in out:
-        # print i[0][0], i[1][0], i[2][0], i[3][0]
-        # print i[0][4], i[1][4], i[2][4], i[3][4]
+            print i[0][0], i[1][0], i[2][0], i[3][0]
+            print 'ck_ij'
+            pprint(i[0])
+            print 'th_i'
+            pprint(i[1])
+            print 'ptrm_j'
+            pprint(i[2])
+            print 'th_j'
+            pprint(i[3])
         return out
 
     def _get_ac_data(self):

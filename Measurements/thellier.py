@@ -725,6 +725,78 @@ class Thellier(base.Measurement):
         n = self.result_n(**parameter).v
         self.results['w'] = q / np.sqrt((n - 2))
 
+    ''' CHECK SECTION '''
+
+    def _get_ck_data(self):
+        '''
+        Helper function, returns the preceding th steps to each ck step
+
+        :returns: list [ck_ij, th_i, ptrm_j, th_j]
+           where ck_ij = the ptrm check to the ith temperature after heating to the jth temperature
+        '''
+        out = []
+
+        for ck in self.ck:
+            th_j = [0, 0, 0, 0, 0]
+            for th in self.th.v:
+                if ck[-1] - th[-1] > 0:  # if the time diff >0 => ck past th step
+                    if th_j[-1] < th[-1]:
+                        th_j = th.v
+                if ck[0] == th[0]:
+                    th_i = th
+            for ptrm in self.ptrm:
+                if ptrm[0] == th_j[0]:
+                    ptrm_j = ptrm
+            for pt in self.pt:
+                if pt[0] == th_i[0]:
+                    pt_i = pt
+                    # print ptrm
+            d_ck = ck[1:4] - th_j[1:4]
+            d_ck_m = np.linalg.norm(d_ck)
+            d_ck = np.array([ck[0], d_ck[0], d_ck[1], d_ck[2], d_ck_m, ck[-1]])
+
+            out.append([d_ck, th_i, ptrm_j, th_j])
+
+        # for i in out:
+        # print i[0][0], i[1][0], i[2][0], i[3][0]
+        # print i[0][4], i[1][4], i[2][4], i[3][4]
+        return out
+
+    def _get_ac_data(self):
+        '''
+        Helper function, returns the preceding th steps to each ck step
+
+        :returns: list [ck_ij, th_i, ptrm_j, th_j]
+           where ck_ij = the ptrm check to the ith temperature after heating to the jth temperature
+        '''
+        out = []
+
+        for ac in self.ac:
+            th_j = [0, 0, 0, 0, 0]
+            for th in self.th:
+                if ac[-1] > th[-1]:
+                    if th_j[-1] < th[-1]:
+                        th_j = th
+                if ac[0] == th[0]:
+                    th_i = th
+            for ptrm in self.ptrm:
+                if ptrm[0] == th_j[0]:
+                    ptrm_j = ptrm
+            for pt in self.pt:
+                if pt[0] == th_j[0]:
+                    pt_i = pt
+
+            d_ac = pt_i[1:4] - ac[1:4]
+            d_ac_m = np.linalg.norm(d_ac)
+            d_ac = np.array([ac[0], d_ac[0], d_ac[1], d_ac[2], d_ac_m, ac[-1]])
+
+            out.append([d_ac, th_i, ptrm_j, th_j])
+        # for i in out:
+        # print i[0][0], i[1][0], i[2][0], i[3][0]
+        # print i[0][4], i[1][4], i[2][4], i[3][4]
+        return out
+
+
     ''' EXPORT SECTION '''
 
     def export_tdt(self):

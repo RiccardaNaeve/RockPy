@@ -1,5 +1,5 @@
-from Plotting import arai
-from VisualizeOLD import base
+from RockPy.Plotting import arai
+from RockPy.VisualizeOLD import base
 
 __author__ = 'mike'
 import matplotlib.pyplot as plt
@@ -62,7 +62,7 @@ class Sample_sheet(base.Generic):
         self.stereo_ptrm.set_title('TH')
 
         if len(self.sample_list) > 1:
-        # self.log.warning('MORE than one sample, using first')
+            self.log.warning('MORE than one sample, using first')
 
         sample = self.sample_list[0]
         # thellier_objs = sample.get_measurements(mtype='thellier')

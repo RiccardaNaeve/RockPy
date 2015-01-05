@@ -73,6 +73,8 @@ class Study(object):
         if not samplegroup is None:
             samplegroup = self._check_samplegroup_list(samplegroup)
             self._samplegroups.extend(samplegroup)
+            return samplegroup[0]
+
 
 
     def _check_samplegroup_list(self, samplegroup):
@@ -99,6 +101,9 @@ class Study(object):
             samplegroup = [samplegroup]
         return samplegroup
 
+    def __add__(self, other):
+        self._samplegroups.extend(other._samplegroups)
+        return self
 
     @property
     def all_samplegroup(self):

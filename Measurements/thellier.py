@@ -488,22 +488,21 @@ class Thellier(base.Measurement):
         t_max = parameter.get('t_max', self.standard_parameters['x_dash']['t_max'])
         component = parameter.get('component', self.standard_parameters['x_dash']['component'])
         # self.log.info('CALCULATING\t << %s >> x_dash << t_min=%.1f , t_max=%.1f >>' % (component, t_min, t_max))
-
-        idx = (self.th['temp'] <= t_max) & (t_min <= self.th['temp'])  # filtering for t_min/t_max
+        idx = (self.th['temp'].v <= t_max) & (t_min <= self.th['temp'].v)  # filtering for t_min/t_max
         y = self.th.filter(idx)
 
-        idx = (self.ptrm['temp'] <= t_max) & (t_min <= self.ptrm['temp'])
+        idx = (self.ptrm['temp'].v <= t_max) & (t_min <= self.ptrm['temp'].v)
         x = self.ptrm.filter(idx)
 
-        idx = np.array([(ix, iy) for iy, v1 in enumerate(self.ptrm['temp'])
-                        for ix, v2 in enumerate(self.th['temp'])
+        idx = np.array([(ix, iy) for iy, v1 in enumerate(self.ptrm['temp'].v)
+                        for ix, v2 in enumerate(self.th['temp'].v)
                         if v1 == v2])  # filtering for equal var
 
         x = x.filter_idx(idx[:, 0])
         y = y.filter_idx(idx[:, 1])
 
         x_dash = 0.5 * (
-            x[component] + ((y[component] - self.result_y_int(**parameter)) / self.result_slope(**parameter)))
+            x[component].v + ((y[component].v - self.result_y_int(**parameter).v) / self.result_slope(**parameter).v))
         return x_dash
 
     def calculate_y_dash(self, **parameter):
@@ -742,6 +741,34 @@ class Thellier(base.Measurement):
     both Ti and Tj must be less than or equal to Tmax.
     """
 
+    def get_d_ptrm(self, **parameter):
+        """
+        The difference between a pTRM check and the original TRM is calculated as the scalar intensity difference
+
+        :math:
+
+           \delta pTRM_{i,j} = pTRM_{check i,j} − TRM_i = pTRM_{check i,j} − TH_i
+
+        :param parameter:
+        :return: RockPy data object of CK - TH
+        """
+        t_min = parameter.get('t_min', self.standard_parameters['slope']['t_min'])
+        t_max = parameter.get('t_max', self.standard_parameters['slope']['t_max'])
+
+        temps = self.ck['temp'].v
+        pt_temps = self.pt['temp'].v
+        out = np.array([(v, i, i2) for i, v in enumerate(temps) for i2, v2 in enumerate(pt_temps)
+                        if v == v2
+                        if v >= t_min
+                        if v <= t_max])
+
+        ck_data = self.ck.filter_idx(out[:, 1])
+        pt_data = self.pt.filter_idx(out[:, 2])
+        out = ck_data - pt_data
+        out['mag'] = out.magnitude(('x', 'y', 'z'))
+
+        return out
+
     def result_n_ptrm(self, t_min=None, t_max=None, recalc=False, **options):
         parameter = {'t_min': t_min,
                      't_max': t_max,
@@ -766,42 +793,15 @@ class Thellier(base.Measurement):
 
         self.results['n_ptrm'] = len(out)
 
-    def result_ck_check_percent(self, t_min=None, t_max=None, recalc=False, **options):
+    def result_ck_check_percent(self, t_min=None, t_max=None, component=None, recalc=False, **options):
         parameter = {'t_min': t_min,
                      't_max': t_max,
+                     'component': component,
+
         }
         self.calc_result(parameter, recalc)
         return self.results['ck_check_percent']
 
-    def get_d_ptrm(self, **parameter):
-        """
-        The difference between a pTRM check and the original TRM is calculated as the scalar intensity difference
-
-        :math:
-
-           \delta pTRM_{i,j} = pTRM_{check i,j} − TRM_i = pTRM_{check i,j} − TH_i
-
-        :param parameter:
-        :return: RockPy data object of CK - TH
-        """
-        t_min = parameter.get('t_min', self.standard_parameters['slope']['t_min'])
-        t_max = parameter.get('t_max', self.standard_parameters['slope']['t_max'])
-
-        temps = self.ck['temp'].v
-        th_temps = self.th['temp'].v
-        out = np.array([(v, i, i2) for i, v in enumerate(temps) for i2, v2 in enumerate(th_temps)
-                        if v == v2
-                        if v >= t_min
-                        if v <= t_max])
-
-        ck_data = self.ck.filter_idx(out[:, 1])
-        th_data = self.th.filter_idx(out[:, 2])
-        print(ck_data)
-        print(th_data)
-        out = ck_data - th_data
-        out['mag'] = out.magnitude(('x', 'y', 'z'))
-
-        return out
 
     def calculate_ck_check_percent(self, **parameter):
         """
@@ -812,20 +812,550 @@ class Thellier(base.Measurement):
         """
         t_min = parameter.get('t_min', self.standard_parameters['slope']['t_min'])
         t_max = parameter.get('t_max', self.standard_parameters['slope']['t_max'])
+        component = parameter.get('component', self.standard_parameters['slope']['component'])
 
         dptrm = self.get_d_ptrm(**parameter)
 
         temps = dptrm['temp'].v
-        th_temps = self.th['temp'].v
-        out = np.array([(v, i, i2) for i, v in enumerate(temps) for i2, v2 in enumerate(th_temps)
+        pt_temps = self.pt['temp'].v
+        out = np.array([(v, i, i2) for i, v in enumerate(temps) for i2, v2 in enumerate(pt_temps)
                         if v == v2
                         if v >= t_min
                         if v <= t_max])
+        pt_data = self.pt.filter_idx(out[:, 2])
+        percentages = (dptrm / pt_data) * 100
+
+        max_idx = np.argmax(abs(percentages[component].v))
+        out = percentages.filter_idx(max_idx)[component].v
+        self.results['ck_check_percent'] = out
+
+    def result_delta_ck(self, t_min=None, t_max=None, component=None, recalc=False, **options):
+
+        parameter = {'t_min': t_min,
+                     't_max': t_max,
+                     'component': component,
+        }
+        self.calc_result(parameter, recalc)
+        return self.results['delta_ck']
+
+    def calculate_delta_ck(self, **parameter):
+        """
+        Maximum absolute difference produced by a pTRM check, normalized by the total TRM (obtained from the
+        intersection of the best-fit line and the x-axis on an Arai plot; Leonhardt et al., 2004a).
+
+        :math:
+
+           \delta{CK}=\frac{\max{ \left\{ \left| \delta{pTRM_{i,j}} \right| \right\} }_{i \leq end \textbf{ and } j \leq end}}{\left|X_{Int.}\right|}\times{100}
+
+        """
+
+        t_min = parameter.get('t_min', self.standard_parameters['slope']['t_min'])
+        t_max = parameter.get('t_max', self.standard_parameters['slope']['t_max'])
+        component = parameter.get('component', self.standard_parameters['slope']['component'])
+
+        dptrm = self.get_d_ptrm(**parameter)
+
+        max_idx = np.argmax(abs(dptrm[component].v))
+        out = ( dptrm.filter_idx(max_idx)[component].v / self.result_x_int(**parameter).v[0] ) * 100
+        self.results['delta_ck'] = out
+
+    def result_drat(self, t_min=None, t_max=None, component=None, recalc=False, **options):
+
+        parameter = {'t_min': t_min,
+                     't_max': t_max,
+                     'component': component,
+        }
+        self.calc_result(parameter, recalc)
+        return self.results['drat']
+
+    def calculate_drat(self, **parameter):
+        """
+        Maximum absolute difference produced by a pTRM check, normalized by the length of the best-fit line
+        (Selkin and Tauxe, 2000).
+
+        :math:
+
+           DRAT=\frac{\max{\left\{\left|\delta{pTRM_{i,j}} \right| \right\}}_{i \leq end \textbf{ and } j \leq end}}{L}\times{100},
+
+        where `L` is the length of the best-fit line on the Arai plot. `L` is given by:
+
+        :math:
+
+           L=\sqrt{ (\Delta{x'})^2 + (\Delta{y'})^2 }
+
+        where `\Delta{x'}` and `\Delta{y'}` are TRM and NRM lengths of the best-fit line on the Arai plot, respectively (Section 3).
+        """
+        component = parameter.get('component', self.standard_parameters['slope']['component'])
+
+        dptrm = self.get_d_ptrm(**parameter)
+        L = np.sqrt((self.calculate_delta_x_dash(**parameter)) ** 2 + (self.calculate_delta_y_dash(**parameter)) ** 2)
+        max_idx = np.argmax(abs(dptrm[component].v))
+        out = ( dptrm.filter_idx(max_idx)[component].v / L ) * 100
+        self.results['drat'] = out
+        # self.calculation_parameters['drat'].update(parameter)
+
+    def result_ck_max_dev(self, t_min=None, t_max=None, component=None, recalc=False, **options):
+
+        parameter = {'t_min': t_min,
+                     't_max': t_max,
+                     'component': component,
+        }
+        self.calc_result(parameter, recalc)
+        return self.results['ck_max_dev']
+
+    def calculate_ck_max_dev(self, **parameter):
+        """
+        Maximum absolute difference produced by a pTRM check, normalized by the length of the TRM segment of the
+        best-fit line on the Arai plot (Blanco et al., 2012).
+
+        math::
+
+           maxDEV=\frac{\max{\left\{\left|\delta{pTRM_{i,j}} \right| \right\}}_{i \leq end \textbf{ and } j \leq end}}{\Delta{x'}}\times{100}
+
+        """
+        component = parameter.get('component', self.standard_parameters['slope']['component'])
+
+        dptrm = self.get_d_ptrm(**parameter)
+        max_idx = np.argmax(abs(dptrm[component].v))
+        out = ( dptrm.filter_idx(max_idx)[component].v / self.calculate_delta_x_dash(**parameter) ) * 100
+        self.results['ck_max_dev'] = out
+
+    '''
+    Cumulative pTRM check parameters
+    ********************************
+
+    Most cumulative pTRM checks can be calculated in two fashions. The first method, is the summation of the signed
+    pTRM differences (i.e., :math:`\pm \delta{pTRM}`), the second is to calculate the sum of the absolute pTRM difference
+    (i.e., :math:`\left|\delta{pTRM} \right|`). The convention of the Standard Paleointensity Definition is to denote the
+    second approach with a prime (`'`). For example, `CDRAT` is calculated by the first method and `CDRAT'`
+    by the second.
+
+    '''
+
+    def result_cdrat(self, t_min=None, t_max=None, component=None, recalc=False, **options):
+
+        parameter = {'t_min': t_min,
+                     't_max': t_max,
+                     'component': component,
+        }
+        self.calc_result(parameter, recalc)
+        return self.results['cdrat']
+
+    def calculate_cdrat(self, **parameter):
+        """
+        Cumulative `DRAT` (Kissel and Laj, 2004).
+
+        :math:
+
+          CDRAT=\frac{\left|\sum\limits_{i=1}^{end}{\delta{pTRM_{i,j}}}\right|}{L}\times{100} \\
+          CDRAT'=\frac{\sum\limits_{i=1}^{end}{\left|\delta{pTRM_{i,j}}\right|}}{L}\times{100}
+
+
+        """
+        component = parameter.get('component', self.standard_parameters['slope']['component'])
+
+        dptrm = self.get_d_ptrm(**parameter)
+        L = np.sqrt((self.calculate_delta_x_dash(**parameter)) ** 2 + (self.calculate_delta_y_dash(**parameter)) ** 2)
+
+        signed_sum = np.abs(np.sum(dptrm[component].v))
+        unsigned_sum = np.sum(np.fabs(dptrm[component].v))  # for cdrat' not used
+
+        out = (signed_sum / L) * 100
+        self.results['cdrat'] = out
+
+    def result_drats(self, t_min=None, t_max=None, component=None, recalc=False, **options):
+
+        parameter = {'t_min': t_min,
+                     't_max': t_max,
+                     'component': component,
+        }
+        self.calc_result(parameter, recalc)
+        return self.results['drats']
+
+    def calculate_drats(self, **parameter):
+        """
+        Cumulative pTRM check difference normalized by the pTRM gained at the maximum temperature used for the
+        best-fit on the Arai diagram (Tauxe and Staudigel, 2004).
+
+
+        :math:
+
+           DRATS=\frac{\left|\sum\limits_{i=1}^{end}{\delta{pTRM_{i,j}}}\right|}{x_{end}}\times{100} \\
+           DRATS'=\frac{\sum\limits_{i=1}^{end}{\left|\delta{pTRM_{i,j}}\right|}}{x_{end}}\times{100}
+        """
+
+        t_min = parameter.get('t_min', self.standard_parameters['slope']['t_min'])
+        t_max = parameter.get('t_max', self.standard_parameters['slope']['t_max'])
+        component = parameter.get('component', self.standard_parameters['slope']['component'])
+
+        dptrm = self.get_d_ptrm(**parameter)
+
+        # finding last ptrm step for normalization of dck
+
+        equal_steps = list(set(self.th['temp'].v) & set(self.ptrm['temp'].v))
+        th_steps = (t_min <= self.th['temp'].v) & (self.th['temp'].v <= t_max)  # True if step between t_min, t_max
+        ptrm_steps = (t_min <= self.ptrm['temp'].v) & (self.ptrm['temp'].v <= t_max)  # True if step betw. t_min, t_max
+
+        ptrm_data = self.ptrm.filter(ptrm_steps)  # filtered data for t_min & t_max
+        max_idx = np.argmax(ptrm_data['temp'].v)
+        ptrm_data = ptrm_data.filter_idx(max_idx)
+
+        signed_sum = np.abs(np.sum(dptrm[component].v))
+        unsigned_sum = np.sum(np.fabs(dptrm[component].v))  # for cdrat' not used
+
+        out = (signed_sum / ptrm_data[component].v[0] ) * 100
+        self.results['drats'] = out
+
+    def result_mean_drat(self, t_min=None, t_max=None, component=None, recalc=False, **options):
+
+        parameter = {'t_min': t_min,
+                     't_max': t_max,
+                     'component': component,
+        }
+        self.calc_result(parameter, recalc)
+        return self.results['mean_drat']
+
+    def calculate_mean_drat(self, **parameter):
+        """
+        The average difference produced by a pTRM check, normalized by the length of the best-fit line.
+
+        .. math::
+
+           \textrm{Mean }DRAT=\frac{1}{n_{pTRM}}\frac{\left|\sum\limits_{i=1}^{end}{\delta{pTRM_{i,j}}}\right|}{L}\times{100} \\
+           \textrm{Mean }DRAT'=\frac{1}{n_{pTRM}}\frac{\sum\limits_{i=1}^{end}{\left|\delta{pTRM_{i,j}}\right|}}{L}\times{100}
+        """
+        out = (1 / self.result_n_ptrm(**parameter).v) * self.result_drat(**parameter).v
+        self.results['mean_drat'] = out
+
+    def result_mean_dev(self, t_min=None, t_max=None, component=None, recalc=False, **options):
+
+        parameter = {'t_min': t_min,
+                     't_max': t_max,
+                     'component': component,
+        }
+        self.calc_result(parameter, recalc)
+        return self.results['mean_dev']
+
+    def calculate_mean_dev(self, **parameter):
+        """
+        Mean deviation of a pTRM check (Blanco et al., 2012).
+
+        .. math::
+
+           \textrm{Mean }DEV=\frac{1}{n_{pTRM}}\frac{\left|\sum\limits_{i=1}^{end}\delta{pTRM_{i,j}}\right|}{\Delta{x'}}\times{100} \\
+           \textrm{Mean }DEV'=\frac{1}{n_{pTRM}}\frac{\sum\limits_{i=1}^{end}\left|\delta{pTRM_{i,j}}\right|}{\Delta{x'}}\times{100}
+
+        """
+        component = parameter.get('component', self.standard_parameters['slope']['component'])
+
+        dptrm = self.get_d_ptrm(**parameter)
+
+        signed_sum = np.abs(np.sum(dptrm[component].v))
+        unsigned_sum = np.sum(np.fabs(dptrm[component].v))  # for cdrat' not used
+
+        out = (1 / self.result_n_ptrm(**parameter).v) * (signed_sum / self.calculate_delta_x_dash(**parameter)) * 100
+        self.results['mean_dev'] = out
+
+
+    def result_delta_pal(self, t_min=None, t_max=None, component=None, recalc=False, **options):
+
+        parameter = {'t_min': t_min,
+                     't_max': t_max,
+                     'component': component,
+        }
+        self.calc_result(parameter, recalc)
+        return self.results['delta_pal']
+
+    def calculate_delta_pal(self, **parameter):
+        """
+        A measure of cumulative alteration determined by the difference of the alteration corrected intensity estimate 
+        (Valet et al., 1996) and the uncorrected estimate, normalized by the uncorrected estimate 
+        (Leonhardt et al., 2004a).
+
+        We first calculate the cumulative sum of the pTRM checks up to the :math:`i^{th}` step of the experiment:
+        
+        .. math::
+        
+           \mathbf{C}_i=\sum\limits_{l=1}^{l=i}{ \mathbf{\delta{pTRM}}_{l,j} }, ~~\textrm{for} ~i=1,\ldots, n_{max}, 
+        
+        where :math:`\mathbf{\delta{pTRM}}_{l,j}` is the vector difference between :math:`\mathbf{TRM}_l`
+        and :math:`\mathbf{pTRM\_check}_{l,j}`, i.e.,
+
+        .. math::
+
+           \mathbf{\delta{pTRM}}_{l,j}=\mathbf{TRM}_l - \mathbf{pTRM\_check}_{l,j}.
+
+        When no pTRM check is performed :math:`\mathbf{\delta{pTRM}}_l=[0,0,0]`.
+
+        The :math:`\mathbf{TRM}_i` vector is then corrected by adding the cumulative effect of the alteration,
+        :math:`\mathbf{C}_i`:
+
+        .. math::
+
+           \mathbf{TRM}_i^*=\mathbf{TRM}_i+\mathbf{C}_{i}, ~~\textrm{for} ~i=1,\ldots, n_{max}.
+
+        Since no pTRM check is performed at the first step:
+
+        .. math::
+
+           \mathbf{TRM}_1^*=\mathbf{TRM}_1.
+
+        The corrected TRM values on the Arai plot (:math:`x_i^*`) can be calculated by determining the vector
+        lengths of :math:`\mathbf{TRM}_i^*`.
+        The corrected slope on the Arai plot (:math:`b^*`) can be calculated using the selected points and the
+        standard approach outlined in Section 3.
+
+        :math:`\delta{pal}` is then given by:
+
+        .. math::
+
+           \delta{pal}=\left|\frac{b-b^*}{b}\right|\times100.
+
+        """
+        component = parameter.get('component', self.standard_parameters['slope']['component'])
+        # todo
+        #
+        # dptrm = self.get_d_ptrm(**parameter)
+        #
+        # signed_sum = np.abs(np.sum(dptrm[component].v))
+        # unsigned_sum = np.sum(np.fabs(dptrm[component].v))  # for cdrat' not used
+        #
+        # out = (1 / self.result_n_ptrm(**parameter).v) * (signed_sum / self.calculate_delta_x_dash(**parameter)) *100
+        # self.results['mean_dev'] = out
+
+    """
+    pTRM tails check statistics (TR)
+    ================================
+
+    A pTRM tail check is a repeat demagnetization step to test for changes in a specimen's magnetization carried in the
+    blocking temperature range above the temperature of the check. The difference between the first NRM measurement and 
+    the pTRM tail check is calculated as the scalar intensity difference: 
+    
+    .. math::
+     
+       \delta{tail_i}=tail\_check_i - NRM_i = tail\_check_i - y_i, 
+    
+    where :math:`tail\_check_i` is the pTRM tail check to the :math:`i^{th}` temperature step. The order of the
+    difference is such that tail checks smaller than the original NRM yield negative :math:`\delta{tail_i}` and tail
+    checks larger than the original NRM give positive :math:`\delta{tail_i}`. For a pTRM tail check to be included
+    in the analysis, :math:`T_i` must be less than or equal to :math:`T_{max}`.
+    """
+
+    def get_d_tail(self, **parameter):
+        """
+        The difference between a pTRM check and the original TRM is calculated as the scalar intensity difference
+
+        :math:
+
+           \delta pTRM_{i,j} = pTRM_{check i,j} − TRM_i = pTRM_{check i,j} − TH_i
+
+        :param parameter:
+        :return: RockPy data object of CK - TH
+        """
+
+        t_min = parameter.get('t_min', self.standard_parameters['slope']['t_min'])
+        t_max = parameter.get('t_max', self.standard_parameters['slope']['t_max'])
+
+        temps = self.tr['temp'].v
+        th_steps = self.th['temp'].v
+
+        out = np.array([(v, i, i2) for i, v in enumerate(temps) for i2, v2 in enumerate(th_steps)
+                        if v == v2
+                        if v >= t_min
+                        if v <= t_max])
+
+        tr_data = self.tr.filter_idx(out[:, 1])
         th_data = self.th.filter_idx(out[:, 2])
-        print(dptrm)
-        print(th_data)
-        print(dptrm / th_data) * 100
-        # self.results['ck_check_percent'] = len(out)
+
+        out = tr_data - th_data
+        # out['mag'] = out.magnitude(('x', 'y', 'z'))
+        return out
+
+    def result_n_tail(self, t_min=None, t_max=None, recalc=False, **options):
+        parameter = {'t_min': t_min,
+                     't_max': t_max,
+        }
+        self.calc_result(parameter, recalc)
+        return self.results['n_tail']
+
+    def calculate_n_tail(self, **parameter):
+        """
+        The number of pTRM tail checks conducted below the maximum temperature used for the best-fit segment on the
+        Arai plot (i.e., the number of pTRM tail checks used to analyze the best-fit segment on the Arai plot).
+        :param parameter:
+
+        """
+        t_min = parameter.get('t_min', self.standard_parameters['slope']['t_min'])
+        t_max = parameter.get('t_max', self.standard_parameters['slope']['t_max'])
+
+        temps = self.tr['temp'].v
+        out = [i for i in temps
+               if i >= t_min
+               if i <= t_max]
+
+        self.results['n_tail'] = len(out)
+
+    def result_drat_tail(self, t_min=None, t_max=None, component=None, recalc=False, **options):
+
+        parameter = {'t_min': t_min,
+                     't_max': t_max,
+                     'component': component,
+        }
+        self.calc_result(parameter, recalc)
+        return self.results['drat_tail']
+
+    def calculate_drat_tail(self, **parameter):
+        """
+        Maximum absolute difference produced by a pTRM tail check, normalized by the length of the best-fit line
+        (Biggin et al., 2007).
+
+        .. math::
+
+           DRAT_{Tail}=\frac{\max{\{\left| \delta{tail_i} \right|\}}_{i=1, \ldots, end}}{L}\times{100}
+
+        """
+        component = parameter.get('component', self.standard_parameters['slope']['component'])
+
+        dtail = self.get_d_tail(**parameter)
+        L = np.sqrt((self.calculate_delta_x_dash(**parameter)) ** 2 + (self.calculate_delta_y_dash(**parameter)) ** 2)
+        max_idx = np.argmax(abs(dtail[component].v))
+        out = ( abs(dtail.filter_idx(max_idx)[component].v) / L ) * 100
+        self.results['drat_tail'] = out
+
+
+    def result_delta_tr(self, t_min=None, t_max=None, component=None, recalc=False, **options):
+
+        parameter = {'t_min': t_min,
+                     't_max': t_max,
+                     'component': component,
+        }
+        self.calc_result(parameter, recalc)
+        return self.results['delta_tr']
+
+    def calculate_delta_tr(self, **parameter):
+        """
+        Maximum absolute difference produced by a pTRM tail check, normalized by the NRM (obtained from the
+        intersection of the best-fit line and the y-axis on an Arai plot; Leonhardt et al., 2004a).
+
+        .. math::
+
+           \delta{TR}=\frac{\max{\{\left| \delta{tail_i} \right|\}}_{i=1, \ldots, end}}{\left|Y_{Int.}\right|}\times{100}
+
+        """
+        component = parameter.get('component', self.standard_parameters['slope']['component'])
+
+        dtail = self.get_d_tail(**parameter)
+        max_idx = np.argmax(abs(dtail[component].v))
+        out = ( abs(dtail.filter_idx(max_idx)[component].v) / abs(self.result_y_int(**parameter).v)) * 100
+        self.results['delta_tr'] = out
+
+    def result_md_vds(self, t_min=None, t_max=None, component=None, recalc=False, **options):
+
+        parameter = {'t_min': t_min,
+                     't_max': t_max,
+                     'component': component,
+        }
+        self.calc_result(parameter, recalc)
+        return self.results['md_vds']
+
+    def calculate_md_vds(self, **parameter):
+        """
+        Maximum absolute difference produced by a pTRM tail check, normalized by the vector difference sum of the
+        NRM (Tauxe and Staudigel, 2004).
+
+        .. math::
+
+           MD_{VDS}=\frac{\max{\{\left| \delta{tail_i} \right|\}}_{i=1, \ldots, end}}{VDS}\times{100}
+
+        .. note::
+        Some versions of PmagPy and ThellierGUI use a pTRM tail check statistic called $$MD(\%)$$. This is identical
+        to $$MD_{VDS}$$, but the change in name emphasizes its calculation method.
+        """
+        component = parameter.get('component', self.standard_parameters['slope']['component'])
+
+        dtail = self.get_d_tail(**parameter)
+        max_idx = np.argmax(abs(dtail[component].v))
+        out = ( abs(dtail.filter_idx(max_idx)[component].v) / abs(self.result_vds(**parameter).v)) * 100
+        self.results['md_vds'] = out
+
+    def result_d_t(self, t_min=None, t_max=None, component=None, recalc=False, **options):
+
+        parameter = {'t_min': t_min,
+                     't_max': t_max,
+                     'component': component,
+        }
+        self.calc_result(parameter, recalc)
+        return self.results['d_t']
+
+    def calculate_d_t(self, **parameter):
+        """
+        The extent of a pTRM tail after correction for angular dependence (Leonhardt et al., 2004a; 2004b).
+
+        The applied laboratory field vector ($$\mathbf{B}_{Lab}$$) is typically applied along a principle axis in the
+        sample coordinate system (i.e., $$\pm x$$, $$\pm y$$, or $$\pm z$$). Therefore,
+        for simplicity, $$\delta{t^*}$$ should be calculated in the sample coordinate system only.
+        Figure 7 is a schematic illustration of aspects of the calculation of $$\delta{t^*}$$.
+
+        Figure 7.Schematic illustration of an NRM vector ($$\mathbf{NRM}_i$$) and a pTRM tail
+        check vector ($$\mathbf{tail\_check}_i$$) for a sample that exhibits a pTRM tail.
+        Modified after Leonhardt et al. (2004b).
+
+        Let $$N_{x,i}$$, $$N_{y,i}$$, and $$N_{z,i}$$ denote the Cartesian coordinates of the NRM
+        vector at step $$i$$ (i.e., $$\mathbf{NRM}_i = $$ [$$N_{x,i}$$, $$N_{y,i}$$, $$N_{z,i}$$]).
+        Similarly, let $$T_{x,i}$$, $$T_{y,i}$$, and $$T_{z,i}$$ denote the Cartesian
+        coordinates of the repeat demagnetization vector at step
+        $$i$$ (i.e., $$\mathbf{tail\_check}_i = $$ [$$T_{x,i}$$, $$T_{y,i}$$, $$T_{z,i}$$]).
+
+        Assuming that $$\mathbf{B}_{Lab}$$ is applied along the z-axis, the difference
+        in the horizontal ($$\delta{H_i}$$) and vertical components ($$\delta{Z_i}$$)
+        between $$\mathbf{NRM}_i$$ and $$\mathbf{tail\_check}_i$$ (Figure 7) are given by:
+
+        \[ \delta{H_i}=\sqrt{N_{x,i}^2 + N_{y,i}^2} - \sqrt{T_{x,i}^2 + T_{y,i}^2} \] and \[ \delta{Z_i}=N_{z,i} - T_{z,i}. \]
+
+        pTRM tails have an angular dependence and the calculation of $$\delta{t^*}$$
+        requires two angular differences. Let $$\Delta{\theta}_i$$ denote the angle between
+        $$\mathbf{B}_{Lab}$$ and $$\mathbf{NRM}_i$$ (see Section 4 for advice on calculating the
+        angle between two vectors). Let $$\delta{Inc}_i$$ denote the difference in inclinations
+        between the $$\mathbf{B}_{Lab}$$ and $$\mathbf{NRM}_i$$:
+
+        \[ \delta{Inc_i}=Inc(\mathbf{B}_{Lab}) - Inc(\mathbf{NRM}_i)=\arctan{\left(\frac{B_{Lab,z}}{\sqrt{B_{Lab,x}^2 + B_{Lab,y}^2}}\right)} - \arctan{\left(\frac{N_{z,i}}{\sqrt{N_{x,i}^2 + N_{x,i}^2}}\right)}. \]
+
+        In the ThellierTool software (v4.22 and previous) $$\mathbf{B}_{Lab}$$ is determined from
+        each $$\mathbf{TRM}_i$$. Given that $$\mathbf{B}_{Lab}$$ is almost always known, the convention of
+        SPD is to use the known $$\mathbf{B}_{Lab}$$ and not as estimated from $$\mathbf{TRM}_i$$,
+        which may suffer from the effects of experimental noise.
+
+        As will be seen below, the calculation of $$\delta{t^*}$$ requires $$\frac{1}{\tan{(\Delta{\theta}_i)}}$$.
+        As $$\Delta{\theta}_i$$ approaches zero or 180° this fraction tends to infinity. To tackle this,
+        $$\delta{t^*}$$ is calculated in a piecewise fashion that depends on upper and lower angular limits
+        ($$Lim_{upper}$$ and $$Lim_{lower}$$, respectively). Below is pseudo-code that describes the logic
+        of the calculation procedure.
+
+        In v    4.22 of the ThellierTool $$Lim_{lower} = 0.175$$ ($$\approx10$$°) radi
+
+
+        $$\delta{t^*}$$ is then calculated as:
+
+        \[ \delta{t^*}=\left\{ \begin{array}{lc}	\max{ \left\{ t^*_i\right\} }_{i=1, \ldots, end}	&	\mbox{ if } (\max{ \left\{ t^*_i\right\} }_{i=1, \ldots, end} > 0)\\ 0	&	\mbox{ if } (\max{ \left\{ t^*_i\right\} }_{i=1, \ldots, end} < 0)\end{array}\right. \]
+
+        Only positive values of $$t^*$$ and $$\delta{t^*}$$ can be attributed to the effects of pTRM
+        tails, hence $$\delta{t^*}$$ is calculated as the maximum of $$t^*$$ and not the maximum of $$\left|t^*\right|$$.
+
+        It should be noted that an implicit assumption in the above calculations is that $$\mathbf{B}_{Lab}$$
+        is applied along the $$z$$-axis. In situations where $$\mathbf{B}_{Lab}$$ is applied along the
+        $$x$$- or $$y$$-axes, the definition of ``horizontal'' and ``vertical'' can be redefined such that
+        $$\mathbf{B}_{Lab}$$ is applied in the ``vertical'' direction. For example, if $$\mathbf{B}_{Lab}$$
+        is along the $$x$$-axis, $$\delta{H_i}$$ and $$\delta{Z_i}$$ can be defined as:
+
+        \[ \delta{H_i}=\sqrt{N_{y,i}^2 + N_{z,i}^2} - \sqrt{T_{y,i}^2 + T_{z,i}^2} \] and \[ \delta{Z_i}=N_{x,i} - T_{x,i}, \]
+
+        and
+
+        \[ \delta{Inc_i}=\arctan{\left(\frac{B_{Lab,x}}{\sqrt{B_{Lab,y}^2 + B_{Lab,z}^2}}\right)} - \arctan{\left(\frac{N_{x,i}}{\sqrt{N_{y,i}^2 + N_{z,i}^2}}\right)}. \]
+
+        The remaining calculations can proceed as described above.
+        """
+        self.results['delta_tr'] = np.nan
 
     ''' CHECK SECTION '''
 

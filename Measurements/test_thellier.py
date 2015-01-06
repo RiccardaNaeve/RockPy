@@ -23,40 +23,40 @@ class TestThellier(TestCase):
         # self.fail()
         #
         # def test_delete_temp(self):
-        #     self.fail()
+        # self.fail()
         #
         # def test_result_slope(self):
-        #     self.fail()
+        # self.fail()
         #
         # def test_result_n(self):
-        #     self.fail()
+        # self.fail()
         #
         # def test_result_sigma(self):
-        #     self.fail()
+        # self.fail()
         #
         # def test_result_x_int(self):
-        #     self.fail()
+        # self.fail()
         #
         # def test_result_y_int(self):
-        #     self.fail()
+        # self.fail()
         #
         # def test_result_b_anc(self):
-        #     self.fail()
+        # self.fail()
         #
         # def test_result_sigma_b_anc(self):
-        #     self.fail()
+        # self.fail()
         #
         # def test_result_vds(self):
-        #     self.fail()
+        # self.fail()
         #
         # def test_result_f(self):
-        #     self.fail()
+        # self.fail()
         #
         # def test_result_f_vds(self):
-        #     self.fail()
+        # self.fail()
         #
         # def test_result_frac(self):
-        #     self.fail()
+        # self.fail()
         #
         # def test_result_beta(self):
         #     self.fail()
@@ -139,3 +139,63 @@ class TestThellier(TestCase):
 
     def test_result_ck_check_percent(self):
         self.thellier_cryomag.result_ck_check_percent()
+        # print(self.thellier_cryomag.results)
+
+
+    def test_calculate_delta_ck(self):
+        self.thellier_cryomag.result_delta_ck()
+        # print(self.thellier_cryomag.results)
+
+
+    def test_calculate_drat(self):
+        self.thellier_cryomag.result_drat()
+        # print(self.thellier_cryomag.results)
+
+
+    def test_result_ck_max_dev(self):
+        self.thellier_cryomag.result_ck_max_dev()
+        # print(self.thellier_cryomag.results)
+
+
+    def test_calculate_cdrat(self):
+        self.thellier_cryomag.result_cdrat()
+        # print(self.thellier_cryomag.results)
+
+
+    def test_result_drats(self):
+        self.thellier_cryomag.result_drats()
+        # print(self.thellier_cryomag.results)
+
+
+    def test_result_mean_drat(self):
+        self.thellier_cryomag.result_mean_drat()
+        # print(self.thellier_cryomag.results)
+
+
+    def test_result_mean_dev(self):
+        self.thellier_cryomag.result_mean_dev()
+        # print(self.thellier_cryomag.results)
+
+
+    def test_get_d_tail(self):
+        self.thellier_cryomag.get_d_tail()
+
+
+    def test_result_n_tail(self):
+        self.thellier_cryomag.result_n_tail()
+        # print(self.thellier_cryomag.results)
+
+
+    def test_result_drat_tail(self):
+        self.thellier_cryomag.result_drat_tail()
+        # print(self.thellier_cryomag.results)
+
+
+    def test_result_delta_tr(self):
+        self.thellier_cryomag.result_delta_tr()
+        print(self.thellier_cryomag.results)
+
+
+    def test_result_md_vds(self):
+        self.thellier_cryomag.result_md_vds()
+        print(self.thellier_cryomag.results)

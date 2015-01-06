@@ -12,7 +12,6 @@ class TestThellier(TestCase):
         self.thellier_cryomag = self.test_sample_cryomag.add_measurement(mtype='thellier', mfile=cryomag_file,
                                                                          machine='cryomag')
 
-        #
         # def test_format_cryomag(self):
         # self.fail()
         #
@@ -197,5 +196,5 @@ class TestThellier(TestCase):
 
 
     def test_result_md_vds(self):
-        self.thellier_cryomag.result_md_vds()
+        self.thellier_cryomag.calc_all()
         print(self.thellier_cryomag.results)

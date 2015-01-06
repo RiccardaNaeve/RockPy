@@ -225,6 +225,35 @@ class Thellier(base.Measurement):
 
     ''' RESULT SECTION '''
 
+
+    """
+    Arai plot statistics
+    ====================
+    
+    A note on data indexing
+    +++++++++++++++++++++++
+        
+    Statistic: :math:`i` and :math:`n_{max}`
+    
+    The index :math:`i` is used to denote the :math:`i^{th}` temperature step of the paleointensity experiment.
+    :math:`i` is used to index Arai plot data (e.g., :math:`x_i`, or :math:`y_i`) and ranges from :math:`i=1` to
+    :math:`n_{max}`, where :math:`n_{max}` is the total number of steps on the Arai plot.
+    
+     
+    
+    Statistic: :math:`start` and :math:`end`
+    
+    :math:`start` and :math:`end` denote the :math:`i` indices of the selected steps used for analyzing the
+    paleointensity results. :math:`i=start` denotes the first selected data point and :math:`i=end` denotes the last.
+    
+     
+    
+    Statistic: :math:`T_{min}` and :math:`T_{max}`
+    
+    The minimum and maximum temperatures used for the best-fit linear segment on the Arai plot, 
+    where :math:`T_{min} \equiv T_{i=start}` and :math:`T_{max} \equiv T_{i=end}`.
+    
+    """
     def result_slope(self, t_min=None, t_max=None, component=None, recalc=False):
         '''
         Gives result for calculate_slope(t_min, t_max), returns slope value if not calculated already
@@ -765,7 +794,7 @@ class Thellier(base.Measurement):
         ck_data = self.ck.filter_idx(out[:, 1])
         pt_data = self.pt.filter_idx(out[:, 2])
         out = ck_data - pt_data
-        out['mag'] = out.magnitude(('x', 'y', 'z'))
+        # out['mag'] = out.magnitude(('x', 'y', 'z'))
 
         return out
 
@@ -775,6 +804,42 @@ class Thellier(base.Measurement):
         }
         self.calc_result(parameter, recalc)
         return self.results['n_ptrm']
+
+    def result_ck_check_percent(self, t_min=None, t_max=None, component=None, recalc=False, **options):
+        parameter = {'t_min': t_min,
+                     't_max': t_max,
+                     'component': component,
+
+        }
+        self.calc_result(parameter, recalc)
+        return self.results['ck_check_percent']
+
+    def result_delta_ck(self, t_min=None, t_max=None, component=None, recalc=False, **options):
+
+        parameter = {'t_min': t_min,
+                     't_max': t_max,
+                     'component': component,
+        }
+        self.calc_result(parameter, recalc)
+        return self.results['delta_ck']
+
+    def result_drat(self, t_min=None, t_max=None, component=None, recalc=False, **options):
+
+        parameter = {'t_min': t_min,
+                     't_max': t_max,
+                     'component': component,
+        }
+        self.calc_result(parameter, recalc)
+        return self.results['drat']
+
+    def result_ck_max_dev(self, t_min=None, t_max=None, component=None, recalc=False, **options):
+
+        parameter = {'t_min': t_min,
+                     't_max': t_max,
+                     'component': component,
+        }
+        self.calc_result(parameter, recalc)
+        return self.results['ck_max_dev']
 
     def calculate_n_ptrm(self, **parameter):
         """
@@ -792,15 +857,6 @@ class Thellier(base.Measurement):
                if i <= t_max]
 
         self.results['n_ptrm'] = len(out)
-
-    def result_ck_check_percent(self, t_min=None, t_max=None, component=None, recalc=False, **options):
-        parameter = {'t_min': t_min,
-                     't_max': t_max,
-                     'component': component,
-
-        }
-        self.calc_result(parameter, recalc)
-        return self.results['ck_check_percent']
 
 
     def calculate_ck_check_percent(self, **parameter):
@@ -827,16 +883,8 @@ class Thellier(base.Measurement):
 
         max_idx = np.argmax(abs(percentages[component].v))
         out = percentages.filter_idx(max_idx)[component].v
-        self.results['ck_check_percent'] = out
+        self.results['ck_check_percent'] = abs(out)
 
-    def result_delta_ck(self, t_min=None, t_max=None, component=None, recalc=False, **options):
-
-        parameter = {'t_min': t_min,
-                     't_max': t_max,
-                     'component': component,
-        }
-        self.calc_result(parameter, recalc)
-        return self.results['delta_ck']
 
     def calculate_delta_ck(self, **parameter):
         """
@@ -856,17 +904,9 @@ class Thellier(base.Measurement):
         dptrm = self.get_d_ptrm(**parameter)
 
         max_idx = np.argmax(abs(dptrm[component].v))
-        out = ( dptrm.filter_idx(max_idx)[component].v / self.result_x_int(**parameter).v[0] ) * 100
+        out = ( abs(dptrm.filter_idx(max_idx)[component].v) / self.result_x_int(**parameter).v[0] ) * 100
         self.results['delta_ck'] = out
 
-    def result_drat(self, t_min=None, t_max=None, component=None, recalc=False, **options):
-
-        parameter = {'t_min': t_min,
-                     't_max': t_max,
-                     'component': component,
-        }
-        self.calc_result(parameter, recalc)
-        return self.results['drat']
 
     def calculate_drat(self, **parameter):
         """
@@ -890,18 +930,10 @@ class Thellier(base.Measurement):
         dptrm = self.get_d_ptrm(**parameter)
         L = np.sqrt((self.calculate_delta_x_dash(**parameter)) ** 2 + (self.calculate_delta_y_dash(**parameter)) ** 2)
         max_idx = np.argmax(abs(dptrm[component].v))
-        out = ( dptrm.filter_idx(max_idx)[component].v / L ) * 100
+        out = ( abs(dptrm.filter_idx(max_idx)[component].v) / L ) * 100
         self.results['drat'] = out
         # self.calculation_parameters['drat'].update(parameter)
 
-    def result_ck_max_dev(self, t_min=None, t_max=None, component=None, recalc=False, **options):
-
-        parameter = {'t_min': t_min,
-                     't_max': t_max,
-                     'component': component,
-        }
-        self.calc_result(parameter, recalc)
-        return self.results['ck_max_dev']
 
     def calculate_ck_max_dev(self, **parameter):
         """
@@ -918,7 +950,7 @@ class Thellier(base.Measurement):
         dptrm = self.get_d_ptrm(**parameter)
         max_idx = np.argmax(abs(dptrm[component].v))
         out = ( dptrm.filter_idx(max_idx)[component].v / self.calculate_delta_x_dash(**parameter) ) * 100
-        self.results['ck_max_dev'] = out
+        self.results['ck_max_dev'] = abs(out)
 
     '''
     Cumulative pTRM check parameters
@@ -941,6 +973,42 @@ class Thellier(base.Measurement):
         self.calc_result(parameter, recalc)
         return self.results['cdrat']
 
+    def result_drats(self, t_min=None, t_max=None, component=None, recalc=False, **options):
+
+        parameter = {'t_min': t_min,
+                     't_max': t_max,
+                     'component': component,
+        }
+        self.calc_result(parameter, recalc)
+        return self.results['drats']
+
+    def result_mean_drat(self, t_min=None, t_max=None, component=None, recalc=False, **options):
+
+        parameter = {'t_min': t_min,
+                     't_max': t_max,
+                     'component': component,
+        }
+        self.calc_result(parameter, recalc)
+        return self.results['mean_drat']
+
+    def result_mean_dev(self, t_min=None, t_max=None, component=None, recalc=False, **options):
+
+        parameter = {'t_min': t_min,
+                     't_max': t_max,
+                     'component': component,
+        }
+        self.calc_result(parameter, recalc)
+        return self.results['mean_dev']
+
+    def result_delta_pal(self, t_min=None, t_max=None, component=None, recalc=False, **options):
+
+        parameter = {'t_min': t_min,
+                     't_max': t_max,
+                     'component': component,
+        }
+        self.calc_result(parameter, recalc)
+        return self.results['delta_pal']
+
     def calculate_cdrat(self, **parameter):
         """
         Cumulative `DRAT` (Kissel and Laj, 2004).
@@ -962,15 +1030,6 @@ class Thellier(base.Measurement):
 
         out = (signed_sum / L) * 100
         self.results['cdrat'] = out
-
-    def result_drats(self, t_min=None, t_max=None, component=None, recalc=False, **options):
-
-        parameter = {'t_min': t_min,
-                     't_max': t_max,
-                     'component': component,
-        }
-        self.calc_result(parameter, recalc)
-        return self.results['drats']
 
     def calculate_drats(self, **parameter):
         """
@@ -1006,15 +1065,6 @@ class Thellier(base.Measurement):
         out = (signed_sum / ptrm_data[component].v[0] ) * 100
         self.results['drats'] = out
 
-    def result_mean_drat(self, t_min=None, t_max=None, component=None, recalc=False, **options):
-
-        parameter = {'t_min': t_min,
-                     't_max': t_max,
-                     'component': component,
-        }
-        self.calc_result(parameter, recalc)
-        return self.results['mean_drat']
-
     def calculate_mean_drat(self, **parameter):
         """
         The average difference produced by a pTRM check, normalized by the length of the best-fit line.
@@ -1026,15 +1076,6 @@ class Thellier(base.Measurement):
         """
         out = (1 / self.result_n_ptrm(**parameter).v) * self.result_drat(**parameter).v
         self.results['mean_drat'] = out
-
-    def result_mean_dev(self, t_min=None, t_max=None, component=None, recalc=False, **options):
-
-        parameter = {'t_min': t_min,
-                     't_max': t_max,
-                     'component': component,
-        }
-        self.calc_result(parameter, recalc)
-        return self.results['mean_dev']
 
     def calculate_mean_dev(self, **parameter):
         """
@@ -1055,16 +1096,6 @@ class Thellier(base.Measurement):
 
         out = (1 / self.result_n_ptrm(**parameter).v) * (signed_sum / self.calculate_delta_x_dash(**parameter)) * 100
         self.results['mean_dev'] = out
-
-
-    def result_delta_pal(self, t_min=None, t_max=None, component=None, recalc=False, **options):
-
-        parameter = {'t_min': t_min,
-                     't_max': t_max,
-                     'component': component,
-        }
-        self.calc_result(parameter, recalc)
-        return self.results['delta_pal']
 
     def calculate_delta_pal(self, **parameter):
         """
@@ -1178,6 +1209,42 @@ class Thellier(base.Measurement):
         self.calc_result(parameter, recalc)
         return self.results['n_tail']
 
+    def result_drat_tail(self, t_min=None, t_max=None, component=None, recalc=False, **options):
+
+        parameter = {'t_min': t_min,
+                     't_max': t_max,
+                     'component': component,
+        }
+        self.calc_result(parameter, recalc)
+        return self.results['drat_tail']
+
+    def result_delta_tr(self, t_min=None, t_max=None, component=None, recalc=False, **options):
+
+        parameter = {'t_min': t_min,
+                     't_max': t_max,
+                     'component': component,
+        }
+        self.calc_result(parameter, recalc)
+        return self.results['delta_tr']
+
+    def result_md_vds(self, t_min=None, t_max=None, component=None, recalc=False, **options):
+
+        parameter = {'t_min': t_min,
+                     't_max': t_max,
+                     'component': component,
+        }
+        self.calc_result(parameter, recalc)
+        return self.results['md_vds']
+
+    def result_d_t(self, t_min=None, t_max=None, component=None, recalc=False, **options):
+
+        parameter = {'t_min': t_min,
+                     't_max': t_max,
+                     'component': component,
+        }
+        self.calc_result(parameter, recalc)
+        return self.results['d_t']
+
     def calculate_n_tail(self, **parameter):
         """
         The number of pTRM tail checks conducted below the maximum temperature used for the best-fit segment on the
@@ -1194,15 +1261,6 @@ class Thellier(base.Measurement):
                if i <= t_max]
 
         self.results['n_tail'] = len(out)
-
-    def result_drat_tail(self, t_min=None, t_max=None, component=None, recalc=False, **options):
-
-        parameter = {'t_min': t_min,
-                     't_max': t_max,
-                     'component': component,
-        }
-        self.calc_result(parameter, recalc)
-        return self.results['drat_tail']
 
     def calculate_drat_tail(self, **parameter):
         """
@@ -1222,16 +1280,6 @@ class Thellier(base.Measurement):
         out = ( abs(dtail.filter_idx(max_idx)[component].v) / L ) * 100
         self.results['drat_tail'] = out
 
-
-    def result_delta_tr(self, t_min=None, t_max=None, component=None, recalc=False, **options):
-
-        parameter = {'t_min': t_min,
-                     't_max': t_max,
-                     'component': component,
-        }
-        self.calc_result(parameter, recalc)
-        return self.results['delta_tr']
-
     def calculate_delta_tr(self, **parameter):
         """
         Maximum absolute difference produced by a pTRM tail check, normalized by the NRM (obtained from the
@@ -1248,15 +1296,6 @@ class Thellier(base.Measurement):
         max_idx = np.argmax(abs(dtail[component].v))
         out = ( abs(dtail.filter_idx(max_idx)[component].v) / abs(self.result_y_int(**parameter).v)) * 100
         self.results['delta_tr'] = out
-
-    def result_md_vds(self, t_min=None, t_max=None, component=None, recalc=False, **options):
-
-        parameter = {'t_min': t_min,
-                     't_max': t_max,
-                     'component': component,
-        }
-        self.calc_result(parameter, recalc)
-        return self.results['md_vds']
 
     def calculate_md_vds(self, **parameter):
         """
@@ -1277,15 +1316,6 @@ class Thellier(base.Measurement):
         max_idx = np.argmax(abs(dtail[component].v))
         out = ( abs(dtail.filter_idx(max_idx)[component].v) / abs(self.result_vds(**parameter).v)) * 100
         self.results['md_vds'] = out
-
-    def result_d_t(self, t_min=None, t_max=None, component=None, recalc=False, **options):
-
-        parameter = {'t_min': t_min,
-                     't_max': t_max,
-                     'component': component,
-        }
-        self.calc_result(parameter, recalc)
-        return self.results['d_t']
 
     def calculate_d_t(self, **parameter):
         """

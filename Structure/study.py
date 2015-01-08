@@ -13,7 +13,7 @@ class Study(object):
     i.e. container for samplegroups
     """
 
-    def __init__(self, name=None, samplegroups=None):
+    def __init__(self, samplegroups=None, name=None):
         """
         constructor
         :param samplegroups: one or several samplegroups that form the study
@@ -70,10 +70,10 @@ class Study(object):
         :param samplegroup:
         :return:
         """
-        if not samplegroup is None:
+        if samplegroup is not None:
             samplegroup = self._check_samplegroup_list(samplegroup)
             self._samplegroups.extend(samplegroup)
-            return samplegroup[0]
+            return samplegroup
 
 
 

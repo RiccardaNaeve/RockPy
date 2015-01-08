@@ -1,10 +1,48 @@
 __author__ = 'mike'
 import matplotlib.pyplot as plt
 from matplotlib import lines
+import numpy as np
 
 
-def arai_points(ax, thellier_object, component='mag', **plt_opt):
-    ax.plot(thellier_object.ptrm[component], thellier_object.th[component])
+def arai_points(ax, m_obj, component='mag', **plt_opt):
+    idx = m_obj._get_idx_equal_val('ptrm', 'th', 'temp')
+    x = m_obj.ptrm.filter_idx(idx[:, 0])
+    y = m_obj.th.filter_idx(idx[:, 1])
+
+    marker = plt_opt.pop('marker', 's')
+    markersize = plt_opt.pop('markersize', 3)
+    linestyle = plt_opt.pop('linestyle', '-')
+
+    ax.plot(x[component].v, y[component].v,
+            marker=marker,
+            linestyle=linestyle,
+            markersize=markersize,
+            zorder=100,
+            label=m_obj.sample_obj.name,
+            **plt_opt)
+
+
+def arai_stdev(ax, m_obj, component='mag', **plt_opt):
+    idx = m_obj._get_idx_equal_val('ptrm', 'th', 'temp')
+    x = m_obj.ptrm.filter_idx(idx[:, 0])
+    y = m_obj.th.filter_idx(idx[:, 1])
+    color = plt_opt.pop('color', 'k')
+    if not np.all(np.isnan(x[component].e)):
+        # ax.errorbar(x=x[component].v,
+        # xerr=x[component].e,
+        #             y=y[component].v,
+        #             yerr=y[component].e,
+        #             color=color,
+        #             # alpha=0.3,
+        #             zorder=2,
+        #             **plt_opt)
+        ax.fill_between(x[component].v,
+                        y[component].v - y[component].e,
+                        y[component].v + y[component].e,
+                        color=color,
+                        alpha=0.3,
+                        zorder=0,
+                        **plt_opt)
 
 
 def add_ck_check(ax, thellier_object, component='mag', norm_factor=[1, 1], **plt_opt):

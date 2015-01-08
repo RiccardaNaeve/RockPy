@@ -1,9 +1,13 @@
+from Visualize.Features.day import day_grid
+
 __author__ = 'mike'
 import base
 import matplotlib.pyplot as plt
 import RockPy.Plotting
 import RockPy as RP
 import RockPy.Measurements.thellier
+
+from Visualize.Features import generic, arai
 
 
 class Tutorial(base.Generic):
@@ -47,10 +51,26 @@ class Arai(base.Generic):
     def initialize_visual(self):
         super(Arai, self).initialize_visual()
         self._required = RockPy.Measurements.thellier.Thellier
+        self.standard_features = [generic.grid, arai.arai_points, arai.arai_stdev]
         self.add_plot()
+        self.ax = self.figs[self.name][0].gca()
 
-    def plotting(self, sample):
-        pass
+
+    def plotting(self, samples, **plt_opt):
+        for feature in self.standard_features:
+            for s in samples:
+                # look for measurements
+                for visual, mtype in self.required.iteritems():
+                    measurements = s.get_measurements(mtype=mtype)
+                    for m in measurements:
+                        feature(ax=self.ax, m_obj=m, **plt_opt)
+        plt.legend(loc='best')
+
+    ''' Features '''
+
+    def feature_points(self, thellier_obj, **plt_opt):
+        lines, texts = arai.arai_points(self.ax, thellier_obj, **plt_opt)
+        self._add_line_text_dict(lines, texts)
 
 
 class Multiple(base.Generic):

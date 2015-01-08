@@ -1,4 +1,4 @@
-from Visualize.Features.generic import grid
+from Visualize.Features.day import day_grid
 
 __author__ = 'mike'
 import inspect
@@ -18,7 +18,7 @@ class Day1977(base.Generic):
 
     def initialize_visual(self):
         # super(Day1977, self).initialize_visual()
-        self.standard_features = [grid, day.points]
+        self.standard_features = [day_grid, day.points]
         self.add_plot()
         self.ax = self.figs[self.name][0].gca()
 
@@ -38,7 +38,10 @@ class Day1977(base.Generic):
             bcr_bc = coe.results['bcr'].v / hys.results['bc'].v
             self.ax.plot(bcr_bc, mrs_ms, '.')
 
+
     ''' PLOT FEATURES '''
+    def feature_points(self):
+        pass
 
     def feature_sd_md1(self, **plt_opt):
         lines, texts = day.sd_md_mixline_1(self.ax, **plt_opt)

@@ -11,10 +11,11 @@ def Day1977():
     SG = RockPy.Tutorials.sample_group.get_hys_coe_irm_rmp_sample_group(load=False)
     ST = RockPy.Study(name='day_plot', samplegroups=SG)
     S = SG.sample_list[0]
-    ms = S.get_measurements(mtype=['hysteresis', 'backfield'])
-    results = S.mean_results_from_list(mlist=ms)
+    S.calc_all()
+    print S.results
+    results = S.mean_results()
     print results
-    # plot = RockPy.Visualize.combined.Day1977(S)
+    plot = RockPy.Visualize.combined.Day1977(S)
     # plot = RockPy.Visualize.combined.Day1977(SG)
     # plot = RockPy.Visualize.combined.Day1977(ST)
     # print(plot.input_type)
@@ -24,12 +25,16 @@ def Day1977():
 def test():
     S = RockPy.Tutorials.sample.get_hys_all_sample()
     ms = S.get_measurements(mtype='hysteresis')
-    results = S.mean_results_from_list(mlist=ms)
+    results = S.mean_results(mlist=ms)
     print results
 
 def Arai():
-    pass
+    S = RockPy.Tutorials.sample_group.get_thellier_samplegroup()
+    ST = RockPy.Study(S, name='TT-test-ST')
+    P = RockPy.Visualize.paleointensity.Arai(ST)
+    P.add_all_samples()
+    P.show()
 
 if __name__ == '__main__':
-    Day1977()
+    Arai()
     # test()

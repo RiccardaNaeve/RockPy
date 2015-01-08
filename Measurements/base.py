@@ -95,7 +95,6 @@ class Measurement(object):
         :param options:
         :return:
         """
-        Measurement.logger
 
         self.has_data = True
         self._data = {}
@@ -188,6 +187,7 @@ class Measurement(object):
                                     not i.endswith('generic')}
         if self._treatment_opt:
             self._add_treatment_from_opt()
+            self._add_ttype_to_results()
 
 
     def __getstate__(self):
@@ -196,7 +196,7 @@ class Measurement(object):
         :return:
         '''
         pickle_me = {k: v for k, v in self.__dict__.iteritems() if k in
-                     ('machine_data', 'is_machine_data', '_data',  'has_data', 'mtype', 'sample_obj', 'mfile', '_treatment_opt', 'suffix')}
+                     ('machine_data', 'initial_state', 'is_machine_data', '_data',  'has_data', 'mtype', 'sample_obj', 'mfile', '_treatment_opt', 'suffix')}
         return pickle_me
 
     def __setstate__(self, d):
@@ -645,3 +645,16 @@ class Measurement(object):
             return out
         else:
             return None
+
+    def _add_ttype_to_results(self):
+        """
+        adds a column with ttype ttype.name to the results for each ttype in measurement.treatments
+        :return:
+        """
+        if self._treatments:
+            for t in self.treatments:
+                if t.ttype:
+                    self.results.append_columns(column_names='ttype '+ t.ttype,
+                                                data= t.value,
+                                                # unit = t.unit      # todo add units
+                                                )

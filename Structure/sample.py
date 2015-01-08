@@ -8,6 +8,7 @@ import numpy as np
 from RockPy.Measurements.base import Measurement
 from RockPy.Structure.data import RockPyData, condense
 import RockPy.Visualize.base
+from copy import deepcopy
 
 RockPy.Functions.general.create_logger(__name__)
 
@@ -156,35 +157,17 @@ class Sample(object):
 
             Sample.logger.error(' << %s >> not implemented, yet' % mtype)
 
-    def calc_all(self, **options):
-        self.results = None
-        for measurement in self.measurements:
-            if not measurement.mtype in ['mass', 'height', 'diameter']:
-                s_type = None
-                measurement.calc_all(**options)
-                if measurement.suffix:
-                    try:
-                        s_type, s_value, s_unit = measurement._get_treatment_from_suffix()
-                    except:
-                        pass
-                if not self.results:
-                    if measurement.suffix:
-                        row_name = measurement.suffix
-                    else:
-                        row_name = ''
+    def calc_all(self, **parameter):
+        """
+        Calculates all results using specified parameter for all available measurements
+        .. Note::
 
-                    self.results = RockPyData(
-                        column_names=[i for i in measurement.results.column_names],
-                        data=measurement.results.data,
-                        row_names=measurement.suffix
-                    )
-                else:
-                    c_names = [i for i in measurement.results.column_names]
-                    data = measurement.results.data
-                    rpdata = RockPyData(column_names=c_names, data=data,
-                                        row_names=measurement.suffix
-                    )
-                    self.results = self.results.append_rows(rpdata)
+           always recalculates everything
+
+        :param parameter: calculation parameter e.g. t_min, t_max @ Thellier-Thellier
+        :return:
+        """
+        self.results = self.all_results(**parameter)
         return self.results
 
     @property
@@ -319,26 +302,27 @@ class Sample(object):
         :return:
         """
         mlist = _to_list(mlist)
-        measurement = mlist[0]
+        measurement = deepcopy(mlist[0])
 
         for dtype in measurement.data:
-            aux = [m.data[dtype] for m in mlist]
-
+            dtype_list = [m.data[dtype] for m in mlist]
             if interpolate:
-                varlist = self.__get_variable_list(aux)
+                varlist = self.__get_variable_list(dtype_list)
                 if len(varlist) > 1:
-                    aux = [m.interpolate(varlist) for m in aux]
+                    dtype_list = [m.interpolate(varlist) for m in dtype_list]
 
-            measurement.data[dtype] = condense(aux)
-            measurement.data[dtype] = measurement.data[dtype].sort('variable')
+            if len(dtype_list) > 1: #for single measurements
+                measurement.data[dtype] = condense(dtype_list)
+                measurement.data[dtype] = measurement.data[dtype].sort('variable')
+
             if recalc_mag:
                 measurement.data[dtype].define_alias('m', ( 'x', 'y', 'z'))
                 measurement.data[dtype]['mag'].v = measurement.data[dtype].magnitude('m')
 
         if measurement.initial_state:
             for dtype in measurement.initial_state.data:
-                aux = [m.initial_state.data[dtype] for m in mlist if m.initial_state]
-                measurement.initial_state.data[dtype] = condense(aux)
+                dtype_list = [m.initial_state.data[dtype] for m in mlist if m.initial_state]
+                measurement.initial_state.data[dtype] = condense(dtype_list)
                 measurement.initial_state.data[dtype] = measurement.initial_state.data[dtype].sort('variable')
                 if recalc_mag:
                     measurement.initial_state.data[dtype].define_alias('m', ( 'x', 'y', 'z'))
@@ -346,14 +330,14 @@ class Sample(object):
                         'm')
         return measurement
 
-    def all_results_from_list(self, mlist, **parameter):
+    def all_results(self, mtype=None, ttype=None, tval=None, tval_range=None, **parameter):
         """
         calculates all results for a list of measuremetns and stores them in a RockPy data object
         :param mlist:
         :param parameter:
         :return:
         """
-        mlist = _to_list(mlist)  # convert to list
+        mlist = self.get_measurements(mtype=mtype, ttype=ttype, tval=tval, tval_range=tval_range)
 
         # # initialize
         all_results = None
@@ -368,29 +352,37 @@ class Sample(object):
             else:
                 # add new columns to all_results
                 column_add_all_results = list(set(results.column_names) -
-                                               set(
-                                                   all_results.column_names))  # columns in results but not in all_results
+                                              set(all_results.column_names)) #cols in results but not in all_results
+
                 all_results = all_results.append_columns(column_add_all_results)
+
                 aux = RockPyData(column_names=all_results.column_names, data=[np.nan for i in range(len(all_results.column_names))])
                 # todo remove workaround
                 # column_add_results = list(set(all_results.column_names) -
                 #                           set(results.column_names))  # columns in all_results but not in results
                 # results = results.append_columns(column_add_results)
+                for k in aux.column_names:
+                    if k in results.column_names:
+                        aux[k] = results[k].v
                 # store new results in mean_measults
-
                 all_results = all_results.append_rows(aux)
 
         all_results._row_names = rownames
         return all_results
 
-    def mean_results_from_list(self, mlist, substfunc='mean', **parameter):
+    def mean_results(self, mtype=None, ttype=None, tval=None, tval_range=None, **parameter):
         """
-        calculates all
+        calculates all results and returns the
         :param mlist:
         :return:
         """
-        mlist = _to_list(mlist)
-        all_results = self.all_results_from_list(mlist=mlist, **parameter)
+        mlist = self.get_measurements(mtype=mtype, ttype=ttype, tval=tval, tval_range=tval_range)
+
+        all_results = self.all_results(mlist=mlist, **parameter)
+
+        if 'ttype' in ''.join(all_results.column_names): #check for ttype
+            self.logger.warning('TREATMENT/S found check if measurement list correct'
+            )
         v = np.nanmean(all_results.v, axis=0)
         errors = np.nanstd(all_results.v, axis=0)
 
@@ -427,6 +419,10 @@ class Sample(object):
 
     @property
     def plottable(self):
+        """
+        returns a list of all possible Visuals for this sample
+        :return:
+        """
         out = {}
         for visual in RockPy.Visualize.base.Generic.inheritors():
             if self.meets_requirements(visual._required):

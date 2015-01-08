@@ -9,5 +9,8 @@ from RockPy.Measurements.base import Measurement
 from file_operations import save, load
 RockPy.Functions.general.create_logger('RockPy')
 
-#import os
+import os
+from os.path import join
+test_data_path = join(os.getcwd().split('RockPy')[0], 'RockPy', 'Tutorials', 'test_data')
+
 #os.chdir(default_path)

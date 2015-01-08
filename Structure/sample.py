@@ -237,21 +237,6 @@ class Sample(object):
         out = {ttype: self.get_measurements(ttype=ttype) for ttype in self.ttypes}
         return out
 
-    # @property #todo can erase?
-    # def mtype_ttype_dict(self):
-    #     """
-    #     returns a dictionary of mtypes, with all ttypes in that mtype
-    #     """
-    #     out = {mtype: self.__sort_list_set([ttype for m in self.get_measurements(mtype=mtype) for ttype in m.ttypes])
-    #            for mtype in self.mtypes}
-    #     return out
-
-    # @property #todo can erase?
-    # def ttype_tval_dict(self):
-    #     out = {ttype: self.__sort_list_set([m.ttype_dict[ttype].value for m in self.ttype_dict[ttype]]) for ttype in
-    #            self.ttypes}
-    #     return out
-
     @property
     def mtype_ttype_tval_mdict(self):
         out = {mt:
@@ -318,18 +303,6 @@ class Sample(object):
         if measurements_for_del:
             self.measurements = [m for m in self.measurements if not m in measurements_for_del]
 
-    # def get_measurements_with_treatment(self, ttype, **options): #todo can erase?
-    #     Sample.logger.debug('SEARCHING\t measurements with treatment type << %s >>' % (ttype.lower()))
-    #     out = [m for m in self.measurements for t in m.treatments if t.ttype == ttype.lower()]
-    #
-    #     if len(out) != 0:
-    #         Sample.logger.info('FOUND\t sample << %s >> has %i measurements with treatment << %s >>' % (
-    #             self.name, len(out), ttype.lower()))
-    #     else:
-    #         Sample.logger.error(
-    #             'UNKNOWN\t treatment << %s >> or no measurement found for sample << %s >>' % (ttype.lower(), self.name))
-    #         return []
-    #     return out
 
     ''' MISC FUNTIONS '''
 

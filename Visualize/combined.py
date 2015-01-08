@@ -1,3 +1,5 @@
+from Visualize.Features.generic import grid
+
 __author__ = 'mike'
 import inspect
 import numpy as np
@@ -16,17 +18,17 @@ class Day1977(base.Generic):
 
     def initialize_visual(self):
         # super(Day1977, self).initialize_visual()
-        self.standard_features = ['grid']
+        self.standard_features = [grid, day.points]
         self.add_plot()
         self.ax = self.figs[self.name][0].gca()
-        RockPy.Plotting.day_plot.grid(self.ax)
+
         self.ax.set_xlim([0, 8])
         # self.ax.set_ylim([0, 0.6])
         self.ax.set_xlabel('$B_{cr} / B_c$')
         self.ax.set_ylabel('$M_{rs} / M_{s}$')
 
     def plotting(self, samples, **plt_opt):
-        samples = self._to_sample_list(samples)
+        samples = self.get_plot_samples()
         for sample in samples:
             hys = sample.get_measurements(mtype='hysteresis')[0]
             coe = sample.get_measurements(mtype='backfield')[0]
@@ -82,6 +84,7 @@ class Fabian2010(base.Generic):
         coe = sample.get_measurements(mtype='backfield')[0]
 
         p_cor = self.options.get('paramag_correct', False)
+
         if p_cor:
             hys.simple_paramag_cor()
 

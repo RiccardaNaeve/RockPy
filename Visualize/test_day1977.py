@@ -1,12 +1,12 @@
 from unittest import TestCase
-import RockPy.VisualizeV2.combined
+import RockPy.Visualize.combined
 
 __author__ = 'mike'
 
 
 class TestDay1977(TestCase):
     def setUp(self):
-        self.plot = RockPy.VisualizeV2.combined.Day1977()
+        self.plot = RockPy.Visualize.combined.Day1977()
 
     def test_plotting(self):
         self.fail()

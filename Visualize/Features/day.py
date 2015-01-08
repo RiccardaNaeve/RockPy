@@ -1,7 +1,8 @@
 __author__ = 'mike'
-import matplotlib.pyplot as plt
 import numpy as np
 
+def points(ax, hys_obj, coe_obj, **plt_opt):
+    pass
 
 def sd_md_mixline_1(ax, **plt_opt):
     color = plt_opt.pop('color', 'k')

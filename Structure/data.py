@@ -344,7 +344,7 @@ class RockPyData(object):
         :return:
         """
 
-        if errors is None or errors == np.NAN:
+        if errors is None or errors.all() == np.NAN:
             self._data[:, :, 1] = np.NAN
         else:
             # todo: check type of errors
@@ -483,7 +483,7 @@ class RockPyData(object):
             row_names = data.row_names
             data = data.data
 
-        # todo: check if column names match????
+        # todo: check if column names match???? IMPORTANT
 
         if ignore_row_names:
             row_names = None
@@ -1248,7 +1248,6 @@ class RockPyData(object):
 
         x = self[column_name_x].v
         y = self[column_name_y].v
-
         if len(x) < 2 or len(y) < 2:
             return None
 

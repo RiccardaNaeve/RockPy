@@ -122,25 +122,25 @@ class SampleGroup(object):
         return self.__sort_list_set(out)
 
     # ## sample-stage
-    @property
-    def sname_mdict(self):
-        out = {s.name: s.mtype_mdict for s in self.slist}
-        return out
+    # @property #todo can erase?
+    # def sname_mdict(self):
+    #     out = {s.name: s.mtype_mdict for s in self.slist}
+    #     return out
 
-    @property
-    def sname_tdict(self):
-        out = {s.name: s.ttype_dict for s in self.slist}
-        return out
+    # @property #todo can erase?
+    # def sname_tdict(self):
+    #     out = {s.name: s.ttype_dict for s in self.slist}
+    #     return out
 
-    @property
-    def sname_tvals(self):
-        out = {s.name: s.tvals for s in self.slist}
-        return out
+    # @property #todo can erase?
+    # def sname_tvals(self):
+    #     out = {s.name: s.tvals for s in self.slist}
+    #     return out
 
-    @property
-    def sname_mtype_ttype_tval_mdict(self):
-        out = {s.name: s.mtype_ttype_tval_mdict for s in self.slist}
-        return out
+    # @property #todo can erase?
+    # def sname_mtype_ttype_tval_mdict(self):
+    #     out = {s.name: s.mtype_ttype_tval_mdict for s in self.slist}
+    #     return out
 
     # ## measurement stage
 
@@ -182,15 +182,15 @@ class SampleGroup(object):
         return out
 
 
-    @property
-    def ttype_dict(self):
-        """
-        returns all treatments and lust of values as dictionaty
-        """
-        t_dict = {i: {j: self._get_measurements_with_treatment(i, j) for j in self._get_all_treatment_values(i)} for i
-                  in
-                  self.ttypes}
-        return t_dict
+    # @property #todo can erase?
+    # def ttype_dict(self):
+    #     """
+    #     returns all treatments and lust of values as dictionaty
+    #     """
+    #     t_dict = {i: {j: self._get_measurements_with_treatment(i, j) for j in self._get_all_treatment_values(i)} for i
+    #               in
+    #               self.ttypes}
+    #     return t_dict
 
     @property
     def ttype_tval_dict(self):
@@ -233,13 +233,13 @@ class SampleGroup(object):
                 out[ttype][tval] = self.results.filter_idx(idx)
         return out
 
-    def _get_measurements_with_treatment(self, ttype, tvalue):
-        out = [m
-               for sample in self.sample_list
-               for m in sample.get_measurements_with_treatment(ttype)
-               for t in m.treatments
-               if t.value == tvalue]
-        return out
+    # def _get_measurements_with_treatment(self, ttype, tvalue): #todo can erase?
+    #     out = [m
+    #            for sample in self.sample_list
+    #            for m in sample.get_measurements_with_treatment(ttype)
+    #            for t in m.treatments
+    #            if t.value == tvalue]
+    #     return out
 
     def _sdict_from_slist(self, s_list):
         if not type(s_list) is list:

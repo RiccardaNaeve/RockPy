@@ -11,6 +11,7 @@ import RockPy.Visualize.base
 
 RockPy.Functions.general.create_logger(__name__)
 
+
 class Sample(object):
     """
     Sample in a way a container for measurements
@@ -116,8 +117,8 @@ class Sample(object):
             self.add_measurement(mtype='height', mfile=None, machine=length_machine,
                                  value=float(height), unit=length_unit)
 
-    # def __repr__(self):
-    # return '<< %s - Structure.sample.Sample >>' % self.name
+    def __repr__(self):
+        return '<< %s - Structure.sample.Sample >>' % self.name
 
     ''' ADD FUNCTIONS '''
 
@@ -175,11 +176,14 @@ class Sample(object):
                     self.results = RockPyData(
                         column_names=[i for i in measurement.results.column_names],
                         data=measurement.results.data,
-                        row_names=measurement.suffix)
+                        row_names=measurement.suffix
+                    )
                 else:
                     c_names = [i for i in measurement.results.column_names]
                     data = measurement.results.data
-                    rpdata = RockPyData(column_names=c_names, data=data, row_names=measurement.suffix)
+                    rpdata = RockPyData(column_names=c_names, data=data,
+                                        row_names=measurement.suffix
+                    )
                     self.results = self.results.append_rows(rpdata)
         return self.results
 
@@ -223,18 +227,6 @@ class Sample(object):
         return out
 
     @property
-    def mtype_mdict(self):
-        """
-        dictionary with all measurement_types {mtype:[list of measurements]}
-
-        example:
-        >>> {'thellier': [<RockPy.Measurements.parameters.Mass object at 0x10e196150>, <RockPy.Measurements.parameters.Diameter object at 0x10e1962d0>]}
-        """
-
-        out = {mtype: self.get_measurements(mtype=mtype) for mtype in self.mtypes}
-        return out
-
-    @property
     def ttype_dict(self):
         """
         dictionary with all treatment_types {ttype:[list of measurements]}
@@ -245,30 +237,20 @@ class Sample(object):
         out = {ttype: self.get_measurements(ttype=ttype) for ttype in self.ttypes}
         return out
 
-    @property
-    def mtype_ttype_dict(self):
-        """
-        returns a dictionary of mtypes, with all ttypes in that mtype
-        """
-        out = {mtype: self.__sort_list_set([ttype for m in self.get_measurements(mtype=mtype) for ttype in m.ttypes])
-               for mtype in self.mtypes}
-        return out
+    # @property #todo can erase?
+    # def mtype_ttype_dict(self):
+    #     """
+    #     returns a dictionary of mtypes, with all ttypes in that mtype
+    #     """
+    #     out = {mtype: self.__sort_list_set([ttype for m in self.get_measurements(mtype=mtype) for ttype in m.ttypes])
+    #            for mtype in self.mtypes}
+    #     return out
 
-    @property
-    def mtype_ttype_mdict(self):
-        """
-        returns a dictionary of mtypes, with all ttypes in that mtype
-        """
-        out = {mtype: {ttype: self.get_measurements(mtype=mtype, ttype=ttype)
-                       for ttype in self.mtype_ttype_dict[mtype]}
-               for mtype in self.mtypes}
-        return out
-
-    @property
-    def ttype_tval_dict(self):
-        out = {ttype: self.__sort_list_set([m.ttype_dict[ttype].value for m in self.ttype_dict[ttype]]) for ttype in
-               self.ttypes}
-        return out
+    # @property #todo can erase?
+    # def ttype_tval_dict(self):
+    #     out = {ttype: self.__sort_list_set([m.ttype_dict[ttype].value for m in self.ttype_dict[ttype]]) for ttype in
+    #            self.ttypes}
+    #     return out
 
     @property
     def mtype_ttype_tval_mdict(self):
@@ -336,24 +318,33 @@ class Sample(object):
         if measurements_for_del:
             self.measurements = [m for m in self.measurements if not m in measurements_for_del]
 
-    def get_measurements_with_treatment(self, ttype, **options):
-        Sample.logger.debug('SEARCHING\t measurements with treatment type << %s >>' % (ttype.lower()))
-        out = [m for m in self.measurements for t in m.treatments if t.ttype == ttype.lower()]
-
-        if len(out) != 0:
-            Sample.logger.info('FOUND\t sample << %s >> has %i measurements with treatment << %s >>' % (
-                self.name, len(out), ttype.lower()))
-        else:
-            Sample.logger.error(
-                'UNKNOWN\t treatment << %s >> or no measurement found for sample << %s >>' % (ttype.lower(), self.name))
-            return []
-        return out
+    # def get_measurements_with_treatment(self, ttype, **options): #todo can erase?
+    #     Sample.logger.debug('SEARCHING\t measurements with treatment type << %s >>' % (ttype.lower()))
+    #     out = [m for m in self.measurements for t in m.treatments if t.ttype == ttype.lower()]
+    #
+    #     if len(out) != 0:
+    #         Sample.logger.info('FOUND\t sample << %s >> has %i measurements with treatment << %s >>' % (
+    #             self.name, len(out), ttype.lower()))
+    #     else:
+    #         Sample.logger.error(
+    #             'UNKNOWN\t treatment << %s >> or no measurement found for sample << %s >>' % (ttype.lower(), self.name))
+    #         return []
+    #     return out
 
     ''' MISC FUNTIONS '''
+
     def average_all_measurements(self):
         pass
 
     def mean_measurement_from_list(self, mlist, interpolate=False, recalc_mag=False):
+        """
+        takes a list of measurements and creates a mean measurement out of all measurements data
+
+        :param mlist:
+        :param interpolate:
+        :param recalc_mag:
+        :return:
+        """
         mlist = _to_list(mlist)
         measurement = mlist[0]
 
@@ -370,6 +361,7 @@ class Sample(object):
             if recalc_mag:
                 measurement.data[dtype].define_alias('m', ( 'x', 'y', 'z'))
                 measurement.data[dtype]['mag'].v = measurement.data[dtype].magnitude('m')
+
         if measurement.initial_state:
             for dtype in measurement.initial_state.data:
                 aux = [m.initial_state.data[dtype] for m in mlist if m.initial_state]
@@ -380,6 +372,61 @@ class Sample(object):
                     measurement.initial_state.data[dtype]['mag'].v = measurement.initial_state.data[dtype].magnitude(
                         'm')
         return measurement
+
+    def all_results_from_list(self, mlist, **parameter):
+        """
+        calculates all results for a list of measuremetns and stores them in a RockPy data object
+        :param mlist:
+        :param parameter:
+        :return:
+        """
+        mlist = _to_list(mlist)  # convert to list
+
+        # # initialize
+        all_results = None
+        rownames = []
+
+        for index, measurement in enumerate(mlist):
+            measurement.calc_all()
+            rownames.append(measurement.mtype[0:3] + ' %03i' % index)
+            results = measurement.results
+            if not all_results:
+                all_results = results
+            else:
+                # add new columns to all_results
+                column_add_all_results = list(set(results.column_names) -
+                                               set(
+                                                   all_results.column_names))  # columns in results but not in all_results
+                all_results = all_results.append_columns(column_add_all_results)
+                aux = RockPyData(column_names=all_results.column_names, data=[np.nan for i in range(len(all_results.column_names))])
+                # todo remove workaround
+                # column_add_results = list(set(all_results.column_names) -
+                #                           set(results.column_names))  # columns in all_results but not in results
+                # results = results.append_columns(column_add_results)
+                # store new results in mean_measults
+
+                all_results = all_results.append_rows(aux)
+
+        all_results._row_names = rownames
+        return all_results
+
+    def mean_results_from_list(self, mlist, substfunc='mean', **parameter):
+        """
+        calculates all
+        :param mlist:
+        :return:
+        """
+        mlist = _to_list(mlist)
+        all_results = self.all_results_from_list(mlist=mlist, **parameter)
+        v = np.nanmean(all_results.v, axis=0)
+        errors = np.nanstd(all_results.v, axis=0)
+
+        mean_results = RockPyData(column_names=all_results.column_names,
+                                  row_names='mean ' + '_'.join(all_results.row_names),
+                                  data=v,
+        )
+        mean_results.e = errors.reshape((1, len(errors)))
+        return mean_results
 
     def __get_variable_list(self, rpdata_list):
         out = []
@@ -395,34 +442,43 @@ class Sample(object):
         """
         return sorted(list(set(values)))
 
-    def _sort_ttype_tval(self, mlist):
-        """
-        sorts a list of measurements according to their tvals and ttypes
-        :param mlist:
-        :return:
-        """
+    # def _sort_ttype_tval(self, mlist):
+    #     """
+    #     sorts a list of measurements according to their tvals and ttypes
+    #     :param mlist:
+    #     :return:
+    #     """
 
 
     ''' FOR PLOTTING FUNCTIONS '''
+
     @property
     def plottable(self):
         out = {}
-        for visual in RockPy.VisualizeV2.base.Generic.inheritors():
+        for visual in RockPy.Visualize.base.Generic.inheritors():
             if self.meets_requirements(visual._required):
                 out.update({visual.__name__: visual})
         return out
 
     def meets_requirements(self, require_list):
+        """
+        checks if the sample meets the requirements for a certain plot
+
+        :param require_list: list of requirements, usually comes from Visualize
+        :return: bool
+        """
         out = []
-        if require_list is None:
+
+        if require_list is None: #no requirements - standard == False
             return False
 
-        for i in require_list:
+        for i in require_list: #iterate over requirements
             if i in self.mtypes:
-                out.append(True)
+                out.append(True) # true if meets requirements
             else:
-                out.append(False)
+                out.append(False) # false if not
+
         if all(out):
-            return True
+            return True # return if all == True
         else:
             return False

@@ -3,6 +3,10 @@ import matplotlib.pyplot as plt
 from matplotlib import lines
 
 
+def arai_points(ax, thellier_object, component='mag', **plt_opt):
+    ax.plot(thellier_object.ptrm[component], thellier_object.th[component])
+
+
 def add_ck_check(ax, thellier_object, component='mag', norm_factor=[1, 1], **plt_opt):
     if not plt_opt: plt_opt = {}
 

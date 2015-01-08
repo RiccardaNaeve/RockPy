@@ -85,7 +85,7 @@ class Generic(object):
         # check if a figure is provided, this way multiple plots can be combined into one figure
         if create_fig:
             # self.fig = options.get('fig', plt.figure(figsize=(8, 6), dpi=100))
-            self.fig = options.get('fig', plt.figure(figsize=(10, 10), dpi=100))
+            self.fig = options.get('fig', plt.figure(figsize=(5, 5), dpi=100))
 
         if create_ax:
             self.ax = options.get('ax', plt.subplot2grid((1, 1), (0, 0), colspan=1, rowspan=1))

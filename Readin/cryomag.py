@@ -18,9 +18,11 @@ class CryoMag(base.Machine):
 
         if sample_name == 'test_sample':
             sample_name = self.samples[0]
-
-        self.sample_idx = [i for i, v in enumerate(d[:, 0]) if
-                           v == sample_name or sample_name in d[i, 9]]
+        try:
+            self.sample_idx = [i for i, v in enumerate(d[:, 0]) if
+                               v == sample_name or sample_name in d[i, 9]]
+        except IndexError:
+            print sample_name
         self.results_idx = [i for i, v in enumerate(d[:, 11]) if v == 'results' and i in self.sample_idx]
         self.data = np.array(
             [v for i, v in enumerate(d) if v[0] == sample_name or sample_name in v[9]

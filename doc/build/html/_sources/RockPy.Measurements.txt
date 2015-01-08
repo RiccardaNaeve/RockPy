@@ -1,96 +1,80 @@
 Measurements Package
 ====================
 
-:mod:`Measurements` Package
----------------------------
+Measurement Base-Class
+----------------------
 
 .. automodule:: RockPy.Measurements
     :members:
     :undoc-members:
     :show-inheritance:
 
-:mod:`af_demag` Module
-----------------------
+AF-demag
+--------
 
 .. automodule:: RockPy.Measurements.af_demag
     :members:
     :undoc-members:
     :show-inheritance:
 
-:mod:`backfield` Module
------------------------
+Backfield
+---------
 
 .. automodule:: RockPy.Measurements.backfield
     :members:
     :undoc-members:
     :show-inheritance:
 
-:mod:`base` Module
-------------------
-
-.. automodule:: RockPy.Measurements.base
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-:mod:`forc` Module
-------------------
-
-.. automodule:: RockPy.Measurements.forc
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-:mod:`hysteresis` Module
-------------------------
+Hysteresis
+----------
 
 .. automodule:: RockPy.Measurements.hysteresis
     :members:
     :undoc-members:
     :show-inheritance:
 
-:mod:`irm` Module
------------------
+IRM - single moment
+-------------------
 
 .. automodule:: RockPy.Measurements.irm
     :members:
     :undoc-members:
     :show-inheritance:
 
-:mod:`nrm` Module
------------------
+NRM - single moment
+-------------------
 
 .. automodule:: RockPy.Measurements.nrm
     :members:
     :undoc-members:
     :show-inheritance:
 
-:mod:`parameters` Module
-------------------------
+Parameters
+----------
 
 .. automodule:: RockPy.Measurements.parameters
     :members:
     :undoc-members:
     :show-inheritance:
 
-:mod:`thellier` Module
-----------------------
+Thellier-Thellier
+-----------------
 
 .. automodule:: RockPy.Measurements.thellier
     :members:
     :undoc-members:
     :show-inheritance:
 
-:mod:`thermocurve` Module
--------------------------
+Thermocurve
+-----------
 
 .. automodule:: RockPy.Measurements.thermocurve
     :members:
     :undoc-members:
     :show-inheritance:
 
-:mod:`trm` Module
------------------
+TRM - single moment
+-------------------
 
 .. automodule:: RockPy.Measurements.trm
     :members:

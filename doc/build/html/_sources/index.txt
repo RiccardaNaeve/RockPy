@@ -14,7 +14,6 @@ Contents:
    RockPy.Structure
    RockPy.Treatments
    RockPy.Visualize
-   RockPy.Plotting
    guidlines
 
 Indices and tables

@@ -51,6 +51,7 @@ class TestRockPyData(TestCase):
         rpd = copy.deepcopy(self.RPD)
         rpd.rename_column('Mx', 'M_x')
         self.RPD = self.RPD.append_rows(rpd)
+        # TODO: add assert
         print self.RPD
 
     def test_delete_rows(self):

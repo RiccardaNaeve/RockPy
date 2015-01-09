@@ -498,9 +498,15 @@ class RockPyData(object):
                 self_copy = self_copy.append_columns(ecn)  # append extra columns from data to self_copy
                 mcn |= ecn  # extend matching columns by extra column names
 
-            # pad data with NAN values for columns not present in data
-            data = data.data
+            # create 3D numpy array of dimension needed for data to append
+            npdata = np.empty((data.row_count, self_copy.column_count, 2))
+            npdata[:] = np.NAN
+            # TODO: make this loop more efficient
+            for i, n in enumerate(self_copy.column_names):
+                if n in mcn:  # matching column, has to be included in result
+                    npdata[:,i,:] = data.data[:,data.column_names.index(n),:]
 
+            data = npdata
 
         if ignore_row_names:
             row_names = None

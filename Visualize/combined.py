@@ -1,4 +1,4 @@
-from Visualize.Features.day import day_grid
+
 
 __author__ = 'mike'
 import inspect
@@ -10,6 +10,7 @@ import RockPy.Measurements.backfield
 import RockPy.Plotting.hysteresis
 import RockPy.Plotting.backfield
 import RockPy.Plotting.day_plot
+from RockPy.Visualize.Features.day import day_grid
 from Features import day
 
 

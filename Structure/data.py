@@ -469,13 +469,15 @@ class RockPyData(object):
         self._update_column_dictionary(self._column_names)
         self._column_dict.pop(old_cname)
 
-    def append_rows(self, data, row_names=None, ignore_row_names=False):
+    def append_rows(self, data, row_names=None, ignore_row_names=False, add_extra_columns=True):
         """
         append rows with data and optionally row_names
-        :param data: can be either an 1-3 dim array or another RockPyData object with matching number of columns
+        :param data: can be either an 1-3 dim array with matching number of columns or another RockPyData object
+                in the latter case, columns will be matched by names
         :param row_names: one or multiple row names matching the number of data rows. if data is another
                             RockPyData object, row labels will be taken from that
         :param ignore_row_names: if true, no row names will be appended in any case
+        :param add_extra_columns: if true and data is RockPyData, extra columns present in data will be included in the result
         :return:
         """
         # check if we have another RockPyData object to append

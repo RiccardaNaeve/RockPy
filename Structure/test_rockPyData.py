@@ -1,6 +1,7 @@
 from unittest import TestCase  # Unit Tutorials framework
 import numpy as np  # numerical array functions
 from RockPy.Structure.data import RockPyData
+import copy
 
 
 __author__ = 'wack'
@@ -47,8 +48,10 @@ class TestRockPyData(TestCase):
         self.RPD = self.RPD.append_rows(d2, '5.Zeile')
         self.assertTrue(np.array_equal(self.RPD.v[-1, :], np.array(d2)))
         # lets try with other RockPyData object
-        # self.RPD.append_rows( self.RPD)
-        # print self.RPD
+        rpd = copy.deepcopy(self.RPD)
+        rpd.rename_column('Mx', 'M_x')
+        self.RPD = self.RPD.append_rows(rpd)
+        print self.RPD
 
     def test_delete_rows(self):
         self.RPD = self.RPD.delete_rows((0, 2))
@@ -102,12 +105,16 @@ class TestRockPyData(TestCase):
         self.assertTrue(np.array_equal((self.RPD.interpolate(iv))['Mx'].v[1:-1], np.array([2., 4., 6.])))
 
 
-    def test_normalize(self):
+    def test_magnitude(self):
         self.RPD.define_alias('m', ('Mx', 'My', 'Mz'))
         self.RPD = self.RPD.append_columns('mag', self.RPD.magnitude('m'))
         MX = max(self.RPD['mag'].v)
-        self.assertAlmostEqual(self.RPD.normalize(MX)['F'].v, [1.0, 1.0, 1.0, 1.0], 7)
-        self.assertAlmostEqual(self.RPD.normalize(MX)['Mx'].v, [0.02322287, 0.0696686, 0.02322287, 0.0696686], 7)
-        self.assertAlmostEqual(self.RPD.normalize(MX)['My'].v, [0.0348343, 0.08128004, 0.12772577, 0.63862887], 7)
-        self.assertAlmostEqual(self.RPD.normalize(MX, exception=['Mz'])['Mz'].v, [4.0, 8.0, 12.0, 66.0], 7) #????
-        self.assertAlmostEqual(self.RPD.normalize(MX)['mag'].v, [0.06252949, 0.14173562, 0.19044168, 1.], 7)
+        self.assertAlmostEqual(self.RPD.magnitude(MX)['F'].v, [1.0, 1.0, 1.0, 1.0], 7)
+        self.assertAlmostEqual(self.RPD.magnitude(MX)['Mx'].v, [0.02322287, 0.0696686, 0.02322287, 0.0696686], 7)
+        self.assertAlmostEqual(self.RPD.magnitude(MX)['My'].v, [0.0348343, 0.08128004, 0.12772577, 0.63862887], 7)
+        self.assertAlmostEqual(self.RPD.magnitude(MX, exception=['Mz'])['Mz'].v, [4.0, 8.0, 12.0, 66.0], 7)  # ????
+        self.assertAlmostEqual(self.RPD.magnitude(MX)['mag'].v, [0.06252949, 0.14173562, 0.19044168, 1.], 7)
+
+
+    def test_column_names_to_indices(self):
+        self.assertEqual( self.RPD.column_names_to_indices(('Mx', 'Mz')), [1,3])

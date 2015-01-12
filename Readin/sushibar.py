@@ -20,6 +20,7 @@ class SushiBar(base.Machine):
         self.float_header = ['x', 'y', 'z', 'dspin', 'ispin', 'par1', 'dip', 'dipdir', 'geoaz', 'm', 'strat_level',
                              'a95', 'par5', 'par4', 'par3', 'par2', 'sm', 'par6', 'dg', 'is', 'hade', 'dc', 'npos',
                              'bl diff/sample', 'ic', 'ds', 'ig']
+
         self.raw_data = np.array([i.strip('\r\n').split('\t') for i in open(self.file_name)])[1:]
         self.sample_names = list(set([i[0] for i in self.raw_data]))
 
@@ -66,7 +67,7 @@ class SushiBar(base.Machine):
         return self.raw_data[:, idx].astype(float), header, units
 
     def out_trm(self):
-        idx = [24, 5, 6, 7]
+        idx = [24, 5, 6, 7, 16]
         return self.raw_data[:, idx].astype(float)
 
 

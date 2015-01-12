@@ -221,6 +221,31 @@ class Sample(object):
         return out
 
     @property
+    def mtype_ttype_dict(self):
+        """
+        returns a dictionary of mtypes, with all ttypes in that mtype
+        """
+        out = {mtype: self.__sort_list_set([ttype for m in self.get_measurements(mtype=mtype) for ttype in m.ttypes])
+               for mtype in self.mtypes}
+        return out
+
+    @property
+    def mtype_ttype_mdict(self):
+        """
+        returns a dictionary of mtypes, with all ttypes in that mtype
+        """
+        out = {mtype: {ttype: self.get_measurements(mtype=mtype, ttype=ttype)
+                       for ttype in self.mtype_ttype_dict[mtype]}
+               for mtype in self.mtypes}
+        return out
+
+    @property
+    def ttype_tval_dict(self):
+        out = {ttype: self.__sort_list_set([m.ttype_dict[ttype].value for m in self.ttype_dict[ttype]]) for ttype in
+               self.ttypes}
+        return out
+
+    @property
     def mtype_ttype_tval_mdict(self):
         out = {mt:
                    {tt: {tv: self.get_measurements(mtype=mt, ttype=tt, tval=tv)
@@ -321,6 +346,8 @@ class Sample(object):
 
         if measurement.initial_state:
             for dtype in measurement.initial_state.data:
+                print [m.initial_state.data['data'].column_names for m in mlist]
+
                 dtype_list = [m.initial_state.data[dtype] for m in mlist if m.initial_state]
                 measurement.initial_state.data[dtype] = condense(dtype_list)
                 measurement.initial_state.data[dtype] = measurement.initial_state.data[dtype].sort('variable')

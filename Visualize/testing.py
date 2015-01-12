@@ -31,6 +31,7 @@ def test():
 def Arai():
     S = RockPy.Tutorials.sample_group.get_thellier_samplegroup()
     ST = RockPy.Study(S, name='TT-test-ST')
+
     P = RockPy.Visualize.paleointensity.Arai(ST)
     P.add_all_samples()
     P.show()

@@ -40,7 +40,7 @@ def arai_stdev(ax, m_obj, component='mag', **plt_opt):
                         y[component].v - y[component].e,
                         y[component].v + y[component].e,
                         color=color,
-                        alpha=0.3,
+                        alpha=0.1,
                         zorder=0,
                         **plt_opt)
 

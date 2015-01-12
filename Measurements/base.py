@@ -196,7 +196,8 @@ class Measurement(object):
         :return:
         '''
         pickle_me = {k: v for k, v in self.__dict__.iteritems() if k in
-                     ('machine_data', 'initial_state', 'is_machine_data', '_data',  'has_data', 'mtype', 'sample_obj', 'mfile', '_treatment_opt', 'suffix')}
+                     ('machine_data', 'initial_state', 'is_machine_data', '_data',  'has_data', 'mtype', 'sample_obj',
+                      'mfile', '_treatments', '_treatment_opt', 'suffix')}
         return pickle_me
 
     def __setstate__(self, d):
@@ -496,6 +497,13 @@ class Measurement(object):
         else:
             return None
 
+
+    def _add_treatment_from_opt(self):
+        treatments = self._get_treatments_from_opt()
+
+        for t in treatments:
+            self.add_treatment(ttype=t[0], tval=t[1], unit=t[2])
+
     def _get_treatments_from_opt(self):
         """
         creates a list of treatments from the treatment option
@@ -513,18 +521,13 @@ class Measurement(object):
             treatments = None
         return treatments
 
-    def _add_treatment_from_opt(self):
-        treatments = self._get_treatments_from_opt()
-
-        for t in treatments:
-            self.add_treatment(ttype=t[0], tval=t[1], unit=t[2])
-
     def _get_treatment(self, ttype=None, tval=None):
         out = [t for t in self.treatments]
         if ttype:
             out = [t for t in out if t.ttype == ttype]
         if tval:
             out = [t for t in out if t.value == tval]
+        return out
 
     def _get_treatment_value(self, ttype):
         if ttype in self.ttype_dict:
@@ -535,7 +538,7 @@ class Measurement(object):
         treatment = Treatments.Generic(ttype=ttype, value=tval, unit=unit, comment=comment)
         self._treatments.append(treatment)
         self._add_tval_to_data(treatment)
-        self._add_tval_to_results(treatment)
+        # self._add_tval_to_results(treatment)
 
     def _add_tval_to_data(self, tobj):
         for dtype in self.data:
@@ -546,8 +549,9 @@ class Measurement(object):
     def _add_tval_to_results(self, tobj):
 
         # data = np.ones(len(self.results['variable'].v)) * tobj.value
-        self.results = self.results.append_columns(column_names='ttype ' + tobj.ttype,
-                                                   data=[tobj.value])  #, unit=tobj.unit)
+        if not tobj.ttype in self.results.column_names:
+            self.results = self.results.append_columns(column_names='ttype ' + tobj.ttype,
+                                                       data=[tobj.value])  #, unit=tobj.unit)
 
 
 
@@ -653,8 +657,9 @@ class Measurement(object):
         """
         if self._treatments:
             for t in self.treatments:
-                if t.ttype:
-                    self.results.append_columns(column_names='ttype '+ t.ttype,
-                                                data= t.value,
-                                                # unit = t.unit      # todo add units
-                                                )
+                if t.ttype :
+                    if t.ttype not in self.results.column_names:
+                        self.results.append_columns(column_names='ttype '+ t.ttype,
+                                                    data= t.value,
+                                                    # unit = t.unit      # todo add units
+                                                    )

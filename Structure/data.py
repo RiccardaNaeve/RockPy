@@ -469,47 +469,70 @@ class RockPyData(object):
         self._update_column_dictionary(self._column_names)
         self._column_dict.pop(old_cname)
 
-    def append_rows(self, data, row_names=None, ignore_row_names=False):
+    def append_rows(self, data, row_names=None, ignore_row_names=False, add_extra_columns=True):
         """
         append rows with data and optionally row_names
-        :param data: can be either an 1-3 dim array or another RockPyData object with matching number of columns
+        :param data: can be either an 1-3 dim array with matching number of columns or another RockPyData object
+                in the latter case, columns will be matched by names
         :param row_names: one or multiple row names matching the number of data rows. if data is another
                             RockPyData object, row labels will be taken from that
         :param ignore_row_names: if true, no row names will be appended in any case
+        :param add_extra_columns: if true and data is RockPyData, extra columns present in data will be included in the result
         :return:
         """
+        self_copy = deepcopy(self)
+        
         # check if we have another RockPyData object to append
         if isinstance(data, RockPyData):
             row_names = data.row_names
-            data = data.data
 
-        # todo: check if column names match???? IMPORTANT
+
+            scn = set(self_copy.column_names)
+            dcn = set(data.column_names)
+            # find matching column names
+            mcn = scn & dcn
+            # find extra column names in data
+            ecn = dcn - scn
+            if ecn and add_extra_columns:
+                # True if we have extra column names in data which are not present in self and want to add those to the result
+                self_copy = self_copy.append_columns(ecn)  # append extra columns from data to self_copy
+                mcn |= ecn  # extend matching columns by extra column names
+
+            # create 3D numpy array of dimension needed for data to append
+            npdata = np.empty((data.row_count, self_copy.column_count, 2))
+            npdata[:] = np.NAN
+            # TODO: make this loop more efficient
+            for i, n in enumerate(self_copy.column_names):
+                if n in mcn:  # matching column, has to be included in result
+                    npdata[:,i,:] = data.data[:,data.column_names.index(n),:]
+
+            data = npdata
 
         if ignore_row_names:
             row_names = None
-            self._row_names = None
+            self_copy._row_names = None
 
-        if self.row_names is None and row_names is not None and self.row_count > 0:
+        if self_copy.row_names is None and row_names is not None and self_copy.row_count > 0:
             raise RuntimeError('cannot append rows with row_names to RockPyData object without row_names')
 
-        if self.row_names is not None and row_names is None:
+        if self_copy.row_names is not None and row_names is None:
             raise RuntimeError('cannot append data without row_names to RockPyData object with row_names')
 
         data = RockPyData._convert_to_data3D(data)
 
         if data is None:
-            return self  # do nothing
+            return self_copy  # do nothing
 
-        if data.shape[1] != self.column_count:  # check if number of data columns match number of columns in rpd object
+        if data.shape[1] != self_copy.column_count:  # check if number of data columns match number of columns in rpd object
             raise RuntimeError(
-                'column count (%i) of data does not match number of columns (%s)' % (data.shape[1], self.column_count))
+                'column count (%i) of data does not match number of columns (%s)' % (data.shape[1], self_copy.column_count))
 
         row_names = _to_tuple(row_names)
 
         if row_names[0] is not None and data.shape[0] != len(row_names):
             raise RuntimeError('number of rows in data does not match number row names given')
 
-        self_copy = deepcopy(self)
+        
 
         # todo check if row names are unique
         if row_names[0] is not None:
@@ -552,8 +575,7 @@ class RockPyData(object):
 
         # create structured array
         a = self['variable'].v
-        varrows = np.ascontiguousarray(a).view(
-            np.dtype((np.void, a.dtype.itemsize * (a.shape[1] if a.ndim == 2 else 1))))
+        varrows = np.ascontiguousarray(a).view(np.dtype((np.void, a.dtype.itemsize * (a.shape[1] if a.ndim == 2 else 1))))
 
         # get unique elements of variable columns
         uar, inv = np.unique(varrows, return_index=False, return_inverse=True)
@@ -675,6 +697,14 @@ class RockPyData(object):
         :return list of strings
         """
         return self.column_indices_to_names(self.column_dict[key])
+
+    def column_names_to_indices(self, c_names):
+        """
+
+        :param c_names: list of column names
+        :return:
+        """
+        return self._keyseq2colseq(c_names)
 
     def _keyseq2colseq(self, key):
         """

@@ -1,4 +1,4 @@
-from Visualize.Features.day import day_grid
+
 
 __author__ = 'mike'
 import base
@@ -7,8 +7,8 @@ import RockPy.Plotting
 import RockPy as RP
 import RockPy.Measurements.thellier
 
-from Visualize.Features import generic, arai
-
+from RockPy.Visualize.Features import generic, arai
+from RockPy.Visualize.Features.day import day_grid
 
 class Tutorial(base.Generic):
     _required = None

@@ -12,7 +12,6 @@ class Vsm(base.Machine):
         self.measurement_header = self.readMicroMagHeader(reader_object)  # get header
         self.raw_out = [i for i in reader_object][self.measurement_header['meta']['numberoflines']:]  # without header
         self.header_idx = {v: i for i, v in enumerate(self.header)}
-
     @property
     def header(self):
         """
@@ -71,12 +70,11 @@ class Vsm(base.Machine):
                               '-')][0]  # first idx of all indices with + or - (data)
 
         # setting up all data indices
-        data_indices = [data_start_idx] + [data_start_idx + i for i in list(map(int, self.segment_info['final index'].v))] #+ [len(self.raw_out[data_start_idx:])]
-
+        data_indices = [data_start_idx] + [data_start_idx + i for i in list(map(int, self.segment_info['final index'].v))] + [len(self.raw_out[data_start_idx:])+data_start_idx-1]
         data = [self.raw_out[data_indices[i]:data_indices[i+1]] for i in range(len(data_indices)-1)]
+
         data = [[j.strip('\n').split(',') for j in i if not j == '\n'] for i in data]
         data = [np.array([map(float, j) for j in i]) for i in data]
-
         # reformating to T / Am2 / Celsius
         if self.measurement_header['INSTRUMENT']['Units of measure'] == 'cgs':
             for i in range(len(data)):

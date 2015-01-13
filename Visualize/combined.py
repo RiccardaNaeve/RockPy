@@ -68,6 +68,11 @@ class Day1977(base.Generic):
         lines, texts = day.sp_envelope(self.ax, **plt_opt)
         self._add_line_text_dict(lines, texts)
 
+
+    def feature_day_grid(self, **plt_opt):
+        lines, texts = day.day_grid(self.ax, **plt_opt)
+        self._add_line_text_dict(lines, texts)
+
     def feature_data(self):
         print self.get_required_measurements()
 

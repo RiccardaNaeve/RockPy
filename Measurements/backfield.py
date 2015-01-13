@@ -56,7 +56,9 @@ class Backfield(base.Measurement):
         data = self.machine_data.out_backfield()
         header = self.machine_data.header
         self._data['remanence'] = RockPyData(column_names=['field', 'mag'], data=data[0][:, [0, 1]])
-        self._data['induced'] = RockPyData(column_names=['field', 'mag'], data=data[0][:, [0, 2]])
+
+        if self.machine_data.measurement_header['SCRIPT']['Include direct moment?'] == 'Yes':
+            self._data['induced'] = RockPyData(column_names=['field', 'mag'], data=data[0][:, [0, 2]])
 
 
     @property

@@ -507,6 +507,8 @@ class Measurement(object):
     def _get_treatments_from_opt(self):
         """
         creates a list of treatments from the treatment option
+
+        e.g. Pressure,1,GPa;Temp,200,C
         :return:
         """
         if self._treatment_opt:
@@ -663,3 +665,21 @@ class Measurement(object):
                                                     data= t.value,
                                                     # unit = t.unit      # todo add units
                                                     )
+    '''' PLOTTING '''''
+
+    @property
+    def plottable(self):
+        """
+        returns a list of all possible Visuals for this measurement
+        :return:
+        """
+        out = {}
+        for visual in RockPy.Visualize.base.Generic.inheritors():
+            if visual._required == [self.mtype]:
+                out.update({visual.__name__: visual})
+        return out
+
+    def show_plots(self):
+        for visual in self.plottable:
+            print visual
+            self.plottable[visual](self)

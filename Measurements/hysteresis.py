@@ -348,7 +348,7 @@ class Hysteresis(base.Measurement):
                 d[:, 1] -= d[:, 0] * slope
 
     # ## plotting functions
-    def plt_hys(self):
+    def plt_hys(self, noshow=False):
         '''
         Rudimentary plotting function for quick check of data
         :return:
@@ -383,7 +383,8 @@ class Hysteresis(base.Measurement):
         plt.title('Hysteresis %s' % (self.sample_obj.name))
         plt.xlabel('Field [%s]' % ('T'))  # todo replace with data unit
         plt.ylabel('Moment [%s]' % ('Am2'))  # todo replace with data unit
-        plt.show()
+        if not noshow:
+            plt.show()
 
     def plt_hysteresis(self):
         '''

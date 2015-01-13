@@ -125,6 +125,7 @@ class Sample(object):
 
     def add_measurement(self,
                         mtype=None, mfile=None, machine='generic',  # general
+                        idx = None,
                         **options):
         '''
         All measurements have to be added here
@@ -142,11 +143,14 @@ class Sample(object):
         mtype = mtype.lower()
 
         implemented = {i.__name__.lower(): i for i in Measurement.inheritors()}
+
+        if idx is None: idx = len(self.measurements) # if there is no measurement index
+
         if mtype in implemented:
             Sample.logger.info(' ADDING\t << measurement >> %s' % mtype)
             measurement = implemented[mtype](self,
                                              mtype=mtype, mfile=mfile, machine=machine,
-                                             m_idx=len(self.measurements),
+                                             m_idx=idx,
                                              **options)
             if measurement.has_data:
                 self.measurements.append(measurement)
@@ -478,3 +482,16 @@ class Sample(object):
             return True # return if all == True
         else:
             return False
+
+    def sort_mlist_in_ttype_dict(self, mlist):
+        """ sorts a list of measurements according to their ttype and tvals"""
+        mlist = _to_list(mlist)
+        out = {}
+        for m in mlist:
+            for t in m.treatments:
+                if not t.ttype in out:
+                    out[t.ttype] = {}
+                if not t.value in out:
+                    out[t.ttype][t.value] = []
+                out[t.ttype][t.value].append(m)
+        return out

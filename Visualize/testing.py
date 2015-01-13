@@ -11,15 +11,15 @@ def Day1977():
     SG = RockPy.Tutorials.sample_group.get_hys_coe_irm_rmp_sample_group(load=False)
     ST = RockPy.Study(name='day_plot', samplegroups=SG)
     S = SG.sample_list[0]
-    S.calc_all()
-    print S.results
-    results = S.mean_results()
-    print results
-    plot = RockPy.Visualize.combined.Day1977(S)
+
+    m = S.get_measurements('hysteresis')[0]
+
+    m.show_plots()
+    # plot = RockPy.Visualize.combined.Day1977(S)
+    # plot.feature_day_grid()
     # plot = RockPy.Visualize.combined.Day1977(SG)
     # plot = RockPy.Visualize.combined.Day1977(ST)
-    # print(plot.input_type)
-    # print plot.get_plot_samples()
+    # plot.show()
 
 
 def test():
@@ -37,5 +37,6 @@ def Arai():
     P.show()
 
 if __name__ == '__main__':
-    Arai()
+    Day1977()
+    # Arai()
     # test()

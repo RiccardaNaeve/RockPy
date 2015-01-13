@@ -35,49 +35,59 @@ class ThermoCurve(base.Measurement):
         segments = self.machine_data.segment_info
 
         aux = np.array([j for i in data for j in i])  # combine all data arrays
-        a = np.diff(aux, axis=0)[:, 0]
-        zero_crossings = np.where(np.diff(np.sign(a)))[0]  # indices of all zero crossings
-        zero_crossings = [v+1 for i, v in enumerate(zero_crossings) if
-                          np.diff(zero_crossings)[i - 1] > 0]  # get rid of temp jerks
+        a = np.array([(i, v) for i, v in enumerate(np.diff(aux, axis=0)[:, 0])])
 
-        zero_crossings = [0] + zero_crossings  # start with zero index
-        zero_crossings += [len(aux)] # append last index
+        sign = np.sign(np.diff(aux, axis=0)[:, 1])
 
-        ut = 0 #running number warming
-        dt = 0 # running number cooling
+        threshold = 3
+
+        zero_crossings = []
+        # zero_crossings = np.where(np.diff(np.sign(a[:,1])))[0]  # indices of all zero crossings
+        # print zero_crossings
+        # zero_crossings = [v+1 for i, v in enumerate(zero_crossings) if
+        # np.diff(zero_crossings)[i] > 1]  # get rid of temp jerks
+        # zero_crossings = [0] + zero_crossings  # start with zero index
+        # zero_crossings += [len(aux)] # append last index
+        # print np.diff(zero_crossings)
+
+        ut = 0  #running number warming
+        dt = 0  # running number cooling
 
         for i, v in enumerate(zero_crossings):
-            if v < zero_crossings[-1]: # prevents index Error
-                if sum(a[v:zero_crossings[i+1]]) < 0: # cooling
-                    name = 'cool%02i'%(ut)
+            if v < zero_crossings[-1]:  # prevents index Error
+                if sum(a[v:zero_crossings[i + 1], 1]) < 0:  # cooling
+                    name = 'cool%02i' % (ut)
                     ut += 1
                 else:
-                    name = 'warm%02i'%(dt)
+                    name = 'warm%02i' % (dt)
                     dt += 1
-                data = aux[v:zero_crossings[i+1]+1]
+                data = aux[v:zero_crossings[i + 1] + 1]
                 rpd = RockPyData(column_names=header, data=data)
                 rpd.rename_column('temperature', 'temp')
                 rpd.rename_column('moment', 'mag')
                 self._data.update({name: rpd})
 
-        # ut = [i for i, v in enumerate(segments['initial temperature'].v)
-        #       if segments['initial temperature'].v[i] < segments['final temperature'].v[i]
-        # ]
-        # dt = [i for i, v in enumerate(segments['initial temperature'].v)
-        #       if segments['initial temperature'].v[i] > segments['final temperature'].v[i]]
-        #
-        # up_data = np.array([data[i] for i in ut])
-        # up_data = [j for i in up_data for j in i]
-        # down_data = [data[i] for i in dt]
-        # down_data = [j for i in down_data for j in i]
-        #
-        # self._data['up_temp'] = RockPyData(column_names=header, data=up_data)
-        # self._data['up_temp'].rename_column('temperature', 'temp')
-        # self._data['up_temp'].rename_column('moment', 'mag')
-        #
-        # self._data['down_temp'] = RockPyData(column_names=header, data=down_data)
-        # self._data['down_temp'].rename_column('temperature', 'temp')
-        # self._data['down_temp'].rename_column('moment', 'mag')
+                # ut = [i for i, v in enumerate(segments['initial temperature'].v)
+                #       if segments['initial temperature'].v[i] < segments['final temperature'].v[i]
+                # ]
+                # dt = [i for i, v in enumerate(segments['initial temperature'].v)
+                #       if segments['initial temperature'].v[i] > segments['final temperature'].v[i]]
+                #
+                # up_data = np.array([data[i] for i in ut])
+                # up_data = [j for i in up_data for j in i]
+                # down_data = [data[i] for i in dt]
+                # down_data = [j for i in down_data for j in i]
+                #
+                # self._data['up_temp'] = RockPyData(column_names=header, data=up_data)
+                # self._data['up_temp'].rename_column('temperature', 'temp')
+                # self._data['up_temp'].rename_column('moment', 'mag')
+                #
+                # self._data['down_temp'] = RockPyData(column_names=header, data=down_data)
+                # self._data['down_temp'].rename_column('temperature', 'temp')
+                # self._data['down_temp'].rename_column('moment', 'mag')
+
+    def delete_segment(self, segment):
+        self._data.pop(segment)
 
     @property
     def ut(self):
@@ -110,9 +120,9 @@ class ThermoCurve(base.Measurement):
     def plt_thermocurve(self):
         fig = plt.figure()
         ax = fig.add_subplot(111)
-        color = {'warm':'r', 'cool':'b'}
+        color = {'warm': 'r', 'cool': 'b'}
         for seg in self._data:
-            ax.plot(self.data[seg]['temp'].v, self.data[seg]['mag'].v, '.-', color=color[seg[:4]])
+            ax.plot(self.data[seg]['temp'].v, self.data[seg]['mag'].v, 'x-', color=color[seg[:4]])
         ax.grid()
         # ax.axhline(0, color='#808080')
         # ax.axvline(0, color='#808080')

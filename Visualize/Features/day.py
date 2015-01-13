@@ -191,11 +191,14 @@ def sd_sp_93nm(ax, **plt_opt):
 
 
 def day_grid(ax, **options):
-    ax.grid()
-    ax.hlines(0.5, 0, 10)
-    ax.hlines(0.1, 0, 10)
-    ax.vlines(5, 0, 0.6)
-    ax.vlines(1.5, 0, 0.6)
-    ax.text(0.6, 0.55, 'SD', fontdict={'size': 14, 'color': '#909090'})
-    ax.text(2.6, 0.3, 'PSD', fontdict={'size': 14, 'color': '#909090'})
-    ax.text(5.9, 0.05, 'MD', fontdict={'size': 14, 'color': '#909090'})
+    line_out = []
+    text_out = []
+    line_out.append(ax.grid())
+    line_out.append(ax.hlines(0.5, 0, 10))
+    line_out.append(ax.hlines(0.1, 0, 10))
+    line_out.append(ax.vlines(5, 0, 0.6))
+    line_out.append(ax.vlines(1.5, 0, 0.6))
+    text_out.append(ax.text(0.6, 0.55, 'SD', fontdict={'size': 14, 'color': '#909090'}))
+    text_out.append(ax.text(2.6, 0.3, 'PSD', fontdict={'size': 14, 'color': '#909090'}))
+    text_out.append(ax.text(5.9, 0.05, 'MD', fontdict={'size': 14, 'color': '#909090'}))
+    return line_out, text_out

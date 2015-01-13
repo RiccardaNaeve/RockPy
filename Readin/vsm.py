@@ -75,6 +75,7 @@ class Vsm(base.Machine):
 
         data = [[j.strip('\n').split(',') for j in i if not j == '\n'] for i in data]
         data = [np.array([map(float, j) for j in i]) for i in data]
+
         # reformating to T / Am2 / Celsius
         if self.measurement_header['INSTRUMENT']['Units of measure'] == 'cgs':
             for i in range(len(data)):
@@ -84,7 +85,11 @@ class Vsm(base.Machine):
         if self.measurement_header['INSTRUMENT']['Temperature in'] == 'Kelvin':
             for i in range(len(data)):
                 # data[i][:,] *= 1e-3 # emu to Am2
-                data[i][:,self.header_idx['temperature']] -= 0#273.15 # K to C
+                try:
+                    data[i][:,self.header_idx['temperature']] -= 0#273.15 # K to C
+                except KeyError:
+                    print data[i]
+
         return data
 
     def readMicroMagHeader(self, lines):

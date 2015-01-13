@@ -11,7 +11,7 @@ def vigin_branch(ax, hysteresis_obj, norm_factor=[1, 1],
     if hysteresis_obj.virgin:
         ax.plot(hysteresis_obj.virgin['field'].v / norm_factor[0],
                 hysteresis_obj.virgin['mag'].v / norm_factor[1],
-                linestyle=ls, marker=marker,
+                linestyle=ls, marker='.',
                 **plt_opt)
 
 
@@ -36,7 +36,7 @@ def down_field_branch(ax, hysteresis_obj, norm_factor=[1, 1],
     Plots the down_field branch of a hysteresis
     """
     ls = plt_opt.pop('ls', '-')
-    marker = plt_opt.pop('marker', '.')
+    marker = plt_opt.pop('marker', '')
 
     ax.plot(hysteresis_obj.down_field['field'].v / norm_factor[0],
             hysteresis_obj.down_field['mag'].v / norm_factor[1],

@@ -119,3 +119,7 @@ class TestRockPyData(TestCase):
 
     def test_column_names_to_indices(self):
         self.assertEqual( self.RPD.column_names_to_indices(('Mx', 'Mz')), [1,3])
+
+    def test_interation(self):
+        for l in self.RPD:
+            print l

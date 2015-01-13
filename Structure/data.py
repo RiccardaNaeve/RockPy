@@ -1029,6 +1029,14 @@ class RockPyData(object):
 
         return RockPyData(column_names=result_c_names, row_names=None, data=results_rpd_data)
 
+    def __iter__(self):
+        """
+        make RockPyData object interable over rows
+        :return:
+        """
+        return iter( self._data)
+
+
     def __repr__(self):
         """
         get useful representation for debugging

@@ -681,5 +681,4 @@ class Measurement(object):
 
     def show_plots(self):
         for visual in self.plottable:
-            print visual
-            self.plottable[visual](self)
+            self.plottable[visual](self, show=True)

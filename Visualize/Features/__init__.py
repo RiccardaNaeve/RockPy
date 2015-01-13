@@ -1,3 +1,4 @@
 __author__ = 'mike'
+import generic
 import arai
-import day
+import hysteresis, day

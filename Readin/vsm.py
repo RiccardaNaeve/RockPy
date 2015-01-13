@@ -88,7 +88,7 @@ class Vsm(base.Machine):
                 try:
                     data[i][:,self.header_idx['temperature']] -= 0#273.15 # K to C
                 except KeyError:
-                    print data[i]
+                    self.log.debug('No temperature data stored')
 
         return data
 

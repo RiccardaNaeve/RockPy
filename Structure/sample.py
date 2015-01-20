@@ -104,9 +104,14 @@ class Sample(object):
         Sample.logger.info('CREATING\t new sample << %s >>' % self.name)
 
         self.measurements = []
+
         self.results = None
 
+        ''' is sample is a mean sample from sample_goup ect... '''
         self.is_average = False
+        self.is_mean = False
+        self.mean_measurements = []
+        self.mean_results = None
 
         if mass is not None:
             self.add_measurement(mtype='mass', mfile=None, machine=mass_machine,
@@ -119,7 +124,7 @@ class Sample(object):
                                  value=float(height), unit=length_unit)
 
     def __repr__(self):
-        return '<< %s - Structure.sample.Sample >>' % self.name
+        return '<< %s - RockPy.Sample >>' % self.name
 
     ''' ADD FUNCTIONS '''
 
@@ -260,7 +265,8 @@ class Sample(object):
 
     ''' FIND FUNCTIONS '''
 
-    def get_measurements(self, mtype=None, ttype=None, tval=None, tval_range=None, **options):
+    def get_measurements(self, mtype=None, ttype=None, tval=None, tval_range=None,
+                         **options):
         """
         Returns a list of measurements of type = mtype
 
@@ -277,9 +283,13 @@ class Sample(object):
         else:
             tvalue = str(tval)
 
-        Sample.logger.debug('SEARCHING\t measurements with  << %s, %s, %s >>' % (mtype, ttype, tvalue))
+        if self.is_mean:
+            Sample.logger.debug('SEARCHING\t measurements(mean_list) with  << %s, %s, %s >>' % (mtype, ttype, tvalue))
+            out = self.mean_measurements
+        else:
+            Sample.logger.debug('SEARCHING\t measurements with  << %s, %s, %s >>' % (mtype, ttype, tvalue))
+            out = self.measurements
 
-        out = self.measurements
         if mtype:
             mtype = _to_list(mtype)
             out = [m for m in out if m.mtype in mtype]
@@ -318,9 +328,6 @@ class Sample(object):
 
     ''' MISC FUNTIONS '''
 
-    def average_all_measurements(self):
-        pass
-
     def mean_measurement_from_list(self, mlist, interpolate=False, recalc_mag=False):
         """
         takes a list of measurements and creates a mean measurement out of all measurements data
@@ -350,8 +357,6 @@ class Sample(object):
 
         if measurement.initial_state:
             for dtype in measurement.initial_state.data:
-                print [m.initial_state.data['data'].column_names for m in mlist]
-
                 dtype_list = [m.initial_state.data[dtype] for m in mlist if m.initial_state]
                 measurement.initial_state.data[dtype] = condense(dtype_list)
                 measurement.initial_state.data[dtype] = measurement.initial_state.data[dtype].sort('variable')
@@ -359,16 +364,63 @@ class Sample(object):
                     measurement.initial_state.data[dtype].define_alias('m', ( 'x', 'y', 'z'))
                     measurement.initial_state.data[dtype]['mag'].v = measurement.initial_state.data[dtype].magnitude(
                         'm')
+        measurement.sample_obj = self
         return measurement
 
-    def all_results(self, mtype=None, ttype=None, tval=None, tval_range=None, **parameter):
+    def mean_measurement(self,
+                         mtype=None, ttype=None, tval=None, tval_range=None, mlist=None,
+                         interpolate=False, recalc_mag=False):
+        """
+        takes a list of measurements and creates a mean measurement out of all measurements data
+
+        :param mlist:
+        :param interpolate:
+        :param recalc_mag:
+        :return:
+        """
+        if not mtype:
+            raise ValueError('No mtype specified')
+
+        mlist = self.get_measurements(mtype=mtype, ttype=ttype, tval=tval, tval_range=tval_range)
+        measurement = deepcopy(mlist[0])
+
+        for dtype in measurement.data:
+            dtype_list = [m.data[dtype] for m in mlist]
+            if interpolate:
+                varlist = self.__get_variable_list(dtype_list)
+                if len(varlist) > 1:
+                    dtype_list = [m.interpolate(varlist) for m in dtype_list]
+
+            if len(dtype_list) > 1: #for single measurements
+                measurement.data[dtype] = condense(dtype_list)
+                measurement.data[dtype] = measurement.data[dtype].sort('variable')
+
+            if recalc_mag:
+                measurement.data[dtype].define_alias('m', ( 'x', 'y', 'z'))
+                measurement.data[dtype]['mag'].v = measurement.data[dtype].magnitude('m')
+
+        if measurement.initial_state:
+            for dtype in measurement.initial_state.data:
+                dtype_list = [m.initial_state.data[dtype] for m in mlist if m.initial_state]
+                measurement.initial_state.data[dtype] = condense(dtype_list)
+                measurement.initial_state.data[dtype] = measurement.initial_state.data[dtype].sort('variable')
+                if recalc_mag:
+                    measurement.initial_state.data[dtype].define_alias('m', ( 'x', 'y', 'z'))
+                    measurement.initial_state.data[dtype]['mag'].v = measurement.initial_state.data[dtype].magnitude(
+                        'm')
+        measurement.sample_obj = self
+        return measurement
+
+
+    def all_results(self, mtype=None, ttype=None, tval=None, tval_range=None, mlist=None, **parameter):
         """
         calculates all results for a list of measuremetns and stores them in a RockPy data object
         :param mlist:
         :param parameter:
         :return:
         """
-        mlist = self.get_measurements(mtype=mtype, ttype=ttype, tval=tval, tval_range=tval_range)
+        if not mlist:
+            mlist = self.get_measurements(mtype=mtype, ttype=ttype, tval=tval, tval_range=tval_range)
 
         # # initialize
         all_results = None
@@ -401,13 +453,14 @@ class Sample(object):
         all_results._row_names = rownames
         return all_results
 
-    def mean_results(self, mtype=None, ttype=None, tval=None, tval_range=None, **parameter):
+    def get_mean_results(self, mtype=None, ttype=None, tval=None, tval_range=None, mlist=None, **parameter):
         """
         calculates all results and returns the
         :param mlist:
         :return:
         """
-        mlist = self.get_measurements(mtype=mtype, ttype=ttype, tval=tval, tval_range=tval_range)
+        if not mlist:
+            mlist = self.get_measurements(mtype=mtype, ttype=ttype, tval=tval, tval_range=tval_range)
 
         all_results = self.all_results(mlist=mlist, **parameter)
 
@@ -419,8 +472,8 @@ class Sample(object):
 
         mean_results = RockPyData(column_names=all_results.column_names,
                                   row_names='mean ' + '_'.join(all_results.row_names),
-                                  data=v,
-        )
+                                  data=v)
+
         mean_results.e = errors.reshape((1, len(errors)))
         return mean_results
 

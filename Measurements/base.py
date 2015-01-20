@@ -117,6 +117,7 @@ class Measurement(object):
 
         self.__initialize()
 
+
         if mtype in Measurement.measurement_formatters():
             Measurement.logger.debug('MTYPE << %s >> implemented' % mtype)
             self.mtype = mtype  # set mtype
@@ -182,9 +183,10 @@ class Measurement(object):
         # dynamically generating the calculation and standard parameters for each calculation method.
         # This just sets the values to non, the values have to be specified in the class itself
         self.calculation_methods = [i for i in dir(self) if i.startswith('calculate_') if not i.endswith('generic')]
-        self.calculation_parameters = {i[10:]: None for i in self.calculation_methods}
-        self.standard_parameters = {i[10:]: None for i in dir(self) if i.startswith('calculate_') if
+        self.calculation_parameter = {i[10:]: None for i in self.calculation_methods}
+        self._standard_parameter = {i[10:]: None for i in dir(self) if i.startswith('calculate_') if
                                     not i.endswith('generic')}
+
         if self._treatment_opt:
             self._add_treatment_from_opt()
             self._add_ttype_to_results()
@@ -197,7 +199,7 @@ class Measurement(object):
         '''
         pickle_me = {k: v for k, v in self.__dict__.iteritems() if k in
                      ('machine_data', 'initial_state', 'is_machine_data', '_data',  'has_data', 'mtype', 'sample_obj',
-                      'mfile', '_treatments', '_treatment_opt', 'suffix')}
+                      'mfile', '_treatments', '_treatment_opt', 'suffix', 'mean_mdict')}
         return pickle_me
 
     def __setstate__(self, d):
@@ -427,7 +429,7 @@ class Measurement(object):
 
     def compare_parameters(self, caller, parameter, recalc):
         """
-        checks if given parameter[key] is None and replaces it with standard parameter or calculation_parameters.
+        checks if given parameter[key] is None and replaces it with standard parameter or calculation_parameter.
 
         e.g. calculation_generic(A=1, B=2)
              calculation_generic() # will calculate with A=1, B=2
@@ -446,10 +448,10 @@ class Measurement(object):
 
         for i, v in parameter.iteritems():
             if v is None:
-                if self.calculation_parameters[caller] and not recalc:
-                    parameter[i] = self.calculation_parameters[caller][i]
+                if self.calculation_parameter[caller] and not recalc:
+                    parameter[i] = self.calculation_parameter[caller][i]
                 else:
-                    parameter[i] = self.standard_parameters[caller][i]
+                    parameter[i] = self._standard_parameter[caller][i]
         return parameter
 
     def check_parameters(self, caller, parameter):
@@ -463,9 +465,9 @@ class Measurement(object):
         :return:
         '''
 
-        if self.calculation_parameters[caller]:
-            a = [parameter[i] for i in self.calculation_parameters[caller]]
-            b = [self.calculation_parameters[caller][i] for i in self.calculation_parameters[caller]]
+        if self.calculation_parameter[caller]:
+            a = [parameter[i] for i in self.calculation_parameter[caller]]
+            b = [self.calculation_parameter[caller][i] for i in self.calculation_parameter[caller]]
             if a != b:
                 return True
             else:
@@ -585,7 +587,10 @@ class Measurement(object):
                 for tt in ttypes:
                     self.data[dtype][tt] = np.ones(len(dtype_rpd['variable'].v)) * self.ttype_dict[tt[6:]].value
             if 'mag' in self.data[dtype].column_names:
-                self.data[dtype]['mag'] = self.data[dtype].magnitude(('x', 'y', 'z'))
+                try:
+                    self.data[dtype]['mag'] = self.data[dtype].magnitude(('x', 'y', 'z'))
+                except:
+                    self.logger.debug('no (x,y,z) data found keeping << mag >>')
 
         if self.initial_state:
             for dtype, dtype_rpd in self.initial_state.data.iteritems():
@@ -598,25 +603,24 @@ class Measurement(object):
     def _get_norm_factor(self, reference, rtype, vval, norm_method):
         norm_factor = 1  #inititalize
 
-        if reference in self.data:
-            norm_factor = self._norm_method(norm_method, vval, rtype, self.data[reference])
+        if reference:
+            if reference == 'nrm' and reference not in self.data and 'data' in self.data:
+                reference = 'data'
 
-        if reference in ['is', 'initial', 'initial_state']:
-            if self.initial_state:
-                norm_factor = self._norm_method(norm_method, vval, rtype, self.initial_state.data['data'])
-            if self.is_initial_state:
-                norm_factor = self._norm_method(norm_method, vval, rtype, self.data['data'])
+            if reference in self.data:
+                norm_factor = self._norm_method(norm_method, vval, rtype, self.data[reference])
 
-        if reference == 'mass':
-            m = self.sample_obj.get_measurements(mtype='mass', ttype=self.ttypes, tval=self.tvals)
-            if m is None:
-                m = self.sample_obj.get_measurements(mtype='mass')
-            if isinstance(m, list):
-                m = m[0]
-            norm_factor = self._norm_method(norm_method, vval, rtype, m.data['mass'])
+            if reference in ['is', 'initial', 'initial_state']:
+                if self.initial_state:
+                    norm_factor = self._norm_method(norm_method, vval, rtype, self.initial_state.data['data'])
+                if self.is_initial_state:
+                    norm_factor = self._norm_method(norm_method, vval, rtype, self.data['data'])
 
-        if isinstance(reference, float) or isinstance(reference, int):
-            norm_factor = reference
+            if reference == 'mass':
+                m = self.get_mtype_prior_to(mtype='mass')
+                norm_factor = m.data['data']['mass'].v[0]
+            if isinstance(reference, float) or isinstance(reference, int):
+                norm_factor = float(reference)
 
         return norm_factor
 
@@ -665,6 +669,17 @@ class Measurement(object):
                                                     data= t.value,
                                                     # unit = t.unit      # todo add units
                                                     )
+
+
+    def get_treatment_labels(self):
+        out = ''
+        if self.has_treatment:
+            for treat in self.treatments:
+                if not str(treat.value)+ ' '+ treat.unit in out:
+                    out += str(treat.value)+ ' '+ treat.unit
+                    out += ' '
+        return out
+
     '''' PLOTTING '''''
 
     @property

@@ -32,6 +32,13 @@ def get_hys_coe_irm_rmp_sample():
     S.add_measurement(mtype='thermocurve', mfile=rmp, machine='vftb')
     return S
 
+def get_af_demag_sample():
+    folder = RockPy.test_data_path
+    S = RockPy.Sample(name='WURM')
+    af = join(folder, 'MUCSUSH_af_test.af')
+    S.add_measurement(mtype='afdemag', mfile=af, machine='sushibar', magtype='irm')
+    return S
+
 def get_pmd_demag():
     S = RockPy.Sample(name='test_sample')
     dm = 'RockPy/Tutorials/test_data/HA2A.pmd'

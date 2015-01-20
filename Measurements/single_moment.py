@@ -45,3 +45,6 @@ class Irm(generic_moment):
         super(Irm, self).__init__(sample_obj,
                                   mtype, mfile, machine,
                                   **options)
+
+class Arm(generic_moment):
+    pass

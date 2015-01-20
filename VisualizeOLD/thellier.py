@@ -97,7 +97,7 @@ class Dunlop(base.Generic):
         self.y_label = 'Moment'
 
         self.show(**options)
-        self.out()
+        self.out('no_legend')
 
     def show(self, **options):
         measure_dict = self.get_measurement_dict(mtype='thellier')
@@ -482,6 +482,7 @@ class Arai(base.Generic):
         x = []
         y = []
         measurement_dict = self.get_measurement_dict(mtype='thellier')
+        arai.arai_1_1_line(self.ax)
         for sample in measurement_dict:
             thellier_objects = measurement_dict[sample]
             for thellier in thellier_objects:
@@ -494,11 +495,12 @@ class Arai(base.Generic):
                 plt_opt = self.get_plt_opt(sample, thellier_objects, thellier)
                 if len(self.sample_list) > 1 or len(thellier_objects) > 1:
                     plt_opt.update({'label': sample.name})
-                arai.arai_std(self.ax, tt, self.parameter, **plt_opt)
+                # arai.arai_std(self.ax, tt, self.parameter, **plt_opt)
+                arai.arai_error(self.ax, tt, self.parameter, **plt_opt)
                 arai.arai_line(self.ax, tt, self.parameter, **plt_opt)
                 plt_opt.update({'linewidth': 0.5})
                 arai.arai_points(self.ax, tt, self.parameter, **plt_opt)
-                Features.arai.add_ck_check(self.ax, tt)
+                # Features.arai.add_ck_check(self.ax, tt)
                 # x.append(max(thellier.ptrm[self.parameter['component']].v))  # append max for x_lim
                 # y.append(max(thellier.th[self.parameter['component']].v))  # append max for y_lim
         if len(self.sample_list) > 1 or len(thellier_objects) > 1:

@@ -347,14 +347,40 @@ class SampleGroup(object):
                 return
 
         if len(out) == 0:
-            SampleGroup.log.error('UNABLE to find sample with << %s, %s, %s, %.2f >>' % (snames, mtypes, ttypes, t_value))
+            SampleGroup.log.error(
+                'UNABLE to find sample with << %s, %s, %s, %.2f >>' % (snames, mtypes, ttypes, t_value))
 
         return out
 
-    def average_sample(self, reference='nrm', name='average_sample_group',
+
+    def mean_sample(self, reference='nrm', name='mean_sample_group',
+                    rtype='mag', vval=None, norm_method='max', interpolate=True):
+
+        mean_sample = Sample(name='mean ' + self.name)
+        mean_sample.is_average = True
+        mean_sample.is_mean = True
+
+        for mtype in self.mtypes:
+            for ttype in self.mtype_ttype_dict[mtype]:
+                for tval in self.ttype_tval_dict[ttype]:
+                    measurements = self.get_measurements(mtype=mtype, ttype=ttype, tval=tval)
+                    measurements = [m.normalize(reference=reference, rtype=rtype,
+                                                vval=vval, norm_method=norm_method)
+                                    for m in measurements
+                                    if m.mtype not in ['diameter', 'height', 'mass']]
+                    mean_sample.mean_measurements.extend(measurements)
+                    if mtype not in ['diameter', 'height', 'mass']:
+                        M = mean_sample.mean_measurement(mtype=mtype, ttype=ttype, tval=tval)
+                        mean_sample.measurements.append(M)
+        return mean_sample
+
+    def average_sample(self, reference='nrm', name='mean_sample_group',
                        rtype='mag', vval=None, norm_method='max', interpolate=True):
 
-        average_sample = Sample(name='average ' + self.name)
+        average_sample = Sample(name='mean ' + self.name)
+        average_sample.is_average = True
+        average_sample.is_mean = True
+
         for mtype in ['diameter', 'height', 'mass']:
             for ttype in self.mtype_ttype_dict[mtype]:
                 for tval in self.ttype_tval_dict[ttype]:
@@ -371,6 +397,8 @@ class SampleGroup(object):
                                                     vval=vval, norm_method=norm_method)
                                         for m in measurements]
                         M = average_sample.mean_measurement_from_list(measurements, interpolate=interpolate)
+                        print average_sample.get_mean_results(mlist=measurements)
+
                         average_sample.measurements.append(M)
 
         return average_sample

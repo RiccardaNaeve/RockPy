@@ -10,6 +10,7 @@ import base
 class Thellier(base.Measurement):
     # todo format_sushibar
     # todo format_jr6
+    _standard_parameter = {'slope':{'t_min': 20, 't_max': 700, 'component': 'mag'}}
 
     def __init__(self, sample_obj,
                  mtype, mfile, machine,
@@ -22,13 +23,18 @@ class Thellier(base.Measurement):
 
         super(Thellier, self).__init__(sample_obj, mtype, mfile, machine, **options)
 
-        self.standard_parameters['slope'] = {'t_min': 20, 't_max': 700, 'component': 'mag'}
-
-        for i in self.standard_parameters:
-            if self.standard_parameters[i] is None:
-                self.standard_parameters[i] = self.standard_parameters['slope']
-
         self.reset__data()
+
+    @property
+    def standard_parameter(self):
+        out = {}
+        for i in self._standard_parameter:
+            out[i] = {}
+            if self._standard_parameter[i] is None:
+                out[i].update(Thellier._standard_parameter['slope'])
+            else:
+                out[i].update(self._standard_parameter)
+        return out
 
     def reset__data(self, recalc_m=True):
         self.data['ptrm'] = self._ptrm(recalc_m)
@@ -406,9 +412,9 @@ class Thellier(base.Measurement):
         :param parameter:
 
         """
-        t_min = parameter.get('t_min', self.standard_parameters['slope']['t_min'])
-        t_max = parameter.get('t_max', self.standard_parameters['slope']['t_max'])
-        component = parameter.get('component', self.standard_parameters['slope']['component'])
+        t_min = parameter.get('t_min', self.standard_parameter['slope']['t_min'])
+        t_max = parameter.get('t_max', self.standard_parameter['slope']['t_max'])
+        component = parameter.get('component', self.standard_parameter['slope']['component'])
 
         # self.log.info('CALCULATING\t << %s >> arai line fit << t_min=%.1f , t_max=%.1f >>' % (component, t_min, t_max))
         # print self.th
@@ -441,7 +447,7 @@ class Thellier(base.Measurement):
         self.results['x_int'] = x_int
         self.results['n'] = len(th_data[component].v)
 
-        self.calculation_parameters['slope'] = {'t_min': t_min, 't_max': t_max, 'component': component}
+        self.calculation_parameter['slope'] = {'t_min': t_min, 't_max': t_max, 'component': component}
 
     def calculate_b_anc(self, **parameter):
         """
@@ -453,7 +459,7 @@ class Thellier(base.Measurement):
 
         b_lab = parameter.get('b_lab')
         self.results['b_anc'] = b_lab * abs(self.results['slope'].v)
-        self.calculation_parameters['b_anc'] = {'b_lab': b_lab}
+        self.calculation_parameter['b_anc'] = {'b_lab': b_lab}
 
     def calculate_sigma_b_anc(self, **parameter):
         """
@@ -465,7 +471,7 @@ class Thellier(base.Measurement):
 
         b_lab = parameter.get('b_lab')
         self.results['sigma_b_anc'] = b_lab * abs(self.results['sigma'].v)
-        self.calculation_parameters['sigma_b_anc'] = {'b_lab': b_lab}
+        self.calculation_parameter['sigma_b_anc'] = {'b_lab': b_lab}
 
     def calculate_vds(self, **parameter):  # todo move in rockpydata?
         '''
@@ -494,8 +500,8 @@ class Thellier(base.Measurement):
         :return:
 
         '''
-        t_min = parameter.get('t_min', self.standard_parameters['vd']['t_min'])
-        t_max = parameter.get('t_max', self.standard_parameters['vd']['t_max'])
+        t_min = parameter.get('t_min', self.standard_parameter['vd']['t_min'])
+        t_max = parameter.get('t_max', self.standard_parameter['vd']['t_max'])
 
         idx = (self.th['temp'].v <= t_max) & (t_min <= self.th['temp'].v)
         data = self.th.filter(idx)
@@ -520,9 +526,9 @@ class Thellier(base.Measurement):
 
         '''
 
-        t_min = parameter.get('t_min', self.standard_parameters['x_dash']['t_min'])
-        t_max = parameter.get('t_max', self.standard_parameters['x_dash']['t_max'])
-        component = parameter.get('component', self.standard_parameters['x_dash']['component'])
+        t_min = parameter.get('t_min', self.standard_parameter['x_dash']['t_min'])
+        t_max = parameter.get('t_max', self.standard_parameter['x_dash']['t_max'])
+        component = parameter.get('component', self.standard_parameter['x_dash']['component'])
         # self.log.info('CALCULATING\t << %s >> x_dash << t_min=%.1f , t_max=%.1f >>' % (component, t_min, t_max))
 
         equal_steps = list(set(self.th['temp'].v) & set(self.ptrm['temp'].v))
@@ -561,9 +567,9 @@ class Thellier(base.Measurement):
         :return:
 
         '''
-        t_min = parameter.get('t_min', self.standard_parameters['y_dash']['t_min'])
-        t_max = parameter.get('t_max', self.standard_parameters['y_dash']['t_max'])
-        component = parameter.get('component', self.standard_parameters['y_dash']['component'])
+        t_min = parameter.get('t_min', self.standard_parameter['y_dash']['t_min'])
+        t_max = parameter.get('t_max', self.standard_parameter['y_dash']['t_max'])
+        component = parameter.get('component', self.standard_parameter['y_dash']['component'])
 
         # self.log.info('CALCULATING\t << %s >> y_dash << t_min=%.1f , t_max=%.1f >>' % (component, t_min, t_max))
 
@@ -795,8 +801,8 @@ class Thellier(base.Measurement):
         :param parameter:
         :return: RockPy data object of CK - TH
         """
-        t_min = parameter.get('t_min', self.standard_parameters['slope']['t_min'])
-        t_max = parameter.get('t_max', self.standard_parameters['slope']['t_max'])
+        t_min = parameter.get('t_min', self.standard_parameter['slope']['t_min'])
+        t_max = parameter.get('t_max', self.standard_parameter['slope']['t_max'])
 
         temps = self.ck['temp'].v
         pt_temps = self.pt['temp'].v
@@ -862,8 +868,8 @@ class Thellier(base.Measurement):
         :param parameter:
 
         """
-        t_min = parameter.get('t_min', self.standard_parameters['slope']['t_min'])
-        t_max = parameter.get('t_max', self.standard_parameters['slope']['t_max'])
+        t_min = parameter.get('t_min', self.standard_parameter['slope']['t_min'])
+        t_max = parameter.get('t_max', self.standard_parameter['slope']['t_max'])
 
         temps = self.ck['temp'].v
         out = [i for i in temps
@@ -880,9 +886,9 @@ class Thellier(base.Measurement):
         :param parameter:
 
         """
-        t_min = parameter.get('t_min', self.standard_parameters['slope']['t_min'])
-        t_max = parameter.get('t_max', self.standard_parameters['slope']['t_max'])
-        component = parameter.get('component', self.standard_parameters['slope']['component'])
+        t_min = parameter.get('t_min', self.standard_parameter['slope']['t_min'])
+        t_max = parameter.get('t_max', self.standard_parameter['slope']['t_max'])
+        component = parameter.get('component', self.standard_parameter['slope']['component'])
 
         dptrm = self.get_d_ptrm(**parameter)
 
@@ -911,9 +917,9 @@ class Thellier(base.Measurement):
 
         """
 
-        t_min = parameter.get('t_min', self.standard_parameters['slope']['t_min'])
-        t_max = parameter.get('t_max', self.standard_parameters['slope']['t_max'])
-        component = parameter.get('component', self.standard_parameters['slope']['component'])
+        t_min = parameter.get('t_min', self.standard_parameter['slope']['t_min'])
+        t_max = parameter.get('t_max', self.standard_parameter['slope']['t_max'])
+        component = parameter.get('component', self.standard_parameter['slope']['component'])
 
         dptrm = self.get_d_ptrm(**parameter)
 
@@ -939,14 +945,14 @@ class Thellier(base.Measurement):
 
         where `\Delta{x'}` and `\Delta{y'}` are TRM and NRM lengths of the best-fit line on the Arai plot, respectively (Section 3).
         """
-        component = parameter.get('component', self.standard_parameters['slope']['component'])
+        component = parameter.get('component', self.standard_parameter['slope']['component'])
 
         dptrm = self.get_d_ptrm(**parameter)
         L = np.sqrt((self.calculate_delta_x_dash(**parameter)) ** 2 + (self.calculate_delta_y_dash(**parameter)) ** 2)
         max_idx = np.argmax(abs(dptrm[component].v))
         out = ( abs(dptrm.filter_idx(max_idx)[component].v) / L ) * 100
         self.results['drat'] = out
-        # self.calculation_parameters['drat'].update(parameter)
+        # self.calculation_parameter['drat'].update(parameter)
 
 
     def calculate_ck_max_dev(self, **parameter):
@@ -959,7 +965,7 @@ class Thellier(base.Measurement):
            maxDEV=\\frac`{\max{\left\{\left|\delta{pTRM_{i,j}} \right| \right\}}_{i \leq end \textbf{ and } j \leq end}}{\Delta{x'}}\times{100}
 
         """
-        component = parameter.get('component', self.standard_parameters['slope']['component'])
+        component = parameter.get('component', self.standard_parameter['slope']['component'])
 
         dptrm = self.get_d_ptrm(**parameter)
         max_idx = np.argmax(abs(dptrm[component].v))
@@ -1034,7 +1040,7 @@ class Thellier(base.Measurement):
 
 
         """
-        component = parameter.get('component', self.standard_parameters['slope']['component'])
+        component = parameter.get('component', self.standard_parameter['slope']['component'])
 
         dptrm = self.get_d_ptrm(**parameter)
         L = np.sqrt((self.calculate_delta_x_dash(**parameter)) ** 2 + (self.calculate_delta_y_dash(**parameter)) ** 2)
@@ -1057,9 +1063,9 @@ class Thellier(base.Measurement):
            DRATS' &=\\frac{\\sum\\limits_{i=1}^{end}{\\left|\\delta{pTRM_{i,j}}\\right|}}{x_{end}}\\times{100}
         """
 
-        t_min = parameter.get('t_min', self.standard_parameters['slope']['t_min'])
-        t_max = parameter.get('t_max', self.standard_parameters['slope']['t_max'])
-        component = parameter.get('component', self.standard_parameters['slope']['component'])
+        t_min = parameter.get('t_min', self.standard_parameter['slope']['t_min'])
+        t_max = parameter.get('t_max', self.standard_parameter['slope']['t_max'])
+        component = parameter.get('component', self.standard_parameter['slope']['component'])
 
         dptrm = self.get_d_ptrm(**parameter)
 
@@ -1101,7 +1107,7 @@ class Thellier(base.Measurement):
            \\textrm{Mean }DEV'=\\frac{1}{n_{pTRM}}\\frac{\\sum\\limits_{i=1}^{end}\\left|\\delta{pTRM_{i,j}}\\right|}{\\Delta{x'}}\\times{100}
 
         """
-        component = parameter.get('component', self.standard_parameters['slope']['component'])
+        component = parameter.get('component', self.standard_parameter['slope']['component'])
 
         dptrm = self.get_d_ptrm(**parameter)
 
@@ -1157,7 +1163,7 @@ class Thellier(base.Measurement):
            \delta{pal}=\left|\\frac{b-b^*}{b}\right|\times100.
 
         """
-        component = parameter.get('component', self.standard_parameters['slope']['component'])
+        component = parameter.get('component', self.standard_parameter['slope']['component'])
         # todo
         #
         # dptrm = self.get_d_ptrm(**parameter)
@@ -1197,8 +1203,8 @@ class Thellier(base.Measurement):
         :return: RockPy data object of CK - TH
         """
 
-        t_min = parameter.get('t_min', self.standard_parameters['slope']['t_min'])
-        t_max = parameter.get('t_max', self.standard_parameters['slope']['t_max'])
+        t_min = parameter.get('t_min', self.standard_parameter['slope']['t_min'])
+        t_max = parameter.get('t_max', self.standard_parameter['slope']['t_max'])
 
         temps = self.tr['temp'].v
         th_steps = self.th['temp'].v
@@ -1265,8 +1271,8 @@ class Thellier(base.Measurement):
         :param parameter:
 
         """
-        t_min = parameter.get('t_min', self.standard_parameters['slope']['t_min'])
-        t_max = parameter.get('t_max', self.standard_parameters['slope']['t_max'])
+        t_min = parameter.get('t_min', self.standard_parameter['slope']['t_min'])
+        t_max = parameter.get('t_max', self.standard_parameter['slope']['t_max'])
 
         temps = self.tr['temp'].v
         out = [i for i in temps
@@ -1285,7 +1291,7 @@ class Thellier(base.Measurement):
            DRAT_{Tail}=\\frac`{\max{\{\left| \delta{tail_i} \right|\}}_{i=1, \ldots, end}}{L}\times{100}
 
         """
-        component = parameter.get('component', self.standard_parameters['slope']['component'])
+        component = parameter.get('component', self.standard_parameter['slope']['component'])
 
         dtail = self.get_d_tail(**parameter)
         L = np.sqrt((self.calculate_delta_x_dash(**parameter)) ** 2 + (self.calculate_delta_y_dash(**parameter)) ** 2)
@@ -1303,7 +1309,7 @@ class Thellier(base.Measurement):
            \delta{TR}=\\frac`{\max{\{\left| \delta{tail_i} \right|\}}_{i=1, \ldots, end}}{\left|Y_{Int.}\right|}\times{100}
 
         """
-        component = parameter.get('component', self.standard_parameters['slope']['component'])
+        component = parameter.get('component', self.standard_parameter['slope']['component'])
 
         dtail = self.get_d_tail(**parameter)
         max_idx = np.argmax(abs(dtail[component].v))
@@ -1323,7 +1329,7 @@ class Thellier(base.Measurement):
         Some versions of PmagPy and ThellierGUI use a pTRM tail check statistic called $$MD(\%)$$. This is identical
         to $$MD_{VDS}$$, but the change in name emphasizes its calculation method.
         """
-        component = parameter.get('component', self.standard_parameters['slope']['component'])
+        component = parameter.get('component', self.standard_parameter['slope']['component'])
 
         dtail = self.get_d_tail(**parameter)
         max_idx = np.argmax(abs(dtail[component].v))
@@ -1442,8 +1448,8 @@ class Thellier(base.Measurement):
 
         """
 
-        t_min = parameter.get('t_min', self.standard_parameters['slope']['t_min'])
-        t_max = parameter.get('t_max', self.standard_parameters['slope']['t_max'])
+        t_min = parameter.get('t_min', self.standard_parameter['slope']['t_min'])
+        t_max = parameter.get('t_max', self.standard_parameter['slope']['t_max'])
 
         ptrm_i = self.get_ptrm_i()
 
@@ -1511,8 +1517,8 @@ class Thellier(base.Measurement):
         :param parameter:
 
         """
-        t_min = parameter.get('t_min', self.standard_parameters['slope']['t_min'])
-        t_max = parameter.get('t_max', self.standard_parameters['slope']['t_max'])
+        t_min = parameter.get('t_min', self.standard_parameter['slope']['t_min'])
+        t_max = parameter.get('t_max', self.standard_parameter['slope']['t_max'])
 
         temps = self.ac['temp'].v
         out = [i for i in temps
@@ -1531,7 +1537,7 @@ class Thellier(base.Measurement):
            \\delta{AC}=\\frac{\\max{ \\left\\{ \\left| AC_{i,j} \\right| \\right\\} }_{i \\leq end \\textbf{ and } j \\leq end}}{\\left|X_{Int.}\\right|}\\times{100}.
 
         """
-        component = parameter.get('component', self.standard_parameters['slope']['component'])
+        component = parameter.get('component', self.standard_parameter['slope']['component'])
 
         d_ac = self.get_d_ac(**parameter)
         max_idx = np.argmax(abs(d_ac[component].v))

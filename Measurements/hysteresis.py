@@ -218,8 +218,8 @@ class Hysteresis(base.Measurement):
         self.results['sigma_ms'] = np.std(ms_all)
         self.results['paramag_slope'] = np.median(slope_all)
 
-        self.calculation_parameters['ms'] = parameters
-        self.calculation_parameters['paramag_slope'] = parameters
+        self.calculation_parameter['ms'] = parameters
+        self.calculation_parameter['paramag_slope'] = parameters
 
     def calculate_mrs(self, **parameters):
 

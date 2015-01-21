@@ -125,7 +125,7 @@ class Sample(object):
 
     def add_measurement(self,
                         mtype=None, mfile=None, machine='generic',  # general
-                        idx = None,
+                        idx=None,
                         **options):
         '''
         All measurements have to be added here
@@ -133,7 +133,7 @@ class Sample(object):
         :param mtype: str - the type of measurement
         :param mfile: str -  the measurement file
         :param machine: str - the machine from which the file is output
-        :param mag_method: str - only used for af-demag
+        :param idx: int - measurement index
         :return: RockPyV3.measurement object
 
         :mtypes:
@@ -144,7 +144,8 @@ class Sample(object):
 
         implemented = {i.__name__.lower(): i for i in Measurement.inheritors()}
 
-        if idx is None: idx = len(self.measurements) # if there is no measurement index
+        if idx is None:
+            idx = len(self.measurements)  # if there is no measurement index
 
         if mtype in implemented:
             Sample.logger.info(' ADDING\t << measurement >> %s' % mtype)

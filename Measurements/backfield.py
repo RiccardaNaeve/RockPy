@@ -34,6 +34,8 @@ class Backfield(base.Measurement):
         
         self._data = {'remanence': None,
                       'induced': None}
+        # TODO: check if the above makes sense. super resets self._data ????
+
 
         super(Backfield, self).__init__(sample_obj,
                                         mtype, mfile, machine,

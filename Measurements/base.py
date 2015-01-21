@@ -238,7 +238,7 @@ class Measurement(object):
             return
         else:
             if rtn_raw_data:
-                Measurement.logger.info(' RETURNING raw_data for << %s , %s >> data' % (machine, mtype))
+                Measurement.logger.info('RETURNING raw_data for << %s , %s >> data' % (machine, mtype))
                 return raw_data
             else:
                 self.machine_data = raw_data

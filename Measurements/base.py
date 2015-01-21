@@ -227,7 +227,7 @@ class Measurement(object):
         :return:
         '''
 
-        Measurement.logger.info(' IMPORTING << %s , %s >> data' % (self.machine, self.mtype))
+        Measurement.logger.info('IMPORTING << %s , %s >> data' % (self.machine, self.mtype))
 
         machine = options.get('machine', self.machine)
         mtype = options.get('mtype', self.mtype)

@@ -10,19 +10,14 @@ class Anisotropy(base.Measurement):
 
     logger = logging.getLogger('RockPy.MEASUREMENT.Anisotropy')
 
-    def __init__(self, sample_obj, mtype, mfile, machine, **options):
-        super(Anisotropy, self).__init__(sample_obj, mtype, mfile, machine, **options)
-
-        self._data = {'mdirs': None, 'measurements': None}
-
-
-
-    # create design matrix for anisotropy measurements
-    # input
-    # mdirs: measurement directions e.g. [[D1,I1],[D2,I2],[D3,I3],[D4,I4]]
-    # xyz: True --> individual components measured (AARM); False: one component measured (AMS) or ARM without GRM
-
+    @classmethod
     def makeDesignMatrix( mdirs, xyz):
+        """
+        create design matrix for anisotropy measurements
+        :param mdirs: measurement directions e.g. [[D1,I1],[D2,I2],[D3,I3],[D4,I4]]
+        :param xyz: True --> individual components measured (AARM); False: one component measured (AMS) or ARM without GRM
+        :return:
+        """
         #directions in cartesian coordinates
         XYZ = []
         for i in range( len( mdirs)):
@@ -58,8 +53,14 @@ class Anisotropy(base.Measurement):
         return A
 
 
-    #calculate pseude inverse of matrix A
+    @classmethod
     def CalcPseudoInverse(A):
+        """
+        calculate pseude inverse of matrix A
+        :param A: matrix
+        :return:
+        """
+
         AT = numpy.transpose(A)
         ATA = numpy.dot(AT, A)
         ATAI = numpy.linalg.inv(ATA)
@@ -68,8 +69,14 @@ class Anisotropy(base.Measurement):
         return B
 
 
-    #calculate eigenvalues and eigenvectors from tensor T, sorted by eigenvalues
+
+    @classmethod
     def CalcEigenValVec(T):
+        """
+        calculate eigenvalues and eigenvectors from tensor T, sorted by eigenvalues
+        :param T: tensor
+        :return:
+        """
         #get eigenvalues and eigenvectors
         eigvals, eigvec = numpy.linalg.eig(T)
 
@@ -88,7 +95,7 @@ class Anisotropy(base.Measurement):
 
         return eigvals, eigvec
 
-
+    @classmethod
     def CalcAnisoTensor(A, K):
         """ calculate anisotropy tensor
             input: A: design matrix
@@ -251,18 +258,25 @@ class Anisotropy(base.Measurement):
 
         return aniso_dict  # return the whole bunch of values
 
+
+    def __init__(self, sample_obj, mtype, mfile, machine, **options):
+        super(Anisotropy, self).__init__(sample_obj, mtype, mfile, machine, **options)
+
+        self._data = {'mdirs': None, 'measurements': None}
+
     # formats
 
     def format_ani(self):
         self.header = self.machine_data.header
         self._data['mdirs'] = self.machine_data.mdirs
         self._data['measurements'] = self.machine_data.data
-
+        print "Anisotropy.format_ani self._data", self._data
 
 
     # calculations
     def calculate_tensor(self):
-        # do we have scalar or vectorial measurements?
+        #do we have scalar or vectorial measurements?
+        print self._data
         if self._data['measurements'].shape[1] == 1:  #scalar
             xyz = False
         elif self._data['measurements'].shape[1] == 3:  #vectorial

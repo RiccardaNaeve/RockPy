@@ -363,7 +363,7 @@ class Sample(object):
 
     def all_results(self, mtype=None, ttype=None, tval=None, tval_range=None, **parameter):
         """
-        calculates all results for a list of measuremetns and stores them in a RockPy data object
+        calculates all results for a list of measurements and stores them in a RockPy data object
         :param mlist:
         :param parameter:
         :return:

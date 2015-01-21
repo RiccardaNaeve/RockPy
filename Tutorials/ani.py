@@ -6,7 +6,7 @@ from RockPy.Structure.sample import Sample
 
 def test():
     # define measurement data file
-    ani_file = '/home/wack/data/Python/svn/RockPy/Tutorials/test_data/anisotropy/S1_isotropic_sushi.ani'
+    ani_file = 'test_data/anisotropy/S1_isotropic_sushi.ani'
 
     # create a sample
     sample = Sample(name='S1')

@@ -1,5 +1,7 @@
 __author__ = 'wack'
 
+import base
+import logging
 
 class Anisotropy(base.Measurement):
     '''
@@ -67,7 +69,7 @@ class Anisotropy(base.Measurement):
 
 
     #calculate eigenvalues and eigenvectors from tensor T, sorted by eigenvalues
-    def CalcEigenValVec( T):
+    def CalcEigenValVec(T):
         #get eigenvalues and eigenvectors
         eigvals, eigvec = numpy.linalg.eig(T)
 
@@ -238,7 +240,7 @@ class Anisotropy(base.Measurement):
         aniso_dict['E13'] = E13
 
         #Tests for anisotropy (Hext 63)
-        F0 = 0.4 * ( eigvals[0]**2+eigvals[1]**2+eigvals[2]**2 - 3 * ((s[0]+s[1]+s[2])/3)**2 ) / var
+        F0  = 0.4 * (eigvals[0]**2+eigvals[1]**2+eigvals[2]**2 - 3 * ((s[0]+s[1]+s[2])/3)**2) / var
         F12 = 0.5 * ((eigvals[0] - eigvals[1]) / stddev)**2
         F23 = 0.5 * ((eigvals[1] - eigvals[2]) / stddev)**2
 
@@ -247,9 +249,30 @@ class Anisotropy(base.Measurement):
         aniso_dict['F23'] = F23
 
 
-        return aniso_dict # return the whole bunch of values
+        return aniso_dict  # return the whole bunch of values
+
+    # formats
+
+    def format_ani(self):
+        self.header = self.machine_data.header
+        self._data['mdirs'] = self.machine_data.mdirs
+        self._data['measurements'] = self.machine_data.data
+
 
 
     # calculations
+    def calculate_tensor(self):
+        # do we have scalar or vectorial measurements?
+        if self._data['measurements'].shape[1] == 1:  #scalar
+            xyz = False
+        elif self._data['measurements'].shape[1] == 3:  #vectorial
+            xyz = True
+        else:
+            Anisotropy.logger.error("anisotropy measurements have %d components")
+            return
 
-    # results
+        # calculate design matrix
+        dm = Anisotropy.MakeDesignMatrix(self.mdirs, xyz)
+        # calculate tensor and all other results
+        self.results = Anisotropy.CalcAnisoTensor( dm, self._data['measurements'])
+

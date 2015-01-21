@@ -7,7 +7,7 @@ import base
 import numpy as np
 from StringIO import StringIO
 
-class ANI(base.Machine):
+class Ani(base.Machine):
     """
     ani file format to describe anisotropy measurements
     format:
@@ -19,7 +19,7 @@ class ANI(base.Machine):
     """
 
     def __init__(self, dfile, sample_name):
-        super(ANI, self).__init__(dfile=dfile, sample_name=sample_name)
+        super(Ani, self).__init__(dfile=dfile, sample_name=sample_name)
 
         # read the data file line by line
         f = open(self.file_name)
@@ -28,12 +28,10 @@ class ANI(base.Machine):
 
         # store first header line
         self.header = self.raw_data[0]
-        dipairs = self.raw_data.strip().split(';')
-        self.mdirs = [[float(di[0]), float(di[1])] for di in dipairs.split(',')]
+        dipairs = self.raw_data[1].strip().split(';')
+        self.mdirs = [[di[0], di[1]] for di in [dipair.split(',') for dipair in dipairs]]
         # read the directional values from remaining lines
         self.data = np.genfromtxt(StringIO(self.raw_data[2:]), delimiter=",")
 
-    def out_anisotropy(self):
-        # return mdirs, directional data
-        return self.mdirs, self.data
+
 

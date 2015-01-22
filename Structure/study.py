@@ -51,6 +51,11 @@ class Study(object):
             return self._samplegroups
 
     @property
+    def samplegroup_names(self):
+        out = [i.name for i in self.no_all_samplegroups]
+        return out
+
+    @property
     def no_all_samplegroups(self):
         return self._samplegroups
 
@@ -73,6 +78,7 @@ class Study(object):
         if samplegroup is not None:
             samplegroup = self._check_samplegroup_list(samplegroup)
             self._samplegroups.extend(samplegroup)
+            self.all_group()
             return samplegroup
 
 
@@ -105,13 +111,15 @@ class Study(object):
         self._samplegroups.extend(other._samplegroups)
         return self
 
+    def all_group(self):
+        out = np.sum(self._samplegroups)
+        out.name = 'all'
+        self._all_samplegroup = out
+        return out
+
     @property
     def all_samplegroup(self):
-        if len(self._samplegroups) > 1:
-            out = np.sum(self._samplegroups)
-            out.name = 'all'
-        else:
-            out = self._samplegroups[0]
+        out = self._all_samplegroup
         return out
 
     @property

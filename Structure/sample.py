@@ -138,8 +138,7 @@ class Sample(object):
         :param mtype: str - the type of measurement
         :param mfile: str -  the measurement file
         :param machine: str - the machine from which the file is output
-        :param mag_method: str - only used for af-demag
-        :return: RockPyV3.measurement object
+        :return: RockPyV.measurement object
 
         :mtypes:
 
@@ -165,6 +164,10 @@ class Sample(object):
         else:
 
             Sample.logger.error(' << %s >> not implemented, yet' % mtype)
+
+    def add_simulation(self):
+        #todo
+        raise NotImplementedError
 
     def calc_all(self, **parameter):
         """

@@ -22,7 +22,6 @@ class Thellier(base.Measurement):
         self._data = {}
 
         super(Thellier, self).__init__(sample_obj, mtype, mfile, machine, **options)
-
         self.reset__data()
 
     @property

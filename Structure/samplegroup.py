@@ -50,6 +50,7 @@ class SampleGroup(object):
         except KeyError:
             raise KeyError('SampleGroup has no Sample << %s >>' % item)
 
+
     def import_multiple_samples(self, sample_file, length_unit='mm', mass_unit='mg', **options):
         """
         imports a csv file with sample_names masses and dimensions and creates the sample_objects
@@ -101,6 +102,10 @@ class SampleGroup(object):
     def slist(self):
         out = [self.samples[i] for i in sorted(self.samples.keys())]
         return out
+
+    @property
+    def sdict(self):
+        return {s.name: s for s in self.sample_list}
 
     @property
     def mtypes(self):
@@ -188,7 +193,7 @@ class SampleGroup(object):
 
     def ttype_results(self, **parameter):
         if not self.results:
-            self.calc_all(**parameter)
+            self.results = self.calc_all(**parameter)
         ttypes = [i for i in self.results.column_names if 'ttype' in i]
         out = {i.split()[1]: {round(j, 2): None for j in self.results[i].v} for i in ttypes}
 
@@ -207,7 +212,6 @@ class SampleGroup(object):
 
 
     def calc_all(self, **parameter):
-        self.results = None
         for sample in self.sample_list:
             label = sample.name
             sample.calc_all(**parameter)
@@ -219,6 +223,7 @@ class SampleGroup(object):
                 rpdata = RockPyData(column_names=results.column_names,
                                     data=results.data, row_names=[label for i in results.data])
                 self.results = self.results.append_rows(rpdata)
+        return self.results
 
     def average_results(self, **parameter):
         """

@@ -86,7 +86,6 @@ class Measurement(object):
                  mtype, mfile, machine,
                  **options):
         """
-
         :param sample_obj:
         :param mtype:
         :param mfile:
@@ -451,7 +450,7 @@ class Measurement(object):
                 if self.calculation_parameter[caller] and not recalc:
                     parameter[i] = self.calculation_parameter[caller][i]
                 else:
-                    parameter[i] = self._standard_parameter[caller][i]
+                    parameter[i] = self.standard_parameter[caller][i]
         return parameter
 
     def check_parameters(self, caller, parameter):
@@ -515,7 +514,7 @@ class Measurement(object):
         """
         if self._treatment_opt:
             treatments = self._treatment_opt.replace(' ', '').split(';')  # split ; for multiple treatments
-            treatments = [i.split(',') for i in treatments]  # split , for type, value, unit
+            treatments = [i.split('_') for i in treatments]  # split , for type, value, unit
             for i in treatments:
                 try:
                     i[1] = float(i[1])

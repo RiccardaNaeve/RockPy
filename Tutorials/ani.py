@@ -19,7 +19,9 @@ def test():
     #study = RockPy.Study(samplegroups=sg)
 
     #print sample
+
     M.calculate_tensor()
+    print M.aniso_dict
     print M.results
 
 if __name__ == '__main__':

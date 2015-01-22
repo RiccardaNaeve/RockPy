@@ -14,8 +14,8 @@ def test():
 
     M = sample.add_measurement(mtype='hysteresis', mfile=vsm_file, machine='vsm')
     print M.result_ms(from_field=80)
-    # M.calc_all()
-    # print M.results
+    M.calc_all()
+    print M.results
     M.plt_hys()
 
 if __name__ == '__main__':

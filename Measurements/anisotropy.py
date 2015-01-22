@@ -294,5 +294,5 @@ class Anisotropy(base.Measurement):
         # calculate design matrix
         dm = Anisotropy.makeDesignMatrix(self.mdirs, xyz)
         # calculate tensor and all other results
-        self.results = Anisotropy.CalcAnisoTensor(dm, self._data['measurements'])
+        self.aniso_dict = Anisotropy.CalcAnisoTensor(dm, self._data['measurements'])
 

@@ -71,7 +71,6 @@ class Anisotropy(base.Measurement):
         return B
 
 
-
     @staticmethod
     def CalcEigenValVec(T):
         """
@@ -141,7 +140,7 @@ class Anisotropy(base.Measurement):
 
         # construct symmetric anisotropy tensor R (3x3)
         R = np.array([[s[0], s[3], s[5]], [s[3], s[1], s[4]], [s[5], s[4], s[2]]])
-        R = R.reshape(3, 3)
+        #R = R.reshape(3, 3)
         aniso_dict['R'] = R
 
         # calculate eigenvalues and eigenvectors = principal axes
@@ -183,7 +182,7 @@ class Anisotropy(base.Measurement):
         aniso_dict['P'] = P
 
         n = []
-        neg_eigenvalue = False # check for negative eigenvalues, log will fail
+        neg_eigenvalue = False  # check for negative eigenvalues, log will fail
         for kn in k:
             if kn <=0:
                 neg_eigenvalue = True
@@ -198,11 +197,17 @@ class Anisotropy(base.Measurement):
             P1 = exp(sqrt(2 * ((n[0]-navg)**2+(n[1]-navg)**2+(n[2]-navg)**2)))
             aniso_dict['P1'] = P1
 
-            T = (2 * n[1] - n[0] - n[2]) / (n[0] - n[2])
+            # calculation of T fails when measurements are isotropic
+            c = 2 * n[1] - n[0] - n[2]
+            if c == 0:
+                T = 0  # TODO: check if this makes sense : T = 0, when isotropic
+            else:
+                T = c / (n[0] - n[2])
+
             aniso_dict['T'] = T
 
         else:
-            aniso_dict['P1'] = 0 # not possible to calc -> set to 0
+            aniso_dict['P1'] = 0  # not possible to calc -> set to 0
             aniso_dict['T'] = 0
 
         U = (2 * k[1] - k[0] - k[2]) / (k[0] - k[2])
@@ -273,18 +278,14 @@ class Anisotropy(base.Measurement):
         self.header = self.machine_data.header
         self._data['mdirs'] = self.machine_data.mdirs
         # directional measurements
-        m = self.machine_data.data
-        if m.ndim == 1:  # only one column
-            m = m.reshape(len(m), 1)  # make numpy array 2 dimensional
-        self._data['measurements'] = m
-
+        self._data['measurements'] = self.machine_data.data.flatten()
 
     # calculations
     def calculate_tensor(self):
         #do we have scalar or vectorial measurements?
-        if self._data['measurements'].shape[1] == 1:  #scalar
+        if len(self._data['measurements']) == len(self._data['mdirs']):  #scalar
             xyz = False
-        elif self._data['measurements'].shape[1] == 3:  #vectorial
+        elif len(self._data['measurements']) / len(self._data['mdirs']) == 3:  #vectorial
             xyz = True
         else:
             Anisotropy.logger.error("anisotropy measurements have %d components")

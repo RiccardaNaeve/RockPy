@@ -34,11 +34,9 @@ class Machine(object):
     def _check_data_exists(self):
         """
         Needed as a check for data import in Sample.add_measurement. if it returns False, the measurement will not be created.
-
-
         :return: bool
         """
-        if self.data:
+        if self.data is not None:
             return True
         else:
             return False

@@ -29,7 +29,9 @@ class Hysteresis(base.Measurement):
                       'down_field': None,
                       'virgin': None,
                       'msi': None,
-                      'all':None}
+                      'all': None}
+
+        # TODO: check if the above makes sense. super resets self._data ????
 
         super(Hysteresis, self).__init__(sample_obj, mtype, mfile, machine, **options)
         self.paramag_correction = None

@@ -104,7 +104,6 @@ class Sample(object):
         Sample.logger.info('CREATING\t new sample << %s >>' % self.name)
 
         self.measurements = []
-
         self.results = None
 
         ''' is sample is a mean sample from sample_goup ect... '''
@@ -130,7 +129,7 @@ class Sample(object):
 
     def add_measurement(self,
                         mtype=None, mfile=None, machine='generic',  # general
-                        idx = None,
+                        idx=None,
                         **options):
         '''
         All measurements have to be added here
@@ -148,7 +147,8 @@ class Sample(object):
 
         implemented = {i.__name__.lower(): i for i in Measurement.inheritors()}
 
-        if idx is None: idx = len(self.measurements) # if there is no measurement index
+        if idx is None:
+            idx = len(self.measurements)  # if there is no measurement index
 
         if mtype in implemented:
             Sample.logger.info(' ADDING\t << measurement >> %s' % mtype)
@@ -417,7 +417,7 @@ class Sample(object):
 
     def all_results(self, mtype=None, ttype=None, tval=None, tval_range=None, mlist=None, **parameter):
         """
-        calculates all results for a list of measuremetns and stores them in a RockPy data object
+        calculates all results for a list of measurements and stores them in a RockPy data object
         :param mlist:
         :param parameter:
         :return:

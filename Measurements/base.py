@@ -228,7 +228,7 @@ class Measurement(object):
         :return:
         '''
 
-        Measurement.logger.info(' IMPORTING << %s , %s >> data' % (self.machine, self.mtype))
+        Measurement.logger.info('IMPORTING << %s , %s >> data' % (self.machine, self.mtype))
 
         machine = options.get('machine', self.machine)
         mtype = options.get('mtype', self.mtype)
@@ -239,7 +239,7 @@ class Measurement(object):
             return
         else:
             if rtn_raw_data:
-                Measurement.logger.info(' RETURNING raw_data for << %s , %s >> data' % (machine, mtype))
+                Measurement.logger.info('RETURNING raw_data for << %s , %s >> data' % (machine, mtype))
                 return raw_data
             else:
                 self.machine_data = raw_data

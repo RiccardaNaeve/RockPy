@@ -199,7 +199,8 @@ class Anisotropy(base.Measurement):
 
             # calculation of T fails when measurements are isotropic
             c = 2 * n[1] - n[0] - n[2]
-            if c == 0:
+
+            if c == 0.0:
                 T = 0  # TODO: check if this makes sense : T = 0, when isotropic
             else:
                 T = c / (n[0] - n[2])
@@ -282,15 +283,65 @@ class Anisotropy(base.Measurement):
 
     def result_t11(self, recalc=False):
         self.calc_result(parameter={}, recalc=recalc, force_caller='tensor')
-    def result_t12(self, recalc=False):
+    def result_t12_21(self, recalc=False):
         self.calc_result(parameter={}, recalc=recalc, force_caller='tensor')
-    def result_t13(self, recalc=False):
+    def result_t13_31(self, recalc=False):
         self.calc_result(parameter={}, recalc=recalc, force_caller='tensor')
     def result_t22(self, recalc=False):
         self.calc_result(parameter={}, recalc=recalc, force_caller='tensor')
-    def result_t23(self, recalc=False):
+    def result_t23_32(self, recalc=False):
         self.calc_result(parameter={}, recalc=recalc, force_caller='tensor')
-    def result_t32(self, recalc=False):
+    def result_t33(self, recalc=False):
+        self.calc_result(parameter={}, recalc=recalc, force_caller='tensor')
+    def result_eval1(self, recalc=False):
+        self.calc_result(parameter={}, recalc=recalc, force_caller='tensor')
+    def result_eval2(self, recalc=False):
+        self.calc_result(parameter={}, recalc=recalc, force_caller='tensor')
+    def result_eval3(self, recalc=False):
+        self.calc_result(parameter={}, recalc=recalc, force_caller='tensor')
+    def result_I1(self, recalc=False):
+        self.calc_result(parameter={}, recalc=recalc, force_caller='tensor')
+    def result_D1(self, recalc=False):
+        self.calc_result(parameter={}, recalc=recalc, force_caller='tensor')
+    def result_I2(self, recalc=False):
+        self.calc_result(parameter={}, recalc=recalc, force_caller='tensor')
+    def result_D2(self, recalc=False):
+        self.calc_result(parameter={}, recalc=recalc, force_caller='tensor')
+    def result_I3(self, recalc=False):
+        self.calc_result(parameter={}, recalc=recalc, force_caller='tensor')
+    def result_D3(self, recalc=False):
+        self.calc_result(parameter={}, recalc=recalc, force_caller='tensor')
+    def result_P(self, recalc=False):
+        self.calc_result(parameter={}, recalc=recalc, force_caller='tensor')
+    def result_P1(self, recalc=False):
+        self.calc_result(parameter={}, recalc=recalc, force_caller='tensor')
+    def result_F(self, recalc=False):
+        self.calc_result(parameter={}, recalc=recalc, force_caller='tensor')
+    def result_L(self, recalc=False):
+        self.calc_result(parameter={}, recalc=recalc, force_caller='tensor')
+    def result_T(self, recalc=False):
+        self.calc_result(parameter={}, recalc=recalc, force_caller='tensor')
+    def result_E12(self, recalc=False):
+        self.calc_result(parameter={}, recalc=recalc, force_caller='tensor')
+    def result_E13(self, recalc=False):
+        self.calc_result(parameter={}, recalc=recalc, force_caller='tensor')
+    def result_E23(self, recalc=False):
+        self.calc_result(parameter={}, recalc=recalc, force_caller='tensor')
+    def result_E(self, recalc=False):
+        self.calc_result(parameter={}, recalc=recalc, force_caller='tensor')
+    def result_Q(self, recalc=False):
+        self.calc_result(parameter={}, recalc=recalc, force_caller='tensor')
+    def result_U(self, recalc=False):
+        self.calc_result(parameter={}, recalc=recalc, force_caller='tensor')
+    def result_F0(self, recalc=False):
+        self.calc_result(parameter={}, recalc=recalc, force_caller='tensor')
+    def result_F12(self, recalc=False):
+        self.calc_result(parameter={}, recalc=recalc, force_caller='tensor')
+    def result_F23(self, recalc=False):
+        self.calc_result(parameter={}, recalc=recalc, force_caller='tensor')
+    def result_stddev(self, recalc=False):
+        self.calc_result(parameter={}, recalc=recalc, force_caller='tensor')
+    def result_QF(self, recalc=False):
         self.calc_result(parameter={}, recalc=recalc, force_caller='tensor')
 
 
@@ -309,4 +360,17 @@ class Anisotropy(base.Measurement):
         dm = Anisotropy.makeDesignMatrix(self.mdirs, xyz)
         # calculate tensor and all other results
         self.aniso_dict = Anisotropy.CalcAnisoTensor(dm, self._data['measurements'])
-        self.results['t11'] = 5
+        self.results['t11'] = self.aniso_dict['R'][0][0]
+        self.results['t12_21'] = self.aniso_dict['R'][0][1]
+        self.results['t13_31'] = self.aniso_dict['R'][0][2]
+        self.results['t22'] = self.aniso_dict['R'][1][1]
+        self.results['t23_32'] = self.aniso_dict['R'][1][2]
+        self.results['t33'] = self.aniso_dict['R'][2][2]
+
+        self.results['eval1'] = self.aniso_dict['eigvals'][0]
+        self.results['eval2'] = self.aniso_dict['eigvals'][1]
+        self.results['eval3'] = self.aniso_dict['eigvals'][2]
+
+
+        for k in ('I1', 'D1', 'I2', 'D2', 'I3', 'D3', 'P', 'P1', 'F', 'L', 'T', 'E12', 'E13', 'E23', 'E', 'Q', 'U', 'F0', 'F12', 'F23', 'stddev', 'QF'):
+            self.results[k] = self.aniso_dict[k]

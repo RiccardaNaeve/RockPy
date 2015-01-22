@@ -153,6 +153,7 @@ class Sample(object):
                                              mtype=mtype, mfile=mfile, machine=machine,
                                              m_idx=idx,
                                              **options)
+
             if measurement.has_data:
                 self.measurements.append(measurement)
                 return measurement

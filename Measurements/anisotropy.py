@@ -2,6 +2,9 @@ __author__ = 'wack'
 
 import base
 import logging
+from math import cos, sin, atan, radians, log, exp, sqrt, degrees
+import numpy as np
+from RockPy.Functions.general import XYZ2DIL, MirrorDirectionToPositiveInclination
 
 class Anisotropy(base.Measurement):
     '''
@@ -10,7 +13,7 @@ class Anisotropy(base.Measurement):
 
     logger = logging.getLogger('RockPy.MEASUREMENT.Anisotropy')
 
-    @classmethod
+    @staticmethod
     def makeDesignMatrix( mdirs, xyz):
         """
         create design matrix for anisotropy measurements
@@ -20,13 +23,13 @@ class Anisotropy(base.Measurement):
         """
         #directions in cartesian coordinates
         XYZ = []
-        for i in range( len( mdirs)):
-            XYZ.append([cos( radians( mdirs[i][0]))*cos( radians( mdirs[i][1])), sin( radians( mdirs[i][0]))*cos( radians( mdirs[i][1])), sin( radians( mdirs[i][1]))])
+        for i in range(len(mdirs)):
+            XYZ.append([cos(radians(mdirs[i][0]))*cos(radians(mdirs[i][1])), sin(radians(mdirs[i][0]))*cos(radians(mdirs[i][1])), sin(radians(mdirs[i][1]))])
 
         # make design matrix for single components (x,y,z)
-        B = numpy.zeros((len( XYZ) * 3,6),'f')
+        B = np.zeros((len(XYZ) * 3, 6), 'f')
 
-        for i in range( len( XYZ)):
+        for i in range(len(XYZ)):
             B[i*3+0][0] = XYZ[i][0]
             B[i*3+0][3] = XYZ[i][1]
             B[i*3+0][5] = XYZ[i][2]
@@ -44,7 +47,7 @@ class Anisotropy(base.Measurement):
 
         else:
             # make design matrix for directional measurement (same direction as applied field)
-            A=numpy.zeros((len( mdirs),6),'f')
+            A=np.zeros((len( mdirs),6),'f')
 
 
             for i in range( len( XYZ)):
@@ -52,8 +55,7 @@ class Anisotropy(base.Measurement):
 
         return A
 
-
-    @classmethod
+    @staticmethod
     def CalcPseudoInverse(A):
         """
         calculate pseude inverse of matrix A
@@ -61,16 +63,16 @@ class Anisotropy(base.Measurement):
         :return:
         """
 
-        AT = numpy.transpose(A)
-        ATA = numpy.dot(AT, A)
-        ATAI = numpy.linalg.inv(ATA)
-        B = numpy.dot(ATAI, AT)
+        AT = np.transpose(A)
+        ATA = np.dot(AT, A)
+        ATAI = np.linalg.inv(ATA)
+        B = np.dot(ATAI, AT)
 
         return B
 
 
 
-    @classmethod
+    @staticmethod
     def CalcEigenValVec(T):
         """
         calculate eigenvalues and eigenvectors from tensor T, sorted by eigenvalues
@@ -78,16 +80,16 @@ class Anisotropy(base.Measurement):
         :return:
         """
         #get eigenvalues and eigenvectors
-        eigvals, eigvec = numpy.linalg.eig(T)
+        eigvals, eigvec = np.linalg.eig(T)
 
         #sort by eigenvalues
         #put eigenvalues and and eigenvectors together in one list and sort this one
         valvec = []
         for i in range(len(eigvals)):
-            valvec.append([eigvals[i], numpy.transpose(eigvec)[i].tolist()])
+            valvec.append([eigvals[i], np.transpose(eigvec)[i].tolist()])
 
         #sort eigenvalues and eigenvectors by eigenvalues
-        valvec.sort(lambda x, y: -cmp( x[0], y[0])) # sort from large to small
+        valvec.sort(lambda x, y: -cmp(x[0], y[0]))  # sort from large to small
 
         for i in range(len(valvec)):
             eigvals[i] = valvec[i][0]
@@ -95,7 +97,7 @@ class Anisotropy(base.Measurement):
 
         return eigvals, eigvec
 
-    @classmethod
+    @staticmethod
     def CalcAnisoTensor(A, K):
         """ calculate anisotropy tensor
             input: A: design matrix
@@ -129,24 +131,26 @@ class Anisotropy(base.Measurement):
                    """
 
         aniso_dict = {}
-        aniso_dict['msg'] = '' # put in here any message you want to pass out of this routine
+        aniso_dict['msg'] = ''  # put in here any message you want to pass out of this routine
 
         # calculate pseudo inverse of A
-        B = CalcPseudoInverse( A)
+        B = Anisotropy.CalcPseudoInverse(A)
         # calculate elements of anisotropy tensor
-        s = numpy.dot( B, K)
+        s = np.dot(B, K)
         # construct symmetric anisotropy tensor R (3x3)
-        R = numpy.array([[s[0], s[3], s[5]], [s[3], s[1], s[4]], [s[5], s[4], s[2]]])
+        R = np.array([[s[0], s[3], s[5]], [s[3], s[1], s[4]], [s[5], s[4], s[2]]])
         aniso_dict['R'] = R
+        R = R.reshape(3, 3)
+
         # calculate eigenvalues and eigenvectors = principal axes
-        eigvals, eigvecs = CalcEigenValVec(R)
+        eigvals, eigvecs = Anisotropy.CalcEigenValVec(R)
         aniso_dict['eigvals'] = eigvals
         aniso_dict['eigvecs'] = eigvecs
 
         # calc inclination and declination of eigenvectors
-        (D1, I1, L) = XYZ2DIL( eigvecs[0])
-        (D2, I2, L) = XYZ2DIL( eigvecs[1])
-        (D3, I3, L) = XYZ2DIL( eigvecs[2])
+        (D1, I1, L) = XYZ2DIL(eigvecs[0])
+        (D2, I2, L) = XYZ2DIL(eigvecs[1])
+        (D3, I3, L) = XYZ2DIL(eigvecs[2])
 
         # to get consistent plotting, make all inclinations positive
         aniso_dict['D1'], aniso_dict['I1'] = MirrorDirectionToPositiveInclination( D1, I1)
@@ -182,14 +186,14 @@ class Anisotropy(base.Measurement):
             if kn <=0:
                 neg_eigenvalue = True
                 aniso_dict['msg'] = 'Warning: negative eigenvalue!'
-                n.append( None)
+                n.append(None)
             else:
-                n.append( log( kn))
+                n.append(log(kn))
 
         if not neg_eigenvalue:
             navg = (n[0]+n[1]+n[2]) / 3
 
-            P1 = exp( sqrt( 2 * ((n[0]-navg)**2+(n[1]-navg)**2+(n[2]-navg)**2)))
+            P1 = exp(sqrt(2 * ((n[0]-navg)**2+(n[1]-navg)**2+(n[2]-navg)**2)))
             aniso_dict['P1'] = P1
 
             T = (2 * n[1] - n[0] - n[2]) / (n[0] - n[2])
@@ -210,7 +214,7 @@ class Anisotropy(base.Measurement):
 
 
         #calculate best fit values of K
-        Kf = numpy.dot( A, s)
+        Kf = np.dot(A, s)
         aniso_dict['Kf'] = Kf
 
         #calculate K - Kf --> errors
@@ -221,7 +225,7 @@ class Anisotropy(base.Measurement):
         #    print "%.4f   \t %.4f \t %.4f" % (K[c], Kf[c], d[c])
 
         #calculate sum of errors^2
-        S0 = numpy.dot( d, d)
+        S0 = np.dot(d[0], d[0])
         aniso_dict['S0'] = S0
 
         #calculate variance
@@ -237,10 +241,10 @@ class Anisotropy(base.Measurement):
 
         # calculate confidence ellipses
         #F = 3.89 --> looked up from tauxe lecture 2005; F-table
-        f = sqrt( 2 * 3.89)
-        E12 = abs( degrees( atan( f * stddev / (2 * (eigvals[1]-eigvals[0])))))
-        E23 = abs( degrees( atan( f * stddev / (2 * (eigvals[1]-eigvals[2])))))
-        E13 = abs( degrees( atan( f * stddev / (2 * (eigvals[2]-eigvals[0])))))
+        f = sqrt(2 * 3.89)
+        E12 = abs(degrees(atan(f * stddev / (2 * (eigvals[1]-eigvals[0])))))
+        E23 = abs(degrees(atan(f * stddev / (2 * (eigvals[1]-eigvals[2])))))
+        E13 = abs(degrees(atan(f * stddev / (2 * (eigvals[2]-eigvals[0])))))
 
         aniso_dict['E12'] = E12
         aniso_dict['E23'] = E23
@@ -259,24 +263,23 @@ class Anisotropy(base.Measurement):
         return aniso_dict  # return the whole bunch of values
 
 
-    def __init__(self, sample_obj, mtype, mfile, machine, **options):
-        super(Anisotropy, self).__init__(sample_obj, mtype, mfile, machine, **options)
-
-        self._data = {'mdirs': None, 'measurements': None}
+    #def __init__(self, sample_obj, mtype, mfile, machine, **options):
+    #    super(Anisotropy, self).__init__(sample_obj, mtype, mfile, machine, **options)
 
     # formats
-
     def format_ani(self):
         self.header = self.machine_data.header
         self._data['mdirs'] = self.machine_data.mdirs
-        self._data['measurements'] = self.machine_data.data
-        print "Anisotropy.format_ani self._data", self._data
+        # directional measurements
+        m = self.machine_data.data
+        if m.ndim == 1:  # only one column
+            m = m.reshape(len(m), 1)  # make numpy array 2 dimensional
+        self._data['measurements'] = m
 
 
     # calculations
     def calculate_tensor(self):
         #do we have scalar or vectorial measurements?
-        print self._data
         if self._data['measurements'].shape[1] == 1:  #scalar
             xyz = False
         elif self._data['measurements'].shape[1] == 3:  #vectorial
@@ -286,7 +289,7 @@ class Anisotropy(base.Measurement):
             return
 
         # calculate design matrix
-        dm = Anisotropy.MakeDesignMatrix(self.mdirs, xyz)
+        dm = Anisotropy.makeDesignMatrix(self.mdirs, xyz)
         # calculate tensor and all other results
-        self.results = Anisotropy.CalcAnisoTensor( dm, self._data['measurements'])
+        self.results = Anisotropy.CalcAnisoTensor(dm, self._data['measurements'])
 

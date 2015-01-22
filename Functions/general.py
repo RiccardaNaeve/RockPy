@@ -3,7 +3,7 @@ import logging
 import numpy as np
 import matplotlib.pyplot as plt
 from math import degrees, radians
-from math import sin, cos, tan
+from math import sin, cos, tan, asin, atan2
 
 
 def create_logger(name):
@@ -112,3 +112,56 @@ def _to_list(oneormoreitems):
     :return: tuple of elements
     """
     return oneormoreitems if hasattr(oneormoreitems, '__iter__') else [oneormoreitems]
+
+
+
+def XYZ2DIL( XYZ):
+    """
+    convert XYZ to dec, inc, length
+    :param XYZ:
+    :return:
+    """
+    DIL = []
+    L = np.linalg.norm( XYZ)
+    #L=sqrt(XYZ[0]**2+XYZ[1]**2+XYZ[2]**2) # calculate resultant vector length
+    D = degrees(atan2(XYZ[1],XYZ[0]))  # calculate declination taking care of correct quadrants (atan2)
+    if D < 0: D = D+360. # put declination between 0 and 360.
+    if D > 360.: D = D-360.
+    DIL.append(D)  # append declination to Dir list
+    I = degrees(asin(XYZ[2]/L))  # calculate inclination (converting to degrees)
+    DIL.append(I)  # append inclination to Dir list
+    DIL.append(L)  # append vector length to Dir list
+    return DIL
+
+def DIL2XYZ( DIL):
+    """
+    Convert a tuple of D,I,L components to a tuple of x,y,z.
+    :param DIL:
+    :return:
+    """
+    (D, I, L) = DIL
+    H = L*cos(radians(I))
+    X = H*cos(radians(D))
+    Y = H*sin(radians(D))
+    Z = H*tan(radians(I))
+    return (X, Y, Z)
+
+def MirrorDirectionToNegativeInclination( dec, inc):
+    if inc > 0:
+        return (dec + 180) % 360, -inc
+    else:
+        return dec, inc
+
+def MirrorDirectionToPositiveInclination( dec, inc):
+    if inc < 0:
+        return (dec + 180) % 360, -inc
+    else:
+        return dec, inc
+
+def MirrorVectorToNegativeInclination( x,y,z):
+    if z > 0: return -x,-y,-z
+    else: return x,y,z
+
+def MirrorVectorToPositiveInclination( x,y,z):
+    if z < 0: return -x, -y, -z
+    else: return x,y,z

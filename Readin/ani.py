@@ -29,7 +29,7 @@ class Ani(base.Machine):
         # store first header line
         self.header = self.raw_data[0]
         dipairs = self.raw_data[1].strip().split(';')
-        self.mdirs = [[di[0], di[1]] for di in [dipair.split(',') for dipair in dipairs]]
+        self.mdirs = [[float(di[0]), float(di[1])] for di in [dipair.split(',') for dipair in dipairs]]
         # read the directional measurements from remaining lines
         self.data = np.genfromtxt(StringIO(''.join( self.raw_data[2:])), delimiter=",")
 

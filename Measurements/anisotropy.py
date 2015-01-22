@@ -280,6 +280,20 @@ class Anisotropy(base.Measurement):
         # directional measurements
         self._data['measurements'] = self.machine_data.data.flatten()
 
+    def result_t11(self, recalc=False):
+        self.calc_result(parameter={}, recalc=recalc, force_caller='tensor')
+    def result_t12(self, recalc=False):
+        self.calc_result(parameter={}, recalc=recalc, force_caller='tensor')
+    def result_t13(self, recalc=False):
+        self.calc_result(parameter={}, recalc=recalc, force_caller='tensor')
+    def result_t22(self, recalc=False):
+        self.calc_result(parameter={}, recalc=recalc, force_caller='tensor')
+    def result_t23(self, recalc=False):
+        self.calc_result(parameter={}, recalc=recalc, force_caller='tensor')
+    def result_t32(self, recalc=False):
+        self.calc_result(parameter={}, recalc=recalc, force_caller='tensor')
+
+
     # calculations
     def calculate_tensor(self):
         #do we have scalar or vectorial measurements?
@@ -295,4 +309,4 @@ class Anisotropy(base.Measurement):
         dm = Anisotropy.makeDesignMatrix(self.mdirs, xyz)
         # calculate tensor and all other results
         self.aniso_dict = Anisotropy.CalcAnisoTensor(dm, self._data['measurements'])
-
+        self.results['t11'] = 5

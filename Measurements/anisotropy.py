@@ -14,7 +14,7 @@ class Anisotropy(base.Measurement):
     logger = logging.getLogger('RockPy.MEASUREMENT.Anisotropy')
 
     @staticmethod
-    def makeDesignMatrix( mdirs, xyz):
+    def makeDesignMatrix(mdirs, xyz):
         """
         create design matrix for anisotropy measurements
         :param mdirs: measurement directions e.g. [[D1,I1],[D2,I2],[D3,I3],[D4,I4]]
@@ -47,10 +47,10 @@ class Anisotropy(base.Measurement):
 
         else:
             # make design matrix for directional measurement (same direction as applied field)
-            A=np.zeros((len( mdirs),6),'f')
+            A = np.zeros((len(mdirs), 6), 'f')
 
 
-            for i in range( len( XYZ)):
+            for i in range(len(XYZ)):
                 A[i] = XYZ[i][0]*B[i*3+0] + XYZ[i][1]*B[i*3+1] + XYZ[i][2]*B[i*3+2]
 
         return A
@@ -135,12 +135,14 @@ class Anisotropy(base.Measurement):
 
         # calculate pseudo inverse of A
         B = Anisotropy.CalcPseudoInverse(A)
+
         # calculate elements of anisotropy tensor
         s = np.dot(B, K)
+
         # construct symmetric anisotropy tensor R (3x3)
         R = np.array([[s[0], s[3], s[5]], [s[3], s[1], s[4]], [s[5], s[4], s[2]]])
-        aniso_dict['R'] = R
         R = R.reshape(3, 3)
+        aniso_dict['R'] = R
 
         # calculate eigenvalues and eigenvectors = principal axes
         eigvals, eigvecs = Anisotropy.CalcEigenValVec(R)

@@ -2,7 +2,7 @@ import numpy as np
 import logging
 
 import RockPy
-
+from copy import deepcopy
 RockPy.Functions.general.create_logger(__name__)
 log = logging.getLogger(__name__)
 
@@ -22,6 +22,8 @@ class Study(object):
         #self.log = log  # logging.getLogger('RockPy.' + type(self).__name__)
         self.name = name
         self._samplegroups = []
+        self._all_samplegroup = None
+
         self.add_samplegroup(samplegroups)
 
     def __getitem__(self, item):
@@ -61,7 +63,10 @@ class Study(object):
 
     @property
     def samples(self):
-        return self.all_samplegroup.sample_list
+        out = []
+        for sg in self._samplegroups:
+            out.extend(sg.slist)
+        return out
 
     @property
     def gdict(self):
@@ -112,13 +117,16 @@ class Study(object):
         return self
 
     def all_group(self):
-        out = np.sum(self._samplegroups)
-        out.name = 'all'
+        out = RockPy.SampleGroup(name='all')
+        for i in self._samplegroups:
+            out.add_samples(i.slist)
         self._all_samplegroup = out
         return out
 
     @property
     def all_samplegroup(self):
+        if not hasattr(self, '_all_samplegroup'):
+            self.all_group()
         out = self._all_samplegroup
         return out
 

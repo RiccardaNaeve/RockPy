@@ -73,7 +73,7 @@ def generate_file_name(sample_group='', sample_name='',
         ['_'.join(map(str, [parameter[i], parameter_values[i], parameter_units[i]])) for i in range(len(parameter))])
 
     out = '#'.join([sample, sample_info, params, standard_measurement])
-    out += '.' + index
+    out += '.%03i' %index
     return out
 
 
@@ -155,17 +155,25 @@ def import_folder(folder, name = 'study', study=None):
     files = os.listdir(folder)
 
     for f in files:
+
+
         d = RockPy.extract_info_from_filename(f, folder)
+
         if not d['sample_group'] in study.samplegroup_names:
             sg = RockPy.SampleGroup(name=d['sample_group'])
             study.add_samplegroup(sg)
         else:
             sg = study.gdict[d['sample_group']]
-
         if not d['name'] in sg.sample_names:
             s = RockPy.Sample(**d)
             sg.add_samples(s)
         else:
-            s = sg.sdict[d['name']]
-        s.add_measurement(**d)
+            s = sg.get_samples(snames = d['name'])[0]
+        m = s.add_measurement(**d)
+
+    print study
+    print study.samplegroups
+    print sg
+    print sg.samples
+    print s
     return study

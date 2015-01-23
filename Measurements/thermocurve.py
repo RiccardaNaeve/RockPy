@@ -118,31 +118,6 @@ class ThermoCurve(base.Measurement):
         return out
 
     def plt_thermocurve(self):
-        fig = plt.figure()
-        ax = fig.add_subplot(111)
-        color = {'warm': 'r', 'cool': 'b'}
-        for seg in self._data:
-            ax.plot(self.data[seg]['temp'].v, self.data[seg]['mag'].v, 'x-', color=color[seg[:4]])
-        ax.grid()
-        # ax.axhline(0, color='#808080')
-        # ax.axvline(0, color='#808080')
-
-        unit = 'T'
-        field = np.mean(self.ut['field'].v)
-
-        if field < 0.01:
-            field *= 1000.
-            unit = 'mT'
-
-        ax.text(0.01, 1.01, 'mean field: %.3f %s' % (field, unit),  # replace with data.unit
-                verticalalignment='bottom', horizontalalignment='left',
-                transform=ax.transAxes,
-
-        )
-        ax.set_xlabel('Temperature [%s]' % ('C'))  # todo data.unit
-        ax.set_ylabel('Magnetic Moment [%s]' % ('Am2'))  # todo data.unit
-        ax.set_title('Thermocurve %s' % self.sample_obj.name)
-        lims = ax.get_ylim()
-        ax.set_ylim([0, lims[1]])
-        plt.tight_layout()
-        plt.show()
+        import RockPy.Visualize.demag
+        plot = RockPy.Visualize.demag.ThermoCurve(self)
+        plot.show()

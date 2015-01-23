@@ -19,14 +19,15 @@ class Day1977(base.Generic):
 
     def initialize_visual(self):
         # super(Day1977, self).initialize_visual()
-        self.standard_features = [day_grid, day.points]
+        self.standard_features = [day.points]
+        self.single_features = [self.feature_day_grid]
         self.add_plot()
         self.ax = self.figs[self.name][0].gca()
 
         self.ax.set_xlim([0, 8])
-        # self.ax.set_ylim([0, 0.6])
-        self.ax.set_xlabel('$B_{cr} / B_c$')
-        self.ax.set_ylabel('$M_{rs} / M_{s}$')
+        self.ax.set_ylim([0, 0.6])
+        self.xlabel = '$B_{cr} / B_c$'
+        self.ylabel = '$M_{rs} / M_{s}$'
 
     def plotting(self, samples, **plt_opt):
         samples = self.get_plot_samples()
@@ -38,6 +39,9 @@ class Day1977(base.Generic):
             mrs_ms = hys.results['mrs'].v / hys.results['ms'].v
             bcr_bc = coe.results['bcr'].v / hys.results['bc'].v
             self.ax.plot(bcr_bc, mrs_ms, '.')
+
+        for feature in self.single_features:
+            feature()
 
 
     ''' PLOT FEATURES '''

@@ -83,13 +83,14 @@ class Measurement(object):
         return measurement_formatters
 
     def __init__(self, sample_obj,
-                 mtype, mfile, machine,
+                 mtype, mfile, machine, mdata,
                  **options):
         """
         :param sample_obj:
         :param mtype:
         :param mfile:
         :param machine:
+        :param mdata: when mdata is set, this will be directly used as measurement data without formatting from file
         :param options:
         :return:
         """

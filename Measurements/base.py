@@ -90,7 +90,6 @@ class Measurement(object):
         :param mtype:
         :param mfile:
         :param machine:
-        :param suffix: str
         :param options:
         :return:
         """
@@ -143,7 +142,7 @@ class Measurement(object):
 
 
         # dynamic data formatting
-        # checks is format_'machine_name' exists. If exists it formats self.raw_data according to format_'machine_name'
+        # checks if format_'machine_name' exists. If exists it formats self.raw_data according to format_'machine_name'
         if callable(getattr(self, 'format_' + machine)):
             if self.has_data:
                 Measurement.logger.debug('FORMATTING raw data from << %s >>' % machine)

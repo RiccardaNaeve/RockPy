@@ -49,10 +49,10 @@ class Measurement(object):
     logger = logging.getLogger('RockPy.MEASUREMENT')
 
     @classmethod
-    def simulate(cls, **options):
+    def simulate(cls, **parameter):
         """
         pseudo abstract method that should be overridden in subclasses to return a simulated measurement
-        based on given options
+        based on given parameters
         """
         return None
 

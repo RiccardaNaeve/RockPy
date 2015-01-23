@@ -303,7 +303,10 @@ class Sample(object):
 
     ''' FIND FUNCTIONS '''
 
-    def get_measurements(self, mtype=None, ttype=None, tval=None, tval_range=None,
+    def get_measurements(self,
+                         mtype=None,
+                         ttype=None, tval=None, tval_range=None,
+                         is_mean=False,
                          **options):
         """
         Returns a list of measurements of type = mtype

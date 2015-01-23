@@ -56,6 +56,9 @@ class Arai(base.Generic):
         self.ax = self.figs[self.name][0].gca()
 
     def plotting(self, samples, **plt_opt):
+        print('arai plotting', samples)
+
+        """ PRIMARY """
         for feature in self.standard_features:
             for s in samples:
                 # look for measurements
@@ -63,7 +66,6 @@ class Arai(base.Generic):
                     measurements = s.get_measurements(mtype=mtype)
                     for m in measurements:
                         feature(ax=self.ax, m_obj=m, **plt_opt)
-        plt.legend(loc='best')
 
     ''' Features '''
 

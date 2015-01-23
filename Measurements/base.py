@@ -107,6 +107,7 @@ class Measurement(object):
         self.has_data = True
         self._data = {}
         self.is_initial_state = False
+        self.is_mean = False # flag for mean measurements
 
         if machine is not None:
             machine = machine.lower()  # for consistency in code
@@ -221,9 +222,6 @@ class Measurement(object):
                          '_treatments', 'suffix',
                      )
         }
-        for i, v in self._data.iteritems():
-            print i
-            print v
 
         return pickle_me
 
@@ -233,7 +231,6 @@ class Measurement(object):
         :param d:
         :return:
         '''
-        print self.__dict__
         self.__dict__.update(d)
         self.__initialize()
 

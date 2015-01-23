@@ -38,7 +38,6 @@ class Thellier(base.Measurement):
         self._data.update({'ptrm': self._ptrm(recalc_m)})
         self._data.update({'sum' : self._sum(recalc_m)})
         self._data.update({'difference': self._difference(recalc_m)})
-        print self._data.keys()
         # self._data = {i: getattr(self, i) for i in self.steps}
 
     @property
@@ -96,7 +95,6 @@ class Thellier(base.Measurement):
     def format_generic(self):
         for step in ['nrm', 'th', 'pt', 'ac', 'tr', 'ck']:
             self._data.update({step: None})
-        print self._data
 
     def _ptrm(self, recalc_m=True):
         idx = self._get_idx_equal_val('pt', 'th')
@@ -170,8 +168,7 @@ class Thellier(base.Measurement):
         try:
             calc_data = self.data[step]
         except KeyError:
-            print('REFERENCE << %s >> can not be found ' % (step))
-            # self.log.error('REFERENCE << %s >> can not be found ' % (step))
+            self.log.error('REFERENCE << %s >> can not be found ' % (step))
 
         if val == 'last':
             val = calc_data[var].v[-1]
@@ -226,13 +223,11 @@ class Thellier(base.Measurement):
             o_len = len(getattr(self, step)['temp'].v)
             idx = [i for i, v in enumerate(getattr(self, step)['temp'].v) if v != temp]
             if o_len - len(idx) != 0:
-                # self.log.info(
-                print(
+                self.log.info(
                     'DELETING << %i, %s >> entries for << %.2f >> temperature' % (o_len - len(idx), step, temp))
                 setattr(self, step, getattr(self, step).filter_idx(idx))
             else:
-                print('UNABLE to find entriy for << %s, %.2f >> temperature' % (step, temp))
-                # self.log.debug('UNABLE to find entriy for << %s, %.2f >> temperature' % (step, temp))
+                self.log.debug('UNABLE to find entriy for << %s, %.2f >> temperature' % (step, temp))
 
 
     """ RESULT SECTION """

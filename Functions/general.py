@@ -119,8 +119,6 @@ def _to_list(oneormoreitems):
     """
     return oneormoreitems if hasattr(oneormoreitems, '__iter__') else [oneormoreitems]
 
-
-
 def XYZ2DIL( XYZ):
     """
     convert XYZ to dec, inc, length

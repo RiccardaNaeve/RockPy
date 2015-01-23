@@ -1,7 +1,7 @@
 __author__ = 'mike'
 import matplotlib.pyplot as plt
 import base
-from Plotting import af_demagnetization
+from PlottingOLD import af_demagnetization
 
 
 class REM_dash_log(base.Generic):

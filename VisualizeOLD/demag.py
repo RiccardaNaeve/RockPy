@@ -1,8 +1,8 @@
 __author__ = 'mike'
 import matplotlib.pyplot as plt
 
-import RockPy.Plotting
-from RockPy.Plotting import af_demagnetization
+import RockPy.PlottingOLD
+from RockPy.PlottingOLD import af_demagnetization
 import base
 import numpy as np
 
@@ -53,20 +53,20 @@ class AfDemag(base.Generic):
                 plt_opt = self.get_plt_opt(sample, measurements, measurement)
                 plt_opt.update({'zorder': 10})
                 norm_factor = self.get_norm_factor(measurement)
-                RockPy.Plotting.af_demagnetization.field_mom(self.ax, measurement,
+                RockPy.PlottingOLD.af_demagnetization.field_mom(self.ax, measurement,
                                                              component=self.component, norm_factor=norm_factor,
                                                              **plt_opt)
                 if mdf_line:
-                    RockPy.Plotting.af_demagnetization.mdf_line(self.ax, measurement,
+                    RockPy.PlottingOLD.af_demagnetization.mdf_line(self.ax, measurement,
                                                                 component=self.component, norm_factor=norm_factor,
                                                                 **plt_opt)
                 if mdf_text:
-                    RockPy.Plotting.af_demagnetization.mdf_txt(self.ax, measurement,
+                    RockPy.PlottingOLD.af_demagnetization.mdf_txt(self.ax, measurement,
                                                                component=self.component, norm_factor=norm_factor,
                                                                y_shift=shift,
                                                                **plt_opt)
                 if diff_fill:
-                    RockPy.Plotting.af_demagnetization.diff_fill(self.ax, measurement,
+                    RockPy.PlottingOLD.af_demagnetization.diff_fill(self.ax, measurement,
                                                                  component=self.component, norm_factor=norm_factor,
                                                                  smoothing=smoothing, diff=diff,
                                                                  **plt_opt)

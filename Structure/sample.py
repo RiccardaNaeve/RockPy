@@ -110,6 +110,7 @@ class Sample(object):
         self.is_mean = False # if a calculated mean_sample
         self.mean_measurements = []
         self.mean_results = None
+        self._filtered_data = None
 
         if mass is not None:
             self.add_measurement(mtype='mass', mfile=None, machine=mass_machine,
@@ -120,6 +121,14 @@ class Sample(object):
         if height is not None:
             self.add_measurement(mtype='height', mfile=None, machine=length_machine,
                                  value=float(height), unit=length_unit)
+
+    @property
+    def filtered_data(self):
+        if not self._filtered_data:
+            return self.measurements
+        else:
+            return self._filtered_data
+
 
     def __repr__(self):
         return '<< %s - RockPy.Sample >>' % self.name
@@ -263,6 +272,31 @@ class Sample(object):
                     for tt in self.mtype_ttype_dict[mt]}
                for mt in self.mtypes}
         return out
+
+    ''' FILTER FUNCTIONS '''
+    def filter(self, mtype=None, ttype=None, tval=None, tval_range=None,
+                         **kwargs):
+        """
+        used to filter measurement data.
+
+        :param mtype: mtype to be filtered for, if not specified all mtypes are returned
+        :param ttype: ttype to be filtered for, if not specified all ttypes are returned
+        :param tval: tval to be filtered for, can only be used in conjuction with ttype
+        :param tval_range: tval_range to be filtered for, can only be used in conjuction with ttype
+        :param kwargs:
+        :return:
+        """
+        self._filtered_data = self.get_measurements(mtype=mtype,
+                                                    ttype=ttype, tval=tval, tval_range=tval_range)
+
+    def reset_filter(self):
+        """
+        rests filter applied using sample.filter()
+        :return:
+        """
+        self._filtered_data = None
+
+
 
     ''' FIND FUNCTIONS '''
 
@@ -549,3 +583,4 @@ class Sample(object):
                     out[t.ttype][t.value] = []
                 out[t.ttype][t.value].append(m)
         return out
+

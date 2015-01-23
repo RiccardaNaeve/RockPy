@@ -1,6 +1,6 @@
 __author__ = 'mike'
 import base
-import Plotting.hysteresis
+import PlottingOLD.hysteresis
 import matplotlib.pyplot as plt
 
 
@@ -29,10 +29,10 @@ class T_v_Hys(base.Generic):
                 colors = self.create_heat_color_map(measurement_dict[S])
 
                 if measurement.virgin:
-                    Plotting.hysteresis.vigin_branch(self.ax, measurement)
+                    PlottingOLD.hysteresis.vigin_branch(self.ax, measurement)
 
-                Plotting.hysteresis.up_field_branch(self.ax, measurement, color=colors[i], linewidth=0.5)
-                Plotting.hysteresis.down_field_branch(self.ax, measurement, color=colors[i], linewidth=0.5)
+                PlottingOLD.hysteresis.up_field_branch(self.ax, measurement, color=colors[i], linewidth=0.5)
+                PlottingOLD.hysteresis.down_field_branch(self.ax, measurement, color=colors[i], linewidth=0.5)
 
         self.ax.set_xlabel('field [T]')
         self.ax.set_ylabel('Moment [Am2]')

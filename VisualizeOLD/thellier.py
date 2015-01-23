@@ -1,10 +1,10 @@
-from RockPy.Plotting import arai
+from RockPy.PlottingOLD import arai
 from RockPy.VisualizeOLD import base
 
 __author__ = 'mike'
 import matplotlib.pyplot as plt
 import base
-from RockPy import Plotting
+from RockPy import PlottingOLD
 from RockPy.Visualize import Features
 import numpy as np
 
@@ -106,10 +106,10 @@ class Dunlop(base.Generic):
                 norm_factor = self.get_norm_factor(measurement)
                 plt_opt = self.get_plt_opt(sample=sample, measurements=measure_dict[sample], measurement=measurement)
                 plt_opt.update({'markersize': measurement.tdict['pressure'] * 4 + 2})
-                Plotting.dunlop.dunlop(self.ax, measurement, norm_factor=norm_factor, **plt_opt)
+                PlottingOLD.dunlop.dunlop(self.ax, measurement, norm_factor=norm_factor, **plt_opt)
 
                 if 'std_fill' in options:
-                    Plotting.dunlop.dunlop_std(self.ax, measurement, norm_factor=norm_factor, **plt_opt)
+                    PlottingOLD.dunlop.dunlop_std(self.ax, measurement, norm_factor=norm_factor, **plt_opt)
 
     def get_norm_factor(self, measurement):
         implemented = {'is':
@@ -189,10 +189,10 @@ class Dunlop_Treatments_Difference(base.Generic):
         #                                  'marker': self.markers[i],
         #                                  'markersize': self.markersizes[i]})
         #             norm_factor = [1, 1]  # m.initial_state.data['mag'].v[0]]
-        #             Plotting.dunlop.dunlop(self.ax1, thellier_obj=m, component=self.component, norm_factor=norm_factor,
+        #             PlottingOLD.dunlop.dunlop(self.ax1, thellier_obj=m, component=self.component, norm_factor=norm_factor,
         #                                    **self.plt_opt)
         #             if self.std_fill:
-        #                 Plotting.dunlop.dunlop_std(self.ax1, thellier_obj=m, component=self.component,
+        #                 PlottingOLD.dunlop.dunlop_std(self.ax1, thellier_obj=m, component=self.component,
         #                                            norm_factor=norm_factor, **self.plt_opt)
 
         treats = sorted(d.keys())
@@ -216,11 +216,11 @@ class Dunlop_Treatments_Difference(base.Generic):
                                          'marker': self.markers[i],
                                          'markersize': self.markersizes[i],
                     })
-                    Plotting.dunlop.difference(self.ax2, a, b, component=self.component, norm_factor=norm_factor,
+                    PlottingOLD.dunlop.difference(self.ax2, a, b, component=self.component, norm_factor=norm_factor,
                                                **self.plt_opt)
 
                     if self.std_fill:
-                        Plotting.dunlop.difference_std(self.ax2, a, b, component=self.component,
+                        PlottingOLD.dunlop.difference_std(self.ax2, a, b, component=self.component,
                                                        norm_factor=norm_factor, **self.plt_opt)
 
         # self.ax1.set_title('Dunlop %s' % self.sample_names)
@@ -299,15 +299,15 @@ class Dunlop_Treatments_Derivative(base.Generic):
                                          'marker': self.markers[i],
                                          'markersize': self.markersizes[i]})
                     norm_factor = [1, 1]  # m.initial_state.data['mag'].v[0]]
-                    Plotting.dunlop.dunlop(self.ax1, thellier_obj=m, component=self.component, norm_factor=norm_factor,
+                    PlottingOLD.dunlop.dunlop(self.ax1, thellier_obj=m, component=self.component, norm_factor=norm_factor,
                                            **self.plt_opt)
 
                     if self.std_fill:
-                        Plotting.dunlop.dunlop_std(self.ax1, thellier_obj=m, component=self.component,
+                        PlottingOLD.dunlop.dunlop_std(self.ax1, thellier_obj=m, component=self.component,
                                                    norm_factor=norm_factor,
                                                    **self.plt_opt)
 
-                    Plotting.dunlop.derivative(self.ax2, thellier_obj=m, component=self.component,
+                    PlottingOLD.dunlop.derivative(self.ax2, thellier_obj=m, component=self.component,
                                                norm_factor=norm_factor, diff=1, interpolate=False,
                                                **self.plt_opt)
 

@@ -1,6 +1,6 @@
 __author__ = 'volk'
 import RockPy.Functions.general
-import Plotting
+import PlottingOLD
 from RockPy.Structure.sample import Sample
 from RockPy.Structure.samplegroup import SampleGroup
 from RockPy.Structure.study import Study

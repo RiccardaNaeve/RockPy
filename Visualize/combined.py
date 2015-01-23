@@ -7,9 +7,9 @@ import base
 import RockPy.Functions.general
 import RockPy.Measurements.hysteresis
 import RockPy.Measurements.backfield
-import RockPy.Plotting.hysteresis
-import RockPy.Plotting.backfield
-import RockPy.Plotting.day_plot
+import RockPy.PlottingOLD.hysteresis
+import RockPy.PlottingOLD.backfield
+import RockPy.PlottingOLD.day_plot
 from RockPy.Visualize.Features.day import day_grid
 from Features import day
 
@@ -101,10 +101,10 @@ class Fabian2010(base.Generic):
         if p_cor:
             hys.simple_paramag_cor()
 
-        RockPy.Plotting.hysteresis.zero_lines(self.ax, color='k')
-        RockPy.Plotting.hysteresis.up_field_branch(self.ax, hysteresis_obj=hys, color='k')
-        RockPy.Plotting.hysteresis.down_field_branch(self.ax, hysteresis_obj=hys, color='k')
-        RockPy.Plotting.hysteresis.vigin_branch(self.ax, hysteresis_obj=hys, color='k')
-        # RockPy.Plotting.hysteresis.hys_text(self.ax, hysteresis_obj=hys) #todo
-        RockPy.Plotting.backfield.backfield(self.ax, coe, color='k')
+        RockPy.PlottingOLD.hysteresis.zero_lines(self.ax, color='k')
+        RockPy.PlottingOLD.hysteresis.up_field_branch(self.ax, hysteresis_obj=hys, color='k')
+        RockPy.PlottingOLD.hysteresis.down_field_branch(self.ax, hysteresis_obj=hys, color='k')
+        RockPy.PlottingOLD.hysteresis.vigin_branch(self.ax, hysteresis_obj=hys, color='k')
+        # RockPy.PlottingOLD.hysteresis.hys_text(self.ax, hysteresis_obj=hys) #todo
+        RockPy.PlottingOLD.backfield.backfield(self.ax, coe, color='k')
 

@@ -274,12 +274,19 @@ class Anisotropy(base.Measurement):
     #def __init__(self, sample_obj, mtype, mfile, machine, **options):
     #    super(Anisotropy, self).__init__(sample_obj, mtype, mfile, machine, **options)
 
-    # formats
+
+    ''' FORMAT SECTION '''
+
+
     def format_ani(self):
         self.header = self.machine_data.header
         self._data['mdirs'] = self.machine_data.mdirs
         # directional measurements
         self._data['measurements'] = self.machine_data.data.flatten()
+
+
+    ''' RESULT SECTION '''
+
 
     def result_t11(self, recalc=False):
         self.calc_result(parameter={}, recalc=recalc, force_caller='tensor')
@@ -345,7 +352,8 @@ class Anisotropy(base.Measurement):
         self.calc_result(parameter={}, recalc=recalc, force_caller='tensor')
 
 
-    # calculations
+    ''' CALCULATION SECTION '''
+
     def calculate_tensor(self):
         #do we have scalar or vectorial measurements?
         if len(self._data['measurements']) == len(self._data['mdirs']):  #scalar

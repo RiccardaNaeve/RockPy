@@ -22,7 +22,7 @@ class Anisotropy(base.Measurement):
         # get measurement directions in array of D,I pairs
         mdirs = parameter.get('mdirs', [[0.0, 0.0], [90.0, 0.0], [0.0, 90.0]])
         # get eigenvalues
-        evals = list(parameter.get('evals', [1.0,1.0,1.0]))
+        evals = list(parameter.get('evals', [1.0, 1.0, 1.0]))
         if len(evals) != 3:
             raise RuntimeError('got %d eigenvalues instead of 3' % len(evals))
         # todo: normalize evals to 1?

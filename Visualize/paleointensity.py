@@ -57,11 +57,21 @@ class Arai(base.Generic):
 
     def plotting(self, samples, **plt_opt):
         print('arai plotting', samples)
+        primary = samples[0]
+        secondary = samples[1]
 
         """ PRIMARY """
         for feature in self.standard_features:
-            for s in samples:
+            for s in primary:
                 # look for measurements
+                for visual, mtype in self.required.iteritems():
+                    measurements = s.get_measurements(mtype=mtype)
+                    for m in measurements:
+                        feature(ax=self.ax, m_obj=m, **plt_opt)
+
+            for s in secondary:
+                # look for measurements
+                plt_opt.update({'alpha': 0.5})
                 for visual, mtype in self.required.iteritems():
                     measurements = s.get_measurements(mtype=mtype)
                     for m in measurements:

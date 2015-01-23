@@ -23,7 +23,9 @@ def test():
 
     M2 = sample.add_measurement( mtype='anisotropy', mdata=mdata)
 
-    M3 = sample.add_simulation( mtype='anisotropy', evals=(0.4, 1.5, 0.3), mdirs=[[225.0, 0.0], [135.0, 0.0], [90.0, 45.0], [90.0, -45.0], [0.0, -45.0], [0.0, 45.0]])
+    M3 = sample.add_simulation( mtype='anisotropy', evals=(1.5, 1.5, 0.3),
+                                mdirs=[[225.0, 0.0], [135.0, 0.0], [90.0, 45.0],
+                                       [90.0, -45.0], [0.0, -45.0], [0.0, 45.0]])
 
 
     # print "M._data", M._data

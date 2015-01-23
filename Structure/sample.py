@@ -195,7 +195,7 @@ class Sample(object):
         if mtype in implemented:
             Sample.logger.info(' ADDING\t << simulated measurement >> %s' % mtype)
             measurement = implemented[mtype].simulate(self,
-                                             mtype=mtype, m_idx=idx, **options)
+                                                      mtype=mtype, m_idx=idx, **options)
             if measurement.has_data:
                 self.measurements.append(measurement)
                 return measurement

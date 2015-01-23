@@ -40,4 +40,4 @@ if __name__ == '__main__':
     sg = RockPy.SampleGroup(name='sg')
     s = get_test_sample()
 
-    RockPy.Visualize.paleointensity.Arai(s)
+    RockPy.Visualize.paleointensity.Arai(s).show()

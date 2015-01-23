@@ -16,15 +16,14 @@ def test():
     # add measurement, read from file
     M1 = sample.add_measurement(mtype='anisotropy', mfile=ani_file2, machine='ani')
 
-    #mdata = {'mdirs': [[225.0, 0.0], [135.0, 0.0], [90.0, 45.0], [90.0, -45.0], [0.0, -45.0], [0.0, 45.0]],
-    #         'measurements': np.array([1.1, 1.1, 1.1, 1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 0.9, 0.9, 0.9])}
-
-    mdata = Anisotropy.simulate(sample, mtype='anisotropy')
+    mdata = {'mdirs': [[225.0, 0.0], [135.0, 0.0], [90.0, 45.0], [90.0, -45.0], [0.0, -45.0], [0.0, 45.0]],
+             'measurements': np.array([1.1, 1.1, 1.1, 1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 0.9, 0.9, 0.9])}
 
     print mdata
 
-    M2 = sample.add_measurement(mtype='anisotropy', mdata=mdata)
+    M2 = sample.add_measurement( mtype='anisotropy', mdata=mdata)
 
+    M3 = sample.add_simulation( mtype='anisotropy', evals=(0.4, 1.5, 0.3), mdirs=[[225.0, 0.0], [135.0, 0.0], [90.0, 45.0], [90.0, -45.0], [0.0, -45.0], [0.0, 45.0]])
 
 
     # print "M._data", M._data
@@ -33,11 +32,13 @@ def test():
 
     M1.calculate_tensor()
     M2.calculate_tensor()
+    M3.calculate_tensor()
     #print M1._data
     #M.calc_all()  # broken
     #print M.aniso_dict
     print M1.results
     print M2.results
+    print M3.results
 
 
 if __name__ == '__main__':

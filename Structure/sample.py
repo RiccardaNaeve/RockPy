@@ -175,9 +175,34 @@ class Sample(object):
         else:
             Sample.logger.error(' << %s >> not implemented, yet' % mtype)
 
-    def add_simulation(self):
-        #todo
-        raise NotImplementedError
+    def add_simulation(self, mtype, sim_param=None, idx=None, **options):
+        """
+        add simulated measurements
+
+        :param mtype: str - the type of simulated measurement
+        :param idx:
+        :param sim_param: dict of parameters to specifiy simulation
+        :return: RockPy.measurement object
+        """
+        mtype = mtype.lower()
+
+        implemented = {i.__name__.lower(): i for i in Measurement.inheritors()}
+
+        if idx is None:
+            idx = len(self.measurements)  # if there is no measurement index
+
+
+        if mtype in implemented:
+            Sample.logger.info(' ADDING\t << simulated measurement >> %s' % mtype)
+            measurement = implemented[mtype].simulate(self,
+                                             mtype=mtype, m_idx=idx, **options)
+            if measurement.has_data:
+                self.measurements.append(measurement)
+                return measurement
+            else:
+                return None
+        else:
+            Sample.logger.error(' << %s >> not implemented, yet' % mtype)
 
     def calc_all(self, **parameter):
         """

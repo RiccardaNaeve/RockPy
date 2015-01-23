@@ -4,7 +4,7 @@ import base
 import logging
 from math import cos, sin, atan, radians, log, exp, sqrt, degrees
 import numpy as np
-from RockPy.Functions.general import XYZ2DIL, MirrorDirectionToPositiveInclination
+from RockPy.Functions.general import XYZ2DIL, DIL2XYZ, MirrorDirectionToPositiveInclination
 
 class Anisotropy(base.Measurement):
     """
@@ -15,14 +15,30 @@ class Anisotropy(base.Measurement):
 
 
     @classmethod
-    def simulate(cls, sample_obj, mtype, **options):
+    def simulate(cls, sample_obj, mtype, **parameter):
         """
-        return simulated instance of measurement
+        return simulated instance of measurement depending on parameters
         """
-        mdata = {'mdirs': [[225.0, 0.0], [135.0, 0.0], [90.0, 45.0], [90.0, -45.0], [0.0, -45.0], [0.0, 45.0]],
-             'measurements': np.array([1.1,  1.1,  1.1,  1.,  1.,  1.,  1.,  1.,  1.,  1.,  1., 1., 1., 1., 1., 0.9, 0.9, 0.9])}
+        # get measurement directions in array of D,I pairs
+        mdirs = parameter.get('mdirs', [[0.0, 0.0], [90.0, 0.0], [0.0, 90.0]])
+        # get eigenvalues
+        evals = list(parameter.get('evals', [1.0,1.0,1.0]))
+        if len(evals) != 3:
+            raise RuntimeError('got %d eigenvalues instead of 3' % len(evals))
+        # todo: normalize evals to 1?
 
-        return cls(sample_obj, mtype, mfile=None, mdata=mdata, machine=None, *options)
+        R = Anisotropy.createDiagonalTensor(*evals)
+
+        #todo: also implement 1D measurement
+        # M = R * H
+        measurements = []
+        for d, i in mdirs:
+            measurements.extend(np.dot(R, DIL2XYZ((d, i, 1))))
+
+        mdata = {'mdirs': mdirs,
+             'measurements': measurements}
+
+        return cls(sample_obj, mtype, mfile=None, mdata=mdata, machine=None, **parameter)
 
 
 

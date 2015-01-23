@@ -83,13 +83,14 @@ class Measurement(object):
         return measurement_formatters
 
     def __init__(self, sample_obj,
-                 mtype, mfile, machine,
+                 mtype, mfile, machine, mdata,
                  **options):
         """
         :param sample_obj:
         :param mtype:
         :param mfile:
         :param machine:
+        :param mdata: when mdata is set, this will be directly used as measurement data without formatting from file
         :param options:
         :return:
         """
@@ -119,6 +120,11 @@ class Measurement(object):
         if mtype in Measurement.measurement_formatters():
             Measurement.logger.debug('MTYPE << %s >> implemented' % mtype)
             self.mtype = mtype  # set mtype
+
+            if mdata is not None:  # we have mdata -> ignore mfile and just use that data directly
+                Measurement.logger.debug('mdata passed -> using as measurement data without formatting')
+                self._data = mdata
+                return  # done
             if machine in Measurement.measurement_formatters()[mtype]:
                 Measurement.logger.debug('MACHINE << %s >> implemented' % machine)
                 self.machine = machine  # set machine
@@ -153,6 +159,7 @@ class Measurement(object):
         else:
             Measurement.logger.error(
                 'FORMATTING raw data from << %s >> not possible, probably not implemented, yet.' % machine)
+
     @property
     def m_idx(self):
         return self.sample_obj.measurements.index(self)

@@ -137,7 +137,7 @@ class Sample(object):
 
     def add_measurement(self,
                         mtype=None, mfile=None, machine='generic',  # general
-                        idx=None,
+                        idx=None, mdata=None,
                         **options):
         '''
         All measurements have to be added here
@@ -145,7 +145,10 @@ class Sample(object):
         :param mtype: str - the type of measurement
         :param mfile: str -  the measurement file
         :param machine: str - the machine from which the file is output
-        :return: RockPyV.measurement object
+        :param idx:
+        :param mdata: any kind of data that must fit the required structure of the data of the measurement
+                    will be used instead of data from file
+        :return: RockPy.measurement object
 
         :mtypes:
 
@@ -162,7 +165,7 @@ class Sample(object):
             Sample.logger.info(' ADDING\t << measurement >> %s' % mtype)
             measurement = implemented[mtype](self,
                                              mtype=mtype, mfile=mfile, machine=machine,
-                                             m_idx=idx,
+                                             m_idx=idx, mdata=mdata,
                                              **options)
             if measurement.has_data:
                 self.measurements.append(measurement)

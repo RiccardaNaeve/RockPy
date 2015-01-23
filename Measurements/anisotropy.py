@@ -7,11 +7,32 @@ import numpy as np
 from RockPy.Functions.general import XYZ2DIL, MirrorDirectionToPositiveInclination
 
 class Anisotropy(base.Measurement):
-    '''
+    """
     calculation of anisotropy tensors based on pseudo inverse (least squares fitting) of given data
-    '''
+    """
 
     logger = logging.getLogger('RockPy.MEASUREMENT.Anisotropy')
+
+
+    @classmethod
+    def simulate(cls, sample_obj, mtype, **options):
+        """
+        return simulated instance of measurement
+        """
+        mdata = {'mdirs': [[225.0, 0.0], [135.0, 0.0], [90.0, 45.0], [90.0, -45.0], [0.0, -45.0], [0.0, 45.0]],
+             'measurements': np.array([1.1,  1.1,  1.1,  1.,  1.,  1.,  1.,  1.,  1.,  1.,  1., 1., 1., 1., 1., 0.9, 0.9, 0.9])}
+
+        return cls(sample_obj, mtype, mdata=mdata)
+
+
+    @staticmethod
+    def createDiagonalTensor( ev1, ev2, ev3):
+        """
+        create a tensor (3x3 matrix) with the 3 given eigenvalues on its diagonal
+        :param eigenvalues:
+        :return: numpy array as tensor
+        """
+        return np.array([[ev1, 0, 0], [0, ev2, 0], [0, 0, ev3]])
 
     @staticmethod
     def makeDesignMatrix(mdirs, xyz):
@@ -157,7 +178,6 @@ class Anisotropy(base.Measurement):
         aniso_dict['D1'], aniso_dict['I1'] = MirrorDirectionToPositiveInclination( D1, I1)
         aniso_dict['D2'], aniso_dict['I2'] = MirrorDirectionToPositiveInclination( D2, I2)
         aniso_dict['D3'], aniso_dict['I3'] = MirrorDirectionToPositiveInclination( D3, I3)
-
 
 
         #calc mean magnetization

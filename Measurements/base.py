@@ -49,6 +49,14 @@ class Measurement(object):
     logger = logging.getLogger('RockPy.MEASUREMENT')
 
     @classmethod
+    def simulate(cls, **options):
+        """
+        pseudo abstract method that should be overridden in subclasses to return a simulated measurement
+        based on given options
+        """
+        return None
+
+    @classmethod
     def implemented_machines(cls):
         # setting implemented machines
         # looking for all subclasses of RockPy.Readin.base.Machine

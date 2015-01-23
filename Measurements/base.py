@@ -14,6 +14,7 @@ from RockPy.Readin import *
 from copy import deepcopy
 import inspect
 
+
 class Measurement(object):
     """
 
@@ -116,7 +117,6 @@ class Measurement(object):
 
         self.__initialize()
 
-
         if mtype in Measurement.measurement_formatters():
             Measurement.logger.debug('MTYPE << %s >> implemented' % mtype)
             self.mtype = mtype  # set mtype
@@ -160,6 +160,9 @@ class Measurement(object):
             Measurement.logger.error(
                 'FORMATTING raw data from << %s >> not possible, probably not implemented, yet.' % machine)
 
+        if self._treatment_opt:
+            self._add_treatment_from_opt()
+
     @property
     def m_idx(self):
         return self.sample_obj.measurements.index(self)
@@ -192,9 +195,6 @@ class Measurement(object):
         self._standard_parameter = {i[10:]: None for i in dir(self) if i.startswith('calculate_') if
                                     not i.endswith('generic')}
 
-        if self._treatment_opt:
-            self._add_treatment_from_opt()
-
 
     def __getstate__(self):
         '''
@@ -202,8 +202,18 @@ class Measurement(object):
         :return:
         '''
         pickle_me = {k: v for k, v in self.__dict__.iteritems() if k in
-                     ('machine_data', 'initial_state', 'is_machine_data', '_data',  'has_data', 'mtype', 'sample_obj',
-                      'mfile', '_treatments', '_treatment_opt', 'suffix', 'mean_mdict')}
+                     (
+                         'mtype', 'machine', 'mfile',
+                         'has_data', 'machine_data',
+                         '_data', #todo _data seems to make the unicode error
+                         'initial_state', 'is_machine_data', 'sample_obj',
+                         '_treatments', 'suffix',
+                     )
+        }
+        for i, v in self._data.iteritems():
+            print i
+            print v
+
         return pickle_me
 
     def __setstate__(self, d):
@@ -212,6 +222,7 @@ class Measurement(object):
         :param d:
         :return:
         '''
+        print self.__dict__
         self.__dict__.update(d)
         self.__initialize()
 
@@ -533,7 +544,7 @@ class Measurement(object):
             treatments = None
         return treatments
 
-    def _get_treatment(self, ttype=None, tval=None): #todo delete?
+    def _get_treatment(self, ttype=None, tval=None):  # todo delete?
         out = [t for t in self.treatments]
         if ttype:
             out = [t for t in out if t.ttype == ttype]
@@ -541,12 +552,20 @@ class Measurement(object):
             out = [t for t in out if t.value == tval]
         return out
 
-    def _get_treatment_value(self, ttype): #todo delete?
+    def _get_treatment_value(self, ttype):  # todo delete?
         if ttype in self.ttype_dict:
             out = self.ttype_dict[ttype].value
             return out
 
     def add_treatment(self, ttype, tval, unit=None, comment=''):
+        """
+        adds a treatments to measurement.treatments, then adds is to the data and results datastructure
+        :param ttype:
+        :param tval:
+        :param unit:
+        :param comment:
+        :return:
+        """
         treatment = Treatments.Generic(ttype=ttype, value=tval, unit=unit, comment=comment)
         self._treatments.append(treatment)
         self._add_tval_to_data(treatment)
@@ -554,17 +573,22 @@ class Measurement(object):
         return treatment
 
     def _add_tval_to_data(self, tobj):
-        for dtype in self.data:
+        """
+        adds ttype ad tvals to data
+        :param tobj:
+        :return:
+        """
+        for dtype in self._data:
             data = np.ones(len(self.data[dtype]['variable'].v)) * tobj.value
             self.data[dtype] = self.data[dtype].append_columns(column_names='ttype ' + tobj.ttype,
-                                                               data=data)  #, unit=tobj.unit)
+                                                               data=data)  # , unit=tobj.unit) #todo add units
 
     def _add_tval_to_results(self, tobj):
 
         # data = np.ones(len(self.results['variable'].v)) * tobj.value
         if not 'ttype ' + tobj.ttype in self.results.column_names:
             self.results = self.results.append_columns(column_names='ttype ' + tobj.ttype,
-                                                       data=[tobj.value])  #, unit=tobj.unit)
+                                                       data=[tobj.value])  # , unit=tobj.unit) #todo add units
 
 
     def __sort_list_set(self, values):
@@ -612,7 +636,7 @@ class Measurement(object):
         return self
 
     def _get_norm_factor(self, reference, rtype, vval, norm_method):
-        norm_factor = 1  #inititalize
+        norm_factor = 1  # inititalize
 
         if reference:
             if reference == 'nrm' and reference not in self.data and 'data' in self.data:
@@ -674,20 +698,20 @@ class Measurement(object):
         """
         if self._treatments:
             for t in self.treatments:
-                if t.ttype :
+                if t.ttype:
                     if t.ttype not in self.results.column_names:
-                        self.results.append_columns(column_names='ttype '+ t.ttype,
-                                                    data= t.value,
+                        self.results.append_columns(column_names='ttype ' + t.ttype,
+                                                    data=t.value,
                                                     # unit = t.unit      # todo add units
-                                                    )
+                        )
 
 
     def get_treatment_labels(self):
         out = ''
         if self.has_treatment:
             for treat in self.treatments:
-                if not str(treat.value)+ ' '+ treat.unit in out:
-                    out += str(treat.value)+ ' '+ treat.unit
+                if not str(treat.value) + ' ' + treat.unit in out:
+                    out += str(treat.value) + ' ' + treat.unit
                     out += ' '
         return out
 

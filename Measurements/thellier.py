@@ -19,7 +19,7 @@ class Thellier(base.Measurement):
 
         # # ## initialize data
         self.steps = ['nrm', 'th', 'pt', 'ac', 'tr', 'ck', 'ptrm', 'sum', 'difference']
-        self._data = {}
+        # self._data = {}
 
         super(Thellier, self).__init__(sample_obj, mtype, mfile, machine, **options)
         self.reset__data()
@@ -36,14 +36,15 @@ class Thellier(base.Measurement):
         return out
 
     def reset__data(self, recalc_m=True):
-        self.data['ptrm'] = self._ptrm(recalc_m)
-        self.data['sum'] = self._sum(recalc_m)
-        self.data['difference'] = self._difference(recalc_m)
+        self._data.update({'ptrm': self._ptrm(recalc_m)})
+        self._data.update({'sum' : self._sum(recalc_m)})
+        self._data.update({'difference': self._difference(recalc_m)})
+        print self._data.keys()
         # self._data = {i: getattr(self, i) for i in self.steps}
 
     @property
     def data(self):
-        if not hasattr(self, '_data'):
+        if not 'ptrm' in self._data.keys():
             self.reset__data()
         return self._data
 
@@ -91,6 +92,7 @@ class Thellier(base.Measurement):
                 self._data.update({step: rp_data})
             else:
                 self._data.update({step: None})
+        self.reset__data()
 
     def format_generic(self):
         for step in ['nrm', 'th', 'pt', 'ac', 'tr', 'ck']:
@@ -100,8 +102,8 @@ class Thellier(base.Measurement):
     def _ptrm(self, recalc_m=True):
         idx = self._get_idx_equal_val('pt', 'th')
 
-        pt = self.pt.filter_idx(idx[:, 0])
-        th = self.th.filter_idx(idx[:, 1])
+        pt = self._data['pt'].filter_idx(idx[:, 0])
+        th = self._data['th'].filter_idx(idx[:, 1])
 
         ptrm = pt - th
 
@@ -113,8 +115,8 @@ class Thellier(base.Measurement):
 
     def _sum(self, recalc_m=True):
         idx = self._get_idx_equal_val('pt', 'th')
-        pt = self.data['pt'].filter_idx(idx[:, 0])
-        th = self.data['th'].filter_idx(idx[:, 1])
+        pt = self._data['pt'].filter_idx(idx[:, 0])
+        th = self._data['th'].filter_idx(idx[:, 1])
         sum = th + pt - th
         if recalc_m:
             sum.define_alias('m', ( 'x', 'y', 'z'))
@@ -123,8 +125,8 @@ class Thellier(base.Measurement):
 
     def _difference(self, recalc_m=True):
         idx = self._get_idx_equal_val('pt', 'th')
-        pt = self.data['pt'].filter_idx(idx[:, 0])
-        th = self.data['th'].filter_idx(idx[:, 1])
+        pt = self._data['pt'].filter_idx(idx[:, 0])
+        th = self._data['th'].filter_idx(idx[:, 1])
         ptrm = pt - th
         difference = th - ptrm
         if recalc_m:
@@ -138,8 +140,8 @@ class Thellier(base.Measurement):
 
     def _get_idx_equal_val(self, step_x, step_y, key='temp'):
 
-        idx = np.array([(xi, yi) for xi, v1 in enumerate(self.data[step_x][key].v)
-                                 for yi, v2 in enumerate(self.data[step_y][key].v)
+        idx = np.array([(xi, yi) for xi, v1 in enumerate(self._data[step_x][key].v)
+                                 for yi, v2 in enumerate(self._data[step_y][key].v)
                                  if v1 == v2])
         return idx
 

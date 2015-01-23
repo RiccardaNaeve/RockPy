@@ -338,8 +338,6 @@ class Sample(object):
             tval = _to_list(tval)
             out = [m for m in out for val in tval if val in m.tvals]
 
-        print(out)
-
         if not tval_range is None:
             if not isinstance(tval_range, list):
                 tval_range = [0, tval_range]

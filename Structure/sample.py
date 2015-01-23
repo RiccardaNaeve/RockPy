@@ -107,8 +107,7 @@ class Sample(object):
         self.results = None
 
         ''' is sample is a mean sample from sample_goup ect... '''
-        self.is_average = False
-        self.is_mean = False
+        self.is_mean = False # if a calculated mean_sample
         self.mean_measurements = []
         self.mean_results = None
 
@@ -165,7 +164,6 @@ class Sample(object):
             else:
                 return None
         else:
-
             Sample.logger.error(' << %s >> not implemented, yet' % mtype)
 
     def add_simulation(self):

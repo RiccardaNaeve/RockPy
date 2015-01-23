@@ -1337,8 +1337,9 @@ class RockPyData(object):
         aux = [[(x[i - smoothing] + x[i + 1 + smoothing]) / 2.,
                 (y[i - smoothing] - y[i + 1 + smoothing]) / (x[i - smoothing] - x[i + 1 + smoothing])] for i in
                range(smoothing, len(x) - 1 - smoothing)]
+        # getting rid of infs
+        aux = [i for i in aux if not any(j == -float('Inf') for j in i)]
         aux = np.array(aux)
-
         out = RockPyData(column_names=[independent_var, dependent_var],
                          data=aux)
         out.define_alias('d' + dependent_var + '/d' + independent_var, dependent_var)

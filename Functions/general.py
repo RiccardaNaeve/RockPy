@@ -104,7 +104,12 @@ def rotate(xyz, axis='x', degree=0, *args):
 
     return out
 
-
+def abs_min_max(list):
+    list = [i for i in list if not i == np.nan or not i == inf]
+    min_idx = np.argmin(np.fabs(list))
+    print min_idx
+    max_idx = np.argmax(np.fabs(list))
+    return list[min_idx], list[max_idx]
 
 def _to_list(oneormoreitems):
     """

@@ -362,7 +362,6 @@ class SampleGroup(object):
                     rtype='mag', vval=None, norm_method='max', interpolate=True):
 
         mean_sample = Sample(name='mean ' + self.name)
-        mean_sample.is_average = True
         mean_sample.is_mean = True
 
         for mtype in self.mtypes:
@@ -383,7 +382,6 @@ class SampleGroup(object):
                        rtype='mag', vval=None, norm_method='max', interpolate=True):
 
         average_sample = Sample(name='mean ' + self.name)
-        average_sample.is_average = True
         average_sample.is_mean = True
 
         for mtype in ['diameter', 'height', 'mass']:

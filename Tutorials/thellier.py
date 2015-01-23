@@ -13,9 +13,10 @@ def test():
     M = sample.add_measurement(mtype='thellier', mfile=cryomag_file, machine='cryomag',
                                treatments='Pressure_0.0_GPa')
 
-
-    RockPy.save(M._data['nrm'], 'TTtest.rpy', RockPy.test_data_path)
-    sample = RockPy.load('TTtest.rpy', RockPy.test_data_path)
-    print sample
+    print(M._data['nrm']._column_names)
+    for i, v in M._data['nrm'].__dict__.iteritems():
+        print i
+        RockPy.save(v, 'TTtest.rpy', RockPy.test_data_path)
+        sample = RockPy.load('TTtest.rpy', RockPy.test_data_path)
 if __name__ == '__main__':
     test()

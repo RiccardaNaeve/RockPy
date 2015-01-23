@@ -92,7 +92,7 @@ class Measurement(object):
         return measurement_formatters
 
     def __init__(self, sample_obj,
-                 mtype, mfile, machine, mdata,
+                 mtype, mfile, machine, mdata=None,
                  **options):
         """
         :param sample_obj:
@@ -108,8 +108,11 @@ class Measurement(object):
         self._data = {}
         self.is_initial_state = False
 
-        machine = machine.lower()  # for consistency in code
-        mtype = mtype.lower()  # for consistency in code
+        if machine is not None:
+            machine = machine.lower()  # for consistency in code
+
+        if mtype is not None:
+            mtype = mtype.lower()  # for consistency in code
 
         ''' initialize parameters '''
         self.machine_data = None  # returned data from Readin.machines()

@@ -2,6 +2,7 @@ __author__ = 'wack'
 
 import numpy as np
 from RockPy.Structure.sample import Sample
+from RockPy.Measurements.anisotropy import Anisotropy
 
 
 def test():
@@ -15,10 +16,16 @@ def test():
     # add measurement, read from file
     M1 = sample.add_measurement(mtype='anisotropy', mfile=ani_file2, machine='ani')
 
-    mdata = {'mdirs': [[225.0, 0.0], [135.0, 0.0], [90.0, 45.0], [90.0, -45.0], [0.0, -45.0], [0.0, 45.0]],
-             'measurements': np.array([1.1, 1.1, 1.1, 1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 0.9, 0.9, 0.9])}
+    #mdata = {'mdirs': [[225.0, 0.0], [135.0, 0.0], [90.0, 45.0], [90.0, -45.0], [0.0, -45.0], [0.0, 45.0]],
+    #         'measurements': np.array([1.1, 1.1, 1.1, 1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 0.9, 0.9, 0.9])}
+
+    mdata = Anisotropy.simulate(sample, mtype='anisotropy')
+
+    print mdata
 
     M2 = sample.add_measurement(mtype='anisotropy', mdata=mdata)
+
+
 
     # print "M._data", M._data
     #sg = RockPy.SampleGroup(sample_list=sample)

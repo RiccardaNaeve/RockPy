@@ -145,6 +145,7 @@ class RockPyData(object):
 
         # initialize member variables
         self._column_names = list(column_names)
+        self._column_names = map(str, self.column_names)
         # todo: check for right dimension of units
         if units is None:
             self._units = None

@@ -1,4 +1,3 @@
-# coding=utf-8
 __author__ = 'volk'
 import numpy as np
 import matplotlib.pyplot as plt
@@ -56,13 +55,13 @@ class Thellier(base.Measurement):
             self.reset__data()
 
     def format_cryomag(self):
-        '''
+        """
         Formats cryomag output dictionary into thellier measurement data format.
 
         Beware: NRM step has to be called NRM or TH
 
         :return:
-        '''
+        """
         steps = self.machine_data.steps
         data = self.machine_data.get_float_data()
         row_labels = [v + '[%.0f]' % (data[i, 0]) for i, v in enumerate(steps)]
@@ -236,7 +235,7 @@ class Thellier(base.Measurement):
                 # self.log.debug('UNABLE to find entriy for << %s, %.2f >> temperature' % (step, temp))
 
 
-    ''' RESULT SECTION '''
+    """ RESULT SECTION """
 
     """
     Arai plot statistics
@@ -268,9 +267,9 @@ class Thellier(base.Measurement):
     """
 
     def result_slope(self, t_min=None, t_max=None, component=None, recalc=False):
-        '''
+        """
         Gives result for calculate_slope(t_min, t_max), returns slope value if not calculated already
-        '''
+        """
         parameter = {'t_min': t_min,
                      't_max': t_max,
                      'component': component,
@@ -280,9 +279,9 @@ class Thellier(base.Measurement):
         return self.results['slope']
 
     def result_n(self, t_min=None, t_max=None, component=None, recalc=False):
-        '''
+        """
         Gives result for calculate_slope(t_min, t_max), returns slope value if not calculated already
-        '''
+        """
         parameter = {'t_min': t_min,
                      't_max': t_max,
                      'component': component,
@@ -404,7 +403,7 @@ class Thellier(base.Measurement):
         self.calc_result(parameter, recalc)
         return self.results['w']
 
-    ''' CALCULATE SECTION '''
+    """ CALCULATE SECTION """
 
     def calculate_slope(self, **parameter):
         """
@@ -475,7 +474,7 @@ class Thellier(base.Measurement):
         self.calculation_parameter['sigma_b_anc'] = {'b_lab': b_lab}
 
     def calculate_vds(self, **parameter):  # todo move in rockpydata?
-        '''
+        """
         The vector difference sum of the entire NRM vector :math:`\\mathbf{NRM}`.
 
         .. math::
@@ -488,19 +487,19 @@ class Thellier(base.Measurement):
         :param parameter:
         :return:
 
-        '''
+        """
         NRM_t_max = self.th['mag'].v[-1]
         NRM_sum = np.sum(self.calculate_vd(**parameter))
         self.results['vds'] = NRM_t_max + NRM_sum
 
     def calculate_vd(self, **parameter):  # todo move in rockpydata?
-        '''
+        """
         Vector differences
 
         :param parameter:
         :return:
 
-        '''
+        """
         t_min = parameter.get('t_min', self.standard_parameter['vd']['t_min'])
         t_max = parameter.get('t_max', self.standard_parameter['vd']['t_max'])
 
@@ -510,11 +509,11 @@ class Thellier(base.Measurement):
         return vd
 
     def calculate_x_dash(self, **parameter):
-        '''
+        """
 
-        :math:`x_0 and :math:`y_0` the x and y points on the Arai plot projected on to the best-ﬁt line. These are
+        :math:`x_0 and :math:`y_0` the x and y points on the Arai plot projected on to the best-fit line. These are
         used to
-        calculate the NRM fraction and the length of the best-ﬁt line among other parameters. There are
+        calculate the NRM fraction and the length of the best-fit line among other parameters. There are
         multiple ways of calculating :math:`x_0 and :math:`y_0`, below is one example.
 
         ..math:
@@ -525,7 +524,7 @@ class Thellier(base.Measurement):
         :param parameter:
         :return:
 
-        '''
+        """
 
         t_min = parameter.get('t_min', self.standard_parameter['x_dash']['t_min'])
         t_max = parameter.get('t_max', self.standard_parameter['x_dash']['t_max'])
@@ -552,12 +551,12 @@ class Thellier(base.Measurement):
         return x_dash
 
     def calculate_y_dash(self, **parameter):
-        '''
+        """
 
-        :math:`x_0 and :math:`y_0` the x and y points on the Arai plot projected on to the best-ﬁt line. These are
+        :math:`x_0` and :math:`y_0` the x and y points on the Arai plot projected on to the best-fit line. These are
         used to
-        calculate the NRM fraction and the length of the best-ﬁt line among other parameters. There are
-        multiple ways of calculating :math:`x_0 and :math:`y_0`, below is one example.
+        calculate the NRM fraction and the length of the best-fit line among other parameters. There are
+        multiple ways of calculating :math:`x_0` and :math:`y_0`, below is one example.
 
         ..math:
 
@@ -567,7 +566,7 @@ class Thellier(base.Measurement):
         :param parameter:
         :return:
 
-        '''
+        """
         t_min = parameter.get('t_min', self.standard_parameter['y_dash']['t_min'])
         t_max = parameter.get('t_max', self.standard_parameter['y_dash']['t_max'])
         component = parameter.get('component', self.standard_parameter['y_dash']['component'])
@@ -590,21 +589,21 @@ class Thellier(base.Measurement):
         return y_dash
 
     def calculate_delta_x_dash(self, **parameter):
-        '''
+        """
 
-        :math:`\Delta x_0` is the TRM length of the best-ﬁt line on the Arai plot.
+        :math:`\Delta x_0` is the TRM length of the best-fit line on the Arai plot.
 
-        '''
+        """
         x_dash = self.calculate_x_dash(**parameter)
         out = abs(np.max(x_dash)) - np.min(x_dash)
         return out
 
     def calculate_delta_y_dash(self, **parameter):
-        '''
+        """
 
-        :math:`\Delta y_0`  is the NRM length of the best-ﬁt line on the Arai plot.
+        :math:`\Delta y_0`  is the NRM length of the best-fit line on the Arai plot.
 
-        '''
+        """
         y_dash = self.calculate_y_dash(**parameter)
 
         # print (np.max(y_dash)), np.min(y_dash), self.result_y_int().v[0]
@@ -747,7 +746,7 @@ class Thellier(base.Measurement):
 
     def calculate_w(self, **parameter):
         """
-        Weighting factor of Prévot et al. (1985). It is calculated by
+        Weighting factor of Prevot et al. (1985). It is calculated by
 
         .. math::
 
@@ -777,17 +776,17 @@ class Thellier(base.Measurement):
     PTRM CHECK statistics
     =====================
 
-    A pTRM check is a repeat TRM acquisition step to test for changes in a specimen’s ability to acquire TRM at
+    A pTRM check is a repeat TRM acquisition step to test for changes in a specimen's ability to acquire TRM at
     blocking temperatures below the temperature of the check. The difference between a pTRM check and the original TRM
     is calculated as the scalar intensity difference. That is,
 
     :math:
 
-    δpTRMi,j = pTRM checki,j −TRMi = pTRM checki,j −xi,
+    dpTRMi,j = pTRM checki,j -TRMi = pTRM checki,j -xi,
 
     where pTRM checki,j is the pTRM check to the ith temperature step after heating to the jth tem- perature step.
-    The order of the difference is such that pTRM checks smaller than the original TRM yield negative δpTRMi,j and pTRM
-    checks larger than the original TRM give positive δpTRMi,j. For a pTRM check to be included in the analysis,
+    The order of the difference is such that pTRM checks smaller than the original TRM yield negative dpTRMi,j and pTRM
+    checks larger than the original TRM give positive dpTRMi,j. For a pTRM check to be included in the analysis,
     both Ti and Tj must be less than or equal to Tmax.
     """
 
@@ -797,7 +796,7 @@ class Thellier(base.Measurement):
 
         :math:
 
-           \delta pTRM_{i,j} = pTRM_{check i,j} − TRM_i = pTRM_{check i,j} − TH_i
+           \delta pTRM_{i,j} = pTRM_{check i,j} - TRM_i = pTRM_{check i,j} - TH_i
 
         :param parameter:
         :return: RockPy data object of CK - TH
@@ -865,7 +864,7 @@ class Thellier(base.Measurement):
     def calculate_n_ptrm(self, **parameter):
         """
         The number of pTRM checks (CK) used to analyze the best-fit segment on the Arai plot
-        (i.e., the number of pTRMi,j with Ti ≤ Tmax and Tj ≤ Tmax).
+        (i.e., the number of pTRMi,j with Ti <= Tmax and Tj <= Tmax).
         :param parameter:
 
         """
@@ -883,7 +882,7 @@ class Thellier(base.Measurement):
     def calculate_ck_check_percent(self, **parameter):
         """
         The number of pTRM checks (CK) used to analyze the best-fit segment on the Arai plot
-        (i.e., the number of pTRMi,j with Ti ≤ Tmax and Tj ≤ Tmax).
+        (i.e., the number of pTRMi,j with Ti <= Tmax and Tj <= Tmax).
         :param parameter:
 
         """
@@ -973,7 +972,7 @@ class Thellier(base.Measurement):
         out = ( dptrm.filter_idx(max_idx)[component].v / self.calculate_delta_x_dash(**parameter) ) * 100
         self.results['ck_max_dev'] = abs(out)
 
-    '''
+    """
     Cumulative pTRM check parameters
     ********************************
 
@@ -983,7 +982,7 @@ class Thellier(base.Measurement):
     second approach with a prime (`'`). For example, `CDRAT` is calculated by the first method and `CDRAT'`
     by the second.
 
-    '''
+    """
 
     def result_cdrat(self, t_min=None, t_max=None, component=None, recalc=False, **options):
 
@@ -1198,7 +1197,7 @@ class Thellier(base.Measurement):
 
         :math:
 
-           \delta pTRM_{i,j} = pTRM_{check i,j} − TRM_i = pTRM_{check i,j} − TH_i
+           \delta pTRM_{i,j} = pTRM_{check i,j} - TRM_i = pTRM_{check i,j} - TH_i
 
         :param parameter:
         :return: RockPy data object of CK - TH
@@ -1380,12 +1379,12 @@ class Thellier(base.Measurement):
         which may suffer from the effects of experimental noise.
 
         As will be seen below, the calculation of :math:$$\delta{t^*}$$ requires :math:$$\\frac`{1}{\tan{(\Delta{\theta}_i)}}$$.
-        As :math:$$\Delta{\theta}_i$$ approaches zero or 180° this fraction tends to infinity. To tackle this,
+        As :math:$$\Delta{\theta}_i$$ approaches zero or 180 this fraction tends to infinity. To tackle this,
         :math:$$\delta{t^*}$$ is calculated in a piecewise fashion that depends on upper and lower angular limits
         (:math:$$Lim_{upper}$$ and :math:$$Lim_{lower}$$, respectively). Below is pseudo-code that describes the logic
         of the calculation procedure.
 
-        In v4.22 of the ThellierTool :math:$$Lim_{lower} = 0.175$$ (:math:$$\approx10$$°) radi
+        In v4.22 of the ThellierTool :math:$$Lim_{lower} = 0.175$$ (:math:$$\approx10$$) radi
 
 
         :math:$$\delta{t^*}$$ is then calculated as:
@@ -1424,7 +1423,7 @@ class Thellier(base.Measurement):
         ===========================
 
         An additivity check is a repeat demagnetization step to test the validity of Thellier's law of additivity
-        (Krása et al., 2003). In the course of a paleointensity experiment, a pTRM at temperature :math:`T_j` is imparted,
+        (Krasa et al., 2003). In the course of a paleointensity experiment, a pTRM at temperature :math:`T_j` is imparted,
         pTRM(:math:`T_j`, :math:`T_0`), where :math:`T_0` is room temperature. An additivity check demagnetizes
         pTRM(:math:`T_j`, :math:`T_0`) by heating to :math:`T_i`, where :math:`T_i < T_j`. The remaining pTRM
         (pTRM(:math:`T_j`, :math:`T_i`)) is subtracted from the previous pTRM acquisition step,
@@ -1546,10 +1545,10 @@ class Thellier(base.Measurement):
         self.results['delta_ac'] = out
 
 
-    ''' CHECK SECTION '''
+    """ CHECK SECTION """
 
     def _get_ck_data(self):
-        '''
+        """
         Helper function, returns the preceding th steps to each ck step
 
         :returns: list [ck_ij, th_i, ptrm_j, th_j]
@@ -1557,7 +1556,7 @@ class Thellier(base.Measurement):
                  th_i   = the th step at temeprtature i
                  ptrm_j = the ptrm step at temeprtature j
                  th_j = the th step at temeprtature j
-        '''
+        """
         out = []
 
         for ck in self.ck.v:
@@ -1594,12 +1593,12 @@ class Thellier(base.Measurement):
         return out
 
     def _get_ac_data(self):
-        '''
+        """
         Helper function, returns the preceding th steps to each ck step
 
         :returns: list [ck_ij, th_i, ptrm_j, th_j]
            where ck_ij = the ptrm check to the ith temperature after heating to the jth temperature
-        '''
+        """
         out = []
 
         for ac in self.ac:
@@ -1628,7 +1627,7 @@ class Thellier(base.Measurement):
         return out
 
 
-    ''' EXPORT SECTION '''
+    """ EXPORT SECTION """
 
     def export_tdt(self):
         raise NotImplementedError()

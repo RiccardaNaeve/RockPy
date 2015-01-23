@@ -22,7 +22,8 @@ class Anisotropy(base.Measurement):
         mdata = {'mdirs': [[225.0, 0.0], [135.0, 0.0], [90.0, 45.0], [90.0, -45.0], [0.0, -45.0], [0.0, 45.0]],
              'measurements': np.array([1.1,  1.1,  1.1,  1.,  1.,  1.,  1.,  1.,  1.,  1.,  1., 1., 1., 1., 1., 0.9, 0.9, 0.9])}
 
-        return cls(sample_obj, mtype, mdata=mdata)
+        return cls(sample_obj, mtype, mfile=None, mdata=mdata, machine=None, *options)
+
 
 
     @staticmethod

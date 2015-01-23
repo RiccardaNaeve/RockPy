@@ -75,8 +75,8 @@ def get_hys_with_multiple_cond():
 
 def test():
     sample = get_hys_with_multiple_cond()
-    print sample.filtered_data[1].treatments
-    # sample.filter(ttype='temperature', tval='300.')
+    # print sample.filtered_data
+    sample.filter(ttype='temperature', tval=300.)
     # print sample.filtered_data
 
     # S = get_pmd_demag()

@@ -16,11 +16,11 @@ def test():
     M1 = sample.add_measurement(mtype='anisotropy', mfile=ani_file2, machine='ani')
 
     mdata = {'mdirs': [[225.0, 0.0], [135.0, 0.0], [90.0, 45.0], [90.0, -45.0], [0.0, -45.0], [0.0, 45.0]],
-             'measurements': np.array([1.1,  1.1,  1.1,  1.,  1.,  1.,  1.,  1.,  1.,  1.,  1., 1., 1., 1., 1., 0.9, 0.9, 0.9])}
+             'measurements': np.array([1.1, 1.1, 1.1, 1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 0.9, 0.9, 0.9])}
 
     M2 = sample.add_measurement(mtype='anisotropy', mdata=mdata)
 
-    #print "M._data", M._data
+    # print "M._data", M._data
     #sg = RockPy.SampleGroup(sample_list=sample)
     #study = RockPy.Study(samplegroups=sg)
 
@@ -31,6 +31,7 @@ def test():
     #print M.aniso_dict
     print M1.results
     print M2.results
+
 
 if __name__ == '__main__':
     test()

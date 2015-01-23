@@ -194,7 +194,6 @@ class Measurement(object):
 
         if self._treatment_opt:
             self._add_treatment_from_opt()
-            self._add_ttype_to_results()
 
 
     def __getstate__(self):
@@ -272,21 +271,6 @@ class Measurement(object):
         else:
             Measurement.logger.error('UNABLE to find measurement << %s >>' % (mtype))
 
-
-    @property
-    def has_treatment(self):
-        if len(self._treatments) == 0:
-            return False
-        else:
-            return True
-
-    @property
-    def treatments(self):
-        if self.has_treatment:
-            return self._treatments
-        else:
-            treatment = Treatments.base.Generic(ttype='none', value=0, unit='')
-            return [treatment]
 
     @property
     def ttypes(self):
@@ -481,9 +465,26 @@ class Measurement(object):
             return True
 
     ### TREATMENT RELATED
+    @property
+    def has_treatment(self):
+        """
+        checks if a measurement actually has a treatment
+        :return:
+        """
+        if self._treatments:
+            return True
+        else:
+            return False
+
+    @property
+    def treatments(self):
+        if self.has_treatment:
+            return self._treatments
+        else:
+            treatment = Treatments.base.Generic(ttype='none', value=0, unit='')
+            return [treatment]
 
     def _get_treatment_from_suffix(self):
-        # todo next treatment
         """
         takes a given suffix and extracts treatment data-for quick assessment. For more treatment control
         use add_treatment method.
@@ -504,18 +505,20 @@ class Measurement(object):
         else:
             return None
 
-
     def _add_treatment_from_opt(self):
+        """
+        Takes treatements specified in options and adds them to self.treatments
+        :return:
+        """
         treatments = self._get_treatments_from_opt()
-
         for t in treatments:
-            self.add_treatment(ttype=t[0], tval=t[1], unit=t[2])
+            t = self.add_treatment(ttype=t[0], tval=t[1], unit=t[2])
 
     def _get_treatments_from_opt(self):
         """
         creates a list of treatments from the treatment option
 
-        e.g. Pressure,1,GPa;Temp,200,C
+        e.g. Pressure_1_GPa;Temp_200_C
         :return:
         """
         if self._treatment_opt:
@@ -530,7 +533,7 @@ class Measurement(object):
             treatments = None
         return treatments
 
-    def _get_treatment(self, ttype=None, tval=None):
+    def _get_treatment(self, ttype=None, tval=None): #todo delete?
         out = [t for t in self.treatments]
         if ttype:
             out = [t for t in out if t.ttype == ttype]
@@ -538,7 +541,7 @@ class Measurement(object):
             out = [t for t in out if t.value == tval]
         return out
 
-    def _get_treatment_value(self, ttype):
+    def _get_treatment_value(self, ttype): #todo delete?
         if ttype in self.ttype_dict:
             out = self.ttype_dict[ttype].value
             return out
@@ -547,7 +550,8 @@ class Measurement(object):
         treatment = Treatments.Generic(ttype=ttype, value=tval, unit=unit, comment=comment)
         self._treatments.append(treatment)
         self._add_tval_to_data(treatment)
-        # self._add_tval_to_results(treatment)
+        self._add_tval_to_results(treatment)
+        return treatment
 
     def _add_tval_to_data(self, tobj):
         for dtype in self.data:
@@ -558,10 +562,9 @@ class Measurement(object):
     def _add_tval_to_results(self, tobj):
 
         # data = np.ones(len(self.results['variable'].v)) * tobj.value
-        if not tobj.ttype in self.results.column_names:
+        if not 'ttype ' + tobj.ttype in self.results.column_names:
             self.results = self.results.append_columns(column_names='ttype ' + tobj.ttype,
                                                        data=[tobj.value])  #, unit=tobj.unit)
-
 
 
     def __sort_list_set(self, values):
@@ -572,7 +575,10 @@ class Measurement(object):
         """
         return sorted(list(set(values)))
 
-    ### Normalize functions
+    """
+    Normalize functions
+    +++++++++++++++++++
+    """
 
     def normalize(self, reference, rtype='mag', vval=None, norm_method='max'):
         """

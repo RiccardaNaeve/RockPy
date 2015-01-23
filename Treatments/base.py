@@ -12,7 +12,7 @@ class Generic(object):
         #self.log = logging.getLogger('RockPy.TREATMENT.' + type(self).__name__)
         #self.log.info('CREATING treatment << %s >>' % ttype)
         self.ttype = ttype.lower()
-        self.value = value
+        self.value = float(value)
         self.data = RockPyData(column_names=ttype, data=value)
         self.unit = unit
         self.comment = comment

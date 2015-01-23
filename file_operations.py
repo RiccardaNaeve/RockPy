@@ -73,7 +73,7 @@ def generate_file_name(sample_group='', sample_name='',
         ['_'.join(map(str, [parameter[i], parameter_values[i], parameter_units[i]])) for i in range(len(parameter))])
 
     out = '#'.join([sample, sample_info, params, standard_measurement])
-    out += '.%03i' %index
+    out += '.%03i' %int(index)
     return out
 
 

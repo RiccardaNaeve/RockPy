@@ -157,7 +157,7 @@ class Sample(object):
             Sample.logger.info(' ADDING\t << measurement >> %s' % mtype)
             measurement = implemented[mtype](self,
                                              mtype=mtype, mfile=mfile, machine=machine,
-                                             m_idx=idx,
+                                             m_idx=idx, mdata=mdata,
                                              **options)
             if measurement.has_data:
                 self.measurements.append(measurement)

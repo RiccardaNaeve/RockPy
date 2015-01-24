@@ -268,7 +268,7 @@ class SampleGroup(object):
         out = []
         for sample in samples:
             try:
-                out.extend(sample.get_measurements(mtype, ttype, tval, tval_range))
+                out.extend(sample.get_measurements(mtype, ttype, tval, tval_range, filtered=True))
             except TypeError:
                 pass
         return out

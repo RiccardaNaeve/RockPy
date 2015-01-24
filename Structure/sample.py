@@ -332,7 +332,7 @@ class Sample(object):
                          mtype=None,
                          ttype=None, tval=None, tval_range=None,
                          is_mean=False,
-                         filtered = True
+                         filtered = True,
                          **options):
         """
         Returns a list of measurements of type = mtype

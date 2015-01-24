@@ -13,7 +13,7 @@ def arai_points(ax, m_obj, component='mag', **plt_opt):
     markersize = plt_opt.pop('markersize', 3)
     linestyle = plt_opt.pop('linestyle', '-')
 
-    ax.plot(x[component].v, y[component].v,
+    lines = ax.plot(x[component].v, y[component].v,
             marker=marker,
             linestyle=linestyle,
             markersize=markersize,
@@ -21,28 +21,31 @@ def arai_points(ax, m_obj, component='mag', **plt_opt):
             label=m_obj.sample_obj.name,
             **plt_opt)
 
+    return lines
 
 def arai_stdev(ax, m_obj, component='mag', **plt_opt):
     idx = m_obj._get_idx_equal_val('ptrm', 'th', 'temp')
     x = m_obj.ptrm.filter_idx(idx[:, 0])
     y = m_obj.th.filter_idx(idx[:, 1])
     color = plt_opt.pop('color', 'k')
+    alpha = plt_opt.pop('alpha', 0.1)
     if not np.all(np.isnan(x[component].e)):
-        # ax.errorbar(x=x[component].v,
-        # xerr=x[component].e,
-        #             y=y[component].v,
-        #             yerr=y[component].e,
-        #             color=color,
-        #             # alpha=0.3,
-        #             zorder=2,
-        #             **plt_opt)
-        ax.fill_between(x[component].v,
-                        y[component].v - y[component].e,
-                        y[component].v + y[component].e,
-                        color=color,
-                        alpha=0.1,
-                        zorder=0,
-                        **plt_opt)
+        lines = ax.errorbar(x=x[component].v,
+                            xerr=x[component].e,
+                            y=y[component].v,
+                            yerr=y[component].e,
+                            color=color,
+                            # alpha=0.3,
+                            zorder=2,
+                            **plt_opt)
+        # ax.fill_between(x[component].v,
+        # y[component].v - y[component].e,
+        #                 y[component].v + y[component].e,
+        #                 color=color,
+        #                 alpha= alpha,
+        #                 zorder=0,
+        #                 **plt_opt)
+        return lines
 
 
 def add_ck_check(ax, thellier_object, component='mag', norm_factor=[1, 1], **plt_opt):

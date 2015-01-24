@@ -1,5 +1,3 @@
-
-
 __author__ = 'mike'
 import base
 import matplotlib.pyplot as plt
@@ -9,6 +7,8 @@ import RockPy.Measurements.thellier
 
 from RockPy.Visualize.Features import generic, arai
 from RockPy.Visualize.Features.day import day_grid
+from copy import deepcopy
+
 
 class Tutorial(base.Generic):
     _required = None
@@ -51,37 +51,22 @@ class Arai(base.Generic):
     def initialize_visual(self):
         super(Arai, self).initialize_visual()
         self._required = RockPy.Measurements.thellier.Thellier
-        self.standard_features = [generic.grid, arai.arai_points, arai.arai_stdev]
+        self.standard_features = [self.feature_points, self.feature_arai_stdev]
+        self.single_features = [self.feature_grid]
         self.add_plot()
         self.ax = self.figs[self.name][0].gca()
-
-    def plotting(self, samples, **plt_opt):
-        print('arai plotting', samples)
-        primary = samples[0]
-        secondary = samples[1]
-
-        """ PRIMARY """
-        for feature in self.standard_features:
-            for s in primary:
-                # look for measurements
-                for visual, mtype in self.required.iteritems():
-                    measurements = s.get_measurements(mtype=mtype)
-                    for m in measurements:
-                        feature(ax=self.ax, m_obj=m, **plt_opt)
-
-            for s in secondary:
-                # look for measurements
-                plt_opt.update({'alpha': 0.5})
-                for visual, mtype in self.required.iteritems():
-                    measurements = s.get_measurements(mtype=mtype)
-                    for m in measurements:
-                        feature(ax=self.ax, m_obj=m, **plt_opt)
+        self.xlabel = 'NRM remaining'
+        self.ylabel = 'pTRM gained'
 
     ''' Features '''
 
-    def feature_points(self, thellier_obj, **plt_opt):
-        lines, texts = arai.arai_points(self.ax, thellier_obj, **plt_opt)
-        self._add_line_text_dict(lines, texts)
+    def feature_points(self, m_obj, **plt_opt):
+        lines = arai.arai_points(self.ax, m_obj, **plt_opt)
+        self._add_line_text_dict(m_obj.sample_obj.name, '_'.join(m_obj.ttypes), '_'.join(map(str, m_obj.tvals)), lines)
+
+    def feature_arai_stdev(self, m_obj, **plt_opt):
+        lines = arai.arai_stdev(self.ax, m_obj, **plt_opt)
+        self._add_line_text_dict(m_obj.sample_obj.name, '_'.join(m_obj.ttypes), '_'.join(map(str, m_obj.tvals)), lines)
 
 
 class Multiple(base.Generic):

@@ -222,7 +222,7 @@ class Sample(object):
         """
         returns list of all mtypes
         """
-        out = [m.mtype for m in self.measurements]
+        out = [m.mtype for m in self.filtered_data]
         return self.__sort_list_set(out)
 
     @property
@@ -230,7 +230,7 @@ class Sample(object):
         """
         returns a list of all ttypes
         """
-        out = [t for m in self.measurements for t in m.ttype_dict]
+        out = [t for m in self.filtered_data for t in m.ttype_dict]
         return self.__sort_list_set(out)
 
     @property
@@ -239,7 +239,7 @@ class Sample(object):
         returns a list of all ttypes
         """
         out = []
-        for m in self.measurements:
+        for m in self.filtered_data:
             out.extend(m.tvals)
         return self.__sort_list_set(out)
 
@@ -315,7 +315,7 @@ class Sample(object):
         :return:
         """
         self._filtered_data = self.get_measurements(mtype=mtype,
-                                                    ttype=ttype, tval=tval, tval_range=tval_range)
+                                                    ttype=ttype, tval=tval, tval_range=tval_range, filtered=False)
 
     def reset_filter(self):
         """
@@ -332,6 +332,7 @@ class Sample(object):
                          mtype=None,
                          ttype=None, tval=None, tval_range=None,
                          is_mean=False,
+                         filtered = True
                          **options):
         """
         Returns a list of measurements of type = mtype
@@ -339,7 +340,7 @@ class Sample(object):
         :tval_range: can be used to look up measurements within a certain range. if only one value is given,
                      it is assumed to be an upper limit and the range is set to [0, tval_range]
 
-
+        :filtered: if true measurements will only be searched in filtered data
         :param mtype:
         :return:
         """
@@ -352,8 +353,12 @@ class Sample(object):
             Sample.logger.debug('SEARCHING\t measurements(mean_list) with  << %s, %s, %s >>' % (mtype, ttype, tvalue))
             out = self.mean_measurements
         else:
-            Sample.logger.debug('SEARCHING\t measurements with  << %s, %s, %s >>' % (mtype, ttype, tvalue))
-            out = self.measurements
+            if filtered:
+                Sample.logger.debug('SEARCHING\t measurements with  << %s, %s, %s >> in filtered data' % (mtype, ttype, tvalue))
+                out = self.filtered_data
+            else:
+                Sample.logger.debug('SEARCHING\t measurements with  << %s, %s, %s >>' % (mtype, ttype, tvalue))
+                out = self.measurements
 
         if mtype: #filter mtypes, if given
             mtype = _to_list(mtype)
@@ -392,7 +397,7 @@ class Sample(object):
 
     ''' MISC FUNTIONS '''
 
-    def mean_measurement_from_list(self, mlist, interpolate=False, recalc_mag=False):
+    def mean_measurement_from_list(self, mlist, interpolate=False, recalc_mag=False): #todo redundant?
         """
         takes a list of measurements and creates a mean measurement out of all measurements data
 
@@ -445,7 +450,7 @@ class Sample(object):
         if not mtype:
             raise ValueError('No mtype specified')
 
-        mlist = self.get_measurements(mtype=mtype, ttype=ttype, tval=tval, tval_range=tval_range)
+        mlist = self.get_measurements(mtype=mtype, ttype=ttype, tval=tval, tval_range=tval_range, filtered=True)
         measurement = deepcopy(mlist[0])
 
         for dtype in measurement.data:
@@ -484,7 +489,7 @@ class Sample(object):
         :return:
         """
         if not mlist:
-            mlist = self.get_measurements(mtype=mtype, ttype=ttype, tval=tval, tval_range=tval_range)
+            mlist = self.get_measurements(mtype=mtype, ttype=ttype, tval=tval, tval_range=tval_range, filtered=True)
 
         # # initialize
         all_results = None
@@ -524,7 +529,7 @@ class Sample(object):
         :return:
         """
         if not mlist:
-            mlist = self.get_measurements(mtype=mtype, ttype=ttype, tval=tval, tval_range=tval_range)
+            mlist = self.get_measurements(mtype=mtype, ttype=ttype, tval=tval, tval_range=tval_range, filtered=True)
 
         all_results = self.all_results(mlist=mlist, **parameter)
 

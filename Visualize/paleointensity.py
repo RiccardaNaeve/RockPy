@@ -41,9 +41,6 @@ class Dunlop(base.Generic):
         self._required = RockPy.Measurements.thellier.Thellier
         self.add_plot()
 
-    def plotting(self, sample):
-        pass
-
 
 class Arai(base.Generic):
     _required = ['thellier']
@@ -69,21 +66,11 @@ class Arai(base.Generic):
         self._add_line_text_dict(m_obj.sample_obj.name, '_'.join(m_obj.ttypes), '_'.join(map(str, m_obj.tvals)), lines)
 
 
-class Multiple(base.Generic):
-    _required = ['thellier']
-
-    def initialize_visual(self):
-        arai = Arai(plot_samples=self.study)
-        dunlop = Dunlop(plot_samples=self.study)
-        super(Multiple, self).initialize_visual()
-        self.add_plot(plot=arai)
-        self.add_plot(plot=dunlop)
-
 
 def test():
     sample = RP.Sample(name='test_sample')
     sample.add_measurement(mtype='thellier', mfile='../Tutorials/test_data/NLCRY_Thellier_test.TT', machine='cryomag')
-    Plot = Multiple(plot_samples=sample)
+    Plot = Arai(plot_samples=sample)
     Plot.show()
     # print 'test', Plot.ls_source
 

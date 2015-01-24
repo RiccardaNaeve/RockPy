@@ -92,7 +92,6 @@ class SampleGroup(object):
     def sample_names(self):
         return sorted(self.samples.keys())
 
-
     def add_samples(self, s_list):
         self.samples.update(self._sdict_from_slist(s_list=s_list))
 

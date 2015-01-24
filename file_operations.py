@@ -78,6 +78,7 @@ def generate_file_name(sample_group='', sample_name='',
 
 
 def extract_info_from_filename(fname, data_dir):
+    # print fname
     index = int(fname[-3:])
 
     rest = fname[:-4]
@@ -115,7 +116,9 @@ def extract_info_from_filename(fname, data_dir):
     abbrev = {'HYS': 'hysteresis',
               'COE': 'backfield',
               'RMP': 'thermocurve',
-              'TT': 'thellier'}
+              'TT': 'thellier',
+              'CRY': 'cryomag',
+              'SUSH': 'sushibar'}
 
     try:
         abbrev[sample[2]]
@@ -126,7 +129,7 @@ def extract_info_from_filename(fname, data_dir):
         'sample_group': sample[0],
         'name': sample[1],
         'mtype': abbrev[sample[2]],
-        'machine': sample[3],
+        'machine': abbrev[sample[3]],
         'mfile': join(data_dir, fname),
         'treatments': parameter,
         'STD': STD,
@@ -152,7 +155,7 @@ def import_folder(folder, name = 'study', study=None):
     if not study:
         study = RockPy.Study(name=name)
     #get all files in directory
-    files = os.listdir(folder)
+    files = [i for i in os.listdir(folder) if not i == '.DS_Store']
 
     for f in files:
 
@@ -171,9 +174,9 @@ def import_folder(folder, name = 'study', study=None):
             s = sg.get_samples(snames = d['name'])[0]
         m = s.add_measurement(**d)
 
-    print study
-    print study.samplegroups
-    print sg
-    print sg.samples
-    print s
+    # print study
+    # print study.samplegroups
+    # print sg
+    # print sg.samples
+    # print s
     return study

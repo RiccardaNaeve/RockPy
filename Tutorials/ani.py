@@ -35,9 +35,9 @@ def test():
     M1.calculate_tensor()
     M2.calculate_tensor()
     M3.calculate_tensor()
-    #print M1._data
+
     #M.calc_all()  # broken
-    #print M.aniso_dict
+
     print M1.results
     print M2.results
     print M3.results

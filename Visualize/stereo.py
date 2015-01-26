@@ -7,20 +7,6 @@ from mpl_toolkits.basemap import Basemap
 import numpy as np
 
 
-"""
-
-
-
-# we have to send our values through basemap to convert coordinates, note -winterAlt
-winterX,winterY = myMap(winterAzi,-winterAlt)
-
-
-
-
-# plot the winter values
-myMap.plot(winterX,winterY ,'bo')
-"""
-
 class Stereo(base.Generic):
     #_required = ['anisotropy']
 

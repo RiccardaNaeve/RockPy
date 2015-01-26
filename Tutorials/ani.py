@@ -3,7 +3,9 @@ __author__ = 'wack'
 import numpy as np
 from RockPy.Structure.sample import Sample
 from RockPy.Measurements.anisotropy import Anisotropy
-from RockPy.Visualize.stereo import Stereo
+import RockPy.Visualize.anisotropy
+import RockPy.Visualize.stereo
+
 
 
 def test():
@@ -44,7 +46,8 @@ def test():
     #print M3.results
 
 
-    plt = Stereo(sample)
+    #plt = Stereo(sample)
+    plt = RockPy.Visualize.anisotropy.Anisotropy(sample, markersize=50)
     plt.show()
 
 if __name__ == '__main__':

@@ -18,7 +18,7 @@ class Stereo(base.Generic):
 
         self.grid_D_spacing = 15
         self.grid_I_spacing = 10
-        self.standard_features = [self.feature_stereogrid, self.feature_stereogridlabels, self.feature_points]
+        self.standard_features = [self.feature_stereogrid, self.feature_stereogridlabels]
         self.add_plot()
         self.ax = self.figs[self.name][0].gca()
         self.xlabel = ''
@@ -44,23 +44,11 @@ class Stereo(base.Generic):
 
         # draw inclination labels
         for I in np.arange(0, 90, self.grid_I_spacing):
-            (x,y) = self.stereomap(0, -I)
+            (x, y) = self.stereomap(0, -I)
             self.ax.text(x, y, "%i" % I, horizontalalignment='center', verticalalignment='center')
+
 
     def feature_points(self, m_obj, **plt_opt):
         d, i = (30, 50, 120, 150), (-10, -20, -30, -40)
-        lines = self.ax.plot(*self.stereomap( d, i), ls='-', marker='o')
+        lines = self.ax.plot(*self.stereomap( d, i), **plt_opt)
         self._add_line_text_dict(m_obj.sample_obj.name, '_'.join(m_obj.ttypes), '_'.join(map(str, m_obj.tvals)), lines)
-
-
-"""
-def field_mom(ax, afdemag_obj, component='mag', **plt_opt):
-    marker = plt_opt.pop('marker', '.')
-    linestyle = plt_opt.pop('linestype', '-')
-
-    lines = ax.plot(afdemag_obj.data['data']['field'].v,
-                    afdemag_obj.data['data'][component].v,
-                    linestyle=linestyle, marker=marker,
-                    label=' '.join([afdemag_obj.sample_obj.name, afdemag_obj.mag_method, afdemag_obj.get_treatment_labels(), afdemag_obj.suffix]),
-                    **plt_opt)
-"""

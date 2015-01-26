@@ -86,7 +86,12 @@ class Study(object):
             self.all_group()
             return samplegroup
 
-
+    def get_samples(self, snames=None, mtypes=None, ttypes=None, tvals=None, tval_range=None):
+        """
+        Primary search function for all parameters
+        """
+        out = self._all_samplegroup.get_samples(snames = snames, mtypes=mtypes, ttypes=ttypes, tvals=tvals, tval_range=tval_range)
+        return out
 
     def _check_samplegroup_list(self, samplegroup):
         """
@@ -125,8 +130,8 @@ class Study(object):
 
     @property
     def all_samplegroup(self):
-        if not hasattr(self, '_all_samplegroup'):
-            self.all_group()
+        # if not hasattr(self, '_all_samplegroup'):
+        self.all_group()
         out = self._all_samplegroup
         return out
 

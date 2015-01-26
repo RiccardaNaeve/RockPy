@@ -316,6 +316,7 @@ class Sample(object):
         """
         self._filtered_data = self.get_measurements(mtype=mtype,
                                                     ttype=ttype, tval=tval, tval_range=tval_range, filtered=False)
+        return self._filtered_data
 
     def reset_filter(self):
         """
@@ -451,6 +452,9 @@ class Sample(object):
             raise ValueError('No mtype specified')
 
         mlist = self.get_measurements(mtype=mtype, ttype=ttype, tval=tval, tval_range=tval_range, filtered=True)
+        if not mlist:
+            return None
+
         measurement = deepcopy(mlist[0])
 
         for dtype in measurement.data:
@@ -491,6 +495,7 @@ class Sample(object):
         if not mlist:
             mlist = self.get_measurements(mtype=mtype, ttype=ttype, tval=tval, tval_range=tval_range, filtered=True)
 
+        mlist = [m for m in mlist if m.mtype not in ['mass', 'diameter', 'height']] #get rid of parameter measurements
         # # initialize
         all_results = None
         rownames = []

@@ -4,12 +4,98 @@ import matplotlib.pyplot as plt
 from copy import deepcopy
 from RockPy.Structure.data import RockPyData
 import base
+import RockPy
+import time
 
 
 class Thellier(base.Measurement):
     # todo format_sushibar
     # todo format_jr6
-    _standard_parameter = {'slope':{'t_min': 20, 't_max': 700, 'component': 'mag'}}
+    _standard_parameter = {'slope': {'t_min': 20, 't_max': 700, 'component': 'mag'}}
+
+    @classmethod
+    def simulate(cls, sample_obj, **parameter):
+        """
+        return simulated instance of measurement depending on parameters
+        """
+        b_lab = parameter.get('b_lab', 35.0)
+        b_anc = parameter.get('b_anc', 35.0)
+
+        aniso = parameter.get('aniso', [[1, 0, 0], [0, 1, 0], [0, 0, 1]])
+
+        check_freq = parameter.get('check_freq', 2)
+        temps = parameter.get('temps', [20, 300, 450, 490, 500, 510, 515, 520, 525, 530, 535, 540, 545, 550, 560])
+        th_steps = []
+        pt_steps = []
+
+        ac_steps = []
+        ck_steps = []
+        tr_steps = []
+        # checks
+        n=0
+        for i,v  in enumerate(temps):
+            th_steps.append([n, v])
+            n += 1
+            if (i-1)%check_freq == 0 and i < len(temps)-2 and i >= check_freq:
+                ck_steps.append([n, temps[i-check_freq]])
+                n += 1
+            pt_steps.append([n,v])
+            n += 1
+            if  (i-1)%check_freq == 0 and i < len(temps)-2 and i >= check_freq:
+                ac_steps.append([n, temps[i-check_freq]])
+                n += 1
+            if  (i-1)%check_freq == 0 and i < len(th_steps)-2 and i >= check_freq:
+                tr_steps.append([n, temps[i]])
+                n += 1
+
+
+        print th_steps
+        print pt_steps
+        print ac_steps
+        print ck_steps
+        print tr_steps
+
+
+        """ Generate data """
+
+        mdata = {'th': None, 'pt': None}#, 'ac': None, 'ck': None, 'tr': None}  #initialize
+
+        th_data = np.linspace(1, 0, len(temps)).T
+
+        t = [time.clock() for i in range(len(th_data))]
+        mdata['th'] = RockPyData(column_names=['temp', 'x', 'y', 'z', 'sm', 'time'])
+        mdata['pt'] = RockPyData(column_names=['temp', 'x', 'y', 'z', 'sm', 'time'])
+        mdata['ac'] = RockPyData(column_names=['temp', 'x', 'y', 'z', 'sm', 'time'])
+        mdata['ck'] = RockPyData(column_names=['temp', 'x', 'y', 'z', 'sm', 'time'])
+        mdata['tr'] = RockPyData(column_names=['temp', 'x', 'y', 'z', 'sm', 'time'])
+
+        mdata['th']['temp'] = temps
+        mdata['th']['time'] = [time.clock()*999 for i in range(len(th_data))]
+        mdata['th']['x'] = th_data
+        mdata['th']['y'] = th_data
+        mdata['th']['z'] = th_data
+
+        mdata['pt']['temp'] = temps
+        mdata['pt']['time'] = [time.clock()*1000 for i in range(len(th_data))]
+        mdata['pt']['x'] = np.ones(len(th_data))
+        mdata['pt']['y'] = np.ones(len(th_data))
+        mdata['pt']['z'] = np.ones(len(th_data))
+
+        ck_index = [i for i,v in enumerate(mdata['pt']['temp'].v) if v in ck_steps]
+        mdata['ck'] = mdata['pt'].filter_idx(ck_index)
+
+        tr_index = [i for i,v in enumerate(mdata['th']['temp'].v) if v in tr_steps]
+        mdata['tr'] = mdata['th'].filter_idx(tr_index)
+
+        ac_index = [i for i,v in enumerate(mdata['th']['temp'].v) if v in ac_steps]
+        mdata['ac'] = mdata['th'].filter_idx(ac_index)
+        mdata['ac']['time'].v += 0.1
+
+        for dtype in mdata:
+            mdata[dtype].define_alias('m', ( 'x', 'y', 'z'))
+            mdata[dtype] = mdata[dtype].append_columns('mag', mdata[dtype].magnitude('m'))
+        return cls(sample_obj, mfile=None, mdata=mdata, machine=None, **parameter)
+
 
     def __init__(self, sample_obj,
                  mtype, mfile, machine,
@@ -36,10 +122,12 @@ class Thellier(base.Measurement):
 
     def reset__data(self, recalc_m=True):
         self._data.update({'ptrm': self._ptrm(recalc_m)})
-        self._data.update({'sum' : self._sum(recalc_m)})
+        self._data.update({'sum': self._sum(recalc_m)})
         self._data.update({'difference': self._difference(recalc_m)})
         # self._data = {i: getattr(self, i) for i in self.steps}
-
+        for i in self.data:
+            print i
+            print self.data[i]
     @property
     def data(self):
         if not 'ptrm' in self._data.keys():
@@ -81,13 +169,13 @@ class Thellier(base.Measurement):
             if step == 'nrm' and len(idx) == 0:
                 idx = [i for i, v in enumerate(steps) if v == 'th'][0]
             if len(idx) != 0:
-                rp_data = self.all_data.filter_idx(idx)  # finding step_idx
-                rp_data = rp_data.eliminate_duplicate_variable_rows(substfunc='last')
-                rp_data.define_alias('m', ( 'x', 'y', 'z'))
-                rp_data = rp_data.append_columns('mag', rp_data.magnitude('m'))
-                rp_data = rp_data.sort('temp')
-                rp_data.define_alias('variable', 'temp')
-                self._data.update({step: rp_data})
+                mdata[dtype] = self.all_data.filter_idx(idx)  # finding step_idx
+                mdata[dtype] = mdata[dtype].eliminate_duplicate_variable_rows(substfunc='last')
+                mdata[dtype].define_alias('m', ( 'x', 'y', 'z'))
+                mdata[dtype] = mdata[dtype].append_columns('mag', mdata[dtype].magnitude('m'))
+                mdata[dtype] = mdata[dtype].sort('temp')
+                mdata[dtype].define_alias('variable', 'temp')
+                self._data.update({step: mdata[dtype]})
             else:
                 self._data.update({step: None})
         self.reset__data()
@@ -107,6 +195,8 @@ class Thellier(base.Measurement):
         ptrm['time'] = pt['time'].v  # copy old pt times into ptrm
         if recalc_m:
             ptrm.define_alias('m', ( 'x', 'y', 'z'))
+            if not 'mag' in ptrm.column_names:
+                ptrm = ptrm.append_columns('mag', ptrm.magnitude('m'))
             ptrm['mag'] = ptrm.magnitude('m')
         return ptrm
 
@@ -114,11 +204,13 @@ class Thellier(base.Measurement):
         idx = self._get_idx_equal_val('pt', 'th')
         pt = self._data['pt'].filter_idx(idx[:, 0])
         th = self._data['th'].filter_idx(idx[:, 1])
-        sum = th + pt - th
+        pt_th_sum = th + pt - th
         if recalc_m:
-            sum.define_alias('m', ( 'x', 'y', 'z'))
-            sum['mag'] = sum.magnitude('m')
-        return sum
+            pt_th_sum.define_alias('m', ( 'x', 'y', 'z'))
+            if not 'mag' in pt_th_sum.column_names:
+                pt_th_sum = pt_th_sum.append_columns('mag', pt_th_sum.magnitude('m'))
+            pt_th_sum['mag'] = pt_th_sum.magnitude('m')
+        return pt_th_sum
 
     def _difference(self, recalc_m=True):
         idx = self._get_idx_equal_val('pt', 'th')
@@ -128,7 +220,10 @@ class Thellier(base.Measurement):
         difference = th - ptrm
         if recalc_m:
             difference.define_alias('m', ( 'x', 'y', 'z'))
-            difference['mag'] = difference.magnitude('m')
+            if not 'mag' in difference.column_names:
+                difference = ptrm.append_columns('mag', difference.magnitude('m'))
+            else:
+                difference['mag'] = difference.magnitude('m')
         return difference
 
     def _get_idx_tmin_tmax(self, step, t_min, t_max):
@@ -138,8 +233,8 @@ class Thellier(base.Measurement):
     def _get_idx_equal_val(self, step_x, step_y, key='temp'):
 
         idx = np.array([(xi, yi) for xi, v1 in enumerate(self._data[step_x][key].v)
-                                 for yi, v2 in enumerate(self._data[step_y][key].v)
-                                 if v1 == v2])
+                        for yi, v2 in enumerate(self._data[step_y][key].v)
+                        if v1 == v2])
         return idx
 
     def _get_idx_step_var_val(self, step, var, val, *args):
@@ -211,7 +306,8 @@ class Thellier(base.Measurement):
         th = self.th.filter_idx(idx)
         plt.plot(self.ptrm['mag'].v, th['mag'].v, '.-', zorder=1)
         plt.plot([min(self.ptrm['mag'].v), max(self.ptrm['mag'].v)],
-                 self.result_slope().v * np.array([min(self.ptrm['mag'].v), max(self.ptrm['mag'].v)]) + self.result_y_int().v, '--')
+                 self.result_slope().v * np.array(
+                     [min(self.ptrm['mag'].v), max(self.ptrm['mag'].v)]) + self.result_y_int().v, '--')
         plt.grid()
         plt.title('Arai Diagram %s' % (self.sample_obj.name))
         plt.xlabel('NRM remaining [%s]' % ('C'))
@@ -1626,3 +1722,9 @@ class Thellier(base.Measurement):
 
     def export_tdt(self):
         raise NotImplementedError()
+
+
+if __name__ == '__main__':
+    s = RockPy.Sample(name='Thellier Test')
+    m = s.add_simulation(mtype='thellier')
+    print m.calc_all()

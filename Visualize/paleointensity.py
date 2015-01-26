@@ -66,7 +66,6 @@ class Arai(base.Generic):
         self._add_line_text_dict(m_obj.sample_obj.name, '_'.join(m_obj.ttypes), '_'.join(map(str, m_obj.tvals)), lines)
 
 
-
 def test():
     sample = RP.Sample(name='test_sample')
     sample.add_measurement(mtype='thellier', mfile='../Tutorials/test_data/NLCRY_Thellier_test.TT', machine='cryomag')

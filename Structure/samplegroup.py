@@ -357,24 +357,30 @@ class SampleGroup(object):
         return out
 
 
-    def mean_sample(self, reference='nrm', name='mean_sample_group',
-                    rtype='mag', vval=None, norm_method='max', interpolate=True):
+    def mean_sample(self, reference=None,
+                    rtype='mag', vval=None,
+                    norm_method='max',
+                    interpolate=True):
 
+        #create new sample_obj
         mean_sample = Sample(name='mean ' + self.name)
-        mean_sample.is_mean = True
+        mean_sample.is_mean = True #set is_mean flag
 
         for mtype in self.mtypes:
             for ttype in self.mtype_ttype_dict[mtype]:
                 for tval in self.ttype_tval_dict[ttype]:
                     measurements = self.get_measurements(mtype=mtype, ttype=ttype, tval=tval)
-                    measurements = [m.normalize(reference=reference, rtype=rtype,
-                                                vval=vval, norm_method=norm_method)
-                                    for m in measurements
-                                    if m.mtype not in ['diameter', 'height', 'mass']]
-                    mean_sample.mean_measurements.extend(measurements)
+                    if reference or vval:
+                        measurements = [m.normalize(reference=reference, rtype=rtype,
+                                                    vval=vval, norm_method=norm_method)
+                                        for m in measurements
+                                        if m.mtype not in ['diameter', 'height', 'mass']]
+                    mean_sample.measurements.extend(measurements)
                     if mtype not in ['diameter', 'height', 'mass']:
+                        print mtype
                         M = mean_sample.mean_measurement(mtype=mtype, ttype=ttype, tval=tval)
-                        mean_sample.measurements.append(M)
+                        print M
+                        # mean_sample.mean_measurements.append(M)
         return mean_sample
 
     def average_sample(self, reference='nrm', name='mean_sample_group',

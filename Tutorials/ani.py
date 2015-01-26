@@ -3,6 +3,7 @@ __author__ = 'wack'
 import numpy as np
 from RockPy.Structure.sample import Sample
 from RockPy.Measurements.anisotropy import Anisotropy
+from RockPy.Visualize.stereo import Stereo
 
 
 def test():
@@ -21,11 +22,11 @@ def test():
 
     print mdata
 
-    M2 = sample.add_measurement( mtype='anisotropy', mdata=mdata)
+    #M2 = sample.add_measurement(mtype='anisotropy', mdata=mdata)
 
-    M3 = sample.add_simulation( mtype='anisotropy', evals=(1.5, 1.5, 0.3),
-                                mdirs=[[225.0, 0.0], [135.0, 0.0], [90.0, 45.0],
-                                       [90.0, -45.0], [0.0, -45.0], [0.0, 45.0]])
+    #M3 = sample.add_simulation(mtype='anisotropy', evals=(1.5, 1.5, 0.3),
+    #                            mdirs=[[225.0, 0.0], [135.0, 0.0], [90.0, 45.0],
+    #                                   [90.0, -45.0], [0.0, -45.0], [0.0, 45.0]])
 
 
     # print "M._data", M._data
@@ -33,15 +34,18 @@ def test():
     #study = RockPy.Study(samplegroups=sg)
 
     M1.calculate_tensor()
-    M2.calculate_tensor()
-    M3.calculate_tensor()
+    #M2.calculate_tensor()
+    #M3.calculate_tensor()
 
     #M.calc_all()  # broken
 
     print M1.results
-    print M2.results
-    print M3.results
+    #print M2.results
+    #print M3.results
 
+
+    plt = Stereo(sample)
+    plt.show()
 
 if __name__ == '__main__':
     test()

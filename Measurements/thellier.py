@@ -6,6 +6,7 @@ from RockPy.Structure.data import RockPyData
 import base
 import RockPy
 import time
+from RockPy.Functions import general
 
 
 class Thellier(base.Measurement):
@@ -22,7 +23,7 @@ class Thellier(base.Measurement):
         b_anc = parameter.get('b_anc', 35.0)
 
         aniso = parameter.get('aniso', [[1, 0, 0], [0, 1, 0], [0, 0, 1]])
-
+        max_moment = parameter.get('max_moment', 1E-8)
         check_freq = parameter.get('check_freq', 2)
         temps = parameter.get('temps', [20, 300, 450, 490, 500, 510, 515, 520, 525, 530, 535, 540, 545, 550, 560])
         th_steps = []
@@ -32,35 +33,33 @@ class Thellier(base.Measurement):
         ck_steps = []
         tr_steps = []
         # checks
-        n=0
-        for i,v  in enumerate(temps):
+        n = 0
+        for i, v in enumerate(temps):
             th_steps.append([n, v])
             n += 1
-            if (i-1)%check_freq == 0 and i < len(temps)-2 and i >= check_freq:
-                ck_steps.append([n, temps[i-check_freq]])
+            if (i - 1) % check_freq == 0 and len(temps) - 2 > i >= check_freq:
+                ck_steps.append([n, temps[i - check_freq], temps[i]])
                 n += 1
-            pt_steps.append([n,v])
+            pt_steps.append([n, v])
             n += 1
-            if  (i-1)%check_freq == 0 and i < len(temps)-2 and i >= check_freq:
-                ac_steps.append([n, temps[i-check_freq]])
+            if (i - 1) % check_freq == 0 and len(temps) - 2 > i >= check_freq:
+                ac_steps.append([n, temps[i - check_freq], temps[i]])
                 n += 1
-            if  (i-1)%check_freq == 0 and i < len(th_steps)-2 and i >= check_freq:
+            if (i - 1) % check_freq == 0 and len(temps) - 2 > i >= check_freq:
                 tr_steps.append([n, temps[i]])
                 n += 1
 
-
-        print th_steps
-        print pt_steps
-        print ac_steps
-        print ck_steps
-        print tr_steps
-
+        th_steps = np.array(th_steps)
+        pt_steps = np.array(pt_steps)[1:]
+        ac_steps = np.array(ac_steps)
+        ck_steps = np.array(ck_steps)
+        tr_steps = np.array(tr_steps)
 
         """ Generate data """
 
-        mdata = {'th': None, 'pt': None}#, 'ac': None, 'ck': None, 'tr': None}  #initialize
+        mdata = {'th': None, 'pt': None}  # , 'ac': None, 'ck': None, 'tr': None}  #initialize
 
-        th_data = np.linspace(1, 0, len(temps)).T
+        th_data = np.linspace(max_moment, 0, len(temps)).T
 
         t = [time.clock() for i in range(len(th_data))]
         mdata['th'] = RockPyData(column_names=['temp', 'x', 'y', 'z', 'sm', 'time'])
@@ -69,32 +68,59 @@ class Thellier(base.Measurement):
         mdata['ck'] = RockPyData(column_names=['temp', 'x', 'y', 'z', 'sm', 'time'])
         mdata['tr'] = RockPyData(column_names=['temp', 'x', 'y', 'z', 'sm', 'time'])
 
-        mdata['th']['temp'] = temps
-        mdata['th']['time'] = [time.clock()*999 for i in range(len(th_data))]
+        mdata['th']['temp'] = th_steps[:, 1]
+        mdata['th']['time'] = th_steps[:, 0]
         mdata['th']['x'] = th_data
         mdata['th']['y'] = th_data
         mdata['th']['z'] = th_data
 
-        mdata['pt']['temp'] = temps
-        mdata['pt']['time'] = [time.clock()*1000 for i in range(len(th_data))]
-        mdata['pt']['x'] = np.ones(len(th_data))
-        mdata['pt']['y'] = np.ones(len(th_data))
-        mdata['pt']['z'] = np.ones(len(th_data))
+        mdata['pt']['temp'] = pt_steps[:, 1]
+        mdata['pt']['time'] = pt_steps[:, 0]
+        mdata['pt']['x'] = np.ones(len(pt_steps[:, 0]))* max_moment
+        mdata['pt']['y'] = np.ones(len(pt_steps[:, 0]))* max_moment
+        mdata['pt']['z'] = np.ones(len(pt_steps[:, 0]))* max_moment
 
-        ck_index = [i for i,v in enumerate(mdata['pt']['temp'].v) if v in ck_steps]
-        mdata['ck'] = mdata['pt'].filter_idx(ck_index)
+        mdata['nrm'] = mdata['th'].filter_idx([0])
 
-        tr_index = [i for i,v in enumerate(mdata['th']['temp'].v) if v in tr_steps]
+        ck_index = [i for i, v in enumerate(mdata['pt']['temp'].v) if v in ck_steps[:, 1]]
+        ck_th_index = [i for i, v in enumerate(mdata['th']['temp'].v) if v in ck_steps[:, 2]]
+        ck_thj_index = [i for i, v in enumerate(mdata['th']['temp'].v) if v in ck_steps[:, 1]]
+
+        pt_copy = mdata['pt'].filter_idx(ck_index)
+        thi_copy = mdata['th'].filter_idx(ck_th_index)
+        thj_copy = mdata['th'].filter_idx(ck_thj_index)
+
+        mdata['ck'] = thi_copy
+        mdata['ck']['x'] = thi_copy['x'].v + (pt_copy['x'].v - thj_copy['x'].v )
+        mdata['ck']['y'] = thi_copy['y'].v + (pt_copy['y'].v - thj_copy['y'].v )
+        mdata['ck']['z'] = thi_copy['z'].v + (pt_copy['z'].v - thj_copy['z'].v )
+        mdata['ck']['time'] = ck_steps[:, 0]
+        mdata['ck']['temp'] = ck_steps[:, 1]
+
+        tr_index = [i for i, v in enumerate(mdata['th']['temp'].v) if v in tr_steps[:, 1]]
         mdata['tr'] = mdata['th'].filter_idx(tr_index)
+        mdata['tr']['time'] = tr_steps[:, 0]
 
-        ac_index = [i for i,v in enumerate(mdata['th']['temp'].v) if v in ac_steps]
-        mdata['ac'] = mdata['th'].filter_idx(ac_index)
-        mdata['ac']['time'].v += 0.1
+        ac_pt_index = [i for i, v in enumerate(mdata['pt']['temp'].v) if v in ac_steps[:, 2]]
+        ac_th_index = [i for i, v in enumerate(mdata['th']['temp'].v) if v in ac_steps[:, 1]]
+
+        pt_copy = mdata['pt'].filter_idx(ac_pt_index)
+        thi_copy = mdata['th'].filter_idx(ac_th_index)
+
+        mdata['ac'] = pt_copy
+        mdata['ac']['x'] = (pt_copy['x'].v - (max_moment - thi_copy['x'].v))
+        mdata['ac']['y'] = (pt_copy['y'].v - (max_moment - thi_copy['y'].v))
+        mdata['ac']['z'] = (pt_copy['z'].v - (max_moment - thi_copy['z'].v))
+        mdata['ac']['time'] = ac_steps[:, 0]
+        mdata['ac']['temp'] = ac_steps[:, 1]
 
         for dtype in mdata:
             mdata[dtype].define_alias('m', ( 'x', 'y', 'z'))
             mdata[dtype] = mdata[dtype].append_columns('mag', mdata[dtype].magnitude('m'))
-        return cls(sample_obj, mfile=None, mdata=mdata, machine=None, **parameter)
+            # print mdata[dtype]
+
+        print mdata['pt']
+        return cls(sample_obj, mfile=None, mdata=mdata, machine='simulation', **parameter)
 
 
     def __init__(self, sample_obj,
@@ -125,9 +151,10 @@ class Thellier(base.Measurement):
         self._data.update({'sum': self._sum(recalc_m)})
         self._data.update({'difference': self._difference(recalc_m)})
         # self._data = {i: getattr(self, i) for i in self.steps}
-        for i in self.data:
-            print i
-            print self.data[i]
+        # for i in self.data:
+        # print i
+        # print self.data[i]
+
     @property
     def data(self):
         if not 'ptrm' in self._data.keys():
@@ -1507,6 +1534,35 @@ class Thellier(base.Measurement):
         """
         self.results['delta_tr'] = np.nan
 
+    """
+    Additivity check statistics
+    ===========================
+
+    An additivity check is a repeat demagnetization step to test the validity of Thellier's law of additivity
+    (Krasa et al., 2003). In the course of a paleointensity experiment, a pTRM at temperature :math:`T_j` is imparted,
+    pTRM(:math:`T_j`, :math:`T_0`), where :math:`T_0` is room temperature. An additivity check demagnetizes
+    pTRM(:math:`T_j`, :math:`T_0`) by heating to :math:`T_i`, where :math:`T_i < T_j`. The remaining pTRM
+    (pTRM(:math:`T_j`, :math:`T_i`)) is subtracted from the previous pTRM acquisition step,
+    pTRM(:math:`T_j`, :math:`T_0`), to estimate pTRM:math:`^*`(:math:`T_i`, :math:`T_0`). That is
+
+    .. math::
+
+       pTRM^*(T_i, T_0)=pTRM(T_j, T_0)-pTRM(T_j, T_i)
+
+    where * denotes an estimated value. This estimated value can be compared with a previously observed
+    value of pTRM(:math:`T_i`, :math:`T_0`) that was measured earlier in the experiment. The difference
+    between the estimated and observed pTRMs is a measure of the violation of
+    additivity between :math:`T_i` and :math:`T_0`. The additivity check difference (:math:`AC_{i,j}`)
+    is the scalar intensity difference between the two pTRMs:
+
+    .. math::
+
+       AC_{i,j}=pTRM^*(T_i, T_0)-pTRM(T_i, T_0).
+
+    For an additivity check to be included in the analysis, both :math:`T_i` and :math:`T_j`
+    must be less than or equal to :math:`T_{max}`.
+
+    """
 
     def get_d_ac(self, **parameter):
         """
@@ -1543,7 +1599,7 @@ class Thellier(base.Measurement):
         t_max = parameter.get('t_max', self.standard_parameter['slope']['t_max'])
 
         ptrm_i = self.get_ptrm_i()
-
+        print ptrm_i
         ac_temps = ptrm_i['temp'].v
         ptrm_temps = self.ptrm['temp'].v
 
@@ -1570,7 +1626,6 @@ class Thellier(base.Measurement):
 
         # get index of the ptrm step measured directly before the ac step
         idx = np.array([(i, max([j for j, v2 in enumerate(ptrm_times) if v2 - v < 0])) for i, v in enumerate(ac_times)])
-
         ac_i = self.ac.filter_idx(idx[:, 0])
         ptrm_j = self.ptrm.filter_idx(idx[:, 1])
 
@@ -1583,6 +1638,9 @@ class Thellier(base.Measurement):
                 ptrm_i[key] = ac_i[key].v
 
         ptrm_i['mag'] = ptrm_i.magnitude(('x', 'y', 'z'))
+        print(ac_i)
+        print(ptrm_j)
+        print(ptrm_i)
         return ptrm_i
 
 
@@ -1720,11 +1778,54 @@ class Thellier(base.Measurement):
 
     """ EXPORT SECTION """
 
-    def export_tdt(self):
-        raise NotImplementedError()
+    def export_tdt(self, folder=None, filename=None):
+        import os
+
+        if not folder:
+            folder = os.path.join(os.path.expanduser('~'), 'Desktop')
+        if not filename:
+            filename = self.sample_obj.name + '.tdt'
+        # v = 115.2 #standard volume 8mm diameter
+        v = 4.86E-8  # standard volume 6mm diameter
+
+        tdt = {'th': 0.00, 'pt': 0.11, 'ac': 0.14, 'ck': 0.12, 'tr': 0.13}
+        th = deepcopy(self.data['th'])
+        pt = deepcopy(self.data['pt'])
+        ac = deepcopy(self.data['ac'])
+        ck = deepcopy(self.data['ck'])
+        tr = deepcopy(self.data['tr'])
+        steps = ['th', 'pt', 'ac', 'ck', 'tr']
+
+        out = None
+
+        for idx, i in enumerate([th, pt, ac, ck, tr]):
+            i['x'] = i['x'].v / v
+            i['y'] = i['y'].v / v
+            i['z'] = i['z'].v / v
+            i['mag'] = i.magnitude('m')
+            i['temp'] = i['temp'].v + tdt[steps[idx]]
+            print steps[idx]
+            print i
+            if not out:
+                out = i
+            else:
+                out = out.append_rows(i)
+        out = out.sort('time')
+
+        lines = []
+        for i, v in enumerate(out['m']):
+            DIL = general.XYZ2DIL(v[:, 0])
+            lines.append(
+                '%s\t%.02f\t%.02f\t%.02f\t%.02f\r\n' % (self.sample_obj.name, out['temp'].v[i], DIL[2], DIL[0], DIL[1]))
+
+        with open(os.path.join(folder, filename), 'w+') as f:
+            for line in lines:
+                f.writelines(line)
 
 
 if __name__ == '__main__':
     s = RockPy.Sample(name='Thellier Test')
     m = s.add_simulation(mtype='thellier')
-    print m.calc_all()
+    # print m.get_d_ac()
+    # print s.calc_all()
+    m.export_tdt()

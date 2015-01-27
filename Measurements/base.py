@@ -135,6 +135,7 @@ class Measurement(object):
 
             if mdata is not None:  # we have mdata -> ignore mfile and just use that data directly
                 Measurement.logger.debug('mdata passed -> using as measurement data without formatting')
+                self.sample_obj = sample_obj
                 self._data = mdata
                 return  # done
             if machine in Measurement.measurement_formatters()[mtype]:

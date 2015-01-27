@@ -204,8 +204,8 @@ class SampleGroup(object):
         return out
 
     def _sdict_from_slist(self, s_list):
-        if not type(s_list) is list:
-            s_list = [s_list]
+        s_list = RockPy.Functions.general._to_list(s_list)
+
         out = {s.name: s for s in s_list}
         return out
 

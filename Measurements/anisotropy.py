@@ -15,7 +15,7 @@ class Anisotropy(base.Measurement):
 
 
     @classmethod
-    def simulate(cls, sample_obj, mtype, **parameter):
+    def simulate(cls, sample_obj, **parameter):
         """
         return simulated instance of measurement depending on parameters
         """
@@ -38,7 +38,7 @@ class Anisotropy(base.Measurement):
         mdata = {'mdirs': mdirs,
              'measurements': measurements}
 
-        return cls(sample_obj, mtype, mfile=None, mdata=mdata, machine=None, **parameter)
+        return cls(sample_obj, 'anisotropy', mfile=None, mdata=mdata, machine=None, **parameter)
 
 
 

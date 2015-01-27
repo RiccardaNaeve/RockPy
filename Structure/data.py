@@ -539,7 +539,10 @@ class RockPyData(object):
         if row_names[0] is not None:
             self_copy.row_names.extend(row_names)  # add one or more row names
 
-        self_copy._data = np.concatenate((self_copy._data, data), axis=0)
+        if self_copy._data is None:
+            self_copy._data = data
+        else:
+            self_copy._data = np.concatenate((self_copy._data, data), axis=0)
 
         return self_copy
 

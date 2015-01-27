@@ -5,6 +5,7 @@ import logging
 from math import cos, sin, atan, radians, log, exp, sqrt, degrees
 import numpy as np
 from RockPy.Functions.general import XYZ2DIL, DIL2XYZ, MirrorDirectionToPositiveInclination
+from RockPy.Structure.data import RockPyData
 
 class Anisotropy(base.Measurement):
     """
@@ -15,7 +16,7 @@ class Anisotropy(base.Measurement):
 
 
     @classmethod
-    def simulate(cls, sample_obj, mtype, **parameter):
+    def simulate(cls, sample_obj, **parameter):
         """
         return simulated instance of measurement depending on parameters
         """
@@ -30,15 +31,23 @@ class Anisotropy(base.Measurement):
         R = Anisotropy.createDiagonalTensor(*evals)
 
         #todo: also implement 1D measurement
+
+        data = RockPyData(column_names=['D', 'I', 'X', 'Y', 'Z'])
+
         # M = R * H
         measurements = []
-        for d, i in mdirs:
-            measurements.extend(np.dot(R, DIL2XYZ((d, i, 1))))
+        for mdir in mdirs:
+            measurement = (np.dot(R, DIL2XYZ((mdir[0], mdir[1], 1))))
+            data = data.append_rows(np.hstack([np.array(mdir), measurement]))
 
-        mdata = {'mdirs': mdirs,
-             'measurements': measurements}
 
-        return cls(sample_obj, mtype, mfile=None, mdata=mdata, machine=None, **parameter)
+        data.define_alias( 'variable', ('D', 'I'))
+
+        print data
+
+        mdata = {'data': data}
+
+        return cls(sample_obj, 'anisotropy', mfile=None, mdata=mdata, machine=None, **parameter)
 
 
 
@@ -317,13 +326,27 @@ class Anisotropy(base.Measurement):
 
     def format_ani(self):
         self.header = self.machine_data.header
-        self._data['mdirs'] = self.machine_data.mdirs
-        # directional measurements
-        self._data['measurements'] = self.machine_data.data.flatten()
+
+        mdirs = self.machine_data.mdirs
+        measurements = self.machine_data.data
+
+        #do we have scalar or vectorial measurements?
+        if len(measurements.flatten()) == len(mdirs):  #scalar
+            data = RockPyData(column_names=['D', 'I', 'M'])
+        elif len(measurements.flatten()) / len(mdirs) == 3:  #vectorial
+            data = RockPyData(column_names=['D', 'I', 'X', 'Y', 'Z'])
+        else:
+            Anisotropy.logger.error("anisotropy measurements have %d components")
+            return
+
+        for idx in range(len(mdirs)):
+            data = data.append_rows(np.hstack([np.array(mdirs[idx]), measurements[idx]]))
+
+        data.define_alias('variable', ('D', 'I'))
+        self._data['data'] = data
 
 
     ''' RESULT SECTION '''
-
 
     def result_t11(self, recalc=False):
         self.calc_result(parameter={}, recalc=recalc, force_caller='tensor')
@@ -392,19 +415,12 @@ class Anisotropy(base.Measurement):
     ''' CALCULATION SECTION '''
 
     def calculate_tensor(self):
-        #do we have scalar or vectorial measurements?
-        if len(self._data['measurements']) == len(self._data['mdirs']):  #scalar
-            xyz = False
-        elif len(self._data['measurements']) / len(self._data['mdirs']) == 3:  #vectorial
-            xyz = True
-        else:
-            Anisotropy.logger.error("anisotropy measurements have %d components")
-            return
-
         # calculate design matrix
-        dm = Anisotropy.makeDesignMatrix(self.mdirs, xyz)
+        mdirs = self._data['data']['D', 'I'].v.tolist()
+        dm = Anisotropy.makeDesignMatrix(mdirs, self._data['data'].column_exists('Z'))
         # calculate tensor and all other results
-        self.aniso_dict = Anisotropy.CalcAnisoTensor(dm, self._data['measurements'])
+        measurements = self._data['data']['dep_var'].v.flatten().tolist()
+        self.aniso_dict = Anisotropy.CalcAnisoTensor(dm, measurements)
         self.results['t11'] = self.aniso_dict['R'][0][0]
         self.results['t12_21'] = self.aniso_dict['R'][0][1]
         self.results['t13_31'] = self.aniso_dict['R'][0][2]

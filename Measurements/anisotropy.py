@@ -34,20 +34,17 @@ class Anisotropy(base.Measurement):
 
         data = RockPyData(column_names=['D', 'I', 'X', 'Y', 'Z'])
 
-        # M = R * H
-        measurements = []
         for mdir in mdirs:
+            # M = R * H
             measurement = (np.dot(R, DIL2XYZ((mdir[0], mdir[1], 1))))
             data = data.append_rows(np.hstack([np.array(mdir), measurement]))
 
 
-        data.define_alias( 'variable', ('D', 'I'))
-
-        print data
+        data.define_alias('variable', ('D', 'I'))
 
         mdata = {'data': data}
 
-        return cls(sample_obj, 'anisotropy', mfile=None, mdata=mdata, machine=None, **parameter)
+        return cls(sample_obj, 'anisotropy', mfile=None, mdata=mdata, machine='simulation', **parameter)
 
 
 

@@ -40,9 +40,7 @@ def test():
     #print M2.results
     print M3.results
 
-
-    #plt = Stereo(sample)
-    plt = RockPy.Visualize.anisotropy.Anisotropy(sample1, plt_primary='sample', plt_secondary=None)
+    plt = RockPy.Visualize.anisotropy.Anisotropy(sg, plt_primary='sample', plt_secondary=None)
     plt.show()
 
 if __name__ == '__main__':

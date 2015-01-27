@@ -21,7 +21,7 @@ class Anisotropy(Stereo):
 
     def feature_eigenvectors(self, m_obj, **plt_opt):
         m_obj.calculate_tensor()
-        #print "eigenvectors"
+
         # todo: also called for mean ?!!
         for n, idx in {1: ("D1", "I1"), 2: ("D2", "I2"), 3: ("D3", "I3")}.items():
             # choose symbol based on n

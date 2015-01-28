@@ -25,13 +25,20 @@ def test():
     samples = []
     for i in range(100):
         s = Sample(name=str(i))
-        s.add_simulation(mtype='anisotropy', evals=(1.1, 1.1, 0.9),
+        m = s.add_simulation(mtype='anisotropy', evals=(1.01, 1.01, 0.99),
                                 mdirs=[[225.0, 0.0], [135.0, 0.0], [90.0, 45.0],
                                        [90.0, -45.0], [0.0, -45.0], [0.0, 45.0]],
                                 measerr=0.01)
+        # modify reference directions
+        #add to inclination
+        #m._data['data'].data[:,1,0] += 2
+        #add to declination
+        #m._data['data'].data[:,0,0] += 2
+
+
         samples.append(s)
         print s.measurements[0]._data['data']
-        print i
+        #print i
     """
     # add measurement, read from file
     #M1 = sample1.add_measurement(mtype='anisotropy', mfile=ani_file2, machine='ani')

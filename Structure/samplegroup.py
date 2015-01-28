@@ -377,9 +377,9 @@ class SampleGroup(object):
                                         if m.mtype not in ['diameter', 'height', 'mass']]
                     mean_sample.measurements.extend(measurements)
                     if mtype not in ['diameter', 'height', 'mass']:
-                        print mtype
+                        #print mtype
                         M = mean_sample.mean_measurement(mtype=mtype, ttype=ttype, tval=tval)
-                        print M
+                        #print M
                         # mean_sample.mean_measurements.append(M)
         return mean_sample
 
@@ -405,7 +405,7 @@ class SampleGroup(object):
                                                     vval=vval, norm_method=norm_method)
                                         for m in measurements]
                         M = average_sample.mean_measurement_from_list(measurements, interpolate=interpolate)
-                        print average_sample.get_mean_results(mlist=measurements)
+                        #print average_sample.get_mean_results(mlist=measurements)
 
                         average_sample.measurements.append(M)
 

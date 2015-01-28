@@ -23,9 +23,10 @@ class Thellier(base.Measurement):
         b_anc = parameter.get('b_anc', 35.0)
 
         aniso = parameter.get('aniso', [[1, 0, 0], [0, 1, 0], [0, 0, 1]])
-        max_moment = parameter.get('max_moment', 1E-8)
         check_freq = parameter.get('check_freq', 2)
-        temps = parameter.get('temps', [20, 300, 450, 490, 500, 510, 515, 520, 525, 530, 535, 540, 545, 550, 560])
+        # temps = parameter.get('temps', [20, 300, 450, 490, 500, 510, 515, 520, 525, 530, 535, 540, 545, 550, 560])
+        temps = parameter.get('temps', [20] + range(100, 650, 25))
+        max_moment = parameter.get('max_moment', len(temps)/np.sqrt(3))
         th_steps = []
         pt_steps = []
 
@@ -37,20 +38,20 @@ class Thellier(base.Measurement):
         for i, v in enumerate(temps):
             th_steps.append([n, v])
             n += 1
-            if (i - 1) % check_freq == 0 and len(temps) - 2 > i >= check_freq:
+            if (i - 1) % check_freq == 0 and len(temps) - 2 >= i >= check_freq:
                 ck_steps.append([n, temps[i - check_freq], temps[i]])
                 n += 1
             pt_steps.append([n, v])
             n += 1
-            if (i - 1) % check_freq == 0 and len(temps) - 2 > i >= check_freq:
+            if (i - 1) % check_freq == 0 and len(temps) - 2 >= i >= check_freq:
                 ac_steps.append([n, temps[i - check_freq], temps[i]])
                 n += 1
-            if (i - 1) % check_freq == 0 and len(temps) - 2 > i >= check_freq:
+            if (i - 1) % check_freq == 0 and len(temps) - 2 >= i >= check_freq:
                 tr_steps.append([n, temps[i]])
                 n += 1
 
         th_steps = np.array(th_steps)
-        pt_steps = np.array(pt_steps)[1:]
+        pt_steps = np.array(pt_steps)#[1:]
         ac_steps = np.array(ac_steps)
         ck_steps = np.array(ck_steps)
         tr_steps = np.array(tr_steps)
@@ -115,12 +116,13 @@ class Thellier(base.Measurement):
         mdata['ac']['temp'] = ac_steps[:, 1]
 
         for dtype in mdata:
+            for d in ['x', 'y','z']:
+                mdata[dtype][d] = mdata[dtype][d].v + np.random.normal(0.0, 0.1, len(mdata[dtype][d].v))
+                mdata[dtype][d] = np.round(mdata[dtype][d].v)
             mdata[dtype].define_alias('m', ( 'x', 'y', 'z'))
             mdata[dtype] = mdata[dtype].append_columns('mag', mdata[dtype].magnitude('m'))
-            # print mdata[dtype]
 
-        print mdata['pt']
-        return cls(sample_obj, mfile=None, mdata=mdata, machine='simulation', **parameter)
+        return cls(sample_obj, mtype='thellier', mfile=None, mdata=mdata, machine='simulation', **parameter)
 
 
     def __init__(self, sample_obj,
@@ -196,13 +198,13 @@ class Thellier(base.Measurement):
             if step == 'nrm' and len(idx) == 0:
                 idx = [i for i, v in enumerate(steps) if v == 'th'][0]
             if len(idx) != 0:
-                mdata[dtype] = self.all_data.filter_idx(idx)  # finding step_idx
-                mdata[dtype] = mdata[dtype].eliminate_duplicate_variable_rows(substfunc='last')
-                mdata[dtype].define_alias('m', ( 'x', 'y', 'z'))
-                mdata[dtype] = mdata[dtype].append_columns('mag', mdata[dtype].magnitude('m'))
-                mdata[dtype] = mdata[dtype].sort('temp')
-                mdata[dtype].define_alias('variable', 'temp')
-                self._data.update({step: mdata[dtype]})
+                rp_data = self.all_data.filter_idx(idx)  # finding step_idx
+                rp_data = rp_data.eliminate_duplicate_variable_rows(substfunc='last')
+                rp_data.define_alias('m', ( 'x', 'y', 'z'))
+                rp_data = rp_data.append_columns('mag', rp_data.magnitude('m'))
+                rp_data = rp_data.sort('temp')
+                rp_data.define_alias('variable', 'temp')
+                self._data.update({step: rp_data})
             else:
                 self._data.update({step: None})
         self.reset__data()
@@ -899,7 +901,6 @@ class Thellier(base.Measurement):
     is calculated as the scalar intensity difference. That is,
 
     :math:
-
     dpTRMi,j = pTRM checki,j -TRMi = pTRM checki,j -xi,
 
     where pTRM checki,j is the pTRM check to the ith temperature step after heating to the jth tem- perature step.
@@ -923,17 +924,40 @@ class Thellier(base.Measurement):
         t_max = parameter.get('t_max', self.standard_parameter['slope']['t_max'])
 
         temps = self.ck['temp'].v
-        pt_temps = self.pt['temp'].v
-        out = np.array([(v, i, i2) for i, v in enumerate(temps) for i2, v2 in enumerate(pt_temps)
+        ptrm_temps = self.ptrm['temp'].v
+
+        #get th_prior_2_ck
+        out = np.array([(v, i, i2) for i, v in enumerate(temps) for i2, v2 in enumerate(ptrm_temps)
                         if v == v2
                         if v >= t_min
                         if v <= t_max])
 
         ck_data = self.ck.filter_idx(out[:, 1])
-        pt_data = self.pt.filter_idx(out[:, 2])
-        out = ck_data - pt_data
-        # out['mag'] = out.magnitude(('x', 'y', 'z'))
+        ptrm_ij = self.get_pTRM_ij(ck_data)
+        ptrm_data = self.ptrm.filter_idx(out[:, 2])
+        out = ptrm_ij - ptrm_data
+        out['mag'] = out.magnitude(('x', 'y', 'z'))
+        return out
 
+    def get_pTRM_ij(self, ck_data):
+        """
+        searches for the th_i step before each CK-step
+        :return: rpdata
+        """
+
+
+        ck_times = ck_data['time'].v  # times of CK step
+        th_times = self.th['time'].v  # times of PTRM steps
+
+        # get index of the th step measured directly before the ac step
+        idx = np.array([(i, max([j for j, v2 in enumerate(th_times) if v2 - v < 0])) for i, v in enumerate(ck_times)])
+        ck = ck_data.filter_idx(idx[:, 0])
+        th_i = self.th.filter_idx(idx[:, 1])
+
+        out = deepcopy(ck)
+        for i in ['x', 'y','z', 'mag']:
+            out[i] = out[i].v - th_i[i].v
+        # out['mag'] = out.magnitude('m')
         return out
 
     def result_n_ptrm(self, t_min=None, t_max=None, recalc=False, **options):
@@ -1089,6 +1113,9 @@ class Thellier(base.Measurement):
         max_idx = np.argmax(abs(dptrm[component].v))
         out = ( dptrm.filter_idx(max_idx)[component].v / self.calculate_delta_x_dash(**parameter) ) * 100
         self.results['ck_max_dev'] = abs(out)
+
+
+
 
     """
     Cumulative pTRM check parameters
@@ -1598,9 +1625,9 @@ class Thellier(base.Measurement):
         t_min = parameter.get('t_min', self.standard_parameter['slope']['t_min'])
         t_max = parameter.get('t_max', self.standard_parameter['slope']['t_max'])
 
-        ptrm_i = self.get_ptrm_i()
-        print ptrm_i
-        ac_temps = ptrm_i['temp'].v
+        ptrm_i0 = self.get_ptrm_i0()
+
+        ac_temps = ptrm_i0['temp'].v
         ptrm_temps = self.ptrm['temp'].v
 
         # filter indices according to t_min and t_max requirement, also ptrm* and ptrm have to have the same temperature step
@@ -1609,14 +1636,35 @@ class Thellier(base.Measurement):
                         if v >= t_min
                         if v <= t_max])
 
-        ptrm_i_data = ptrm_i.filter_idx(out[:, 1])
-        ptrm_data = self.ptrm.filter_idx(out[:, 2])
-
-        out = ptrm_i_data - ptrm_data
+        ptrm_i0_data = ptrm_i0.filter_idx(out[:, 1])
+        ptrm_i_data = self.ptrm.filter_idx(out[:, 2])
+        out = ptrm_i0_data - ptrm_i_data
+        out['time'] = ptrm_i0['time'].v
         out['mag'] = out.magnitude(('x', 'y', 'z'))
         return out
 
-    def get_ptrm_i(self):
+    def get_ptrm_ij(self):
+        """
+        Calculates the ptrm_i step from AC-demagnetization steps
+        :return: rpdata
+        """
+        ac_times = self.ac['time'].v  # times of AC step
+        th_times = self.th['time'].v  # times of PTRM steps
+
+        # get index of the ptrm step measured directly before the ac step
+        idx = np.array([(i, max([j for j, v2 in enumerate(th_times) if v2 - v < 0])) for i, v in enumerate(ac_times)])
+        ac_i = self.ac.filter_idx(idx[:, 0])
+        th_j = self.th.filter_idx(idx[:, 1])
+
+        ptrm_ij = deepcopy(ac_i)
+
+        for key in ['x','y','z', 'mag']:
+            ptrm_ij[key] = ptrm_ij[key].v - th_j[key].v
+
+        # ptrm_ij['mag'] = ptrm_ij.magnitude(('x', 'y', 'z'))
+        return ptrm_ij
+
+    def get_ptrm_i0(self):
         """
         Calculates the ptrm_i step from AC-demagnetization steps
         :return: rpdata
@@ -1629,19 +1677,14 @@ class Thellier(base.Measurement):
         ac_i = self.ac.filter_idx(idx[:, 0])
         ptrm_j = self.ptrm.filter_idx(idx[:, 1])
 
-        ptrm_i = deepcopy(ptrm_j)
+        ptrm_ij = self.get_ptrm_ij()
+        ptrm_i0 = deepcopy(self.get_ptrm_ij())
 
-        for key in ptrm_i.column_names:
-            if not key == 'temp':
-                ptrm_i[key] = ptrm_i[key].v - ac_i[key].v
-            if key == 'time':
-                ptrm_i[key] = ac_i[key].v
+        for key in ['x','y','z']:
+            ptrm_i0[key] = ptrm_j[key].v - ptrm_i0[key].v
+        ptrm_i0['mag'] = ptrm_i0.magnitude(('x', 'y', 'z', 'mag'))
+        return ptrm_i0
 
-        ptrm_i['mag'] = ptrm_i.magnitude(('x', 'y', 'z'))
-        print(ac_i)
-        print(ptrm_j)
-        print(ptrm_i)
-        return ptrm_i
 
 
     def result_n_ac(self, t_min=None, t_max=None, recalc=False, **options):
@@ -1786,11 +1829,15 @@ class Thellier(base.Measurement):
         if not filename:
             filename = self.sample_obj.name + '.tdt'
         # v = 115.2 #standard volume 8mm diameter
-        v = 4.86E-8  # standard volume 6mm diameter
+        # v = 4.86E-8  # standard volume 6mm diameter
+        volume = 1
 
-        tdt = {'th': 0.00, 'pt': 0.11, 'ac': 0.14, 'ck': 0.12, 'tr': 0.13}
+        # tdt = {'th': 0.00, 'pt': 0.11, 'ac': 0.14, 'ck': 0.12, 'tr': 0.13} #long version
+        tdt = {'th': 0.0, 'pt': 0.1, 'ac': 0.4, 'ck': 0.2, 'tr': 0.3}
+
         th = deepcopy(self.data['th'])
         pt = deepcopy(self.data['pt'])
+        pt = pt.filter_idx(range(1, len(pt['temp'].v)))
         ac = deepcopy(self.data['ac'])
         ck = deepcopy(self.data['ck'])
         tr = deepcopy(self.data['tr'])
@@ -1799,24 +1846,22 @@ class Thellier(base.Measurement):
         out = None
 
         for idx, i in enumerate([th, pt, ac, ck, tr]):
-            i['x'] = i['x'].v / v
-            i['y'] = i['y'].v / v
-            i['z'] = i['z'].v / v
+            i['x'] = i['x'].v / volume
+            i['y'] = i['y'].v / volume
+            i['z'] = i['z'].v / volume
             i['mag'] = i.magnitude('m')
             i['temp'] = i['temp'].v + tdt[steps[idx]]
-            print steps[idx]
-            print i
             if not out:
                 out = i
             else:
                 out = out.append_rows(i)
         out = out.sort('time')
 
-        lines = []
+        lines = ['Thellier-tdt\r\n','35.0\t0\t0\t0\t0\r\n']
         for i, v in enumerate(out['m']):
             DIL = general.XYZ2DIL(v[:, 0])
             lines.append(
-                '%s\t%.02f\t%.02f\t%.02f\t%.02f\r\n' % (self.sample_obj.name, out['temp'].v[i], DIL[2], DIL[0], DIL[1]))
+                '%s\t%.01f\t%.03E\t%.03f\t%.03f\r\n' % (self.sample_obj.name, out['temp'].v[i], DIL[2], DIL[0], DIL[1]))
 
         with open(os.path.join(folder, filename), 'w+') as f:
             for line in lines:
@@ -1824,8 +1869,10 @@ class Thellier(base.Measurement):
 
 
 if __name__ == '__main__':
-    s = RockPy.Sample(name='Thellier Test')
-    m = s.add_simulation(mtype='thellier')
-    # print m.get_d_ac()
-    # print s.calc_all()
+    s = RockPy.Sample(name='ThellierTest')
+    m = s.add_simulation(mtype='thellier', sim_params={'max_moment':10})
+    # for dtype in m.data:
+    #     print dtype
+    #     print m.data[dtype]
+    print s.calc_all()
     m.export_tdt()

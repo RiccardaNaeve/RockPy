@@ -435,6 +435,7 @@ class Measurement(object):
         parameter['recalc'] = True
         for result_method in self.result_methods:
             getattr(self, 'result_' + result_method)(**parameter)
+        return self.results
 
     def compare_parameters(self, caller, parameter, recalc):
         """

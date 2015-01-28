@@ -155,7 +155,7 @@ def import_folder(folder, name = 'study', study=None):
     if not study:
         study = RockPy.Study(name=name)
     #get all files in directory
-    files = [i for i in os.listdir(folder) if not i == '.DS_Store']
+    files = [i for i in os.listdir(folder) if not i == '.DS_Store' if not i.startswith('#')]
 
     for f in files:
 

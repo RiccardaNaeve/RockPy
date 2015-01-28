@@ -29,11 +29,12 @@ def test():
                                 mdirs=[[225.0, 0.0], [135.0, 0.0], [90.0, 45.0],
                                        [90.0, -45.0], [0.0, -45.0], [0.0, 45.0]],
                                 measerr=0.01)
-        # modify reference directions
+
+        #modify reference directions
         #add to inclination
-        #m._data['data'].data[:,1,0] += 2
+        #m._data['data']['I'] = m._data['data']['I'].v + 2
         #add to declination
-        #m._data['data'].data[:,0,0] += 2
+        m._data['data']['D'] = m._data['data']['D'].v + 5
 
 
         samples.append(s)
@@ -70,6 +71,10 @@ def test():
     study = RockPy.Study(samplegroups=sg)
     plt = RockPy.Visualize.anisotropy.Anisotropy(sg, plt_primary='sample', plt_secondary=None)
     plt.show()
+
+    for s in samples:
+        s.measurements[0].calculate_tensor()
+        print s.measurements[0].results['T']
 
 if __name__ == '__main__':
     test()

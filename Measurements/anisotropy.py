@@ -6,6 +6,7 @@ from math import cos, sin, atan, radians, log, exp, sqrt, degrees
 import numpy as np
 from RockPy.Functions.general import XYZ2DIL, DIL2XYZ, MirrorDirectionToPositiveInclination
 from RockPy.Structure.data import RockPyData
+from random import random
 
 class Anisotropy(base.Measurement):
     """
@@ -26,6 +27,11 @@ class Anisotropy(base.Measurement):
         evals = list(parameter.get('evals', [1.0, 1.0, 1.0]))
         if len(evals) != 3:
             raise RuntimeError('got %d eigenvalues instead of 3' % len(evals))
+
+        # get random measurement errors
+        measerr = parameter.get('measerr', 0)
+
+
         # todo: normalize evals to 1?
 
         R = Anisotropy.createDiagonalTensor(*evals)
@@ -36,7 +42,8 @@ class Anisotropy(base.Measurement):
 
         for mdir in mdirs:
             # M = R * H
-            measurement = (np.dot(R, DIL2XYZ((mdir[0], mdir[1], 1))))
+            errs = [measerr * random() * 2 - measerr for i in (1,2,3)]
+            measurement = np.dot(R, DIL2XYZ((mdir[0], mdir[1], 1))) + errs
             data = data.append_rows(np.hstack([np.array(mdir), measurement]))
 
 

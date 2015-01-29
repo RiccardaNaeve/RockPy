@@ -693,16 +693,17 @@ class Thellier(base.Measurement):
 
         # self.log.info('CALCULATING\t << %s >> y_dash << t_min=%.1f , t_max=%.1f >>' % (component, t_min, t_max))
 
-        idx = self._get_idx_tmin_tmax('th', t_min, t_max)  # filtering for t_min/t_max
-        y = self.th.filter(idx)
 
-        idx = self._get_idx_tmin_tmax('ptrm', t_min, t_max)  # filtering for t_min/t_max
-        x = self.ptrm.filter(idx)
 
         idx = self._get_idx_equal_val('th', 'ptrm', 'temp')  # filtering for equal var
+        x = self.ptrm.filter_idx(idx[:, 0])
+        y = self.th.filter_idx(idx[:, 1])
 
-        x = x.filter_idx(idx[:, 0])
-        y = y.filter_idx(idx[:, 1])
+        idx = self._get_idx_tmin_tmax('th', t_min, t_max)  # filtering for t_min/t_max
+        y = y.filter_idx(idx)
+
+        idx = self._get_idx_tmin_tmax('ptrm', t_min, t_max)  # filtering for t_min/t_max
+        x = x.filter_idx(idx)
 
         y_dash = 0.5 * (
             y[component].v + self.result_slope(**parameter).v * x[component].v + self.result_y_int(**parameter).v)
@@ -1638,10 +1639,11 @@ class Thellier(base.Measurement):
 
         ptrm_i0_data = ptrm_i0.filter_idx(out[:, 1])
         ptrm_i_data = self.ptrm.filter_idx(out[:, 2])
-        out = ptrm_i0_data - ptrm_i_data
-        out['time'] = ptrm_i0['time'].v
-        out['mag'] = out.magnitude(('x', 'y', 'z'))
-        return out
+
+        d_ac = ptrm_i0_data - ptrm_i_data
+        d_ac['time'] = ptrm_i0_data['time'].v
+        d_ac['mag'] = d_ac.magnitude(('x', 'y', 'z'))
+        return d_ac
 
     def get_ptrm_ij(self):
         """

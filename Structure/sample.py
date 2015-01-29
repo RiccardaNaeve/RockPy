@@ -353,14 +353,14 @@ class Sample(object):
             tvalue = str(tval)
 
         if is_mean:
-            Sample.logger.debug('SEARCHING\t measurements(mean_list) with  << %s, %s, %s >>' % (mtype, ttype, tvalue))
+            # Sample.logger.debug('SEARCHING\t measurements(mean_list) with  << %s, %s, %s >>' % (mtype, ttype, tvalue))
             out = self.mean_measurements
         else:
             if filtered:
-                Sample.logger.debug('SEARCHING\t measurements with  << %s, %s, %s >> in filtered data' % (mtype, ttype, tvalue))
+                # Sample.logger.debug('SEARCHING\t measurements with  << %s, %s, %s >> in filtered data' % (mtype, ttype, tvalue))
                 out = self.filtered_data
             else:
-                Sample.logger.debug('SEARCHING\t measurements with  << %s, %s, %s >>' % (mtype, ttype, tvalue))
+                # Sample.logger.debug('SEARCHING\t measurements with  << %s, %s, %s >>' % (mtype, ttype, tvalue))
                 out = self.measurements
 
         if mtype: #filter mtypes, if given
@@ -488,24 +488,27 @@ class Sample(object):
         return measurement
 
 
-    def all_results(self, mtype=None, ttype=None, tval=None, tval_range=None, mlist=None, **parameter):
+    def all_results(self, mtype=None,
+                    ttype=None, tval=None, tval_range=None,
+                    mlist=None, filtered=True,
+                    **parameter):
         """
         calculates all results for a list of measurements and stores them in a RockPy data object
         :param mlist:
         :param parameter:
         :return:
         """
+
         if not mlist:
-            mlist = self.get_measurements(mtype=mtype, ttype=ttype, tval=tval, tval_range=tval_range, filtered=True)
+            mlist = self.get_measurements(mtype=mtype, ttype=ttype, tval=tval, tval_range=tval_range, filtered=filtered)
 
         mlist = [m for m in mlist if m.mtype not in ['mass', 'diameter', 'height']] #get rid of parameter measurements
         # # initialize
         all_results = None
         rownames = []
-
         for index, measurement in enumerate(mlist):
-            measurement.calc_all()
-            rownames.append(measurement.mtype[0:3] + ' %03i' % index)
+            measurement.calc_all(**parameter)
+            rownames.append(measurement.mtype + ' %02i' % index)
             results = measurement.results
             if not all_results:
                 all_results = results
@@ -530,25 +533,61 @@ class Sample(object):
         all_results._row_names = rownames
         return all_results
 
-    def get_mean_results(self, mtype=None, ttype=None, tval=None, tval_range=None, mlist=None, **parameter):
+    def calc_all_mean_results(self, filtered=False, **parameter):
+        out = None
+        for mtype in self.mtypes:
+            for ttype in self.mtype_ttype_dict[mtype]:
+                for tval in self.ttype_tval_dict[ttype]:
+                    results = self.all_results(mtype=mtype, ttype=ttype, tval=tval,
+                                               filtered=filtered,
+                                               **parameter)
+                    results.define_alias('variable', ['ttype '+ ttype])
+
+                    data = np.mean(results.v, axis=0)
+                    err = np.std(results.v, axis=0)
+                    if not out:
+                        out = RockPyData(column_names=results.column_names, data=data)
+                        out.e = err.reshape(1, len(err))
+                    else:
+                        append = RockPyData(column_names=results.column_names, data=data)
+                        append.e = err.reshape(1, len(err))
+                        out = out.append_rows(data=append.data)
+        return out
+
+    def get_mean_results(self,
+                         mtype=None,
+                         ttype=None, tval=None, tval_range=None,
+                         mlist=None,
+                         filtered=False,
+                         **parameter):
         """
-        calculates all results and returns the
-        :param mlist:
+        calculates all results and returns the mean
+
+
+        :param filtered: bool is used to specify if the filtered_data_measurement list is used to get all corresponding
+                              measurements. In the case of a mean measurements it genreally is not wanted to have the
+                              result of the mean but get the mean of the result.
+                              if True the results(Mean) will be returned
+                              if False the Mean(Results) wil be returned, filtered data will still be calculated.
         :return:
         """
+
         if not mlist:
-            mlist = self.get_measurements(mtype=mtype, ttype=ttype, tval=tval, tval_range=tval_range, filtered=True)
+            mlist = self.get_measurements(mtype=mtype,
+                                          ttype=ttype, tval=tval, tval_range=tval_range,
+                                          filtered=filtered)
 
         all_results = self.all_results(mlist=mlist, **parameter)
 
         if 'ttype' in ''.join(all_results.column_names): #check for ttype
             self.logger.warning('TREATMENT/S found check if measurement list correct'
             )
+
         v = np.nanmean(all_results.v, axis=0)
         errors = np.nanstd(all_results.v, axis=0)
 
         mean_results = RockPyData(column_names=all_results.column_names,
-                                  row_names='mean ' + '_'.join(all_results.row_names),
+                                  # row_names='mean ' + '_'.join(all_results.row_names),
                                   data=v)
 
         mean_results.e = errors.reshape((1, len(errors)))

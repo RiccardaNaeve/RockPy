@@ -208,6 +208,11 @@ class Measurement(object):
         self._standard_parameter = {i[10:]: None for i in dir(self) if i.startswith('calculate_') if
                                     not i.endswith('generic')}
 
+        if self.treatments:
+            for t in self.treatments:
+                self._add_tval_to_results(t)
+        #         self._add_tval_to_data(t)
+
 
     def __getstate__(self):
         '''
@@ -219,7 +224,7 @@ class Measurement(object):
                          'mtype', 'machine', 'mfile',
                          'has_data', 'machine_data',
                          '_data', #todo _data seems to make the unicode error
-                         'initial_state', 'is_machine_data', 'sample_obj',
+                         'initial_state', 'is_machine_data', 'sample_obj', '_treatment_opt',
                          '_treatments', 'suffix',
                      )
         }

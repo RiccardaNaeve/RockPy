@@ -364,7 +364,6 @@ class SampleGroup(object):
 
         #create new sample_obj
         mean_sample = Sample(name='mean ' + self.name)
-        mean_sample.is_mean = True #set is_mean flag
 
         for mtype in self.mtypes:
             for ttype in self.mtype_ttype_dict[mtype]:
@@ -377,10 +376,10 @@ class SampleGroup(object):
                                         if m.mtype not in ['diameter', 'height', 'mass']]
                     mean_sample.measurements.extend(measurements)
                     if mtype not in ['diameter', 'height', 'mass']:
-                        #print mtype
                         M = mean_sample.mean_measurement(mtype=mtype, ttype=ttype, tval=tval)
-                        #print M
-                        # mean_sample.mean_measurements.append(M)
+                        mean_sample.mean_measurements.append(M)
+
+        mean_sample.is_mean = True #set is_mean flag after all measuerements are created
         return mean_sample
 
     def average_sample(self, reference='nrm', name='mean_sample_group',

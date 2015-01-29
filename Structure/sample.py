@@ -125,7 +125,10 @@ class Sample(object):
     @property
     def filtered_data(self):
         if not self._filtered_data:
-            return self.measurements
+            if self.is_mean:
+                return self.mean_measurements
+            else:
+                return self.measurements
         else:
             return self._filtered_data
 
@@ -349,7 +352,7 @@ class Sample(object):
         else:
             tvalue = str(tval)
 
-        if self.is_mean:
+        if is_mean:
             Sample.logger.debug('SEARCHING\t measurements(mean_list) with  << %s, %s, %s >>' % (mtype, ttype, tvalue))
             out = self.mean_measurements
         else:
@@ -451,6 +454,7 @@ class Sample(object):
             raise ValueError('No mtype specified')
 
         mlist = self.get_measurements(mtype=mtype, ttype=ttype, tval=tval, tval_range=tval_range, filtered=True)
+
         if not mlist:
             return None
 

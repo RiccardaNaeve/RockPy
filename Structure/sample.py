@@ -109,7 +109,7 @@ class Sample(object):
         ''' is sample is a mean sample from sample_goup ect... '''
         self.is_mean = False # if a calculated mean_sample
         self.mean_measurements = []
-        self.mean_results = None
+        self._mean_results = None
         self._filtered_data = None
 
         if mass is not None:
@@ -132,6 +132,10 @@ class Sample(object):
         else:
             return self._filtered_data
 
+    def mean_results(self, **parameter):
+        if not self._mean_results:
+            self.calc_all_mean_results(**parameter)
+        return self._mean_results
 
     def __repr__(self):
         return '<< %s - RockPy.Sample >>' % self.name
@@ -552,6 +556,7 @@ class Sample(object):
                         append = RockPyData(column_names=results.column_names, data=data)
                         append.e = err.reshape(1, len(err))
                         out = out.append_rows(data=append.data)
+        self._mean_results = out
         return out
 
     def get_mean_results(self,

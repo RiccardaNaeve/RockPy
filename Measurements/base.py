@@ -109,6 +109,9 @@ class Measurement(object):
         self.is_initial_state = False
         self.is_mean = False # flag for mean measurements
 
+        self.is_normalized = False
+        self.norm = None
+
         if machine is not None:
             machine = machine.lower()  # for consistency in code
 
@@ -469,6 +472,20 @@ class Measurement(object):
                     parameter[i] = self.standard_parameter[caller][i]
         return parameter
 
+    def delete_dtype_var_val(self, dtype, var, val):
+        """
+        deletes step with var = var and val = val
+
+        :param dtype: the step type to be deleted e.g. th
+        :param var: the variable e.g. temperature
+        :param val: the value of that step e.g. 500
+
+        example: measurement.delete_step(step='th', var='temp', val=500) will delete the th step where the temperature is 500
+        """
+        idx = self._get_idx_step_var_val(step=dtype, var=var, val=val)
+        self.data[dtype] = self.data[dtype].filter_idx(idx, invert=True)
+        return self
+
     def check_parameters(self, caller, parameter):
         '''
         Checks if previous calculation used the same parameters, if yes returns the previous calculation
@@ -648,6 +665,8 @@ class Measurement(object):
             if 'mag' in self.initial_state.data[dtype].column_names:
                 self.initial_state.data[dtype]['mag'] = self.initial_state.data[dtype].magnitude(('x', 'y', 'z'))
 
+        self.is_normalized = True
+        self.norm = [reference, rtype, vval, norm_method, norm_factor]
         return self
 
     def _get_norm_factor(self, reference, rtype, vval, norm_method):
@@ -719,7 +738,6 @@ class Measurement(object):
                                                     data=t.value,
                                                     # unit = t.unit      # todo add units
                         )
-
 
     def get_treatment_labels(self):
         out = ''

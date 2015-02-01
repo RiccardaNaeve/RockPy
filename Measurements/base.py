@@ -227,7 +227,8 @@ class Measurement(object):
                          'mtype', 'machine', 'mfile',
                          'has_data', 'machine_data',
                          '_data', #todo _data seems to make the unicode error
-                         'initial_state', 'is_machine_data', 'sample_obj', '_treatment_opt',
+                         'initial_state', 'is_machine_data', 'is_initial_state',
+                         'sample_obj', '_treatment_opt',
                          '_treatments', 'suffix',
                      )
         }
@@ -293,6 +294,7 @@ class Measurement(object):
         Measurement.logger.info('CREATING << %s >> initial state measurement << %s >> data' % (mtype, self.mtype))
         implemented = {i.__name__.lower(): i for i in Measurement.inheritors()}
         if mtype in implemented:
+            # print self.sample_obj, mtype, mfile, machine
             self.initial_state = implemented[mtype](self.sample_obj, mtype, mfile, machine)
             self.initial_state.is_initial_state = True
             # self.initial_state = self.initial_state_obj.data

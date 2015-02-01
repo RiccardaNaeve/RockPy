@@ -130,7 +130,7 @@ class Generic(object):
             # self.log.debug('CONVERTING list(sample) -> RockPy.SampleGroup(Sample)')
             self.sample_group = rp.SampleGroup(sample_list=s_list)
 
-        if isinstance(s_list, rp.Sample):
+        if isinstance(s_list, RockPy.Sample):
             # self.log.debug('CONVERTING sample -> list(sample) -> RockPy.SampleGroup(Sample)')
             self.sample_group = rp.SampleGroup(sample_list=[s_list])
 

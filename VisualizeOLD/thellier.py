@@ -154,8 +154,8 @@ class Dunlop_Treatments_Difference(base.Generic):
         # self.fig = plt.figure()
         self.fig = plt.figure(figsize=(10, 10))
 
-        # self.ax1 = plt.subplot2grid((4, 1), (0, 0), rowspan=2)
-        self.ax2 = plt.subplot2grid((1, 1), (0, 0), rowspan=1)
+        self.ax1 = plt.subplot2grid((2, 1), (0, 0), rowspan=1)
+        self.ax2 = plt.subplot2grid((2, 1), (1, 0), rowspan=1)
         self.get_plot_options(**options)
         self.show(**options)
         plt.tight_layout()
@@ -166,34 +166,33 @@ class Dunlop_Treatments_Difference(base.Generic):
 
 
     def show(self, **options):
-
         d = self.sample_group.treatment_dict[self.ttype]
 
         th_line = ('TH', {'color': 'g', 'linestyle': '-', 'marker': '.'})
         ptrm_line = ('PTRM', {'color': 'b', 'linestyle': '-', 'marker': '.'})
         sum_line = ('SUM', {'color': 'r', 'linestyle': '-', 'marker': '.'})
 
-        # ax1_lines = []
-        # ax1_lines.append(th_line)
-        # ax1_lines.append(ptrm_line)
-        # ax1_lines.append(sum_line)
-        # for i, tval in enumerate(sorted(d.keys())):
-        # self.markers[i] = '.'
-        #     self.markersizes[i] = 1 + tval * 5
-        #     ax1_lines.append(
-        #         (str(tval) + ' GPa', {'color': 'k', 'linestyle': self.linestyles[i], 'marker': self.markers[i],
-        #                               'markersize': self.markersizes[i]}))
-        #     for j, m in enumerate(d[tval]):
-        #         if m.mtype == 'thellier':
-        #             self.plt_opt.update({'linestyle': self.linestyles[i],
-        #                                  'marker': self.markers[i],
-        #                                  'markersize': self.markersizes[i]})
-        #             norm_factor = [1, 1]  # m.initial_state.data['mag'].v[0]]
-        #             PlottingOLD.dunlop.dunlop(self.ax1, thellier_obj=m, component=self.component, norm_factor=norm_factor,
-        #                                    **self.plt_opt)
-        #             if self.std_fill:
-        #                 PlottingOLD.dunlop.dunlop_std(self.ax1, thellier_obj=m, component=self.component,
-        #                                            norm_factor=norm_factor, **self.plt_opt)
+        ax1_lines = []
+        ax1_lines.append(th_line)
+        ax1_lines.append(ptrm_line)
+        ax1_lines.append(sum_line)
+        for i, tval in enumerate(sorted(d.keys())):
+            self.markers[i] = '.'
+            self.markersizes[i] = 1 + tval * 5
+            ax1_lines.append(
+                (str(tval) + ' GPa', {'color': 'k', 'linestyle': self.linestyles[i], 'marker': self.markers[i],
+                                      'markersize': self.markersizes[i]}))
+            for j, m in enumerate(d[tval]):
+                if m.mtype == 'thellier':
+                    self.plt_opt.update({'linestyle': self.linestyles[i],
+                                         'marker': self.markers[i],
+                                         'markersize': self.markersizes[i]})
+                    norm_factor = [1, 1]  # m.initial_state.data['mag'].v[0]]
+                    PlottingOLD.dunlop.dunlop(self.ax1, thellier_obj=m, component=self.component, norm_factor=norm_factor,
+                                           **self.plt_opt)
+                    if self.std_fill:
+                        PlottingOLD.dunlop.dunlop_std(self.ax1, thellier_obj=m, component=self.component,
+                                                   norm_factor=norm_factor, **self.plt_opt)
 
         treats = sorted(d.keys())
         initial = min(treats)
@@ -223,22 +222,22 @@ class Dunlop_Treatments_Difference(base.Generic):
                         PlottingOLD.dunlop.difference_std(self.ax2, a, b, component=self.component,
                                                        norm_factor=norm_factor, **self.plt_opt)
 
-        # self.ax1.set_title('Dunlop %s' % self.sample_names)
+        self.ax1.set_title('Dunlop %s' % self.sample_names)
         self.ax2.set_title('differences')
 
-        # self.ax2.legend([self.create_dummy_line(**l[1]) for l in ax2_lines],
-        # # Line titles
-        # [l[0] for l in ax2_lines],
-        # loc='best'
-        # )
-        # self.ax1.legend([self.create_dummy_line(**l[1]) for l in ax1_lines],
-        #                 Line titles
-        # [l[0] for l in ax1_lines],
-        # loc='best',
-        # fontsize=8,
-        # )
+        self.ax2.legend([self.create_dummy_line(**l[1]) for l in ax2_lines],
+        # Line titles
+        [l[0] for l in ax2_lines],
+        loc='best'
+        )
+        self.ax1.legend([self.create_dummy_line(**l[1]) for l in ax1_lines],
+                        # Line titles
+        [l[0] for l in ax1_lines],
+        loc='best',
+        fontsize=8,
+        )
         self.ax2.set_xlabel = 'Temperature [$^\\circ C$]'
-        # self.ax1.set_ylabel = 'Magnetic Moment'
+        self.ax1.set_ylabel = 'Magnetic Moment'
         self.ax2.set_ylabel = 'M($P_0)-M($P_n$)'
 
 

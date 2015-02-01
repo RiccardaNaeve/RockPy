@@ -107,7 +107,7 @@ def extract_info_from_filename(fname, data_dir):
         sample_info[2][0] = float(sample_info[2][0])
     except ValueError:
         pass
-
+    #print fname, sample_info
     if sample_info[1][1] and sample_info[2][1]:
         if sample_info[1][1] != sample_info[2][1]:
             sample_info[1][0] = sample_info[1][0] * getattr(ureg, sample_info[2][1]).to(
@@ -118,7 +118,8 @@ def extract_info_from_filename(fname, data_dir):
               'RMP': 'thermocurve',
               'TT': 'thellier',
               'CRY': 'cryomag',
-              'SUSH': 'sushibar'}
+              'SUSH': 'sushibar',
+              'TRM': 'trm'}
 
     try:
         abbrev[sample[2]]

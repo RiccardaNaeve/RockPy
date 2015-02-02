@@ -32,6 +32,8 @@ class SampleGroup(object):
         self.samples = {}
         self.results = None
 
+        self.color = None
+
         if sample_file:
             self.import_multiple_samples(sample_file, **options)
 
@@ -377,6 +379,11 @@ class SampleGroup(object):
                     mean_sample.measurements.extend(measurements)
                     if mtype not in ['diameter', 'height', 'mass']:
                         M = mean_sample.mean_measurement(mtype=mtype, ttype=ttype, tval=tval)
+
+                        if reference or vval:
+                            M.is_normalized= True
+                            M.norm = [reference, rtype, vval, norm_method, np.nan]
+
                         mean_sample.mean_measurements.append(M)
 
         mean_sample.is_mean = True #set is_mean flag after all measuerements are created

@@ -109,9 +109,6 @@ class Measurement(object):
         self.is_initial_state = False
         self.is_mean = False # flag for mean measurements
 
-        self.is_normalized = False
-        self.norm = None
-
         if machine is not None:
             machine = machine.lower()  # for consistency in code
 
@@ -216,6 +213,8 @@ class Measurement(object):
                 self._add_tval_to_results(t)
         #         self._add_tval_to_data(t)
 
+        self.is_normalized = False # normalized flag for visuals, so its not normalized twize
+        self.norm = None # the actual parameters
 
     def __getstate__(self):
         '''

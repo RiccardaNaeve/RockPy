@@ -141,3 +141,21 @@ class Study(object):
         looks through all samplegroups and return measurement types
         """
         return sorted(list(set([i for j in self.samplegroups for i in j.mtypes])))
+
+    def info(self):
+        from prettytable import PrettyTable
+        for sg in self._samplegroups:
+            print sg
+            print ''.join(['-' for i in range(20)])
+            out = PrettyTable(['Sample Name', 'Measurements', 'Treatments', 'Initial State'])
+            out.align['Measurements']='l'
+            out.align[ 'Treatments']='l'
+            out.align[ 'Initial State']='l'
+            for s in sg:
+                measurements = '|'.join([m.mtype for m in s.filtered_data if m.mtype not in ['mass', 'diameter', 'height']])
+                ttypes = '|'.join([ ' '.join([t.ttype, str(t.value), t.unit])  for m in s.filtered_data for t in m.treatments
+                            if m.mtype not in ['mass', 'diameter', 'height']])
+                initial = '|'.join([m.initial_state.mtype for m in s.filtered_data
+                                    if m.mtype not in ['mass', 'diameter', 'height']])
+                out.add_row([s.name, measurements, ttypes, initial])
+            print out

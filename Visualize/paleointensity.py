@@ -52,8 +52,8 @@ class Arai(base.Generic):
         self.single_features = [self.feature_grid]
         self.add_plot()
         self.ax = self.figs[self.name][0].gca()
-        self.xlabel = 'NRM remaining'
-        self.ylabel = 'pTRM gained'
+        self.ylabel = 'NRM remaining'
+        self.xlabel = 'pTRM gained'
 
     ''' Features '''
 

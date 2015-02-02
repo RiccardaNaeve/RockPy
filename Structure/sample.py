@@ -112,6 +112,8 @@ class Sample(object):
         self._mean_results = None
         self._filtered_data = None
 
+        self.color = None
+
         if mass is not None:
             self.add_measurement(mtype='mass', mfile=None, machine=mass_machine,
                                  value=float(mass), unit=mass_unit)

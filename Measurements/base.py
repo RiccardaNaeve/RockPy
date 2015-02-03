@@ -6,7 +6,7 @@ from pprint import pprint
 import numpy as np
 
 import RockPy
-import RockPy.Functions.general as RP_functions
+import RockPy.Functions.general
 import RockPy.Readin.base
 from RockPy.Structure.data import RockPyData
 from RockPy import Treatments
@@ -225,9 +225,10 @@ class Measurement(object):
                      (
                          'mtype', 'machine', 'mfile',
                          'has_data', 'machine_data',
-                         '_data', #todo _data seems to make the unicode error
+                         '_data',
                          'initial_state', 'is_machine_data', 'is_initial_state',
-                         'sample_obj', '_treatment_opt',
+                         # 'sample_obj',
+                         '_treatment_opt',
                          '_treatments', 'suffix',
                      )
         }
@@ -290,6 +291,9 @@ class Measurement(object):
         :param options:
         :return:
         """
+        mtype = mtype.lower()
+        machnine = machine.lower()
+
         Measurement.logger.info('CREATING << %s >> initial state measurement << %s >> data' % (mtype, self.mtype))
         implemented = {i.__name__.lower(): i for i in Measurement.inheritors()}
         if mtype in implemented:
@@ -300,6 +304,17 @@ class Measurement(object):
         else:
             Measurement.logger.error('UNABLE to find measurement << %s >>' % (mtype))
 
+    def get_treatmets(self, ttypes=None, tvals=None):
+        ttypes = RockPy.Functions.general._to_list(ttypes)
+        tvals = RockPy.Functions.general._to_list(tvals)
+        out = self.treatments
+
+        if ttypes:
+            out = [i for i in out if i.ttype in ttypes]
+        if tvals:
+            out = [i for i in out if i.tval in tvals]
+
+        return ou
 
     @property
     def ttypes(self):

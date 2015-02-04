@@ -301,7 +301,7 @@ class Thellier(base.Measurement):
         idx = self._get_idx_step_var_val(step=step, var=var, val=val)
 
         correction = self.th.filter_idx(idx)  # correction step
-        for dtype in ['th','pt','ac','ck','tr']:
+        for dtype in ['nrm','th','pt','ac','ck','tr']:
             # store variables so calculation does not affect
             # vars = self.data[dtype]['temp'].v
             # calculate correction

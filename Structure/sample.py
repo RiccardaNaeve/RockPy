@@ -124,6 +124,25 @@ class Sample(object):
             self.add_measurement(mtype='height', mfile=None, machine=length_machine,
                                  value=float(height), unit=length_unit)
 
+    def __setstate__(self, d):
+        self.__dict__.update(d)
+
+    def __getstate__(self):
+        '''
+        returned dict will be pickled
+        :return:
+        '''
+        pickle_me = {k: v for k, v in self.__dict__.iteritems() if k in
+                     (
+                         'name',
+                         'measurements',
+                         '_filtered_data',
+                         'is_mean', 'mean_measurements', '_mean_results',
+                         'results',
+                     )}
+        return pickle_me
+
+
     @property
     def filtered_data(self):
         if not self._filtered_data:
@@ -141,6 +160,7 @@ class Sample(object):
 
     def __repr__(self):
         return '<< %s - RockPy.Sample >>' % self.name
+
 
     ''' ADD FUNCTIONS '''
 
@@ -342,10 +362,17 @@ class Sample(object):
                          ttype=None, tval=None, tval_range=None,
                          is_mean=False,
                          filtered = True,
+                         reversed = False,
                          **options):
         """
         Returns a list of measurements of type = mtype
 
+        :param ttype:
+        :param tval:
+        :param tval_range:
+        :param is_mean:
+        :param filtered:
+        :param revesed: if reversed true it returns only measurements that do not meet criteria
         :tval_range: can be used to look up measurements within a certain range. if only one value is given,
                      it is assumed to be an upper limit and the range is set to [0, tval_range]
 
@@ -396,6 +423,8 @@ class Sample(object):
                     mtype, ttype, tvalue, self.name))
             return []
 
+        if reversed:
+            out = [i for i in self.filtered_data if not i in out]
         return out
 
     def delete_measurements(self, mtype=None, ttype=None, tval=None, tval_range=None, **options):

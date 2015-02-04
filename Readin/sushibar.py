@@ -5,6 +5,7 @@ import base
 import mmap
 import time
 from string import rstrip
+#todo get rid of most functions
 
 class SushiBar(base.Machine):
     float_data_idx = [5, 6, 7, 18, 19, 24, 31, 8, 30, 15, 28, 27, 26, 25, 16, 29, 11, 14, 9, 17,
@@ -22,9 +23,6 @@ class SushiBar(base.Machine):
 
     def __init__(self, dfile, sample_name):
         super(SushiBar, self).__init__(dfile, sample_name)
-
-        start = time.clock()
-
 
         with open(self.file_name) as f:
             data = map(rstrip, f)

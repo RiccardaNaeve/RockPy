@@ -26,6 +26,24 @@ class Study(object):
 
         self.add_samplegroup(samplegroups)
 
+    def __getstate__(self):
+        '''
+        returned dict will be pickled
+        :return:
+        '''
+        state = {k: v for k, v in self.__dict__.iteritems() if k in
+                     (
+                         'name',
+                         '_samplegroups'
+                     )
+        }
+
+        return state
+
+    def __setstate__(self, state):
+        self.__dict__.update(state)
+        self.all_group()
+
     def __getitem__(self, item):
         """
         study['all'] returns a sample_group with all samples of all samplegroups

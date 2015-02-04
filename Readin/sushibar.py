@@ -23,15 +23,15 @@ class SushiBar(base.Machine):
 
         self.raw_data = np.array([i.strip('\r\n').split('\t') for i in open(self.file_name)])[1:]
         self.sample_names = list(set([i[0] for i in self.raw_data]))
+        self.sample_names = map(str, self.sample_name)
 
         self.raw_data = np.array([i for i in self.raw_data if i[0] in [sample_name, 'test_sample']
                                   and i[8] != 'None'
                                   and i[8] != '-'])  # filter for sample and missing data
-
         if len(self.raw_data) == 0:
             print('SAMPLE NAME not recognized: SAMPLES: %s' % str(self.sample_names))
-            # Sample.logger.error('SAMPLE NAME not recognized: SAMPLES: %s' % str(self.sample_names))
-
+            # base.Machine.logger.error('SAMPLE NAME not recognized: SAMPLES: %s' % str(self.sample_names))
+            raise KeyError
         self.raw_data = np.array([self.__replace_none(self.raw_data)])[0]
 
     def __replace_none(self, data):

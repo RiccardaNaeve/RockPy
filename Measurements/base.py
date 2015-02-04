@@ -227,7 +227,7 @@ class Measurement(object):
                          'has_data', 'machine_data',
                          '_data',
                          'initial_state', 'is_machine_data', 'is_initial_state',
-                         # 'sample_obj',
+                         'sample_obj',
                          '_treatment_opt',
                          '_treatments', 'suffix',
                      )
@@ -304,17 +304,15 @@ class Measurement(object):
         else:
             Measurement.logger.error('UNABLE to find measurement << %s >>' % (mtype))
 
-    def get_treatmets(self, ttypes=None, tvals=None):
-        ttypes = RockPy.Functions.general._to_list(ttypes)
-        tvals = RockPy.Functions.general._to_list(tvals)
+    def get_treatments(self, ttypes=None, tvals=None):
         out = self.treatments
-
         if ttypes:
+            ttypes = RockPy.Functions.general._to_list(ttypes)
             out = [i for i in out if i.ttype in ttypes]
         if tvals:
-            out = [i for i in out if i.tval in tvals]
-
-        return ou
+            tvals = RockPy.Functions.general._to_list(tvals)
+            out = [i for i in out if i.value in tvals]
+        return out
 
     @property
     def ttypes(self):

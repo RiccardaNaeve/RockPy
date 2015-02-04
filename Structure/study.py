@@ -155,7 +155,7 @@ class Study(object):
                 measurements = '|'.join([m.mtype for m in s.filtered_data if m.mtype not in ['mass', 'diameter', 'height']])
                 ttypes = '|'.join([ ' '.join([t.ttype, str(t.value), t.unit])  for m in s.filtered_data for t in m.treatments
                             if m.mtype not in ['mass', 'diameter', 'height']])
-                initial = '|'.join([m.initial_state.mtype for m in s.filtered_data
+                initial = '|'.join([m.initial_state.mtype if m.initial_state is not None else '-' for m in s.filtered_data
                                     if m.mtype not in ['mass', 'diameter', 'height']])
                 out.add_row([s.name, measurements, ttypes, initial])
             print out

@@ -278,9 +278,14 @@ class Thellier(base.Measurement):
         out = [np.argmin(abs(self.data[step][var].v - val))]
         return out
 
-    def correct_step(self, step='th', var='variable', val='last'):
+    def correct_step(self, step='th', var='variable', val='last', initial_state=True):
         """
         corrects the remaining moment from the last th_step
+
+        :param step:
+        :param var:
+        :param val:
+        :param initial_state: also corrects the iinitial state if one exists
         """
 
         try:
@@ -306,6 +311,11 @@ class Thellier(base.Measurement):
             # recalc mag for safety
             self.data[dtype]['mag'] = self.data[dtype].magnitude(('x', 'y', 'z'))
         self.reset__data()
+
+        if self.initial_state and initial_state:
+            for dtype in self.initial_state.data:
+                self.initial_state.data[dtype]['m'] = self.initial_state.data[dtype]['m'].v - correction['m'].v
+                self.initial_state.data[dtype]['mag'] = self.initial_state.data[dtype].magnitude(('x', 'y', 'z'))
         return self
 
     # ## plotting functions
@@ -567,7 +577,7 @@ class Thellier(base.Measurement):
 
         """
 
-        b_lab = parameter.get('b_lab')
+        b_lab = parameter.get('b_lab', 35.0)
         self.results['b_anc'] = b_lab * abs(self.results['slope'].v)
         self.calculation_parameter['b_anc'] = {'b_lab': b_lab}
 
@@ -579,7 +589,7 @@ class Thellier(base.Measurement):
 
         """
 
-        b_lab = parameter.get('b_lab')
+        b_lab = parameter.get('b_lab', 35.0)
         self.results['sigma_b_anc'] = b_lab * abs(self.results['sigma'].v)
         self.calculation_parameter['sigma_b_anc'] = {'b_lab': b_lab}
 
@@ -947,11 +957,13 @@ class Thellier(base.Measurement):
         idx = np.array([(i, max([j for j, v2 in enumerate(th_times) if v2 - v < 0])) for i, v in enumerate(ck_times)])
         ck = ck_data.filter_idx(idx[:, 0])
         th_i = self.th.filter_idx(idx[:, 1])
+
         out = deepcopy(ck)
 
-        for i in ['x', 'y','z', 'mag']:
+        for i in ['x', 'y', 'z', 'mag']:
             out[i] = out[i].v - th_i[i].v
         out['mag'] = out.magnitude('m')
+
         return out
 
     def result_n_ptrm(self, t_min=None, t_max=None, recalc=False, **options):

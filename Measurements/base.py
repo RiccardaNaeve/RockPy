@@ -309,7 +309,7 @@ class Measurement(object):
             ttypes = RockPy.Functions.general._to_list(ttypes)
             out = [i for i in out if i.ttype in ttypes]
         if tvals:
-            tvals = RockPy.Functions.general._to_list(tvals)
+            tvals = RockPy.Functions.general._to_list(map(float,tvals))
             out = [i for i in out if i.value in tvals]
         return out
 

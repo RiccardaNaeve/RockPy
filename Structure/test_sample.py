@@ -1,6 +1,9 @@
 from unittest import TestCase
 import RockPy
 from os.path import join
+import timeit
+import time
+import sys
 
 __author__ = 'mike'
 
@@ -46,30 +49,94 @@ class TestSample(TestCase):
         self.sample.add_measurement(mtype='hysteresis', machine='vftb', mfile=self.vftb_hys_file,
                                     treatments='pressure_4.0_GPa; temperature_500.0_C')
 
-
-    def test_mass_kg(self):
-        self.assertEqual(self.sample.mass_kg.v, 3.45e-5)
-
-    def test_height_m(self):
-        self.assertEqual(self.sample.height_m.v, 0.0043)
-
-    def test_diameter_m(self):
-        self.assertEqual(self.sample.diameter_m.v, 0.0054)
-
-
     def test_add_measurement(self):
         measurement = self.sample.add_measurement(mtype='thellier', mfile=self.cryomag_thellier_file, machine='cryomag')
-
         check = {
-            'nrm': [2.00000000e+01, 2.08720000e-08, -8.95180000e-09, 5.04950000e-09, 2.88920000e-10, 2.32652650e-08],
+            'nrm': [2.00000000e+01, 2.08720000e-08, -8.95180000e-09, 5.04950000e-09, 2.88920000e-10, 735277.720278,
+                    2.32652650e-08],
         }
         for i in check:
             for j in range(len(check[i])):
                 self.assertAlmostEqual(measurement.data[i].v[0][j], check[i][j], 5)
 
-    def test_mtype_tdict(self):
-        self.assertEqual(self.sample.mtype_tdict.keys(), ['diameter', 'mass', 'height'])
 
     def test_filter(self):
         self.add_hys_measurements_with_conditions()
         print(self.sample)
+
+    def test_recalc_measurement_dict(self):
+        self.add_hys_measurements_with_conditions()
+        self.sample.recalc_measurement_dict()
+
+    def test_mtypes(self):
+        self.add_hys_measurements_with_conditions()
+        test = sorted(list(set([m.mtype for m in self.sample.measurements])))
+        self.assertEquals(test, self.sample.mtypes)
+
+
+    def test_ttypes(self):
+        test = [t.ttype for m in self.sample.measurements for t in m.treatments]
+        test = sorted(list(set(test)))
+        self.assertEquals(test, self.sample.ttypes)
+
+    def test_tvals(self):
+        test = [t.value for m in self.sample.measurements for t in m.treatments]
+        test = sorted(list(set(test)))
+        self.assertEquals(test, self.sample.tvals)
+
+    def test_mtype_tdict(self):
+        self.assertEqual(self.sample.mtype_tdict.keys(), ['diameter', 'mass', 'height'])
+
+
+    def test_ttype_dict(self):
+        self.add_hys_measurements_with_conditions()
+        out = {ttype: self.sample.get_measurements(ttype=ttype) for ttype in self.sample.ttypes}
+        self.assertEquals(out, self.sample.ttype_dict)
+
+
+    def test_mtype_ttype_dict(self):
+        self.add_hys_measurements_with_conditions()
+        old = {mtype: sorted(list(set([ttype for m in self.sample.get_measurements(mtype=mtype)
+                                       for ttype in m.ttypes])))
+               for mtype in self.sample.mtypes}
+        self.assertEquals(old, self.sample.mtype_ttype_dict)
+
+
+    def test_mtype_ttype_mdict(self):
+        self.add_hys_measurements_with_conditions()
+
+        old = {mtype: {ttype: self.sample.get_measurements(mtype=mtype, ttype=ttype)
+                       for ttype in self.sample.mtype_ttype_dict[mtype]}
+               for mtype in self.sample.mtypes}
+        self.assertEquals(old, self.sample.mtype_ttype_mdict)
+
+
+    def test_ttype_tval_dict(self):
+        self.add_hys_measurements_with_conditions()
+        start = time.clock()
+        old = {ttype: sorted(list(set([m.ttype_dict[ttype].value for m in self.sample.ttype_dict[ttype]])))
+               for ttype in self.sample.ttypes}
+        old_time = time.clock() - start
+        start = time.clock()
+        new = self.sample.ttype_tval_dict
+        new_time = time.clock() - start
+        self.assertEquals(old, new)
+        print '%s - %.2f times faster' % (sys._getframe().f_code.co_name, (old_time / new_time))
+
+
+    def test_mtype_ttype_tval_mdict(self):
+        self.add_hys_measurements_with_conditions()
+
+        start = time.clock()
+        old = {mt:
+                   {tt: {tv: self.sample.get_measurements(mtype=mt, ttype=tt, tval=tv)
+                         for tv in self.sample.ttype_tval_dict[tt]}
+                    for tt in self.sample.mtype_ttype_dict[mt]}
+               for mt in self.sample.mtypes}
+        old_time = time.clock() - start
+
+        start = time.clock()
+        new = self.sample.mtype_ttype_tval_mdict
+        new_time = time.clock() - start
+        print '%s - %.2f times faster' % (sys._getframe().f_code.co_name, (old_time / new_time))
+        self.assertEquals(old, new)

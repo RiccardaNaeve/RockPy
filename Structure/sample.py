@@ -300,8 +300,7 @@ class Sample(object):
         :return:
 
         """
-        for idx, m in enumerate(self.measurements):
-            self.add_m2_info_dict(m)
+        map(self.add_m2_info_dict, self.measurements)
 
     @property
     def mtypes(self):

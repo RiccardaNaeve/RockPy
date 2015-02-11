@@ -1,19 +1,14 @@
 # coding=utf-8
 from RockPy.Functions.general import _to_list
-
-__author__ = 'Michael Volk'
-# for all project related classes
-import logging
+from copy import deepcopy
 import numpy as np
+import logging
+import itertools
 from RockPy.Measurements.base import Measurement
 from RockPy.Structure.data import RockPyData, condense
 import RockPy.Visualize.base
-from copy import deepcopy
-from collections import defaultdict
-import itertools
 
 RockPy.Functions.general.create_logger(__name__)
-
 
 class Sample(object):
     """
@@ -89,8 +84,6 @@ class Sample(object):
     """
     logger = logging.getLogger(__name__)
 
-    implemented = {i.__name__.lower(): i for i in Measurement.inheritors()}
-
     def __init__(self, name,
                  mass=None, mass_unit='kg', mass_machine='generic',
                  height=None, diameter=None, length_unit='mm', length_machine='generic',
@@ -111,11 +104,10 @@ class Sample(object):
         self.results = None
 
         ''' is sample is a mean sample from sample_goup ect... '''
-        self.is_mean = False  # if a calculated mean_sample
+        self.is_mean = False # if a calculated mean_sample
         self.mean_measurements = []
         self._mean_results = None
         self._filtered_data = None
-
         self._info_dict = self.__create_info_dict()
 
         self.color = None
@@ -130,11 +122,57 @@ class Sample(object):
             self.add_measurement(mtype='height', mfile=None, machine=length_machine,
                                  value=float(height), unit=length_unit)
 
+    """ INFO DICTIONARY """
+
+    def __create_info_dict(self):
+        d = ['mtype', 'ttype', 'tval']
+        keys = ['_'.join(i) for n in range(4) for i in itertools.permutations(d, n) if not len(i) == 0]
+        out = {i: {} for i in keys}
+        return out
+
+    def add_m2_info_dict(self, m):
+        keys = self._info_dict.keys()
+        for t in m.treatments:
+            test = {'mtype': m.mtype, 'ttype': t.ttype, 'tval': t.value}
+            for key in keys:
+                levels = key.split('_')
+                for i, level in enumerate(levels):
+                    if i == 0:
+                        if len(levels) == i + 1:
+                            if not test[level] in self._info_dict[key]:
+                                self._info_dict[key][test[level]] = []
+                            self._info_dict[key][test[level]].append(m)
+                        else:
+                            if not test[level] in self._info_dict[key]:
+                                self._info_dict[key][test[level]] = {}
+                    if i == 1:
+                        if len(levels) == i + 1:
+                            if not test[level] in self._info_dict[key][test[levels[0]]]:
+                                self._info_dict[key][test[levels[0]]][test[level]] = []
+                            self._info_dict[key][test[levels[0]]][test[level]].append(m)
+                        else:
+                            if not test[level] in self._info_dict[key][test[levels[0]]]:
+                                self._info_dict[key][test[levels[0]]][test[level]] = {}
+                    if i == 2:
+                        if len(levels) == i + 1:
+                            if not test[level] in self._info_dict[key][test[levels[0]]][test[levels[1]]]:
+                                self._info_dict[key][test[levels[0]]][test[levels[1]]][test[level]] = []
+                            self._info_dict[key][test[levels[0]]][test[levels[1]]][test[level]].append(m)
+
+    def recalc_info_dict(self):
+        """
+        calculates a dictionary with information and the corresponding measurement
+
+        :return:
+
+        """
+        map(self.add_m2_info_dict, self.measurements)
+
+    """ PICKL """
+
     def __setstate__(self, d):
         self.__dict__.update(d)
-        self._info_dict = self.__create_info_dict()
-        self.recalc_info_dict()
-        
+
     def __getstate__(self):
         '''
         returned dict will be pickled
@@ -144,7 +182,7 @@ class Sample(object):
                      (
                          'name',
                          'measurements',
-                         '_filtered_data',
+                         '_filtered_data', '_info_dict',
                          'is_mean', 'mean_measurements', '_mean_results',
                          'results',
                      )}
@@ -229,6 +267,7 @@ class Sample(object):
         if idx is None:
             idx = len(self.measurements)  # if there is no measurement index
 
+
         if mtype in implemented:
             Sample.logger.info(' ADDING\t << simulated measurement >> %s' % mtype)
             measurement = implemented[mtype].simulate(self, m_idx=idx, **options)
@@ -252,55 +291,6 @@ class Sample(object):
         """
         self.results = self.all_results(**parameter)
         return self.results
-
-
-    def __create_info_dict(self):
-        out = {}
-        d = ['mtype', 'ttype', 'tval']
-        for n in range(4):
-            for i in itertools.permutations(d, n):
-                key = '_'.join(i)  # [j for j in i if j !=''])
-                out.update({key: None})
-                if n == 1:
-                    out[key] = defaultdict(list)
-                if n == 2:
-                    out[key] = defaultdict(lambda: defaultdict(list))
-                if n == 3:
-                    out[key] = defaultdict(lambda: defaultdict(lambda: defaultdict(list)))
-
-        out.pop('')
-        return out
-
-    def add_m2_info_dict(self, m):
-
-        self._info_dict['mtype'][m.mtype].append(m)
-        for t in m.treatments:
-            self._info_dict['ttype'][t.ttype].append(m)
-            self._info_dict['tval'][t.value].append(m)
-            """ 2 component """
-            self._info_dict['tval_ttype'][t.value][t.ttype].append(m)
-            self._info_dict['ttype_tval'][t.ttype][t.value].append(m)
-            self._info_dict['tval_mtype'][t.value][m.mtype].append(m)
-            self._info_dict['ttype_mtype'][t.ttype][m.mtype].append(m)
-            self._info_dict['mtype_ttype'][m.mtype][t.ttype].append(m)
-            self._info_dict['mtype_tval'][m.mtype][t.value].append(m)
-            """ 3 component """
-            self._info_dict['tval_ttype_mtype'][t.value][t.ttype][m.mtype].append(m)
-            self._info_dict['ttype_tval_mtype'][t.ttype][t.value][m.mtype].append(m)
-            self._info_dict['ttype_mtype_tval'][t.ttype][m.mtype][t.value].append(m)
-            self._info_dict['tval_mtype_ttype'][t.value][m.mtype][t.ttype].append(m)
-            self._info_dict['mtype_ttype_tval'][m.mtype][t.ttype][t.value].append(m)
-            self._info_dict['mtype_tval_ttype'][m.mtype][t.value][t.ttype].append(m)
-
-
-    def recalc_info_dict(self):
-        """
-        calculates a dictionary with information and the corresponding measurement
-
-        :return:
-
-        """
-        map(self.add_m2_info_dict, self.measurements)
 
     @property
     def mtypes(self):
@@ -352,29 +342,38 @@ class Sample(object):
         """
         returns a dictionary of mtypes, with all ttypes in that mtype
         """
-        out = {k : sorted(v.keys()) for k,v in self._info_dict['mtype_ttype'].iteritems()}
-        return out
+        # out = {mtype: self.__sort_list_set([ttype for m in self.get_measurements(mtype=mtype) for ttype in m.ttypes])
+        #        for mtype in self.mtypes}
+        return {k: v.keys() for k, v in self._info_dict['mtype_ttype'].iteritems()}
 
     @property
     def mtype_ttype_mdict(self):
         """
         returns a dictionary of mtypes, with all ttypes in that mtype
         """
+        # out = {mtype: {ttype: self.get_measurements(mtype=mtype, ttype=ttype)
+        #                for ttype in self.mtype_ttype_dict[mtype]}
+        #        for mtype in self.mtypes}
         return self._info_dict['mtype_ttype']
 
     @property
     def ttype_tval_dict(self):
-        out = {k : sorted(v.keys()) for k,v in self._info_dict['ttype_tval'].iteritems()}
-        return out
+        # out = {ttype: self.__sort_list_set([m.ttype_dict[ttype].value for m in self.ttype_dict[ttype]]) for ttype in
+        #        self.ttypes}
+        return {k: v.keys() for k,v in self._info_dict['ttype_tval'].iteritems()}
 
     @property
     def mtype_ttype_tval_mdict(self):
+        # out = {mt:
+        #            {tt: {tv: self.get_measurements(mtype=mt, ttype=tt, tval=tv)
+        #                  for tv in self.ttype_tval_dict[tt]}
+        #             for tt in self.mtype_ttype_dict[mt]}
+        #        for mt in self.mtypes}
         return self._info_dict['mtype_ttype_tval']
 
     ''' FILTER FUNCTIONS '''
-
     def filter(self, mtype=None, ttype=None, tval=None, tval_range=None,
-               **kwargs):
+                         **kwargs):
         """
         used to filter measurement data.
 
@@ -397,14 +396,15 @@ class Sample(object):
         self._filtered_data = None
 
 
+
     ''' FIND FUNCTIONS '''
 
     def get_measurements(self,
                          mtype=None,
                          ttype=None, tval=None, tval_range=None,
                          is_mean=False,
-                         filtered=True,
-                         reversed=False,
+                         filtered = True,
+                         reversed = False,
                          **options):
         """
         Returns a list of measurements of type = mtype
@@ -438,7 +438,7 @@ class Sample(object):
                 # Sample.logger.debug('SEARCHING\t measurements with  << %s, %s, %s >>' % (mtype, ttype, tvalue))
                 out = self.measurements
 
-        if mtype:  # filter mtypes, if given
+        if mtype: #filter mtypes, if given
             mtype = _to_list(mtype)
             out = [m for m in out if m.mtype in mtype]
         if ttype:
@@ -477,7 +477,7 @@ class Sample(object):
 
     ''' MISC FUNTIONS '''
 
-    def mean_measurement_from_list(self, mlist, interpolate=False, recalc_mag=False):  # todo redundant?
+    def mean_measurement_from_list(self, mlist, interpolate=False, recalc_mag=False): #todo redundant?
         """
         takes a list of measurements and creates a mean measurement out of all measurements data
 
@@ -496,7 +496,7 @@ class Sample(object):
                 if len(varlist) > 1:
                     dtype_list = [m.interpolate(varlist) for m in dtype_list]
 
-            if len(dtype_list) > 1:  # for single measurements
+            if len(dtype_list) > 1: #for single measurements
                 measurement.data[dtype] = condense(dtype_list)
                 measurement.data[dtype] = measurement.data[dtype].sort('variable')
 
@@ -535,13 +535,7 @@ class Sample(object):
         if not mlist:
             return None
 
-        if mtype in Sample.implemented:
-            measurement = Sample.implemented[mtype](self,
-                                             mtype=mtype, mfile=None, machine=None,
-                                             mdata=mlist[0]._data,
-                                             )
-            measurement.add_treatment(ttype=ttype, tval=tval)
-        # measurement = deepcopy(mlist[0])
+        measurement = deepcopy(mlist[0])
 
         for dtype in measurement.data:
             dtype_list = [m.data[dtype] for m in mlist]
@@ -550,7 +544,7 @@ class Sample(object):
                 if len(varlist) > 1:
                     dtype_list = [m.interpolate(varlist) for m in dtype_list]
 
-            if len(dtype_list) > 1:  # for single measurements
+            if len(dtype_list) > 1: #for single measurements
                 measurement.data[dtype] = condense(dtype_list)
                 measurement.data[dtype] = measurement.data[dtype].sort('variable')
 
@@ -585,7 +579,11 @@ class Sample(object):
         if not mlist:
             mlist = self.get_measurements(mtype=mtype, ttype=ttype, tval=tval, tval_range=tval_range, filtered=filtered)
 
-        mlist = [m for m in mlist if m.mtype not in ['mass', 'diameter', 'height']]  # get rid of parameter measurements
+        mlist = [m for m in mlist if m.mtype not in ['mass', 'diameter', 'height']] #get rid of parameter measurements
+
+        if len(mlist) == 0:
+            self.logger.warning('all_results: no measurements for results')
+            return
         # # initialize
         all_results = None
         rownames = []
@@ -598,22 +596,20 @@ class Sample(object):
             else:
                 # add new columns to all_results
                 column_add_all_results = list(set(results.column_names) -
-                                              set(all_results.column_names))  # cols in results but not in all_results
+                                              set(all_results.column_names)) #cols in results but not in all_results
 
                 all_results = all_results.append_columns(column_add_all_results)
 
-                aux = RockPyData(column_names=all_results.column_names,
-                                 data=[np.nan for i in range(len(all_results.column_names))])
+                aux = RockPyData(column_names=all_results.column_names, data=[np.nan for i in range(len(all_results.column_names))])
                 # todo remove workaround
                 # column_add_results = list(set(all_results.column_names) -
-                # set(results.column_names))  # columns in all_results but not in results
+                #                           set(results.column_names))  # columns in all_results but not in results
                 # results = results.append_columns(column_add_results)
                 for k in aux.column_names:
                     if k in results.column_names:
                         aux[k] = results[k].v
                 # store new results in mean_measults
                 all_results = all_results.append_rows(aux)
-
         all_results._row_names = rownames
         return all_results
 
@@ -625,7 +621,8 @@ class Sample(object):
                     results = self.all_results(mtype=mtype, ttype=ttype, tval=tval,
                                                filtered=filtered,
                                                **parameter)
-                    results.define_alias('variable', ['ttype ' + ttype])
+
+                    results.define_alias('variable', ['ttype '+ ttype])
 
                     data = np.mean(results.v, axis=0)
                     err = np.std(results.v, axis=0)
@@ -664,7 +661,7 @@ class Sample(object):
 
         all_results = self.all_results(mlist=mlist, **parameter)
 
-        if 'ttype' in ''.join(all_results.column_names):  # check for ttype
+        if 'ttype' in ''.join(all_results.column_names): #check for ttype
             self.logger.warning('TREATMENT/S found check if measurement list correct'
             )
 
@@ -693,8 +690,8 @@ class Sample(object):
         return sorted(list(set(values)))
 
     # def _sort_ttype_tval(self, mlist):
-    # """
-    # sorts a list of measurements according to their tvals and ttypes
+    #     """
+    #     sorts a list of measurements according to their tvals and ttypes
     #     :param mlist:
     #     :return:
     #     """
@@ -723,17 +720,17 @@ class Sample(object):
         """
         out = []
 
-        if require_list is None:  #no requirements - standard == False
+        if require_list is None: #no requirements - standard == False
             return False
 
-        for i in require_list:  #iterate over requirements
+        for i in require_list: #iterate over requirements
             if i in self.mtypes:
-                out.append(True)  # true if meets requirements
+                out.append(True) # true if meets requirements
             else:
-                out.append(False)  # false if not
+                out.append(False) # false if not
 
         if all(out):
-            return True  # return if all == True
+            return True # return if all == True
         else:
             return False
 

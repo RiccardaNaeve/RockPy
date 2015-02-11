@@ -14,6 +14,9 @@ class AfDemag(base.Measurement):
                  mag_method='', demag_type='af3',
                  **options):
 
+        if 'magmethod' in options:
+            mag_method = options['magmethod']
+
         self.demag_type = demag_type
         self.mag_method = mag_method
         self._data = {'data': None}

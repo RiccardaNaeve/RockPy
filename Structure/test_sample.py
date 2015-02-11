@@ -66,7 +66,7 @@ class TestSample(TestCase):
 
     def test_recalc_measurement_dict(self):
         self.add_hys_measurements_with_conditions()
-        self.sample.recalc_measurement_dict()
+        self.sample.recalc_info_dict()
 
     def test_mtypes(self):
         self.add_hys_measurements_with_conditions()
@@ -87,11 +87,16 @@ class TestSample(TestCase):
     def test_mtype_tdict(self):
         self.assertEqual(self.sample.mtype_tdict.keys(), ['diameter', 'mass', 'height'])
 
-
     def test_ttype_dict(self):
         self.add_hys_measurements_with_conditions()
+        start = time.clock()
         out = {ttype: self.sample.get_measurements(ttype=ttype) for ttype in self.sample.ttypes}
-        self.assertEquals(out, self.sample.ttype_dict)
+        old_time = time.clock() - start
+        start = time.clock()
+        new = self.sample.ttype_dict
+        new_time = time.clock() - start
+        self.assertEquals(out, new)
+        print '%s - %.2f times faster' % (sys._getframe().f_code.co_name, (old_time / new_time))
 
 
     def test_mtype_ttype_dict(self):

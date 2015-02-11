@@ -15,20 +15,20 @@ class AfDemag(base.Generic):
         self.xlabel = 'AF Field [mT]'
         self.ylabel = 'Moment'
 
-    def plotting(self, samples, **plt_opt):
-        for sample in samples:
-            measurements = sample.get_measurements(mtype=AfDemag._required)
-            for feat in self.standard_features:
-                for m in measurements:
-                    feat(m, **plt_opt)
+    # def plotting(self, samples, **plt_opt):
+    #     for sample in samples:
+    #         measurements = sample.get_measurements(mtype=AfDemag._required)
+    #         for feat in self.standard_features:
+    #             for m in measurements:
+    #                 feat(m, **plt_opt)
 
     def legend(self):
         plt.legend(loc='best')
 
-    def feature_data(self, afdemag_obj):
-        afdemag_obj = afdemag_obj.normalize(**self.norm)
-        line = Features.af_demag.field_mom(self.ax, afdemag_obj)
-        self._add_line_text_dict(line)
+    def feature_data(self, m_obj, **plt_opt):
+        m_obj = m_obj.normalize(**self.norm)
+        line = Features.af_demag.field_mom(self.ax, m_obj)
+        # self._add_line_text_dict(m_obj.sample_obj, m_obj.ttypes, m_obj.tvals, line)
 
 class ThermoCurve(base.Generic):
     _required = ['thermocurve']

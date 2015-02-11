@@ -3,6 +3,7 @@ import logging
 
 import RockPy
 from copy import deepcopy
+
 RockPy.Functions.general.create_logger(__name__)
 log = logging.getLogger(__name__)
 
@@ -19,7 +20,7 @@ class Study(object):
         :param samplegroups: one or several samplegroups that form the study
         :return:
         """
-        #self.log = log  # logging.getLogger('RockPy.' + type(self).__name__)
+        # self.log = log  # logging.getLogger('RockPy.' + type(self).__name__)
         self.name = name
         self._samplegroups = []
         self._all_samplegroup = None
@@ -32,10 +33,10 @@ class Study(object):
         :return:
         '''
         state = {k: v for k, v in self.__dict__.iteritems() if k in
-                     (
-                         'name',
-                         '_samplegroups'
-                     )
+                 (
+                     'name',
+                     '_samplegroups'
+                 )
         }
 
         return state
@@ -56,7 +57,7 @@ class Study(object):
         try:
             return self.samplegroups[item]
         except KeyError:
-            raise KeyError('Study has no SampleGroup << %s >>' %item)
+            raise KeyError('Study has no SampleGroup << %s >>' % item)
 
 
     @property
@@ -87,8 +88,12 @@ class Study(object):
         return out
 
     @property
+    def sdict(self):
+        return {s.name: s for s in self.samples}
+
+    @property
     def gdict(self):
-        out = {i.name:i for i in self.samplegroups}
+        out = {i.name: i for i in self.samplegroups}
         return out
 
 
@@ -108,7 +113,8 @@ class Study(object):
         """
         Primary search function for all parameters
         """
-        out = self._all_samplegroup.get_samples(snames = snames, mtypes=mtypes, ttypes=ttypes, tvals=tvals, tval_range=tval_range)
+        out = self._all_samplegroup.get_samples(snames=snames, mtypes=mtypes, ttypes=ttypes, tvals=tvals,
+                                                tval_range=tval_range)
         return out
 
     def _check_samplegroup_list(self, samplegroup):
@@ -162,18 +168,22 @@ class Study(object):
 
     def info(self):
         from prettytable import PrettyTable
+
         for sg in self._samplegroups:
             print sg
             print ''.join(['-' for i in range(20)])
             out = PrettyTable(['Sample Name', 'Measurements', 'Treatments', 'Initial State'])
-            out.align['Measurements']='l'
-            out.align[ 'Treatments']='l'
-            out.align[ 'Initial State']='l'
+            out.align['Measurements'] = 'l'
+            out.align['Treatments'] = 'l'
+            out.align['Initial State'] = 'l'
             for s in sg:
-                measurements = '|'.join([m.mtype for m in s.filtered_data if m.mtype not in ['mass', 'diameter', 'height']])
-                ttypes = '|'.join([ ' '.join([t.ttype, str(t.value), t.unit])  for m in s.filtered_data for t in m.treatments
-                            if m.mtype not in ['mass', 'diameter', 'height']])
-                initial = '|'.join([m.initial_state.mtype if m.initial_state is not None else '-' for m in s.filtered_data
-                                    if m.mtype not in ['mass', 'diameter', 'height']])
+                measurements = '|'.join(
+                    [m.mtype for m in s.filtered_data if m.mtype not in ['mass', 'diameter', 'height']])
+                ttypes = '|'.join(
+                    [' '.join([t.ttype, str(t.value), t.unit]) for m in s.filtered_data for t in m.treatments
+                     if m.mtype not in ['mass', 'diameter', 'height']])
+                initial = '|'.join(
+                    [m.initial_state.mtype if m.initial_state is not None else '-' for m in s.filtered_data
+                     if m.mtype not in ['mass', 'diameter', 'height']])
                 out.add_row([s.name, measurements, ttypes, initial])
             print out

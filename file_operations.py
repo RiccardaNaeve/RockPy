@@ -86,8 +86,7 @@ def generate_file_name(sample_group='', sample_name='',
 
 
 def extract_info_from_filename(fname, data_dir):
-    # print fname
-    index = int(fname[-3:])
+    index = fname.split('.')[-1]
 
     rest = fname[:-4]
     rest = fname.split('#')
@@ -196,8 +195,9 @@ def import_folder(folder, name='study', study=None):
         else:
             s = sg.get_samples(snames=d['name'])[0]
         m = s.add_measurement(**d)
+
         if 'ISindex'in d:
-            idx = [i for i, f in enumerate(files) if d['ISindex'] in f.split('.')[-1] and 'IS_True' in f] #initial_state index
+            idx = [(i, f) for i, f in enumerate(files) if d['ISindex'] in f.split('.')[-1] if 'IS_True' in f] #initial_state index
             if len(idx) >1:
                 print 'more than one initial state found not adding any'
             else:

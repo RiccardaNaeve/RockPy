@@ -13,8 +13,7 @@ from RockPy import Treatments
 from RockPy.Readin import *
 from copy import deepcopy
 import inspect
-import itertools
-from collections import defaultdict
+
 #todo initial states are not pickled
 class Measurement(object):
     """
@@ -139,7 +138,7 @@ class Measurement(object):
                 self.sample_obj = sample_obj
                 self._data = mdata
                 return  # done
-            if machine in Measurement.measurement_formatters()[mtype]:
+            if machine in Measurement.measurement_formatters()[mtype] or machine == 'combined':
                 Measurement.logger.debug('MACHINE << %s >> implemented' % machine)
                 self.machine = machine  # set machine
                 self.sample_obj = sample_obj  # set sample_obj
@@ -163,25 +162,26 @@ class Measurement(object):
 
         # dynamic data formatting
         # checks if format_'machine_name' exists. If exists it formats self.raw_data according to format_'machine_name'
-        if callable(getattr(self, 'format_' + machine)):
+        if machine == 'combined':
+            pass
+        elif callable(getattr(self, 'format_' + machine)):
             if self.has_data:
                 Measurement.logger.debug('FORMATTING raw data from << %s >>' % machine)
                 getattr(self, 'format_' + machine)()
             else:
                 Measurement.logger.debug('NO raw data transfered << %s >>' % machine)
-
         else:
             Measurement.logger.error(
                 'FORMATTING raw data from << %s >> not possible, probably not implemented, yet.' % machine)
 
-
+        if self._treatment_opt:
+            self._add_treatment_from_opt()
 
     @property
     def m_idx(self):
         return self.sample_obj.measurements.index(self)
 
     def __initialize(self):
-        self._info_dict = self.__create_info_dict()
         # dynamical creation of entries in results data. One column for each results_* method.
         # calculation_* methods are not creating columns -> if a result is calculated a result_* method
         # has to be written
@@ -209,13 +209,10 @@ class Measurement(object):
         self._standard_parameter = {i[10:]: None for i in dir(self) if i.startswith('calculate_') if
                                     not i.endswith('generic')}
 
-        if self._treatment_opt:
-            self._add_treatment_from_opt()
-
         if self.treatments:
             for t in self.treatments:
                 self._add_tval_to_results(t)
-                self._add_tval_to_data(t)
+        #         self._add_tval_to_data(t)
 
         self.is_normalized = False # normalized flag for visuals, so its not normalized twize
         self.norm = None # the actual parameters
@@ -251,6 +248,7 @@ class Measurement(object):
         pass
 
     def __getattr__(self, attr):
+        # print attr, self.__dict__.keys()
         if attr in self.__getattribute__('data').keys():
             return self.data[attr]
         if attr in self.__getattribute__('result_methods'):
@@ -317,63 +315,45 @@ class Measurement(object):
             out = [i for i in out if i.value in tvals]
         return out
 
-
-    def add_t2_info_dict(self, t):
-        """
-        adds a single treatment info to the measurements info_dict
-        :param t:
-        :return:
-        """
-        self._info_dict['ttype'][t.ttype].append(t)
-        self._info_dict['tval'][t.value].append(t)
-        """ 2 component """
-        self._info_dict['tval_ttype'][t.value][t.ttype].append(t)
-        self._info_dict['ttype_tval'][t.ttype][t.value].append(t)
-
-    def __create_info_dict(self):
-        out = {}
-        d = ['ttype', 'tval']
-        for n in range(3):
-            for i in itertools.permutations(d, n):
-                key = '_'.join(i)  # [j for j in i if j !=''])
-                out.update({key: None})
-                if n == 1:
-                    out[key] = defaultdict(list)
-                if n == 2:
-                    out[key] = defaultdict(lambda: defaultdict(list))
-        out.pop('')
-        return out
-
-    def recalc_info_dict(self):
-        """
-        calculates a dictionary with information and the corresponding measurement
-
-        :return:
-
-        """
-        map(self.add_t2_info_dict, self.treatments)
-
     @property
     def ttypes(self):
         """
         list of all ttypes
         """
-        return sorted(self._info_dict['ttype'].keys())
+        out = [t.ttype for t in self.treatments]
+        return self.__sort_list_set(out)
 
     @property
     def tvals(self):
         """
         list of all ttypes
         """
-        return sorted(self._info_dict['tval'].keys())
+        out = [t.value for t in self.treatments]
+        return self.__sort_list_set(out)
 
     @property
     def ttype_dict(self):
         """
         dictionary of ttype: treatment}
         """
-        return self._info_dict['ttype']
+        out = {t.ttype: t for t in self.treatments}
+        return out
 
+    @property
+    def tdict(self):
+        """
+        dictionary of ttype: treatment}
+        """
+        out = {t.ttype: t.value for t in self.treatments}
+        return out
+
+    @property
+    def _self_tdict(self):
+        """
+        dictionary of ttype: {tvalue: self}
+        """
+        out = {i.ttype: {i.value: self} for i in self.treatments}
+        return out
 
 
     @property
@@ -517,7 +497,7 @@ class Measurement(object):
 
         example: measurement.delete_step(step='th', var='temp', val=500) will delete the th step where the temperature is 500
         """
-        idx = self._get_idx_step_var_val(step=dtype, var=var, val=val)
+        idx = self._get_idx_dtype_var_val(dtype=dtype, var=var, val=val)
         self.data[dtype] = self.data[dtype].filter_idx(idx, invert=True)
         return self
 
@@ -624,6 +604,7 @@ class Measurement(object):
             out = self.ttype_dict[ttype].value
             return out
 
+
     def add_treatment(self, ttype, tval, unit=None, comment=''):
         """
         adds a treatments to measurement.treatments, then adds is to the data and results datastructure
@@ -634,7 +615,6 @@ class Measurement(object):
         :return:
         """
         treatment = Treatments.Generic(ttype=ttype, value=tval, unit=unit, comment=comment)
-        self.add_t2_info_dict(treatment)
         self._treatments.append(treatment)
         self._add_tval_to_data(treatment)
         self._add_tval_to_results(treatment)
@@ -820,7 +800,7 @@ class Measurement(object):
         if val == 'first':
             val = calc_data[var].v[0]
 
-        idx = self._get_idx_dtype_var_val(dtype=dtype, var=var, val=val)
+        idx = self._get_idx_dtype_var_val(step=dtype, var=var, val=val)
 
         correction = self.data[dtype].filter_idx(idx)  # correction step
 

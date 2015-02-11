@@ -634,6 +634,7 @@ class Measurement(object):
         :return:
         """
         treatment = Treatments.Generic(ttype=ttype, value=tval, unit=unit, comment=comment)
+        self.add_t2_info_dict(treatment)
         self._treatments.append(treatment)
         self._add_tval_to_data(treatment)
         self._add_tval_to_results(treatment)

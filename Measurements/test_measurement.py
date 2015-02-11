@@ -25,7 +25,6 @@ class TestMeasurement(TestCase):
 
     def test___create_info_dict(self):
         self.generic_M.recalc_info_dict()
-        print self.generic_M._info_dict
         self.assertEquals(self.generic_M._info_dict['ttype'].keys(), ['pressure', 'temperature'])
 
 

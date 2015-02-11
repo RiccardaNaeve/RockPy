@@ -625,7 +625,8 @@ class Measurement(object):
         """
         for dtype in self._data:
             data = np.ones(len(self.data[dtype]['variable'].v)) * tobj.value
-            self.data[dtype] = self.data[dtype].append_columns(column_names='ttype ' + tobj.ttype,
+            if not 'ttype ' + tobj.ttype in self.data[dtype].column_names:
+                self.data[dtype] = self.data[dtype].append_columns(column_names='ttype ' + tobj.ttype,
                                                                data=data)  # , unit=tobj.unit) #todo add units
 
     def _add_tval_to_results(self, tobj):
@@ -643,6 +644,17 @@ class Measurement(object):
         :return:
         """
         return sorted(list(set(values)))
+
+    def _get_idx_dtype_var_val(self, dtype, var, val, *args):
+        """
+        returns the index of the closest value with the variable(var) and the step(step) to the value(val)
+
+        option: inverse:
+           returns all indices except this one
+
+        """
+        out = [np.argmin(abs(self.data[dtype][var].v - val))]
+        return out
 
     """
     Normalize functions
@@ -760,6 +772,48 @@ class Measurement(object):
                     out += str(treat.value) + ' ' + treat.unit
                     out += ' '
         return out
+
+    """
+    CORRECTIONS
+    """
+
+    def correct_dtype(self, dtype='th', var='variable', val='last', initial_state=True):
+        """
+        corrects the remaining moment from the last th_step
+
+        :param dtype:
+        :param var:
+        :param val:
+        :param initial_state: also corrects the iinitial state if one exists
+        """
+
+        try:
+            calc_data = self.data[dtype]
+        except KeyError:
+            self.log.error('REFERENCE << %s >> can not be found ' % (dtype))
+
+        if val == 'last':
+            val = calc_data[var].v[-1]
+        if val == 'first':
+            val = calc_data[var].v[0]
+
+        idx = self._get_idx_dtype_var_val(dtype=dtype, var=var, val=val)
+
+        correction = self.data[dtype].filter_idx(idx)  # correction step
+
+        for dtype in self.data:
+            # calculate correction
+            self._data[dtype]['m'] = self._data[dtype]['m'].v - correction['m'].v
+            # recalc mag for safety
+            self.data[dtype]['mag'] = self.data[dtype].magnitude(('x', 'y', 'z'))
+        self.reset__data()
+
+        if self.initial_state and initial_state:
+            for dtype in self.initial_state.data:
+                self.initial_state.data[dtype]['m'] = self.initial_state.data[dtype]['m'].v - correction['m'].v
+                self.initial_state.data[dtype]['mag'] = self.initial_state.data[dtype].magnitude(('x', 'y', 'z'))
+        return self
+
 
     '''' PLOTTING '''''
 

@@ -105,7 +105,7 @@ class Dunlop(base.Generic):
             for measurement in measure_dict[sample]:
                 norm_factor = self.get_norm_factor(measurement)
                 plt_opt = self.get_plt_opt(sample=sample, measurements=measure_dict[sample], measurement=measurement)
-                plt_opt.update({'markersize': measurement.tdict['pressure'] * 4 + 2})
+                # plt_opt.update({'markersize': measurement.tdict['pressure'] * 4 + 2})
                 PlottingOLD.dunlop.dunlop(self.ax, measurement, norm_factor=norm_factor, **plt_opt)
 
                 if 'std_fill' in options:

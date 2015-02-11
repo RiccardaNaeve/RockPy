@@ -13,7 +13,8 @@ from RockPy import Treatments
 from RockPy.Readin import *
 from copy import deepcopy
 import inspect
-
+import itertools
+from collections import defaultdict
 #todo initial states are not pickled
 class Measurement(object):
     """
@@ -173,14 +174,14 @@ class Measurement(object):
             Measurement.logger.error(
                 'FORMATTING raw data from << %s >> not possible, probably not implemented, yet.' % machine)
 
-        if self._treatment_opt:
-            self._add_treatment_from_opt()
+
 
     @property
     def m_idx(self):
         return self.sample_obj.measurements.index(self)
 
     def __initialize(self):
+        self._info_dict = self.__create_info_dict()
         # dynamical creation of entries in results data. One column for each results_* method.
         # calculation_* methods are not creating columns -> if a result is calculated a result_* method
         # has to be written
@@ -208,10 +209,13 @@ class Measurement(object):
         self._standard_parameter = {i[10:]: None for i in dir(self) if i.startswith('calculate_') if
                                     not i.endswith('generic')}
 
+        if self._treatment_opt:
+            self._add_treatment_from_opt()
+
         if self.treatments:
             for t in self.treatments:
                 self._add_tval_to_results(t)
-        #         self._add_tval_to_data(t)
+                self._add_tval_to_data(t)
 
         self.is_normalized = False # normalized flag for visuals, so its not normalized twize
         self.norm = None # the actual parameters
@@ -313,45 +317,63 @@ class Measurement(object):
             out = [i for i in out if i.value in tvals]
         return out
 
+
+    def add_t2_info_dict(self, t):
+        """
+        adds a single treatment info to the measurements info_dict
+        :param t:
+        :return:
+        """
+        self._info_dict['ttype'][t.ttype].append(t)
+        self._info_dict['tval'][t.value].append(t)
+        """ 2 component """
+        self._info_dict['tval_ttype'][t.value][t.ttype].append(t)
+        self._info_dict['ttype_tval'][t.ttype][t.value].append(t)
+
+    def __create_info_dict(self):
+        out = {}
+        d = ['ttype', 'tval']
+        for n in range(3):
+            for i in itertools.permutations(d, n):
+                key = '_'.join(i)  # [j for j in i if j !=''])
+                out.update({key: None})
+                if n == 1:
+                    out[key] = defaultdict(list)
+                if n == 2:
+                    out[key] = defaultdict(lambda: defaultdict(list))
+        out.pop('')
+        return out
+
+    def recalc_info_dict(self):
+        """
+        calculates a dictionary with information and the corresponding measurement
+
+        :return:
+
+        """
+        map(self.add_t2_info_dict, self.treatments)
+
     @property
     def ttypes(self):
         """
         list of all ttypes
         """
-        out = [t.ttype for t in self.treatments]
-        return self.__sort_list_set(out)
+        return sorted(self._info_dict['ttype'].keys())
 
     @property
     def tvals(self):
         """
         list of all ttypes
         """
-        out = [t.value for t in self.treatments]
-        return self.__sort_list_set(out)
+        return sorted(self._info_dict['tval'].keys())
 
     @property
     def ttype_dict(self):
         """
         dictionary of ttype: treatment}
         """
-        out = {t.ttype: t for t in self.treatments}
-        return out
+        return self._info_dict['ttype']
 
-    @property
-    def tdict(self):
-        """
-        dictionary of ttype: treatment}
-        """
-        out = {t.ttype: t.value for t in self.treatments}
-        return out
-
-    @property
-    def _self_tdict(self):
-        """
-        dictionary of ttype: {tvalue: self}
-        """
-        out = {i.ttype: {i.value: self} for i in self.treatments}
-        return out
 
 
     @property

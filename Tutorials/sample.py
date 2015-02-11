@@ -2,13 +2,15 @@ __author__ = 'volk'
 import os
 from os.path import join
 import RockPy
+import itertools
+
 
 def get_hys_all_sample():
     folder = RockPy.test_data_path
     S = RockPy.Sample(name='test_sample',
-                                 mass=14.2, mass_unit='mg',
-                                 diameter=5.4, length_unit='nm',
-                                 height=23.8)
+                      mass=14.2, mass_unit='mg',
+                      diameter=5.4, length_unit='nm',
+                      height=23.8)
 
     mfile1 = join(folder, 'MUCVSM_test.hys')
     mfile2 = join(folder, 'MUCVFTB_test.hys')
@@ -32,12 +34,14 @@ def get_hys_coe_irm_rmp_sample():
     S.add_measurement(mtype='thermocurve', mfile=rmp, machine='vftb')
     return S
 
+
 def get_af_demag_sample():
     folder = RockPy.test_data_path
     S = RockPy.Sample(name='WURM')
     af = join(folder, 'MUCSUSH_af_test.af')
     S.add_measurement(mtype='afdemag', mfile=af, machine='sushibar', magtype='irm')
     return S
+
 
 def get_pmd_demag():
     S = RockPy.Sample(name='test_sample')
@@ -47,43 +51,37 @@ def get_pmd_demag():
 
 
 def get_hys_with_multiple_cond():
-        sample = RockPy.Sample(name='test_sample',
-                                mass=34.5, mass_unit='mg',
-                                diameter=5.4, height=4.3, length_unit='mm',
-                                treatments='pressure_0.0_GPa; temperature_300.0_C')
+    sample = RockPy.Sample(name='test_sample',
+                           mass=34.5, mass_unit='mg',
+                           diameter=5.4, height=4.3, length_unit='mm',
+                           treatments='pressure_0.0_GPa; temperature_300.0_C')
 
 
-        # vftb
-        vftb_hys_file = join(RockPy.test_data_path, 'MUCVFTB_test.hys')
+    # vftb
+    vftb_hys_file = join(RockPy.test_data_path, 'MUCVFTB_test.hys')
 
-        sample.add_measurement(mtype='hysteresis', machine='vftb', mfile=vftb_hys_file,
-                                    treatments='pressure_0.0_GPa; temperature_100.0_C')
-    
-        sample.add_measurement(mtype='hysteresis', machine='vftb', mfile=vftb_hys_file,
-                                    treatments='pressure_1.0_GPa; temperature_200.0_C')
-    
-        sample.add_measurement(mtype='hysteresis', machine='vftb', mfile=vftb_hys_file,
-                                    treatments='pressure_2.0_GPa; temperature_300.0_C')
-    
-        sample.add_measurement(mtype='hysteresis', machine='vftb', mfile=vftb_hys_file,
-                                    treatments='pressure_3.0_GPa; temperature_400.0_C')
-    
-        sample.add_measurement(mtype='hysteresis', machine='vftb', mfile=vftb_hys_file,
-                                    treatments='pressure_4.0_GPa; temperature_500.0_C')
-        return sample
+    sample.add_measurement(mtype='hysteresis', machine='vftb', mfile=vftb_hys_file,
+                           treatments='pressure_0.0_GPa; temperature_100.0_C')
+
+    sample.add_measurement(mtype='hysteresis', machine='vftb', mfile=vftb_hys_file,
+                           treatments='pressure_1.0_GPa; temperature_200.0_C')
+
+    sample.add_measurement(mtype='hysteresis', machine='vftb', mfile=vftb_hys_file,
+                           treatments='pressure_2.0_GPa; temperature_300.0_C')
+
+    sample.add_measurement(mtype='hysteresis', machine='vftb', mfile=vftb_hys_file,
+                           treatments='pressure_3.0_GPa; temperature_400.0_C')
+
+    sample.add_measurement(mtype='hysteresis', machine='vftb', mfile=vftb_hys_file,
+                           treatments='pressure_4.0_GPa; temperature_500.0_C')
+    return sample
 
 
 def test():
     sample = get_hys_with_multiple_cond()
-    # print sample.filtered_data
-    sample.filter(ttype='temperature', tval=300.)
-    # print sample.filtered_data
-
-    # S = get_pmd_demag()
-    # study = RockPy.Study("study", samplegroups=S)
-    # RockPy.save(study, 'hys_coe_irm_rmp.rpy')
-    #print S.plottable
-    #print study.all_samplegroup.mtypes
+    measurements = sample.measurements
+    # sample.filter(ttype='temperature', tval=300.)
+    # sample.recalc_info_dict()
 
 if __name__ == '__main__':
     test()

@@ -10,6 +10,7 @@ import RockPy.Visualize.base
 
 RockPy.Functions.general.create_logger(__name__)
 
+
 class Sample(object):
     """
     Sample in a way a container for measurements
@@ -104,7 +105,7 @@ class Sample(object):
         self.results = None
 
         ''' is sample is a mean sample from sample_goup ect... '''
-        self.is_mean = False # if a calculated mean_sample
+        self.is_mean = False  # if a calculated mean_sample
         self.mean_measurements = []
         self._mean_results = None
         self._filtered_data = None
@@ -235,7 +236,6 @@ class Sample(object):
 
         if idx is None:
             idx = len(self.measurements)  # if there is no measurement index
-
         if mtype in implemented:
             Sample.logger.info(' ADDING\t << measurement >> %s' % mtype)
             measurement = implemented[mtype](self,
@@ -266,7 +266,6 @@ class Sample(object):
 
         if idx is None:
             idx = len(self.measurements)  # if there is no measurement index
-
 
         if mtype in implemented:
             Sample.logger.info(' ADDING\t << simulated measurement >> %s' % mtype)
@@ -315,7 +314,7 @@ class Sample(object):
         return sorted(self._info_dict['tval'].keys())
 
     @property
-    def mtype_tdict(self): #todo: delete?
+    def mtype_tdict(self):  # todo: delete?
         """
         dictionary with all measurement_types {mtype:[tretments to corresponding m]}
         """
@@ -343,7 +342,7 @@ class Sample(object):
         returns a dictionary of mtypes, with all ttypes in that mtype
         """
         # out = {mtype: self.__sort_list_set([ttype for m in self.get_measurements(mtype=mtype) for ttype in m.ttypes])
-        #        for mtype in self.mtypes}
+        # for mtype in self.mtypes}
         return {k: v.keys() for k, v in self._info_dict['mtype_ttype'].iteritems()}
 
     @property
@@ -352,28 +351,29 @@ class Sample(object):
         returns a dictionary of mtypes, with all ttypes in that mtype
         """
         # out = {mtype: {ttype: self.get_measurements(mtype=mtype, ttype=ttype)
-        #                for ttype in self.mtype_ttype_dict[mtype]}
+        # for ttype in self.mtype_ttype_dict[mtype]}
         #        for mtype in self.mtypes}
         return self._info_dict['mtype_ttype']
 
     @property
     def ttype_tval_dict(self):
         # out = {ttype: self.__sort_list_set([m.ttype_dict[ttype].value for m in self.ttype_dict[ttype]]) for ttype in
-        #        self.ttypes}
-        return {k: v.keys() for k,v in self._info_dict['ttype_tval'].iteritems()}
+        # self.ttypes}
+        return {k: v.keys() for k, v in self._info_dict['ttype_tval'].iteritems()}
 
     @property
     def mtype_ttype_tval_mdict(self):
         # out = {mt:
-        #            {tt: {tv: self.get_measurements(mtype=mt, ttype=tt, tval=tv)
+        # {tt: {tv: self.get_measurements(mtype=mt, ttype=tt, tval=tv)
         #                  for tv in self.ttype_tval_dict[tt]}
         #             for tt in self.mtype_ttype_dict[mt]}
         #        for mt in self.mtypes}
         return self._info_dict['mtype_ttype_tval']
 
     ''' FILTER FUNCTIONS '''
+
     def filter(self, mtype=None, ttype=None, tval=None, tval_range=None,
-                         **kwargs):
+               **kwargs):
         """
         used to filter measurement data.
 
@@ -396,15 +396,14 @@ class Sample(object):
         self._filtered_data = None
 
 
-
     ''' FIND FUNCTIONS '''
 
     def get_measurements(self,
                          mtype=None,
                          ttype=None, tval=None, tval_range=None,
                          is_mean=False,
-                         filtered = True,
-                         reversed = False,
+                         filtered=True,
+                         reversed=False,
                          **options):
         """
         Returns a list of measurements of type = mtype
@@ -438,7 +437,7 @@ class Sample(object):
                 # Sample.logger.debug('SEARCHING\t measurements with  << %s, %s, %s >>' % (mtype, ttype, tvalue))
                 out = self.measurements
 
-        if mtype: #filter mtypes, if given
+        if mtype:  # filter mtypes, if given
             mtype = _to_list(mtype)
             out = [m for m in out if m.mtype in mtype]
         if ttype:
@@ -477,7 +476,7 @@ class Sample(object):
 
     ''' MISC FUNTIONS '''
 
-    def mean_measurement_from_list(self, mlist, interpolate=False, recalc_mag=False): #todo redundant?
+    def mean_measurement_from_list(self, mlist, interpolate=False, recalc_mag=False):  # todo redundant?
         """
         takes a list of measurements and creates a mean measurement out of all measurements data
 
@@ -496,7 +495,7 @@ class Sample(object):
                 if len(varlist) > 1:
                     dtype_list = [m.interpolate(varlist) for m in dtype_list]
 
-            if len(dtype_list) > 1: #for single measurements
+            if len(dtype_list) > 1:  #for single measurements
                 measurement.data[dtype] = condense(dtype_list)
                 measurement.data[dtype] = measurement.data[dtype].sort('variable')
 
@@ -544,7 +543,7 @@ class Sample(object):
                 if len(varlist) > 1:
                     dtype_list = [m.interpolate(varlist) for m in dtype_list]
 
-            if len(dtype_list) > 1: #for single measurements
+            if len(dtype_list) > 1:  # for single measurements
                 measurement.data[dtype] = condense(dtype_list)
                 measurement.data[dtype] = measurement.data[dtype].sort('variable')
 
@@ -579,7 +578,7 @@ class Sample(object):
         if not mlist:
             mlist = self.get_measurements(mtype=mtype, ttype=ttype, tval=tval, tval_range=tval_range, filtered=filtered)
 
-        mlist = [m for m in mlist if m.mtype not in ['mass', 'diameter', 'height']] #get rid of parameter measurements
+        mlist = [m for m in mlist if m.mtype not in ['mass', 'diameter', 'height']]  # get rid of parameter measurements
 
         if len(mlist) == 0:
             self.logger.warning('all_results: no measurements for results')
@@ -595,25 +594,32 @@ class Sample(object):
                 all_results = results
             else:
                 # add new columns to all_results
-                column_add_all_results = list(set(results.column_names) -
-                                              set(all_results.column_names)) #cols in results but not in all_results
-
-                all_results = all_results.append_columns(column_add_all_results)
-
-                aux = RockPyData(column_names=all_results.column_names, data=[np.nan for i in range(len(all_results.column_names))])
+                # column_add_all_results = list(set(results.column_names) -
+                #                               set(all_results.column_names))  # cols in results but not in all_results
+                #
+                # all_results = all_results.append_columns(column_add_all_results)
+                #
+                # aux = RockPyData(column_names=all_results.column_names,
+                #                  data=[np.nan for i in range(len(all_results.column_names))])
                 # todo remove workaround
                 # column_add_results = list(set(all_results.column_names) -
-                #                           set(results.column_names))  # columns in all_results but not in results
+                # set(results.column_names))  # columns in all_results but not in results
                 # results = results.append_columns(column_add_results)
-                for k in aux.column_names:
-                    if k in results.column_names:
-                        aux[k] = results[k].v
+                # for k in aux.column_names:
+                #     if k in results.column_names:
+                #         aux[k] = results[k].v
                 # store new results in mean_measults
-                all_results = all_results.append_rows(aux)
+                all_results = all_results.append_rows(results)
         all_results._row_names = rownames
         return all_results
 
     def calc_all_mean_results(self, filtered=False, **parameter):
+        """
+        Calculates the mean out of all results
+        :param filtered:
+        :param parameter:
+        :return:
+        """
         out = None
         for mtype in self.mtypes:
             for ttype in self.mtype_ttype_dict[mtype]:
@@ -622,7 +628,7 @@ class Sample(object):
                                                filtered=filtered,
                                                **parameter)
 
-                    results.define_alias('variable', ['ttype '+ ttype])
+                    results.define_alias('variable', ['ttype ' + ttype])
 
                     data = np.mean(results.v, axis=0)
                     err = np.std(results.v, axis=0)
@@ -661,7 +667,7 @@ class Sample(object):
 
         all_results = self.all_results(mlist=mlist, **parameter)
 
-        if 'ttype' in ''.join(all_results.column_names): #check for ttype
+        if 'ttype' in ''.join(all_results.column_names):  # check for ttype
             self.logger.warning('TREATMENT/S found check if measurement list correct'
             )
 
@@ -690,7 +696,7 @@ class Sample(object):
         return sorted(list(set(values)))
 
     # def _sort_ttype_tval(self, mlist):
-    #     """
+    # """
     #     sorts a list of measurements according to their tvals and ttypes
     #     :param mlist:
     #     :return:
@@ -720,17 +726,17 @@ class Sample(object):
         """
         out = []
 
-        if require_list is None: #no requirements - standard == False
+        if require_list is None:  #no requirements - standard == False
             return False
 
-        for i in require_list: #iterate over requirements
+        for i in require_list:  #iterate over requirements
             if i in self.mtypes:
-                out.append(True) # true if meets requirements
+                out.append(True)  # true if meets requirements
             else:
-                out.append(False) # false if not
+                out.append(False)  # false if not
 
         if all(out):
-            return True # return if all == True
+            return True  # return if all == True
         else:
             return False
 
@@ -747,3 +753,19 @@ class Sample(object):
                 out[t.ttype][t.value].append(m)
         return out
 
+    """ INFO """
+
+    def info(self):
+        import tabulate
+
+        out = []
+        header = ['Sample Name', 'Measurements', 'Treatments', 'Treatment values', 'Initial State']
+        for m in self.measurements:
+            if m.initial_state:
+                initial = m.initial_state.mtype
+            else:
+                initial = 'None'
+            out.append([self.name, m.mtype, m.ttypes, m.tvals, initial])
+        out.append(['-----' for i in header])
+        out = tabulate.tabulate(out, headers=header, tablefmt="simple")
+        return out

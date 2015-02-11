@@ -377,9 +377,9 @@ class SampleGroup(object):
                                         for m in measurements
                                         if m.mtype not in ['diameter', 'height', 'mass']]
                     mean_sample.measurements.extend(measurements)
+
                     if mtype not in ['diameter', 'height', 'mass']:
                         M = mean_sample.mean_measurement(mtype=mtype, ttype=ttype, tval=tval)
-
                         if reference or vval:
                             M.is_normalized= True
                             M.norm = [reference, rtype, vval, norm_method, np.nan]

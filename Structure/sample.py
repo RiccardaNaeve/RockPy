@@ -89,6 +89,8 @@ class Sample(object):
     """
     logger = logging.getLogger(__name__)
 
+    implemented = {i.__name__.lower(): i for i in Measurement.inheritors()}
+
     def __init__(self, name,
                  mass=None, mass_unit='kg', mass_machine='generic',
                  height=None, diameter=None, length_unit='mm', length_machine='generic',
@@ -130,7 +132,9 @@ class Sample(object):
 
     def __setstate__(self, d):
         self.__dict__.update(d)
-
+        self._info_dict = self.__create_info_dict()
+        self.recalc_info_dict()
+        
     def __getstate__(self):
         '''
         returned dict will be pickled
@@ -289,7 +293,7 @@ class Sample(object):
             self._info_dict['mtype_tval_ttype'][m.mtype][t.value][t.ttype].append(m)
 
 
-    def recalc_measurement_dict(self):
+    def recalc_info_dict(self):
         """
         calculates a dictionary with information and the corresponding measurement
 
@@ -532,7 +536,13 @@ class Sample(object):
         if not mlist:
             return None
 
-        measurement = deepcopy(mlist[0])
+        if mtype in Sample.implemented:
+            measurement = Sample.implemented[mtype](self,
+                                             mtype=mtype, mfile=None, machine=None,
+                                             mdata=mlist[0]._data,
+                                             )
+            measurement.add_treatment(ttype=ttype, tval=tval)
+        # measurement = deepcopy(mlist[0])
 
         for dtype in measurement.data:
             dtype_list = [m.data[dtype] for m in mlist]

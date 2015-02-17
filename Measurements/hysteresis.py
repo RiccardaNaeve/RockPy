@@ -36,8 +36,24 @@ class Hysteresis(base.Measurement):
         # TODO: check if the above makes sense. super resets self._data ????
 
         super(Hysteresis, self).__init__(sample_obj, mtype, mfile, machine, **options)
-        self.grid_data = {}
+
+        self._grid_data = {}
+        self._corrected_data = {}
+
         self.paramag_correction = None
+
+    @property
+    def grid_data(self):
+        if not self._grid_data:
+            self.data_gridding()
+        return self._grid_data
+
+    @property
+    def corrected_data(self):
+        if not self._corrected_data:
+            return self.data
+        else:
+            return self._corrected_data
 
     # ## formatting functions
     def format_vftb(self):
@@ -377,7 +393,7 @@ class Hysteresis(base.Measurement):
         for dtype in ['down_field', 'up_field']:
             interp_data = RockPyData(column_names=['field', 'mag'])
             d = self.data[dtype]
-            for i in range(1, len(grid)-1):
+            for i in range(1, len(grid) - 1):
                 idx = [j for j, v in enumerate(d['field'].v) if grid[i - 1] <= v <= grid[i + 1]]
                 if len(idx) > 0:
                     data = deepcopy(d.filter_idx(idx))
@@ -392,14 +408,11 @@ class Hysteresis(base.Measurement):
                             interp_data = interp_data.append_rows(data=[grid[i], mag])
                     except TypeError:
                         self.logger.error('Length of data for interpolation < 2. mag = mean(data)')
-                        self.logger.error('consider reducing number of points for interpolation or lower tuning parameter')
+                        self.logger.error(
+                            'consider reducing number of points for interpolation or lower tuning parameter')
                         mag = np.mean(data['mag'].v)
-            self.grid_data.update({dtype: interp_data})
-        self.logger.debug('reducing %i datapoints to %s datapoints' %((len(self.data['down_field']['field'].v)+
-                                                          len(self.data['up_field']['field'].v)),
-              (len(self.grid_data['down_field']['field'].v)+
-                                                          len(self.grid_data['up_field']['field'].v))
-        ))
+            self._grid_data.update({dtype: interp_data})
+
     def get_grid(self, **parameter):
         n = parameter.get('n', 20)
         tuning = parameter.get('tuning', 8)
@@ -411,7 +424,7 @@ class Hysteresis(base.Measurement):
         grid = []
 
         # calculating the grid
-        for i in xrange(-n -1 , n + 2):
+        for i in xrange(-n - 1, n + 2):
             if i != 0:
                 boi = (abs(i) / i) * (bm / tuning) * ((tuning + 1) ** (abs(i) / float(n)) - 1.)
             else:  # catch exception for i = 0
@@ -420,10 +433,40 @@ class Hysteresis(base.Measurement):
 
         return grid
 
-    def correct_center(self):
-        self.rotate_branch()
+    def correct_center(self, data='grid_data'):
+        uf_rotate = self.rotate_branch('up_field', data)
+
+        # copy data and average with opposite rotated branch
+        df_corrected = getattr(self, data)['down_field']
+        shift = (max(getattr(self, data)['down_field']['mag'].v) - min(getattr(self, data)['up_field']['mag'].v) + \
+                 min(getattr(self, data)['down_field']['mag'].v) - max(getattr(self, data)['up_field']['mag'].v)) / 4
+
+        df_corrected['mag'] = (df_corrected['mag'].v + uf_rotate['mag'].v) / 2 - shift
+        uf_corrected = deepcopy(df_corrected)
+        uf_corrected['field'] = -uf_corrected['field'].v
+        uf_corrected['mag'] = -uf_corrected['mag'].v
+
+        self._corrected_data.update({'down_field': df_corrected})
+        self._corrected_data.update({'up_field': uf_corrected})
+
+    def rotate_branch(self, branch, data='data'):
+        """
+        rotates a branch by 180 degrees, by multiplying the field and mag values by -1
+        :param data: str
+                     e.g. data, grid_data, corrected_data
+        :param branch: str
+                       up-field or down-field
+        :return:
+        """
+        data = deepcopy(getattr(self, data)[branch])
+        data['field'] = -data['field'].v[::-1]
+        data['mag'] = -data['mag'].v[::-1]
+        return data
 
     def correct_slope(self):
+        def approach2sat(x, a, b, c, d):
+            return a * x + b - c(1 / x) * (-d * (1 / x ** 2))
+
         raise NotImplementedError
 
     def correct_holder(self):

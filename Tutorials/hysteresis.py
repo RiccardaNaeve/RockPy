@@ -1,10 +1,12 @@
 __author__ = 'volk'
+import RockPy
+from os.path import join
 from RockPy.Structure.sample import Sample
 
 def test():
     vftb_file = 'test_data/MUCVFTB_test.hys'
-    vsm_file = 'test_data/MUCVSM_test.hys'
-
+    # vsm_file = 'test_data/MUCVSM_test.hys'
+    vsm_file = join(RockPy.test_data_path, 'vsm', 'LTPY_527,1a_HYS_VSM#XX[mg]___#TEMP_300_K#STD000.000')
     sample = Sample(name='vftb_test_sample')
     sample2 = Sample(name='vsm_test_sample')
 

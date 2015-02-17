@@ -12,6 +12,7 @@ class Vsm(base.Machine):
         self.measurement_header = self.readMicroMagHeader(reader_object)  # get header
         self.raw_out = [i for i in reader_object][self.measurement_header['meta']['numberoflines']:]  # without header
         self.header_idx = {v: i for i, v in enumerate(self.header)}
+
     @property
     def header(self):
         """
@@ -139,7 +140,6 @@ class Vsm(base.Machine):
 
     def out_backfield(self):
         return self.out
-
 
     def _check_data_exists(self):
         if self.raw_out:

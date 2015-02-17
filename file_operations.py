@@ -7,7 +7,7 @@ from pint import UnitRegistry
 import RockPy
 import cPickle
 ureg = UnitRegistry()
-
+from collections import defaultdict
 default_folder = join(expanduser("~"), 'Desktop', 'RockPy')
 
 
@@ -96,6 +96,7 @@ def extract_info_from_filename(fname, data_dir):
     parameter = rest[2]
 
     STD = [i for i in rest if 'std' in i.lower()]
+    print fname, sample_info
 
     try:
         options = [i.split('_') for i in rest[4].split('.')[0].split(';')]
@@ -120,7 +121,6 @@ def extract_info_from_filename(fname, data_dir):
     except ValueError:
         pass
 
-    # print fname, sample_info
     if sample_info[1][1] and sample_info[2][1]:
         if sample_info[1][1] != sample_info[2][1]:
             sample_info[1][0] = sample_info[1][0] * getattr(ureg, sample_info[2][1]).to(
@@ -130,12 +130,14 @@ def extract_info_from_filename(fname, data_dir):
               'COE': 'backfield',
               'RMP': 'thermocurve',
               'TT': 'thellier',
-              'CRY': 'cryomag',
-              'SUSH': 'sushibar',
               'TRM': 'trm',
               'AF': 'afdemag',
               'ARM': 'ARM',
-              'IRM': 'IRM',}
+              'IRM': 'IRM',
+              'CRY': 'cryomag',
+              'SUSH': 'sushibar',
+              'VSM':'VSM'
+              }
 
     rev_abbrev = {v: k for k, v in abbrev.iteritems()}
 
@@ -171,7 +173,7 @@ def extract_info_from_filename(fname, data_dir):
     return out
 
 
-def import_folder(folder, name='study', study=None):
+def import_folderOLD(folder, name='study', study=None):
     """
     imports a whole folder creating a study, sample_groups and samples
     """
@@ -211,4 +213,34 @@ def import_folder(folder, name='study', study=None):
     # print sg
     # print sg.samples
     # print s
+    return study
+
+
+def import_folder(folder, name='study', study=None):
+    if not study:
+        study = RockPy.Study(name=name)
+
+    files = [i for i in os.listdir(folder) if not i == '.DS_Store' if not i.startswith('#')]
+    samples = defaultdict(list)
+    for i in files:
+        d = RockPy.extract_info_from_filename(i, folder)
+        samples[d['name']].append(d)
+
+    for s in samples:
+        sgroup_name = samples[s][0]['sample_group']
+        if not sgroup_name in study.samplegroup_names:
+            sg = RockPy.SampleGroup(name=samples[s][0]['sample_group'])
+            study.add_samplegroup(sg)
+        sg = study[sgroup_name]
+        if not s in study.sdict:
+            smpl = RockPy.Sample(**samples[s][0])
+            sg.add_samples(smpl)
+        for m in samples[s]:
+            measurement = smpl.add_measurement(**m)
+            if 'ISindex' in m:
+                initial = get_IS(m, samples[s])
+                measurement.set_initial_state(**initial)
+                samples[s].remove(initial)
+            if 'IS' in m and m['IS'] == True:
+                continue
     return study

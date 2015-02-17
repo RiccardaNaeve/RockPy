@@ -539,7 +539,7 @@ class Measurement(object):
         if self.has_treatment:
             return self._treatments
         else:
-            treatment = Treatments.base.Generic(ttype='none', value=0, unit='')
+            treatment = Treatments.base.Generic(ttype='none', value=np.nan, unit='')
             return [treatment]
 
     def _get_treatment_from_suffix(self):

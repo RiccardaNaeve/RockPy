@@ -48,6 +48,18 @@ class Rem_Prime(base.Measurement):
         """
         :param parameter:
         """
+        component = parameter.get('component', Rem_Prime._standard_parameter['rem_prime']['component'])
+        ratios = self.calc_ratios(**parameter)
+        self.results['rem_prime'] = np.mean(abs(ratios[component].v))
+
+
+
+    def calc_ratios(self, **parameter):
+        """
+        calculates the ratio between the deriatives of two seperate AF demagnetization measurements
+        :param parameter:
+        :return:
+        """
         b_min = parameter.get('b_min', Rem_Prime._standard_parameter['rem_prime']['b_min'])
         b_max = parameter.get('b_max', Rem_Prime._standard_parameter['rem_prime']['b_max'])
         component = parameter.get('component', Rem_Prime._standard_parameter['rem_prime']['component'])
@@ -93,19 +105,16 @@ class Rem_Prime(base.Measurement):
         daf2 = af2.derivative(component, 'field', smoothing=smoothing)
 
         ratios = daf1 / daf2
+        ratios.data = np.fabs(ratios.data) # no negatives
+        return ratios
 
-        self.results['rem_prime'] = np.mean(abs(ratios[component].v))
-
+    def calc_rem_prime_field(self, add2resulrts = False, **parameter):
+        component = parameter.get('component', Rem_Prime._standard_parameter['rem_prime']['component'])
+        ratios = self.calc_ratios(**parameter)
         for i, v in enumerate(ratios['field'].v):
-            name = 'rem_prime [%.1f]' % v
-            self.results = self.results.append_columns(column_names=name, data=ratios[component].v[i])
-            # import matplotlib.pyplot as plt
-            # plt.plot(ratios['field'].v, ratios['x'].v)
-            # plt.plot(ratios['field'].v, ratios['y'].v)
-            # plt.plot(ratios['field'].v, ratios['z'].v)
-            # plt.plot(ratios['field'].v, np.mean(ratios[('x', 'y', 'z')].v, axis=1))
-            # plt.show()
-
+            name = 'rem\' [%.1f]' % v
+            self.results = self.results.append_columns(column_names=name, data=abs(ratios[component].v[i]))
+        return ratios
 
     def calculate_rem(self, **parameter):
         component = parameter.get('component', Rem_Prime._standard_parameter['rem_prime']['component'])

@@ -5,6 +5,8 @@ import logging
 import base
 from RockPy.Structure.data import RockPyData
 from scipy import stats
+from scipy.optimize import curve_fit
+from copy import deepcopy
 
 
 class Hysteresis(base.Measurement):
@@ -34,6 +36,7 @@ class Hysteresis(base.Measurement):
         # TODO: check if the above makes sense. super resets self._data ????
 
         super(Hysteresis, self).__init__(sample_obj, mtype, mfile, machine, **options)
+        self.grid_data = {}
         self.paramag_correction = None
 
     # ## formatting functions
@@ -348,6 +351,83 @@ class Hysteresis(base.Measurement):
             if self.data[dtype]:
                 d = self.data[dtype].v
                 d[:, 1] -= d[:, 0] * slope
+
+
+    def data_gridding(self, **parameter):
+        """
+        .. math::
+
+           B_{\text{grid}}(i) = \frac{|i|}{i} \frac{B_m}{\lambda} \left[(\lambda + 1 )^{|i|/n} - 1 \right]
+
+        :return:
+        """
+
+        grid = self.get_grid(**parameter)
+        order = parameter.get('order', 'first')
+        # interpolate the magnetization values M_int(Bgrid(i)) for i = -n+1 .. n-1
+        # by fitting M_{measured}(B_{experimental}) individually in all intervals [Bgrid(i-1), Bgrid(i+1)]
+        # with first or second order polinomials
+
+        def first(x, a, b):
+            return a + b * x
+
+        def second(x, a, b, c):
+            return a + b * x + c * x ** 2
+
+        for dtype in ['down_field', 'up_field']:
+            interp_data = RockPyData(column_names=['field', 'mag'])
+            d = self.data[dtype]
+            for i in range(1, len(grid)-1):
+                idx = [j for j, v in enumerate(d['field'].v) if grid[i - 1] <= v <= grid[i + 1]]
+                if len(idx) > 0:
+                    data = deepcopy(d.filter_idx(idx))
+                    try:
+                        if order == 'first':
+                            popt, pcov = curve_fit(first, data['field'].v, data['mag'].v)
+                            mag = first(grid[i], *popt)
+                            interp_data = interp_data.append_rows(data=[grid[i], mag])
+                        if order == 'second':
+                            popt, pcov = curve_fit(second, data['field'].v, data['mag'].v)
+                            mag = second(grid[i], *popt)
+                            interp_data = interp_data.append_rows(data=[grid[i], mag])
+                    except TypeError:
+                        self.logger.error('Length of data for interpolation < 2. mag = mean(data)')
+                        self.logger.error('consider reducing number of points for interpolation or lower tuning parameter')
+                        mag = np.mean(data['mag'].v)
+            self.grid_data.update({dtype: interp_data})
+        self.logger.debug('reducing %i datapoints to %s datapoints' %((len(self.data['down_field']['field'].v)+
+                                                          len(self.data['up_field']['field'].v)),
+              (len(self.grid_data['down_field']['field'].v)+
+                                                          len(self.grid_data['up_field']['field'].v))
+        ))
+    def get_grid(self, **parameter):
+        n = parameter.get('n', 20)
+        tuning = parameter.get('tuning', 8)
+
+        # getting the Bmax that is common for both branches
+        bmax = min([max(self.data['down_field']['field'].v), max(self.data['up_field']['field'].v)])
+        bmin = min([min(self.data['down_field']['field'].v), min(self.data['up_field']['field'].v)])
+        bm = min([abs(bmax), abs(bmin)])
+        grid = []
+
+        # calculating the grid
+        for i in xrange(-n -1 , n + 2):
+            if i != 0:
+                boi = (abs(i) / i) * (bm / tuning) * ((tuning + 1) ** (abs(i) / float(n)) - 1.)
+            else:  # catch exception for i = 0
+                boi = 0
+            grid.append(boi)
+
+        return grid
+
+    def correct_center(self):
+        self.rotate_branch()
+
+    def correct_slope(self):
+        raise NotImplementedError
+
+    def correct_holder(self):
+        raise NotImplementedError
 
     # ## plotting functions
     def plt_hys(self, noshow=False):

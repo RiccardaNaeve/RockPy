@@ -50,10 +50,13 @@ class Hysteresis(base.Measurement):
 
     @property
     def corrected_data(self):
-        if not self._corrected_data:
-            return self.data
+        if hasattr(self, '_corrected_data'):
+            if not self._corrected_data:
+                return deepcopy(self.data)
+            else:
+                return self._corrected_data
         else:
-            return self._corrected_data
+            return deepcopy(self.data)
 
     # ## formatting functions
     def format_vftb(self):
@@ -414,6 +417,8 @@ class Hysteresis(base.Measurement):
             self._grid_data.update({dtype: interp_data})
 
     def get_grid(self, **parameter):
+        if not hasattr(self, '_grid_data'):
+            self._grid_data = {}
         n = parameter.get('n', 20)
         tuning = parameter.get('tuning', 8)
 
@@ -464,10 +469,70 @@ class Hysteresis(base.Measurement):
         return data
 
     def correct_slope(self):
-        def approach2sat(x, a, b, c, d):
-            return a * x + b - c(1 / x) * (-d * (1 / x ** 2))
+        """
+        The magnetization curve in this region can be expressed as
+        .. math::
 
-        raise NotImplementedError
+           M(B) = Ms + \Chi B + \alpha B^{\beta}
+
+        where :math:`\Chi` is the susceptibility of all dia- and paramagnetic components
+        (including the para-effect) and the last term represents an individual approach to saturation law.
+        :return:
+        """
+        # calculate approach to saturation ( assuming beta = -1 ) for upfield/downfield branches with pos / negative field
+        # assuming 80 % saturation
+        a2s_data = map(self.calc_approach2sat, ['down_field'])#, 'up_field'])
+        a2s_data = np.array(a2s_data)
+        a2s_data = a2s_data.reshape(1, 2, 3)[0]
+
+        simple = self.result_paramag_slope()
+        # print a2s_data
+
+        popt = np.mean(a2s_data, axis=0)
+        ms = np.mean(abs(a2s_data[:, 0]))
+        ms_std = np.std(abs(a2s_data[:, 0]))
+        chi = np.mean(abs(a2s_data[:, 1])) * np.sign(simple)
+        chi_std = np.std(abs(a2s_data[:, 1]))
+
+        alpha = np.mean(abs(a2s_data[:, 2])) * np.sign(a2s_data[0, 2])
+        alpha_std = np.std(abs(a2s_data[:, 2]))
+
+        for dtype in self.corrected_data:
+            self.corrected_data[dtype]['mag'] = self.corrected_data[dtype]['mag'].v - \
+                                                self.corrected_data[dtype]['field'].v * chi
+        print(a2s_data), self.result_paramag_slope()
+        return ms, chi, alpha
+
+    def calc_approach2sat(self, branch):
+        def approach2sat_func(x, ms, chi, alpha, beta=-1):
+            """
+            General approach to saturation function
+            :param x: field
+            :param ms: saturation magnetization
+            :param chi: susceptibility
+            :param alpha:
+            :param beta:
+            :return:
+            """
+            return ms + chi * x + alpha * x ** -1  # beta
+
+        #### POSITIVE BRANCH
+        # get idx of downfield branch where b > 0
+        idx = [i for i, v in enumerate(self.corrected_data[branch]['field'].v) if
+               v >= 0.7 * max(self.corrected_data[branch]['field'].v)]
+        df_pos = deepcopy(self.corrected_data[branch].filter_idx(idx))  # down field with positive field data
+
+        popt_pos, pcov_pos = curve_fit(approach2sat_func, df_pos['field'].v, df_pos['mag'].v,
+                                       p0=[max(df_pos['mag'].v), 0, 0])
+
+        idx = [i for i, v in enumerate(self.corrected_data[branch]['field'].v) if
+               v <= 0.4 * min(self.corrected_data[branch]['field'].v)]
+        df_neg = deepcopy(self.corrected_data[branch].filter_idx(idx))  # down field with positive field data
+
+        popt_neg, pcov_neg = curve_fit(approach2sat_func, df_neg['field'].v[::-1], df_neg['mag'].v[::-1],
+                                       p0=[max(df_neg['mag'].v), 1e-7, 0])
+        return popt_pos, popt_neg
+
 
     def correct_holder(self):
         raise NotImplementedError
@@ -517,3 +582,6 @@ class Hysteresis(base.Measurement):
         :return:
         '''
         self.plt_hys()
+
+    def export_vftb(self, folder=None, filename=None):
+        import os

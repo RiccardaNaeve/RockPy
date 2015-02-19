@@ -38,7 +38,7 @@ def test():
 
 
         samples.append(s)
-        print s.measurements[0]._data['data']
+        #print s.measurements[0]._data['data']
         #print i
     """
     # add measurement, read from file
@@ -69,7 +69,7 @@ def test():
     """
     sg = RockPy.SampleGroup(sample_list=samples)
     study = RockPy.Study(samplegroups=sg)
-    plt = RockPy.Visualize.anisotropy.Anisotropy(sg, plt_primary='sample', plt_secondary=None)
+    plt = RockPy.Visualize.anisotropy.Anisotropy(samples, plt_primary="sample", plt_secondary=None)
     plt.show()
 
     for s in samples:

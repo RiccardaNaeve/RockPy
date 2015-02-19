@@ -69,7 +69,7 @@ def test():
     """
     sg = RockPy.SampleGroup(sample_list=samples)
     study = RockPy.Study(samplegroups=sg)
-    plt = RockPy.Visualize.anisotropy.Anisotropy(samples, plt_primary="sample", plt_secondary=None)
+    plt = RockPy.Visualize.anisotropy.Anisotropy(samples, plt_primary="samples", plt_secondary=None)
     plt.show()
 
     for s in samples:

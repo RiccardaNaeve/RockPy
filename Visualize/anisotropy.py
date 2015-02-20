@@ -35,5 +35,5 @@ class Anisotropy(Stereo):
 
             d, i = m_obj.results[idx].v[0]
             d, i = MirrorDirectionToNegativeInclination(d, i)
-            lines = self.ax.plot(*self.stereomap(d, i), marker=m, markerfacecolor=color, markersize=20, **plt_opt)
+            lines = self.ax.plot(*self.stereomap(d, i), marker=m, markerfacecolor=color, markersize=10, **plt_opt)
             self._add_line_text_dict(m_obj.sample_obj.name, '_'.join(m_obj.ttypes), '_'.join(map(str, m_obj.tvals)), lines)

@@ -28,7 +28,7 @@ def test():
         m = s.add_simulation(mtype='anisotropy', evals=(1.01, 1.01, 0.99),
                                 mdirs=[[225.0, 0.0], [135.0, 0.0], [90.0, 45.0],
                                        [90.0, -45.0], [0.0, -45.0], [0.0, 45.0]],
-                                measerr=0.01)
+                                measerr=0.001)
 
         #modify reference directions
         #add to inclination
@@ -69,7 +69,7 @@ def test():
     """
     sg = RockPy.SampleGroup(sample_list=samples)
     study = RockPy.Study(samplegroups=sg)
-    plt = RockPy.Visualize.anisotropy.Anisotropy(samples, plt_primary="samples", plt_secondary=None)
+    plt = RockPy.Visualize.anisotropy.Anisotropy(study, plt_primary="samples", plt_secondary=None)
     plt.show()
 
     for s in samples:

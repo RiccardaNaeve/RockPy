@@ -7,6 +7,7 @@ from RockPy.Structure.data import RockPyData
 import RockPy.Visualize.anisotropy
 import RockPy.Visualize.stereo
 from random import random
+from matplotlib.backends.backend_pdf import PdfPages
 
 from matplotlib import pyplot
 
@@ -41,16 +42,8 @@ def test():
                                        [90.0, -45.0], [0.0, -45.0], [0.0, 45.0]],
                                 measerr=0.001)
 
-        #modify reference directions
-        #add to inclination
-        #m._data['data']['I'] = m._data['data']['I'].v + 2
-        #add to declination
-        m._data['data']['D'] = m._data['data']['D'].v + 1
-
-
         samples.append(s)
-        #print s.measurements[0]._data['data']
-        #print i
+
 
     """
     # add measurement, read from file
@@ -82,46 +75,69 @@ def test():
     sg = RockPy.SampleGroup(sample_list=samples)
     study = RockPy.Study(samplegroups=sg)
 
+    pdf_pages = PdfPages('out_oblate_sushi__101_099_099_0_001err.pdf')
 
-    aniplt = RockPy.Visualize.anisotropy.Anisotropy(study, plt_primary="samples", plt_secondary=None)
 
-    # get figure
-    fig1 = aniplt.figs[aniplt.name][0]
+    startoffset = 7
 
-    L, F, T, P, E12, E13, E23 = [], [], [], [], [], [], []
-
-    samples[0].measurements[0].calculate_tensor()
-    print samples[0].measurements[0].results
     for s in samples:
-        s.measurements[0].calculate_tensor()
-        T.extend(s.measurements[0].results['T'].v)
-        L.extend(s.measurements[0].results['L'].v)
-        F.extend(s.measurements[0].results['F'].v)
-        P.extend(s.measurements[0].results['P'].v)
-        E12.extend(s.measurements[0].results['E12'].v)
-        E13.extend(s.measurements[0].results['E13'].v)
-        E23.extend(s.measurements[0].results['E23'].v)
+        s.measurements[0]._data['data']['D'] = s.measurements[0]._data['data']['D'].v + startoffset-1
 
-    #print T
-    #box_ax = fig.add_axes([0.9,0.6,0.08,0.3])
-    #box_ax.boxplot([T, P])
+    for d in range(7):
+        for s in samples:
+            #modify reference directions
+            #add to inclination
+            #m._data['data']['I'] = m._data['data']['I'].v + 2
+            #add to declination
+            s.measurements[0]._data['data']['D'] = s.measurements[0]._data['data']['D'].v + 1
 
-    fig2, axarr = pyplot.subplots(1, 7)
-    do_box_plot(axarr[0], T, 'T', (-1, 1))
-    do_box_plot(axarr[1], L, 'L', (.9, 2))
-    do_box_plot(axarr[2], F, 'F', (.9, 2))
-    do_box_plot(axarr[3], P, 'P', (.9, 2))
-    do_box_plot(axarr[4], E12, 'E12', (0, 90))
-    do_box_plot(axarr[5], E13, 'E13', (0, 90))
-    do_box_plot(axarr[6], E23, 'E23', (0, 90))
+        aniplt = RockPy.Visualize.anisotropy.Anisotropy(study, plt_primary="samples", plt_secondary=None)
+
+        # get figure
+        fig1 = aniplt.figs[aniplt.name][0]
+
+        L, F, T, P, E12, E13, E23 = [], [], [], [], [], [], []
+
+        samples[0].measurements[0].calculate_tensor()
+        #print samples[0].measurements[0].results
+        for s in samples:
+            s.measurements[0].calculate_tensor()
+            T.extend(s.measurements[0].results['T'].v)
+            L.extend(s.measurements[0].results['L'].v)
+            F.extend(s.measurements[0].results['F'].v)
+            P.extend(s.measurements[0].results['P'].v)
+            E12.extend(s.measurements[0].results['E12'].v)
+            E13.extend(s.measurements[0].results['E13'].v)
+            E23.extend(s.measurements[0].results['E23'].v)
+
+        #print T
+        #box_ax = fig.add_axes([0.9,0.6,0.08,0.3])
+        #box_ax.boxplot([T, P])
+
+        fig2, axarr = pyplot.subplots(1, 7)
+        do_box_plot(axarr[0], T, 'T', (-1, 1))
+        do_box_plot(axarr[1], L, 'L', (.9, 2))
+        do_box_plot(axarr[2], F, 'F', (.9, 2))
+        do_box_plot(axarr[3], P, 'P', (.9, 2))
+        do_box_plot(axarr[4], E12, 'E12', (0, 90))
+        do_box_plot(axarr[5], E13, 'E13', (0, 90))
+        do_box_plot(axarr[6], E23, 'E23', (0, 90))
 
 
-    pyplot.tight_layout()
+        pyplot.tight_layout()
 
-    #pyplot.show()
+        #pyplot.show()
 
-    fig1.savefig('stereo.pdf')
-    fig2.savefig('stats.pdf')
+        #fig1.savefig('stereo.pdf')
+        #fig2.savefig('stats.pdf')
+        fig1.suptitle("sushi geomatery, meas_err: 0.001, evals: 1.01,1.01,0.99, D offset: %d" % (d+startoffset))
+
+        pdf_pages.savefig(fig1)
+        pdf_pages.savefig(fig2)
+
+        print d+startoffset
+
+    pdf_pages.close()
 
 
 if __name__ == '__main__':

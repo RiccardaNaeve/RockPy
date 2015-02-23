@@ -8,6 +8,8 @@ import RockPy.Visualize.anisotropy
 import RockPy.Visualize.stereo
 from random import random
 
+from matplotlib import pyplot
+
 
 def test():
     """
@@ -20,6 +22,15 @@ def test():
     sample2 = Sample(name='S2')
     sample3 = Sample(name='S3')
     """
+
+    def do_box_plot(axes, values, label, ylim):
+        axes.boxplot(values, notch=1, whis=999999)  # whis high -> whiskers mark maximum and minimum data
+        axes.set_ylim(ylim)
+        pyplot.setp(axes.get_xticklabels(), visible=False)
+        axes.set_xlabel(label)
+        axes.set_xlim((0.9, 1.1))
+
+
     # create samples
 
     samples = []
@@ -34,12 +45,13 @@ def test():
         #add to inclination
         #m._data['data']['I'] = m._data['data']['I'].v + 2
         #add to declination
-        m._data['data']['D'] = m._data['data']['D'].v + 5
+        m._data['data']['D'] = m._data['data']['D'].v + 1
 
 
         samples.append(s)
         #print s.measurements[0]._data['data']
         #print i
+
     """
     # add measurement, read from file
     #M1 = sample1.add_measurement(mtype='anisotropy', mfile=ani_file2, machine='ani')
@@ -69,12 +81,48 @@ def test():
     """
     sg = RockPy.SampleGroup(sample_list=samples)
     study = RockPy.Study(samplegroups=sg)
-    plt = RockPy.Visualize.anisotropy.Anisotropy(study, plt_primary="samples", plt_secondary=None)
-    plt.show()
 
+
+    aniplt = RockPy.Visualize.anisotropy.Anisotropy(study, plt_primary="samples", plt_secondary=None)
+
+    # get figure
+    fig1 = aniplt.figs[aniplt.name][0]
+
+    L, F, T, P, E12, E13, E23 = [], [], [], [], [], [], []
+
+    samples[0].measurements[0].calculate_tensor()
+    print samples[0].measurements[0].results
     for s in samples:
         s.measurements[0].calculate_tensor()
-        print s.measurements[0].results['T']
+        T.extend(s.measurements[0].results['T'].v)
+        L.extend(s.measurements[0].results['L'].v)
+        F.extend(s.measurements[0].results['F'].v)
+        P.extend(s.measurements[0].results['P'].v)
+        E12.extend(s.measurements[0].results['E12'].v)
+        E13.extend(s.measurements[0].results['E13'].v)
+        E23.extend(s.measurements[0].results['E23'].v)
+
+    #print T
+    #box_ax = fig.add_axes([0.9,0.6,0.08,0.3])
+    #box_ax.boxplot([T, P])
+
+    fig2, axarr = pyplot.subplots(1, 7)
+    do_box_plot(axarr[0], T, 'T', (-1, 1))
+    do_box_plot(axarr[1], L, 'L', (.9, 2))
+    do_box_plot(axarr[2], F, 'F', (.9, 2))
+    do_box_plot(axarr[3], P, 'P', (.9, 2))
+    do_box_plot(axarr[4], E12, 'E12', (0, 90))
+    do_box_plot(axarr[5], E13, 'E13', (0, 90))
+    do_box_plot(axarr[6], E23, 'E23', (0, 90))
+
+
+    pyplot.tight_layout()
+
+    #pyplot.show()
+
+    fig1.savefig('stereo.pdf')
+    fig2.savefig('stats.pdf')
+
 
 if __name__ == '__main__':
     test()

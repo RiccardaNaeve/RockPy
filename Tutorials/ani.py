@@ -37,10 +37,10 @@ def test():
     samples = []
     for i in range(100):
         s = Sample(name=str(i))
-        m = s.add_simulation(mtype='anisotropy', evals=(1.01, 1.01, 0.99),
+        m = s.add_simulation(mtype='anisotropy', evals=(1.0, 1.0, 1.0),
                                 mdirs=[[225.0, 0.0], [135.0, 0.0], [90.0, 45.0],
                                        [90.0, -45.0], [0.0, -45.0], [0.0, 45.0]],
-                                measerr=0.001)
+                                measerr=0.01)
 
         samples.append(s)
 
@@ -75,15 +75,16 @@ def test():
     sg = RockPy.SampleGroup(sample_list=samples)
     study = RockPy.Study(samplegroups=sg)
 
-    pdf_pages = PdfPages('out_oblate_sushi__101_099_099_0_001err.pdf')
+    pdf_pages = PdfPages('out_oblate_sushi__100_100_100_0_01err.pdf')
 
 
-    startoffset = 7
+    startoffset = 0
 
     for s in samples:
         s.measurements[0]._data['data']['D'] = s.measurements[0]._data['data']['D'].v + startoffset-1
 
-    for d in range(10):
+
+    for d in range(20):
         for s in samples:
             #modify reference directions
             #add to inclination
@@ -130,7 +131,7 @@ def test():
 
         #fig1.savefig('stereo.pdf')
         #fig2.savefig('stats.pdf')
-        fig1.suptitle("sushi geomatery, meas_err: 0.001, evals: 1.01,1.01,0.99, D offset: %d" % (d+startoffset))
+        fig1.suptitle("sushi geometry, meas_err: 0.001, evals: 1.0,1.0,1.0, D offset: %d" % (d+startoffset))
 
         pdf_pages.savefig(fig1)
         pdf_pages.savefig(fig2)

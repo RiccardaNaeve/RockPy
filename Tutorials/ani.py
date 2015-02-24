@@ -83,7 +83,7 @@ def test():
     for s in samples:
         s.measurements[0]._data['data']['D'] = s.measurements[0]._data['data']['D'].v + startoffset-1
 
-    for d in range(7):
+    for d in range(10):
         for s in samples:
             #modify reference directions
             #add to inclination

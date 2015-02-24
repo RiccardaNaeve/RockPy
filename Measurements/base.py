@@ -92,7 +92,7 @@ class Measurement(object):
         return measurement_formatters
 
     def __init__(self, sample_obj,
-                 mtype, mfile, machine, mdata=None, color=None
+                 mtype, mfile, machine, mdata=None, color=None,
                  **options):
         """
         :param sample_obj:

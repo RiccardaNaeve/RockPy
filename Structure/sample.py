@@ -87,7 +87,7 @@ class Sample(object):
 
     def __init__(self, name,
                  mass=None, mass_unit='kg', mass_machine='generic',
-                 height=None, diameter=None, length_unit='mm', length_machine='generic', color = None
+                 height=None, diameter=None, length_unit='mm', length_machine='generic', color=None,
                  **options):
         """
 

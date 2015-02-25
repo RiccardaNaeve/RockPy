@@ -7,6 +7,7 @@ from os.path import join
 import numpy as np
 from copy import deepcopy
 
+
 class TestHysteresis(TestCase):
     def setUp(self):
         vsm_file = '../Tutorials/test_data/MUCVSM_test.hys'
@@ -60,7 +61,8 @@ class TestHysteresis(TestCase):
         # for j in np.linspace(0.1, 1):
         vsm2 = deepcopy(self.VSM_hys)
         for dtype in vsm2.data:
-            idx = [i for i,v in enumerate(vsm2.data[dtype]['field'].v) if abs(v) <= j*max(vsm2.data[dtype]['field'].v)]
+            idx = [i for i, v in enumerate(vsm2.data[dtype]['field'].v) if
+                   abs(v) <= j * max(vsm2.data[dtype]['field'].v)]
             # print len(idx)
             vsm2.data[dtype] = vsm2.data[dtype].filter_idx(idx)
         vsm2.data_gridding()
@@ -69,7 +71,7 @@ class TestHysteresis(TestCase):
         res.append(popt2[0])
         # plt.plot(np.linspace(0.3, 1), res)
         # print res
-        #plot hysteresis & cut hysteresis
+        # plot hysteresis & cut hysteresis
         plt.plot(self.VSM_hys.data['down_field']['field'].v,
                  self.VSM_hys.data['down_field']['mag'].v, 'r:')
         plt.plot(self.VSM_hys.data['up_field']['field'].v,
@@ -95,3 +97,7 @@ class TestHysteresis(TestCase):
         plt.xlim([0, 0.5])
         plt.ylim([0, max(vsm2.corrected_data['up_field']['mag'].v) * 1.5])
         plt.show()
+
+
+    def test_data_gridding(self):
+        self.fail()

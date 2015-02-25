@@ -7,7 +7,7 @@ from RockPy.Structure.data import RockPyData
 from scipy import stats
 from scipy.optimize import curve_fit
 from copy import deepcopy
-
+import scipy as sp
 
 class Hysteresis(base.Measurement):
     """
@@ -144,7 +144,7 @@ class Hysteresis(base.Measurement):
 
     # ## results
 
-    def result_generic(self, parameters='standard', recalc=False, **options):
+    def result_generic(self, parameter='standard', recalc=False, **options):
         '''
         Generic for for result implementation. Every calculation of result should be in the self.results data structure
         before calculation.
@@ -152,10 +152,10 @@ class Hysteresis(base.Measurement):
         _calculate_result_(result_name).
 
         '''
-        self.calc_result(parameters, recalc)
+        self.calc_result(parameter, recalc)
         return self.results['generic']
 
-    def result_ms(self, recalc=False, **parameter):
+    def result_ms(self, method='auto', recalc=False, **parameter):
         """
         calculates the Ms value with a linear fit
         :param recalc:
@@ -163,11 +163,11 @@ class Hysteresis(base.Measurement):
             - from_field : field value in % of max. field above which slope seems linear
         :return:
         """
-        self.calc_result(parameter, recalc)
+        self.calc_result(parameter, recalc, force_method=method)
         return self.results['ms']
 
     def result_sigma_ms(self, recalc=False, **parameter):
-        self.calc_result(parameter, recalc, force_caller='ms')
+        self.calc_result(parameter, recalc, force_method='ms')
         return self.results['sigma_ms']
 
     def result_mrs(self, recalc=False, **parameter):
@@ -175,7 +175,7 @@ class Hysteresis(base.Measurement):
         return self.results['mrs']
 
     def result_sigma_mrs(self, recalc=False, **parameter):
-        self.calc_result(dict(), recalc, force_caller='mrs')
+        self.calc_result(dict(), recalc, force_method='mrs')
         return self.results['sigma_mrs']
 
     def result_bc(self, recalc=False, **options):
@@ -199,7 +199,7 @@ class Hysteresis(base.Measurement):
         return self.results['bc']
 
     def result_sigma_bc(self, recalc=False, **options):
-        self.calc_result(dict(), recalc, force_caller='bc')
+        self.calc_result(dict(), recalc, force_method='bc')
         return self.results['sigma_bc']
 
     def result_brh(self, recalc=False, **options):
@@ -208,18 +208,30 @@ class Hysteresis(base.Measurement):
 
     def result_paramag_slope(self, from_field=80, recalc=False, **options):
         parameter = {'from_field': from_field}
-        self.calc_result(parameter, recalc, force_caller='ms')
+        self.calc_result(parameter, recalc, force_method='ms')
         return self.results['paramag_slope']
+
+    def result_E_delta_t(self, recalc=False, **options):
+        self.calc_result(dict(), recalc)
+        return self.results['E_delta_t']
+
+    def result_E_hys(self, recalc=False, **options):
+        self.calc_result(dict(), recalc)
+        return self.results['E_hys']
+
+    # def result_E_delta_t(self, recalc=False, **options):
+    #     self.calc_result(dict(), recalc)
+    #     return self.results['E_hys']
 
     # ## calculations
 
-    def calculate_ms(self, **parameters):
+    def calculate_ms(self, **parameter):
         """
         Calculates the value for Ms
-        :param parameters: from_field: from % of this value a linear interpolation will be calculated for all branches (+ & -)
+        :param parameter: from_field: from % of this value a linear interpolation will be calculated for all branches (+ & -)
         :return:
         """
-        from_field = parameters.get('from_field', 75) / 100.0
+        from_field = parameter.get('from_field', 75) / 100.0
         df_fields = self.data['down_field']['field'].v / max(self.data['down_field']['field'].v)
         uf_fields = self.data['up_field']['field'].v / max(self.data['up_field']['field'].v)
 
@@ -242,10 +254,10 @@ class Hysteresis(base.Measurement):
         self.results['sigma_ms'] = np.std(ms_all)
         self.results['paramag_slope'] = np.median(slope_all)
 
-        self.calculation_parameter['ms'] = parameters
-        self.calculation_parameter['paramag_slope'] = parameters
+        self.calculation_parameter['ms'] = parameter
+        self.calculation_parameter['paramag_slope'] = parameter
 
-    def calculate_mrs(self, **parameters):
+    def calculate_mrs(self, **parameter):
 
         def calc(direction):
             d = getattr(self, direction)
@@ -279,7 +291,7 @@ class Hysteresis(base.Measurement):
         self.results['mrs'] = np.mean([df, uf])
         self.results['sigma_mrs'] = np.std([df, uf])
 
-    def calculate_bc(self, **parameters):
+    def calculate_bc(self, **parameter):
         '''
 
         :return:
@@ -321,47 +333,52 @@ class Hysteresis(base.Measurement):
         self.results['bc'] = np.mean([df, uf])
         self.results['sigma_bc'] = np.std([df, uf])
 
-    def calculate_brh(self, **parameters):
+    def calculate_brh(self, **parameter):
         pass  # todo implement
 
-    def down_field_interp(self, **parameters):
-        from scipy import interpolate
+    def check_if_msi(self):
 
-        x = self.data['down_field']['field'].v
-        y = self.data['down_field']['mag'].v
 
-        if np.all(np.diff(x) > 0):
-            f = interpolate.interp1d(x, y, kind='slinear')
+    def calculate_E_delta_t(self, **parameter):
+        '''
+        Method calculates the :math:`E^{\Delta}_t` value for the hysteresis.
+        It uses scipy.integrate.simps for calculation of the area under the down_field branch for positive fields and
+        later subtracts the area under the Msi curve.
+
+        The energy is:
+
+        .. math::
+
+           E^{\delta}_t = 2 \int_0^{B_{max}} (M^+(B) - M_{si}(B)) dB
+
+        '''
+        if self.msi is not None:
+            df_positive = np.array([i for i in self.down_field if i[0] > 0])[::-1]
+            df_energy = scipy.integrate.simps(df_positive[:, 1], x=df_positive[:, 0])
+            virgin_energy = scipy.integrate.simps(self.msi[:, 1], x=self.msi[:, 0])
+            out = 2 * (df_energy - virgin_energy)
+            return out
+
         else:
-            x = x[::-1]
-            y = y[::-1]
-            f = interpolate.interp1d(x, y, kind='slinear')
+            self.log.error('UNABLE\t to find Msi branch')
+            return 0.0
 
-        x_new = np.arange(min(x), max(x), 0.01)
-        y_new = f(x_new)
-        return x_new, y_new
+        if self.data['virgin'] is not None:
+            df_positive = np.array([i for i in self.down_field if i[0] > 0])[::-1]
+            df_energy = sp.integrate.simps(df_positive[:, 1], x=df_positive[:, 0])
+            virgin_energy = sp.integrate.simps(self.msi[:, 1], x=self.msi[:, 0])
+            out = 2 * (df_energy - virgin_energy)
+            return out
 
-    def up_field_interp(self, **parameters):
-        from scipy import interpolate
-
-        x = self.data['up_field']['field'].v
-        y = self.data['up_field']['mag'].v
-
-        if np.all(np.diff(x) > 0):
-            f = interpolate.interp1d(x, y, kind='slinear')
         else:
-            x = x[::-1]
-            y = y[::-1]
-            f = interpolate.interp1d(x, y, kind='slinear')
+            self.log.error('UNABLE\t to find Msi branch')
+            return 0.0
 
-        x_new = np.arange(min(x), max(x), 0.01)
-        y_new = f(x_new)
-        return x_new, y_new
 
-    def simple_paramag_cor(self, **parameters):
+    def simple_paramag_cor(self, **parameter):
 
         if self.paramag_correction is None:
-            self.calculate_ms(**parameters)
+            self.calculate_ms(**parameter)
 
         slope = np.mean(self.paramag_correction[:, 0])
         intercept = np.mean(self.paramag_correction[:, 2])
@@ -382,7 +399,7 @@ class Hysteresis(base.Measurement):
         """
 
         grid = self.get_grid(**parameter)
-        order = parameter.get('order', 'first')
+        order = parameter.get('order', 'second')
         # interpolate the magnetization values M_int(Bgrid(i)) for i = -n+1 .. n-1
         # by fitting M_{measured}(B_{experimental}) individually in all intervals [Bgrid(i-1), Bgrid(i+1)]
         # with first or second order polinomials

@@ -118,7 +118,7 @@ class Backfield(base.Measurement):
 
     def result_sigma_mrs(self, recalc=False):
         parameter = {}
-        self.calc_result(parameter, recalc, force_caller='mrs')
+        self.calc_result(parameter, recalc, force_method='mrs')
         return self.results['sigma_mrs']
 
 

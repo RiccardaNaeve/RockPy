@@ -410,7 +410,7 @@ class Thellier(base.Measurement):
                      'component': component,
         }
 
-        self.calc_result(parameter, recalc, force_caller='slope')
+        self.calc_result(parameter, recalc, force_method='slope')
         return self.results['n']
 
     def result_sigma(self, t_min=None, t_max=None, component=None, recalc=False, **options):
@@ -419,7 +419,7 @@ class Thellier(base.Measurement):
                      'component': component,
         }
 
-        self.calc_result(parameter, recalc, force_caller='slope')
+        self.calc_result(parameter, recalc, force_method='slope')
         return self.results['sigma']
 
     def result_x_int(self, t_min=None, t_max=None, component=None, recalc=False, **options):
@@ -428,7 +428,7 @@ class Thellier(base.Measurement):
                      'component': component,
         }
 
-        self.calc_result(parameter, recalc, force_caller='slope')
+        self.calc_result(parameter, recalc, force_method='slope')
         return self.results['x_int']
 
     def result_y_int(self, t_min=None, t_max=None, component=None, recalc=False, **options):
@@ -437,7 +437,7 @@ class Thellier(base.Measurement):
                      'component': component,
         }
 
-        self.calc_result(parameter, recalc, force_caller='slope')
+        self.calc_result(parameter, recalc, force_method='slope')
         return self.results['y_int']
 
     def result_b_anc(self, t_min=None, t_max=None, component=None, b_lab=35.0, recalc=False, **options):
@@ -448,7 +448,7 @@ class Thellier(base.Measurement):
         parameter_b = {'b_lab': b_lab}
 
         self.calc_result(parameter_a, recalc,
-                         force_caller='slope')  # force caller because if not calculate_b_anc will be called
+                         force_method='slope')  # force caller because if not calculate_b_anc will be called
         self.calc_result(parameter_b, recalc)
         return self.results['b_anc']
 
@@ -459,7 +459,7 @@ class Thellier(base.Measurement):
         }
 
         parameter_b = {'b_lab': b_lab}
-        self.calc_result(parameter_a, recalc, force_caller='slope')
+        self.calc_result(parameter_a, recalc, force_method='slope')
         self.calc_result(parameter_b, recalc)
         return self.results['sigma_b_anc']
 

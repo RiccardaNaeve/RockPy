@@ -40,7 +40,8 @@ class Stereo(base.Generic):
         for D in np.arange(0, 360, self.grid_D_spacing):
             x = (0.45*np.sin(np.deg2rad(D)))+0.5
             y = (0.45*np.cos(np.deg2rad(D)))+0.5
-            self.ax.text(x, y, "%i" % D, transform=self.ax.transAxes, horizontalalignment='center', verticalalignment='center')
+            self.ax.text(x, y, "%i" % D, transform=self.ax.transAxes,
+                         horizontalalignment='center', verticalalignment='center')
 
         # draw inclination labels
         for I in np.arange(self.grid_I_spacing, 90, self.grid_I_spacing):

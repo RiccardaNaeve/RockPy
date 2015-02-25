@@ -24,7 +24,10 @@ class Anisotropy(Stereo):
         m_obj.calculate_tensor()
 
         # define color
-        color = (random.random(), random.random(), random.random())
+
+        color = m_obj.color  # use color defined for measurement
+        if color is None:  # if not defined, create random color
+            color = (random.random(), random.random(), random.random())
         # todo: also called for mean ?!!
         for n, idx in {1: ("D1", "I1"), 2: ("D2", "I2"), 3: ("D3", "I3")}.items():
             # choose symbol based on n

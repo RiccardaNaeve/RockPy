@@ -92,7 +92,7 @@ class Measurement(object):
         return measurement_formatters
 
     def __init__(self, sample_obj,
-                 mtype, mfile, machine, mdata=None,
+                 mtype, mfile, machine, mdata=None, color=None,
                  **options):
         """
         :param sample_obj:
@@ -100,10 +100,11 @@ class Measurement(object):
         :param mfile:
         :param machine:
         :param mdata: when mdata is set, this will be directly used as measurement data without formatting from file
+        :param color: color used for plotting if specified
         :param options:
         :return:
         """
-
+        self.color = color
         self.has_data = True
         self._data = {}
         self.is_initial_state = False

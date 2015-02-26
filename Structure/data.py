@@ -8,10 +8,9 @@ import scipy
 import scipy.interpolate
 import itertools
 import re  # regular expressions
-from prettytable import PrettyTable
-from tabulate import tabulate
+# from prettytable import PrettyTable
 from numbers import Number
-
+from tabulate import tabulate
 from RockPy.Structure import ureg
 from RockPy.Functions import general
 
@@ -1055,27 +1054,18 @@ class RockPyData(object):
         get readable representation of the data
         :return:
         """
-        #
-        # tab = PrettyTable(('row_name',) + tuple(self.column_names))
-        # for i in range(self.row_count):
-        #     linestrs = tuple(['%s +- %s' % (str(v), str(u)) if not np.isnan(u) else str(v) for (v, u) in self.data[i]])
-        #     if self.row_names is None:
-        #         l = (i,) + linestrs  # if there are no row labels, put numeric index in first column
-        #     else:
-        #         l = (self.row_names[i],) + linestrs  # otherwise put row label in first column
-        #     tab.add_row(l)
 
         header = ['row_name'] + self.column_names
-        table = []
+        tab = []
         for i in range(self.row_count):
             linestrs = tuple(['%s +- %s' % (str(v), str(u)) if not np.isnan(u) else str(v) for (v, u) in self.data[i]])
             if self.row_names is None:
                 l = (i,) + linestrs  # if there are no row labels, put numeric index in first column
             else:
                 l = (self.row_names[i],) + linestrs  # otherwise put row label in first column
-            table.append(l)
+            tab.append(l)
 
-        return tabulate(table, headers=header)
+        return tabulate(tab, header, floatfmt=".3e")
 
     """ METHODS returning ARRAYS """
 

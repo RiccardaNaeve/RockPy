@@ -92,7 +92,7 @@ class Measurement(object):
         return measurement_formatters
 
     def __init__(self, sample_obj,
-                 mtype, mfile, machine, mdata=None,
+                 mtype, mfile, machine, mdata=None, color=None,
                  **options):
         """
         :param sample_obj:
@@ -100,10 +100,11 @@ class Measurement(object):
         :param mfile:
         :param machine:
         :param mdata: when mdata is set, this will be directly used as measurement data without formatting from file
+        :param color: color used for plotting if specified
         :param options:
         :return:
         """
-
+        self.color = color
         self.has_data = True
         self._data = {}
         self.is_initial_state = False
@@ -403,7 +404,7 @@ class Measurement(object):
 
         self.results['generic'] = 0
 
-    def calc_result(self, parameter={}, recalc=False, force_caller=None):
+    def calc_result(self, parameter={}, recalc=False, force_method=None):
         '''
         Helper function:
         Calls any calculate_* function, but checks first:
@@ -422,37 +423,36 @@ class Measurement(object):
 
         :param parameter: dict
                         dictionary with parameters needed for calculation
-        :param caller: calling function name without "calculate"
         :param force_caller: not dynamically retrieved caller name.
 
         :return:
         '''
 
-        if force_caller is not None:
-            caller = force_caller
+        if force_method is not None:
+            method = force_method
         else:
-            caller = '_'.join(inspect.stack()[1][3].split('_')[1:])  # get clling function
+            method = '_'.join(inspect.stack()[1][3].split('_')[1:])  # get clling function
 
-        if callable(getattr(self, 'calculate_' + caller)):  # check if calculation function exists
-            parameter = self.compare_parameters(caller, parameter,
+        if callable(getattr(self, 'calculate_' + method)):  # check if calculation function exists
+            parameter = self.compare_parameters(method, parameter,
                                                 recalc)  # checks for None and replaces it with standard
-            if self.results[caller] is None or self.results[
-                caller] == np.nan or recalc:  # if results dont exist or force recalc #todo exchange 0.000 with np.nan
+            if self.results[method] is None or self.results[
+                method] == np.nan or recalc:  # if results dont exist or force recalc
                 if recalc:
-                    Measurement.logger.debug('FORCED recalculation of << %s >>' % (caller))
+                    Measurement.logger.debug('FORCED recalculation of << %s >>' % (method))
                 else:
-                    Measurement.logger.debug('CANNOT find result << %s >> -> calculating' % (caller))
-                getattr(self, 'calculate_' + caller)(**parameter)  # calling calculation method
+                    Measurement.logger.debug('CANNOT find result << %s >> -> calculating' % (method))
+                getattr(self, 'calculate_' + method)(**parameter)  # calling calculation method
             else:
-                Measurement.logger.debug('FOUND previous << %s >> parameters' % (caller))
-                if self.check_parameters(caller, parameter):  # are parameters equal to previous parameters
+                Measurement.logger.debug('FOUND previous << %s >> parameters' % (method))
+                if self.check_parameters(method, parameter):  # are parameters equal to previous parameters
                     Measurement.logger.debug('RESULT parameters different from previous calculation -> recalculating')
-                    getattr(self, 'calculate_' + caller)(**parameter)  # recalculating if parameters different
+                    getattr(self, 'calculate_' + method)(**parameter)  # recalculating if parameters different
                 else:
                     Measurement.logger.debug('RESULT parameters equal to previous calculation')
         else:
             Measurement.logger.error(
-                'CALCULATION of << %s >> not possible, probably not implemented, yet.' % caller)
+                'CALCULATION of << %s >> not possible, probably not implemented, yet.' % method)
 
     def calc_all(self, **parameter):
         parameter['recalc'] = True
@@ -539,7 +539,7 @@ class Measurement(object):
         if self.has_treatment:
             return self._treatments
         else:
-            treatment = Treatments.base.Generic(ttype='none', value=0, unit='')
+            treatment = Treatments.base.Generic(ttype='none', value=np.nan, unit='')
             return [treatment]
 
     def _get_treatment_from_suffix(self):

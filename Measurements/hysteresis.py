@@ -1,10 +1,15 @@
 __author__ = 'volk'
+import inspect
 import numpy as np
 import matplotlib.pyplot as plt
 import logging
 import base
 from RockPy.Structure.data import RockPyData
 from scipy import stats
+from scipy.optimize import curve_fit
+from copy import deepcopy
+import scipy as sp
+from math import tanh, cosh
 
 
 class Hysteresis(base.Measurement):
@@ -12,29 +17,107 @@ class Hysteresis(base.Measurement):
 
     .. testsetup:: *
 
-       >>> from Structure.sample import Sample
-       >>> vftb_file = TutoTutorials      >>> sample = Sample(name='vftb_test_sample')
+       >>> import RockPy
+       >>> vftb_file = RockPy.test_data_path + '/' +  'MUCVFTB_test.hys'
+       >>> sample = RockPy.Sample(name='vftb_test_sample')
        >>> M = sample.add_measurement(mtype='hysteresis', mfile=vftb_file, machine='vftb')
 
 
     """
 
-    # logger = logging.getLogger('RockPy.MEASUREMENT.hysteresis')
+    @classmethod
+    def simulate(cls, sample_obj, m_idx=0, color=None,
+                 ms=250., mrs_ms=0.5, bc=0.2, hf_sus=1., bmax=1.8, b_sat=1, steps=100,
+                 noise=None):
+        """
+        Simulation of hysteresis loop using sngle tanh and sech functions.
+
+        Parameters:
+        -----------
+        m_idx: int
+            index of measurement
+        ms: float
+
+        mrs_ms: float
+            :math:`M_{rs}/M_{s}` ratio
+        bc:
+        hf_sus:
+        bmax:
+        b_sat: float
+            Field at which 99% of the moment is saturated
+        steps:
+        sample_obj:
+        color:
+        parameter:
+
+        Returns:
+        --------
+
+        Note:
+        ----
+        Increasing the Mrs/Ms ratio to more then 0.5 results in weird looking hysteresis loops
+        """
+
+        data = {'up_field': None,
+                'down_field': None,
+                'virgin': None}
+
+        fields = cls.get_grid(bmax=bmax, n=steps)
+
+        # uf = float(ms) * np.array([tanh(3*(i-bc)/b_sat) for i in fields]) + hf_sus * fields
+        # df = float(ms) * np.array([tanh(3*(i+bc)/b_sat) for i in fields]) + hf_sus * fields
+        rev_mag = float(ms) * np.array([tanh( 2 * i / b_sat) for i in fields]) + hf_sus * fields
+        # irrev_mag = float(ms) * mrs_ms * np.array([cosh(i * (5.5 / b_sat)) ** -1 for i in fields])
+        irrev_mag = float(ms) * mrs_ms * np.array([cosh(i / (4. * bc)) ** -2 for i in fields])
+
+        data['down_field'] = RockPyData(column_names=['field', 'mag'], data=np.c_[fields, rev_mag + irrev_mag])
+        data['up_field'] = RockPyData(column_names=['field', 'mag'], data=np.c_[fields, rev_mag - irrev_mag][::-1])
+
+        # plt.plot(fields, uf)
+        # plt.plot(fields, df)
+        # plt.plot(fields, irrev_mag)
+        # plt.plot(fields, rev_mag + irrev_mag)
+        # plt.plot(fields, rev_mag - irrev_mag)
+        # plt.show()
+        return cls(sample_obj, 'hysteresis', mfile=None, mdata=data, machine='simulation', color=color)
+
+    @classmethod
+    def get_grid(cls, bmax=1, n=20, tuning=8):
+        grid = []
+        # calculating the grid
+        for i in xrange(-n, n + 1):
+            if i != 0:
+                boi = (abs(i) / i) * (bmax / tuning) * ((tuning + 1) ** (abs(i) / float(n)) - 1.)
+            else:  # catch exception for i = 0
+                boi = 0
+            grid.append(boi)
+        return np.array(grid)
+
 
     def __init__(self, sample_obj,
                  mtype, mfile, machine,
                  **options):
 
-        self._data = {'up_field': None,
-                      'down_field': None,
-                      'virgin': None,
-                      'msi': None,
-                      'all': None}
-
-        # TODO: check if the above makes sense. super resets self._data ????
-
         super(Hysteresis, self).__init__(sample_obj, mtype, mfile, machine, **options)
+
+        self._grid_data = {}
+        self._corrected_data = {}
+
+        self.correction = []
         self.paramag_correction = None
+
+    @property
+    def grid_data(self):
+        if not self._grid_data:
+            self.data_gridding()
+        return self._grid_data
+
+    @property
+    def corrected_data(self):
+        if not self._corrected_data:
+            self._corrected_data = deepcopy(self.data)
+        else:
+            return self._corrected_data
 
     # ## formatting functions
     def format_vftb(self):
@@ -120,32 +203,32 @@ class Hysteresis(base.Measurement):
         irrev -= self.data['up_field']
         return irrev
 
-    # ## results
+    """ RESULTS """
 
-    def result_generic(self, parameters='standard', recalc=False, **options):
-        '''
-        Generic for for result implementation. Every calculation of result should be in the self.results data structure
-        before calculation.
-        It should then be tested if a value for it exists, and if not it should be created by calling
-        _calculate_result_(result_name).
-
-        '''
-        self.calc_result(parameters, recalc)
-        return self.results['generic']
-
-    def result_ms(self, recalc=False, **parameter):
+    def result_ms(self, method='auto', recalc=False, **parameter):
         """
         calculates the Ms value with a linear fit
         :param recalc:
         :param parameter:
             - from_field : field value in % of max. field above which slope seems linear
         :return:
+
+        :methods auto: simple
+        :methods simple: Calculates a simple linear regression of the high field magnetization. The y-intercept
+                         is Ms.
+        : method approach_to_sat: Calculates a simple approach to saturation :cite:`Dobeneck1996a`
+
         """
-        self.calc_result(parameter, recalc)
+
+        if method == 'auto':
+            method = 'simple'
+
+        calc_method = '_'.join(method)
+        self.calc_result(parameter, recalc, force_method=calc_method)
         return self.results['ms']
 
     def result_sigma_ms(self, recalc=False, **parameter):
-        self.calc_result(parameter, recalc, force_caller='ms')
+        self.calc_result(parameter, recalc, force_method='ms')
         return self.results['sigma_ms']
 
     def result_mrs(self, recalc=False, **parameter):
@@ -153,7 +236,7 @@ class Hysteresis(base.Measurement):
         return self.results['mrs']
 
     def result_sigma_mrs(self, recalc=False, **parameter):
-        self.calc_result(dict(), recalc, force_caller='mrs')
+        self.calc_result(dict(), recalc, force_method='mrs')
         return self.results['sigma_mrs']
 
     def result_bc(self, recalc=False, **options):
@@ -177,7 +260,7 @@ class Hysteresis(base.Measurement):
         return self.results['bc']
 
     def result_sigma_bc(self, recalc=False, **options):
-        self.calc_result(dict(), recalc, force_caller='bc')
+        self.calc_result(dict(), recalc, force_method='bc')
         return self.results['sigma_bc']
 
     def result_brh(self, recalc=False, **options):
@@ -186,18 +269,40 @@ class Hysteresis(base.Measurement):
 
     def result_paramag_slope(self, from_field=80, recalc=False, **options):
         parameter = {'from_field': from_field}
-        self.calc_result(parameter, recalc, force_caller='ms')
+        self.calc_result(parameter, recalc, force_method='ms')
         return self.results['paramag_slope']
 
-    # ## calculations
+    def result_E_delta_t(self, recalc=False, **options):
+        self.calc_result(dict(), recalc)
+        return self.results['E_delta_t']
 
-    def calculate_ms(self, **parameters):
+    def result_E_hys(self, recalc=False, **options):
+        self.calc_result(dict(), recalc)
+        return self.results['E_hys']
+
+    """ CALCULATIONS """
+
+    ## MS
+    def calculate_ms(self, method='simple', **parameter):
         """
-        Calculates the value for Ms
-        :param parameters: from_field: from % of this value a linear interpolation will be calculated for all branches (+ & -)
+        Wrapper so one can call calculate_ms on its own, giving the method as an argument
+        :param method:
+        :param parameter:
         :return:
         """
-        from_field = parameters.get('from_field', 75) / 100.0
+        method = 'calculate_ms_' + method
+        implemented = [i for i in dir(self) if i.startswith('calculate_ms_')]
+        if method in implemented:
+            getattr(self, method)(**parameter)
+
+    def calculate_ms_simple(self, from_field=75, **parameter):
+        """
+        Calculates the value for Ms
+        :param parameter: from_field: from % of this value a linear interpolation will be calculated for all branches (+ & -)
+        :return:
+        """
+        from_field /= 100.0
+
         df_fields = self.data['down_field']['field'].v / max(self.data['down_field']['field'].v)
         uf_fields = self.data['up_field']['field'].v / max(self.data['up_field']['field'].v)
 
@@ -220,10 +325,11 @@ class Hysteresis(base.Measurement):
         self.results['sigma_ms'] = np.std(ms_all)
         self.results['paramag_slope'] = np.median(slope_all)
 
-        self.calculation_parameter['ms'] = parameters
-        self.calculation_parameter['paramag_slope'] = parameters
+        self.calculation_parameter['ms'] = parameter
+        self.calculation_parameter['paramag_slope'] = parameter
+        self.calculation_parameter['method'] = 'simple'
 
-    def calculate_mrs(self, **parameters):
+    def calculate_mrs(self, **parameter):
 
         def calc(direction):
             d = getattr(self, direction)
@@ -257,7 +363,7 @@ class Hysteresis(base.Measurement):
         self.results['mrs'] = np.mean([df, uf])
         self.results['sigma_mrs'] = np.std([df, uf])
 
-    def calculate_bc(self, **parameters):
+    def calculate_bc(self, **parameter):
         '''
 
         :return:
@@ -299,47 +405,36 @@ class Hysteresis(base.Measurement):
         self.results['bc'] = np.mean([df, uf])
         self.results['sigma_bc'] = np.std([df, uf])
 
-    def calculate_brh(self, **parameters):
+    def calculate_brh(self, **parameter):
         pass  # todo implement
 
-    def down_field_interp(self, **parameters):
-        from scipy import interpolate
+    def calculate_E_delta_t(self, **parameter):
+        '''
+        Method calculates the :math:`E^{\Delta}_t` value for the hysteresis.
+        It uses scipy.integrate.simps for calculation of the area under the down_field branch for positive fields and
+        later subtracts the area under the Msi curve.
 
-        x = self.data['down_field']['field'].v
-        y = self.data['down_field']['mag'].v
+        The energy is:
 
-        if np.all(np.diff(x) > 0):
-            f = interpolate.interp1d(x, y, kind='slinear')
-        else:
-            x = x[::-1]
-            y = y[::-1]
-            f = interpolate.interp1d(x, y, kind='slinear')
+        .. math::
 
-        x_new = np.arange(min(x), max(x), 0.01)
-        y_new = f(x_new)
-        return x_new, y_new
+           E^{\delta}_t = 2 \int_0^{B_{max}} (M^+(B) - M_{si}(B)) dB
 
-    def up_field_interp(self, **parameters):
-        from scipy import interpolate
+        '''
 
-        x = self.data['up_field']['field'].v
-        y = self.data['up_field']['mag'].v
+        raise NotImplementedError
 
-        if np.all(np.diff(x) > 0):
-            f = interpolate.interp1d(x, y, kind='slinear')
-        else:
-            x = x[::-1]
-            y = y[::-1]
-            f = interpolate.interp1d(x, y, kind='slinear')
 
-        x_new = np.arange(min(x), max(x), 0.01)
-        y_new = f(x_new)
-        return x_new, y_new
+    """ CORRECTIONS """
 
-    def simple_paramag_cor(self, **parameters):
+    def check_if_msi(self):
+        raise NotImplementedError
+
+
+    def simple_paramag_cor(self, **parameter):
 
         if self.paramag_correction is None:
-            self.calculate_ms(**parameters)
+            self.calculate_ms(**parameter)
 
         slope = np.mean(self.paramag_correction[:, 0])
         intercept = np.mean(self.paramag_correction[:, 2])
@@ -348,6 +443,179 @@ class Hysteresis(base.Measurement):
             if self.data[dtype]:
                 d = self.data[dtype].v
                 d[:, 1] -= d[:, 0] * slope
+
+
+    def data_gridding(self, method='second', **parameter):
+        """
+        Data griding after :cite:`Dobeneck1996a`. Generates an interpolated hysteresis loop with
+        :math:`M^{\pm}_{sam}(B^{\pm}_{exp})` at mathematically defined (grid) field values, identical for upper
+         and lower branch.
+
+        .. math::
+
+           B_{\text{grid}}(i) = \frac{|i|}{i} \frac{B_m}{\lambda} \left[(\lambda + 1 )^{|i|/n} - 1 \right]
+
+
+        Parameters
+        ----------
+        method : str
+            method with wich the data is fitted between grid points.
+            first:
+                data is fitted using a first order polinomial :math:`M(B) = a_1 + a2*B`
+            second:
+                data is fitted using a second order polinomial :math:`M(B) = a_1 + a2*B +a3*B^2`
+
+        parameter: dict
+            Keyword arguments passed through
+
+        See Also
+        --------
+        get_grid
+        """
+
+        bmax = min([max(self.data['down_field']['field'].v), max(self.data['up_field']['field'].v)])
+        bmin = min([min(self.data['down_field']['field'].v), min(self.data['up_field']['field'].v)])
+        bm = min([abs(bmax), abs(bmin)])
+
+        grid = Hysteresis.get_grid(bmax=bm, **parameter)
+        # interpolate the magnetization values M_int(Bgrid(i)) for i = -n+1 .. n-1
+        # by fitting M_{measured}(B_{experimental}) individually in all intervals [Bgrid(i-1), Bgrid(i+1)]
+        # with first or second order polinomials
+
+        def first(x, a, b):
+            """
+            order one polinomial for fitting
+            """
+            return a + b * x
+
+        def second(x, a, b, c):
+            """
+            second order polinomial
+            """
+            return a + b * x + c * x ** 2
+
+        for dtype in ['down_field', 'up_field']:
+            interp_data = RockPyData(column_names=['field', 'mag'])
+            d = self.data[dtype]
+            for i in range(1, len(grid) - 1):
+                idx = [j for j, v in enumerate(d['field'].v) if grid[i - 1] <= v <= grid[i + 1]]
+                if len(idx) > 0:
+                    data = deepcopy(d.filter_idx(idx))
+                    try:
+                        if method == 'first':
+                            popt, pcov = curve_fit(first, data['field'].v, data['mag'].v)
+                            mag = first(grid[i], *popt)
+                            interp_data = interp_data.append_rows(data=[grid[i], mag])
+                        if method == 'second':
+                            popt, pcov = curve_fit(second, data['field'].v, data['mag'].v)
+                            mag = second(grid[i], *popt)
+                            interp_data = interp_data.append_rows(data=[grid[i], mag])
+                    except TypeError:
+                        self.logger.error('Length of data for interpolation < 2. mag = mean(data)')
+                        self.logger.error(
+                            'consider reducing number of points for interpolation or lower tuning parameter')
+                        mag = np.mean(data['mag'].v)
+            self._grid_data.update({dtype: interp_data})
+
+
+    def correct_center(self, data='grid_data'):
+        uf_rotate = self.rotate_branch('up_field', data)
+
+        # copy data and average with opposite rotated branch
+        df_corrected = getattr(self, data)['down_field']
+        shift = (max(getattr(self, data)['down_field']['mag'].v) - min(getattr(self, data)['up_field']['mag'].v) + \
+                 min(getattr(self, data)['down_field']['mag'].v) - max(getattr(self, data)['up_field']['mag'].v)) / 4
+
+        df_corrected['mag'] = (df_corrected['mag'].v + uf_rotate['mag'].v) / 2 - shift
+        uf_corrected = deepcopy(df_corrected)
+        uf_corrected['field'] = -uf_corrected['field'].v
+        uf_corrected['mag'] = -uf_corrected['mag'].v
+
+        self._corrected_data.update({'down_field': df_corrected})
+        self._corrected_data.update({'up_field': uf_corrected})
+
+    def rotate_branch(self, branch, data='data'):
+        """
+        rotates a branch by 180 degrees, by multiplying the field and mag values by -1
+        :param data: str
+                     e.g. data, grid_data, corrected_data
+        :param branch: str
+                       up-field or down-field
+        :return:
+        """
+        data = deepcopy(getattr(self, data)[branch])
+        data['field'] = -data['field'].v[::-1]
+        data['mag'] = -data['mag'].v[::-1]
+        return data
+
+    def correct_slope(self):
+        """
+        The magnetization curve in this region can be expressed as
+        .. math::
+
+           M(B) = Ms + \Chi B + \alpha B^{\beta}
+
+        where :math:`\Chi` is the susceptibility of all dia- and paramagnetic components
+        (including the para-effect) and the last term represents an individual approach to saturation law.
+        :return:
+        """
+        # calculate approach to saturation ( assuming beta = -1 ) for upfield/downfield branches with pos / negative field
+        # assuming 80 % saturation
+        a2s_data = map(self.calc_approach2sat, ['down_field'])  # , 'up_field'])
+        a2s_data = np.array(a2s_data)
+        a2s_data = a2s_data.reshape(1, 2, 3)[0]
+
+        simple = self.result_paramag_slope()
+        # print a2s_data
+
+        popt = np.mean(a2s_data, axis=0)
+        ms = np.mean(abs(a2s_data[:, 0]))
+        ms_std = np.std(abs(a2s_data[:, 0]))
+        chi = np.mean(abs(a2s_data[:, 1])) * np.sign(simple)
+        chi_std = np.std(abs(a2s_data[:, 1]))
+
+        alpha = np.mean(abs(a2s_data[:, 2])) * np.sign(a2s_data[0, 2])
+        alpha_std = np.std(abs(a2s_data[:, 2]))
+
+        for dtype in self.corrected_data:
+            self.corrected_data[dtype]['mag'] = self.corrected_data[dtype]['mag'].v - \
+                                                self.corrected_data[dtype]['field'].v * chi
+        print(a2s_data), self.result_paramag_slope()
+        return ms, chi, alpha
+
+    def calc_approach2sat(self, branch):
+        def approach2sat_func(x, ms, chi, alpha, beta=-1):
+            """
+            General approach to saturation function
+            :param x: field
+            :param ms: saturation magnetization
+            :param chi: susceptibility
+            :param alpha:
+            :param beta:
+            :return:
+            """
+            return ms + chi * x + alpha * x ** -1  # beta
+
+        #### POSITIVE BRANCH
+        # get idx of downfield branch where b > 0
+        idx = [i for i, v in enumerate(self.corrected_data[branch]['field'].v) if
+               v >= 0.7 * max(self.corrected_data[branch]['field'].v)]
+        df_pos = deepcopy(self.corrected_data[branch].filter_idx(idx))  # down field with positive field data
+
+        popt_pos, pcov_pos = curve_fit(approach2sat_func, df_pos['field'].v, df_pos['mag'].v,
+                                       p0=[max(df_pos['mag'].v), 0, 0])
+
+        idx = [i for i, v in enumerate(self.corrected_data[branch]['field'].v) if
+               v <= 0.4 * min(self.corrected_data[branch]['field'].v)]
+        df_neg = deepcopy(self.corrected_data[branch].filter_idx(idx))  # down field with positive field data
+
+        popt_neg, pcov_neg = curve_fit(approach2sat_func, df_neg['field'].v[::-1], df_neg['mag'].v[::-1],
+                                       p0=[max(df_neg['mag'].v), 1e-7, 0])
+        return popt_pos, popt_neg
+
+
+    def correct_holder(self):
+        raise NotImplementedError
 
     # ## plotting functions
     def plt_hys(self, noshow=False):
@@ -394,3 +662,6 @@ class Hysteresis(base.Measurement):
         :return:
         '''
         self.plt_hys()
+
+    def export_vftb(self, folder=None, filename=None):
+        import os

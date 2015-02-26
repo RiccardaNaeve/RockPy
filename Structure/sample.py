@@ -87,7 +87,7 @@ class Sample(object):
 
     def __init__(self, name,
                  mass=None, mass_unit='kg', mass_machine='generic',
-                 height=None, diameter=None, length_unit='mm', length_machine='generic',
+                 height=None, diameter=None, length_unit='mm', length_machine='generic', color=None,
                  **options):
         """
 
@@ -97,7 +97,10 @@ class Sample(object):
         :param height: float - sample height - stored in 'm'
         :param diameter: float - sample diameter - stored in 'm'
         :param length_unit: str - if not 'm' please specify
+        :param length_machine: str - if not 'm' please specify
+        :param color: color - used in plots if specified
         """
+        self.color = color
         self.name = name
         Sample.logger.info('CREATING\t new sample << %s >>' % self.name)
 

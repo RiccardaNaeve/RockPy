@@ -24,7 +24,10 @@ class Anisotropy(Stereo):
         m_obj.calculate_tensor()
 
         # define color
-        color = (random.random(), random.random(), random.random())
+
+        color = m_obj.color  # use color defined for measurement
+        if color is None:  # if not defined, create random color
+            color = (random.random(), random.random(), random.random())
         # todo: also called for mean ?!!
         for n, idx in {1: ("D1", "I1"), 2: ("D2", "I2"), 3: ("D3", "I3")}.items():
             # choose symbol based on n
@@ -35,5 +38,5 @@ class Anisotropy(Stereo):
 
             d, i = m_obj.results[idx].v[0]
             d, i = MirrorDirectionToNegativeInclination(d, i)
-            lines = self.ax.plot(*self.stereomap(d, i), marker=m, markerfacecolor=color, markersize=20, **plt_opt)
+            lines = self.ax.plot(*self.stereomap(d, i), marker=m, markerfacecolor=color, markersize=10, **plt_opt)
             self._add_line_text_dict(m_obj.sample_obj.name, '_'.join(m_obj.ttypes), '_'.join(map(str, m_obj.tvals)), lines)

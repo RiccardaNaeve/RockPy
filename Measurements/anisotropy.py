@@ -353,67 +353,67 @@ class Anisotropy(base.Measurement):
     ''' RESULT SECTION '''
 
     def result_t11(self, recalc=False):
-        self.calc_result(parameter={}, recalc=recalc, force_caller='tensor')
+        self.calc_result(parameter={}, recalc=recalc, force_method='tensor')
     def result_t12_21(self, recalc=False):
-        self.calc_result(parameter={}, recalc=recalc, force_caller='tensor')
+        self.calc_result(parameter={}, recalc=recalc, force_method='tensor')
     def result_t13_31(self, recalc=False):
-        self.calc_result(parameter={}, recalc=recalc, force_caller='tensor')
+        self.calc_result(parameter={}, recalc=recalc, force_method='tensor')
     def result_t22(self, recalc=False):
-        self.calc_result(parameter={}, recalc=recalc, force_caller='tensor')
+        self.calc_result(parameter={}, recalc=recalc, force_method='tensor')
     def result_t23_32(self, recalc=False):
-        self.calc_result(parameter={}, recalc=recalc, force_caller='tensor')
+        self.calc_result(parameter={}, recalc=recalc, force_method='tensor')
     def result_t33(self, recalc=False):
-        self.calc_result(parameter={}, recalc=recalc, force_caller='tensor')
+        self.calc_result(parameter={}, recalc=recalc, force_method='tensor')
     def result_eval1(self, recalc=False):
-        self.calc_result(parameter={}, recalc=recalc, force_caller='tensor')
+        self.calc_result(parameter={}, recalc=recalc, force_method='tensor')
     def result_eval2(self, recalc=False):
-        self.calc_result(parameter={}, recalc=recalc, force_caller='tensor')
+        self.calc_result(parameter={}, recalc=recalc, force_method='tensor')
     def result_eval3(self, recalc=False):
-        self.calc_result(parameter={}, recalc=recalc, force_caller='tensor')
+        self.calc_result(parameter={}, recalc=recalc, force_method='tensor')
     def result_I1(self, recalc=False):
-        self.calc_result(parameter={}, recalc=recalc, force_caller='tensor')
+        self.calc_result(parameter={}, recalc=recalc, force_method='tensor')
     def result_D1(self, recalc=False):
-        self.calc_result(parameter={}, recalc=recalc, force_caller='tensor')
+        self.calc_result(parameter={}, recalc=recalc, force_method='tensor')
     def result_I2(self, recalc=False):
-        self.calc_result(parameter={}, recalc=recalc, force_caller='tensor')
+        self.calc_result(parameter={}, recalc=recalc, force_method='tensor')
     def result_D2(self, recalc=False):
-        self.calc_result(parameter={}, recalc=recalc, force_caller='tensor')
+        self.calc_result(parameter={}, recalc=recalc, force_method='tensor')
     def result_I3(self, recalc=False):
-        self.calc_result(parameter={}, recalc=recalc, force_caller='tensor')
+        self.calc_result(parameter={}, recalc=recalc, force_method='tensor')
     def result_D3(self, recalc=False):
-        self.calc_result(parameter={}, recalc=recalc, force_caller='tensor')
+        self.calc_result(parameter={}, recalc=recalc, force_method='tensor')
     def result_P(self, recalc=False):
-        self.calc_result(parameter={}, recalc=recalc, force_caller='tensor')
+        self.calc_result(parameter={}, recalc=recalc, force_method='tensor')
     def result_P1(self, recalc=False):
-        self.calc_result(parameter={}, recalc=recalc, force_caller='tensor')
+        self.calc_result(parameter={}, recalc=recalc, force_method='tensor')
     def result_F(self, recalc=False):
-        self.calc_result(parameter={}, recalc=recalc, force_caller='tensor')
+        self.calc_result(parameter={}, recalc=recalc, force_method='tensor')
     def result_L(self, recalc=False):
-        self.calc_result(parameter={}, recalc=recalc, force_caller='tensor')
+        self.calc_result(parameter={}, recalc=recalc, force_method='tensor')
     def result_T(self, recalc=False):
-        self.calc_result(parameter={}, recalc=recalc, force_caller='tensor')
+        self.calc_result(parameter={}, recalc=recalc, force_method='tensor')
     def result_E12(self, recalc=False):
-        self.calc_result(parameter={}, recalc=recalc, force_caller='tensor')
+        self.calc_result(parameter={}, recalc=recalc, force_method='tensor')
     def result_E13(self, recalc=False):
-        self.calc_result(parameter={}, recalc=recalc, force_caller='tensor')
+        self.calc_result(parameter={}, recalc=recalc, force_method='tensor')
     def result_E23(self, recalc=False):
-        self.calc_result(parameter={}, recalc=recalc, force_caller='tensor')
+        self.calc_result(parameter={}, recalc=recalc, force_method='tensor')
     def result_E(self, recalc=False):
-        self.calc_result(parameter={}, recalc=recalc, force_caller='tensor')
+        self.calc_result(parameter={}, recalc=recalc, force_method='tensor')
     def result_Q(self, recalc=False):
-        self.calc_result(parameter={}, recalc=recalc, force_caller='tensor')
+        self.calc_result(parameter={}, recalc=recalc, force_method='tensor')
     def result_U(self, recalc=False):
-        self.calc_result(parameter={}, recalc=recalc, force_caller='tensor')
+        self.calc_result(parameter={}, recalc=recalc, force_method='tensor')
     def result_F0(self, recalc=False):
-        self.calc_result(parameter={}, recalc=recalc, force_caller='tensor')
+        self.calc_result(parameter={}, recalc=recalc, force_method='tensor')
     def result_F12(self, recalc=False):
-        self.calc_result(parameter={}, recalc=recalc, force_caller='tensor')
+        self.calc_result(parameter={}, recalc=recalc, force_method='tensor')
     def result_F23(self, recalc=False):
-        self.calc_result(parameter={}, recalc=recalc, force_caller='tensor')
+        self.calc_result(parameter={}, recalc=recalc, force_method='tensor')
     def result_stddev(self, recalc=False):
-        self.calc_result(parameter={}, recalc=recalc, force_caller='tensor')
+        self.calc_result(parameter={}, recalc=recalc, force_method='tensor')
     def result_QF(self, recalc=False):
-        self.calc_result(parameter={}, recalc=recalc, force_caller='tensor')
+        self.calc_result(parameter={}, recalc=recalc, force_method='tensor')
 
 
     ''' CALCULATION SECTION '''

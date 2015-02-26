@@ -32,15 +32,5 @@ def get_test_sample(recalc=False):
     return sample
 
 if __name__ == '__main__':
-
-    study = RockPy.Study(name='study')
-    sg = RockPy.SampleGroup(name='sg')
-    s = get_test_sample()
-    sg.add_samples(s)
-    s.filter(ttype='pressure', tval=1.0)
-    # print s.filtered_data
-    # print s.measurements
-    P= RockPy.Visualize.paleointensity.Arai(s)
-    # print P.plotted_primary
-    # print P.plotted_secondary
-    P.show()
+    s = get_test_sample(recalc=False)
+    s.calc_all()

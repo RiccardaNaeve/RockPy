@@ -39,5 +39,4 @@ class TestHysteresis(TestCase):
     def test_calculate_bc(self):
         self.simulation.calculate_bc()
         res = self.simulation.results['bc'].v[0]
-        self.simulation.plt_hys()
-        self.assertAlmostEquals(res, 0.20, delta=0.20 * 0.01)
+        self.assertAlmostEquals(res, 0.1672, delta=0.1672 * 0.01)

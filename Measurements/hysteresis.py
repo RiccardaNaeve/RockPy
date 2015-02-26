@@ -64,21 +64,13 @@ class Hysteresis(base.Measurement):
 
         fields = cls.get_grid(bmax=bmax, n=steps)
 
-        # uf = float(ms) * np.array([tanh(3*(i-bc)/b_sat) for i in fields]) + hf_sus * fields
-        # df = float(ms) * np.array([tanh(3*(i+bc)/b_sat) for i in fields]) + hf_sus * fields
-        rev_mag = float(ms) * np.array([tanh( 2 * i / b_sat) for i in fields]) + hf_sus * fields
+        rev_mag = float(ms) * np.array([tanh(2 * i / b_sat) for i in fields]) + hf_sus * fields
         # irrev_mag = float(ms) * mrs_ms * np.array([cosh(i * (5.5 / b_sat)) ** -1 for i in fields])
-        irrev_mag = float(ms) * mrs_ms * np.array([cosh(i / (4. * bc)) ** -2 for i in fields])
+        irrev_mag = float(ms) * mrs_ms * np.array([cosh(1.9 * i / b_sat) ** -2 for i in fields])
 
         data['down_field'] = RockPyData(column_names=['field', 'mag'], data=np.c_[fields, rev_mag + irrev_mag])
         data['up_field'] = RockPyData(column_names=['field', 'mag'], data=np.c_[fields, rev_mag - irrev_mag][::-1])
 
-        # plt.plot(fields, uf)
-        # plt.plot(fields, df)
-        # plt.plot(fields, irrev_mag)
-        # plt.plot(fields, rev_mag + irrev_mag)
-        # plt.plot(fields, rev_mag - irrev_mag)
-        # plt.show()
         return cls(sample_obj, 'hysteresis', mfile=None, mdata=data, machine='simulation', color=color)
 
     @classmethod
@@ -125,7 +117,7 @@ class Hysteresis(base.Measurement):
         header = self.machine_data.header
         self._data['all'] = RockPyData(column_names=header, data=data[0])
         dfield = np.diff(self._data['all']['field'].v)
-        idx = [i for i,v in enumerate(dfield) if dfield[i] <= 0]
+        idx = [i for i, v in enumerate(dfield) if dfield[i] <= 0]
         idx += [max(idx) + 1]
         virgin_idx = range(0, idx[0])
         down_field_idx = idx
@@ -136,6 +128,10 @@ class Hysteresis(base.Measurement):
         self._data['up_field'] = self._data['all'].filter_idx(up_field_idx)
 
     def format_vsm(self):
+        """
+        Formats the output from Readin.VSM into the data structure needed for hysteresis analysis
+        :return:
+        """
         header = self.machine_data.header
         segments = self.machine_data.segment_info
 
@@ -183,8 +179,8 @@ class Hysteresis(base.Measurement):
 
         self._data['all'] = RockPyData(column_names=header, data=data)
         dfield = np.diff(self._data['all']['raw_applied_field_for_plot_'])
-        down_field_idx = [i for i,v in enumerate(dfield) if dfield[i] < 0]
-        up_field_idx = [i for i,v in enumerate(dfield) if dfield[i] > 0]
+        down_field_idx = [i for i, v in enumerate(dfield) if dfield[i] < 0]
+        up_field_idx = [i for i, v in enumerate(dfield) if dfield[i] > 0]
 
         self._data['down_field'] = self.raw_data.filter_idx(down_field_idx)
         self._data['down_field'].define_alias('field', 'raw_applied_field_for_plot_')
@@ -282,7 +278,7 @@ class Hysteresis(base.Measurement):
 
     """ CALCULATIONS """
 
-    ## MS
+    # # MS
     def calculate_ms(self, method='simple', **parameter):
         """
         Wrapper so one can call calculate_ms on its own, giving the method as an argument
@@ -337,26 +333,19 @@ class Hysteresis(base.Measurement):
             idx = np.argmin(abs(data))  # index of closest to 0
             if data[idx] < 0:
                 if data[idx + 1] < 0:
-                    idx1 = idx
-                    idx2 = idx - 1
+                    idx1, idx2 = idx, idx - 1
                 else:
-                    idx1 = idx + 1
-                    idx2 = idx
+                    idx1, idx2 = idx + 1, idx
             else:
                 if data[idx + 1] < 0:
-                    idx1 = idx + 1
-                    idx2 = idx
+                    idx1, idx2 = idx + 1, idx
                 else:
-                    idx1 = idx - 1
-                    idx2 = idx
+                    idx1, idx2 = idx - 1, idx
 
-            i = [idx1, idx2]
+            i = (idx1, idx2)
             d = d.filter_idx(i)
-
-            x = d['field'].v
-            y = d['mag'].v
-            slope, intercept, r_value, p_value, std_err = stats.linregress(x, y)
-            return abs(intercept)
+            slope, sigma, y_intercept, x_intercept = d.lin_regress('field', 'mag')
+            return abs(y_intercept)
 
         df = calc('down_field')
         uf = calc('up_field')
@@ -596,7 +585,7 @@ class Hysteresis(base.Measurement):
             """
             return ms + chi * x + alpha * x ** -1  # beta
 
-        #### POSITIVE BRANCH
+        # ### POSITIVE BRANCH
         # get idx of downfield branch where b > 0
         idx = [i for i, v in enumerate(self.corrected_data[branch]['field'].v) if
                v >= 0.7 * max(self.corrected_data[branch]['field'].v)]

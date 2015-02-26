@@ -26,15 +26,16 @@ def test():
 
     def do_box_plot(axes, values, label, ylim):
         axes.boxplot(values, notch=1, whis=999999)  # whis high -> whiskers mark maximum and minimum data
-        axes.set_ylim(ylim)
+        if ylim is not None:
+            axes.set_ylim(ylim)
         pyplot.setp(axes.get_xticklabels(), visible=False)
         axes.set_xlabel(label)
         axes.set_xlim((0.9, 1.1))
 
 
     # create samples
-    evals=(1.05, 0.95, 0.95)
-    measerr=0.01
+    evals=(0.99, 1.01, 1.00)
+    measerr=0.001
 
     samples = []
     for i in range(100):
@@ -59,10 +60,10 @@ def test():
 
 
     # values for all offsets
-    Ds, Tmeans, Pmeans, Lmeans, Fmeans, E12means, E13means, E23means = [], [], [], [], [], [], [], []
+    Ds, Tmeans, Pmeans, Lmeans, Fmeans, E12means, E13means, E23means, sdmeans, QFmeans = [], [], [], [], [], [], [], [], [], []
 
 
-    for d in range(30):
+    for d in range(5):
         for s in samples:
             #modify reference directions
             #add to inclination
@@ -75,7 +76,7 @@ def test():
         # get figure
         fig1 = aniplt.figs[aniplt.name][0]
 
-        L, F, T, P, E12, E13, E23 = [], [], [], [], [], [], []
+        L, F, T, P, E12, E13, E23, sd, QF = [], [], [], [], [], [], [], [], []
 
         samples[0].measurements[0].calculate_tensor()
         #print samples[0].measurements[0].results
@@ -88,9 +89,11 @@ def test():
             E12.extend(s.measurements[0].results['E12'].v)
             E13.extend(s.measurements[0].results['E13'].v)
             E23.extend(s.measurements[0].results['E23'].v)
+            sd.extend(s.measurements[0].results['stddev'].v)
+            QF.extend(s.measurements[0].results['QF'].v)
 
 
-        fig2, axarr = pyplot.subplots(1, 7)
+        fig2, axarr = pyplot.subplots(1, 9)
         do_box_plot(axarr[0], P, 'P', (.99, 1.15))
         do_box_plot(axarr[1], L, 'L', (.99, 1.15))
         do_box_plot(axarr[2], F, 'F', (.99, 1.15))
@@ -98,6 +101,8 @@ def test():
         do_box_plot(axarr[4], E12, 'E12', (0, 90))
         do_box_plot(axarr[5], E13, 'E13', (0, 90))
         do_box_plot(axarr[6], E23, 'E23', (0, 90))
+        do_box_plot(axarr[7], sd, 'stddev', None)
+        do_box_plot(axarr[8], QF, 'QF', None)
 
 
 
@@ -116,6 +121,8 @@ def test():
         E12means.append(np.mean(E12))
         E13means.append(np.mean(E13))
         E23means.append(np.mean(E23))
+        sdmeans.append(np.mean(sd))
+        QFmeans.append(np.mean(QF))
 
 
         print d+startoffset
@@ -143,11 +150,7 @@ def test():
     axd.legend(loc='lower center', bbox_to_anchor=(0.5, -0.3), fancybox=True, shadow=True, ncol=10)
 
 
-
-
     pdf_pages.savefig(fig3)
-
-
     pdf_pages.close()
 
 if __name__ == '__main__':

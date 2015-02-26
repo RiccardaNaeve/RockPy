@@ -283,14 +283,14 @@ class Anisotropy(base.Measurement):
         #    print "%.4f   \t %.4f \t %.4f" % (K[c], Kf[c], d[c])
 
         #calculate sum of errors^2
-        S0 = np.dot(d[0], d[0])
+        S0 = np.dot(d, d)
         aniso_dict['S0'] = S0
 
         #calculate variance
-        var = S0 / (len(d)/3)
+        var = S0 / (len(d)-6)
         # len(d) == 18 for 6 directions (12 measured)
         #calc standard deviation
-        stddev = sqrt( var)
+        stddev = sqrt(var)
         aniso_dict['stddev'] = stddev
 
         # calculate quality factor

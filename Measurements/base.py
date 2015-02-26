@@ -254,7 +254,7 @@ class Measurement(object):
             return self.data[attr]
         if attr in self.__getattribute__('result_methods'):
             return getattr(self, 'result_' + attr)().v[0]
-        raise AttributeError
+        raise AttributeError('Attribute does not exist:', attr)
 
     def import_data(self, rtn_raw_data=None, **options):
         '''

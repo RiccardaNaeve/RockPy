@@ -29,10 +29,10 @@ class Vsm(base.Machine):
 
         sifw = [len(i) + 1 for i in self.raw_out[data_start_idx[0]].split(',')]
         sifw += [len(self.raw_out[data_start_idx[0]])]
-        sifw = [sum(sifw[:i]) for i in range(len(sifw))]
+        sifw = [sum(sifw[:i]) for i, v in enumerate(sifw)]
 
         data_header = np.array(
-            [[v[sifw[i]: sifw[i + 1]] for i in range(len(sifw) - 1)] for j, v in enumerate(data_header)]).T
+            [[v[sifw[i]: sifw[i + 1]] for i in xrange(len(sifw) - 1)] for j, v in enumerate(data_header)]).T
         data_header = [" ".join(i) for i in data_header]
         data_header = [' '.join(j.split()) for j in data_header]
         data_header = [j.split(' (')[0].lower() for j in data_header]
@@ -47,12 +47,12 @@ class Vsm(base.Machine):
         segment_data = [v.strip('\n').split(',') for i, v in enumerate(self.raw_out) if i in segment_numbers_idx]
         sifw = [len(i) + 1 for i in segment_data[0]]
         sifw += [len(segment_data[0])]
-        sifw = [sum(sifw[:i]) for i in range(len(sifw))]
+        sifw = [sum(sifw[:i]) for i in xrange(len(sifw))]
         segment_data = np.array(segment_data).astype(float)
         # print segment_data.shape
 
         segment_info = np.array(
-            [[v[sifw[i]: sifw[i + 1]] for i in range(len(sifw) - 1)] for j, v in enumerate(self.raw_out) if
+            [[v[sifw[i]: sifw[i + 1]] for i in xrange(len(sifw) - 1)] for j, v in enumerate(self.raw_out) if
              j in segment_start_idx]).T
         segment_info = [' '.join(i) for i in segment_info]
         segment_info = np.array([' '.join(j.split()).lower() for j in segment_info])
@@ -71,23 +71,25 @@ class Vsm(base.Machine):
                               '-')][0]  # first idx of all indices with + or - (data)
 
         # setting up all data indices
-        data_indices = [data_start_idx] + [data_start_idx + i for i in list(map(int, self.segment_info['final index'].v))] + [len(self.raw_out[data_start_idx:])+data_start_idx-1]
-        data = [self.raw_out[data_indices[i]:data_indices[i+1]] for i in range(len(data_indices)-1)]
+        data_indices = [data_start_idx] + [data_start_idx + i for i in
+                                           list(map(int, self.segment_info['final index'].v))] + [
+                           len(self.raw_out[data_start_idx:]) + data_start_idx - 1]
+        data = [self.raw_out[data_indices[i]:data_indices[i + 1]] for i in xrange(len(data_indices) - 1)]
 
         data = [[j.strip('\n').split(',') for j in i if not j == '\n'] for i in data]
         data = [np.array([map(float, j) for j in i]) for i in data]
 
         # reformating to T / Am2 / Celsius
         if self.measurement_header['INSTRUMENT']['Units of measure'] == 'cgs':
-            for i in range(len(data)):
-                data[i][:,1] *= 1e-3 # emu to Am2
-                data[i][:,self.header_idx['field']] *= 1e-4 # oe to T
+            for i in xrange(len(data)):
+                data[i][:, 1] *= 1e-3  # emu to Am2
+                data[i][:, self.header_idx['field']] *= 1e-4  # oe to T
 
         if self.measurement_header['INSTRUMENT']['Temperature in'] == 'Kelvin':
-            for i in range(len(data)):
+            for i in xrange(len(data)):
                 # data[i][:,] *= 1e-3 # emu to Am2
                 try:
-                    data[i][:,self.header_idx['temperature']] -= 0#273.15 # K to C
+                    data[i][:, self.header_idx['temperature']] -= 0  # 273.15 # K to C
                 except KeyError:
                     self.log.debug('No temperature data stored')
 
@@ -104,7 +106,7 @@ class Vsm(base.Machine):
             lc += 1
             sl = l.strip()  # take away any leading and trailing whitespaces
             if lc == 1 and not sl.startswith("MicroMag 2900/3900 Data File"):  # check first line
-                #self.log.error("No valid MicroMag file. Header not found in first line.")
+                # self.log.error("No valid MicroMag file. Header not found in first line.")
                 return None
 
             if len(sl) == 0:  # empty line

@@ -11,7 +11,7 @@ def arai_points(ax, m_obj, component='mag', **plt_opt):
 
     marker = plt_opt.pop('marker', 's')
     markersize = plt_opt.pop('markersize', 3)
-    linestyle = plt_opt.pop('linestyle', '-')
+    linestyle = plt_opt.pop('linestyle', '')
 
     lines = ax.plot(x[component].v, y[component].v,
             marker=marker,

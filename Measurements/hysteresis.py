@@ -125,7 +125,7 @@ class Hysteresis(base.Measurement):
         header = self.machine_data.header
         self._data['all'] = RockPyData(column_names=header, data=data[0])
         dfield = np.diff(self._data['all']['field'].v)
-        idx = [i for i in range(len(dfield)) if dfield[i] <= 0]
+        idx = [i for i,v in enumerate(dfield) if dfield[i] <= 0]
         idx += [max(idx) + 1]
         virgin_idx = range(0, idx[0])
         down_field_idx = idx
@@ -183,8 +183,8 @@ class Hysteresis(base.Measurement):
 
         self._data['all'] = RockPyData(column_names=header, data=data)
         dfield = np.diff(self._data['all']['raw_applied_field_for_plot_'])
-        down_field_idx = [i for i in range(len(dfield)) if dfield[i] < 0]
-        up_field_idx = [i for i in range(len(dfield)) if dfield[i] > 0]
+        down_field_idx = [i for i,v in enumerate(dfield) if dfield[i] < 0]
+        up_field_idx = [i for i,v in enumerate(dfield) if dfield[i] > 0]
 
         self._data['down_field'] = self.raw_data.filter_idx(down_field_idx)
         self._data['down_field'].define_alias('field', 'raw_applied_field_for_plot_')

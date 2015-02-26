@@ -73,7 +73,7 @@ def generate_file_name(sample_group='', sample_name='',
         [add_unit(mass, mass_unit), add_unit(height, height_unit), add_unit(diameter, diameter_unit)])
     # print ['_'.join(map(str, [parameter[i],parameter_values[i], parameter_units[i]])) for i in range(len(parameter))]
     params = ';'.join(
-        ['_'.join(map(str, [parameter[i], parameter_values[i], parameter_units[i]])) for i in range(len(parameter))])
+        ['_'.join(map(str, [parameter[i], parameter_values[i], parameter_units[i]])) for i,v in enumerate(parameter)])
 
     if options:
         opt = ';'.join(['_'.join([k, str(v)]) for k, v in sorted(options.iteritems())])

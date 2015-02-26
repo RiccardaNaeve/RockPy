@@ -62,7 +62,7 @@ class Thellier(base.Measurement):
 
         th_data = np.linspace(max_moment, 0, len(temps)).T
 
-        t = [time.clock() for i in range(len(th_data))]
+        t = [time.clock() for i,v in enumerate(th_data)]
         mdata['th'] = RockPyData(column_names=['temp', 'x', 'y', 'z', 'sm', 'time'])
         mdata['pt'] = RockPyData(column_names=['temp', 'x', 'y', 'z', 'sm', 'time'])
         mdata['ac'] = RockPyData(column_names=['temp', 'x', 'y', 'z', 'sm', 'time'])

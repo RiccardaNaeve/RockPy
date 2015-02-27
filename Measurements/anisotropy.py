@@ -370,6 +370,8 @@ class Anisotropy(base.Measurement):
         self.calc_result(parameter={}, recalc=recalc, force_method='tensor')
     def result_eval3(self, recalc=False):
         self.calc_result(parameter={}, recalc=recalc, force_method='tensor')
+    def result_M(self, recalc=False):
+        self.calc_result(parameter={}, recalc=recalc, force_method='tensor')
     def result_I1(self, recalc=False):
         self.calc_result(parameter={}, recalc=recalc, force_method='tensor')
     def result_D1(self, recalc=False):
@@ -437,5 +439,5 @@ class Anisotropy(base.Measurement):
         self.results['eval3'] = self.aniso_dict['eigvals'][2]
 
 
-        for k in ('I1', 'D1', 'I2', 'D2', 'I3', 'D3', 'P', 'P1', 'F', 'L', 'T', 'E12', 'E13', 'E23', 'E', 'Q', 'U', 'F0', 'F12', 'F23', 'stddev', 'QF'):
+        for k in ('I1', 'D1', 'I2', 'D2', 'I3', 'D3', 'P', 'P1', 'F', 'L', 'T', 'E12', 'E13', 'E23', 'E', 'Q', 'U', 'F0', 'F12', 'F23', 'stddev', 'QF', 'M'):
             self.results[k] = self.aniso_dict[k]

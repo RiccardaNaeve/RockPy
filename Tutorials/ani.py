@@ -34,8 +34,8 @@ def test():
 
 
     # create samples
-    evals=(0.99, 1.01, 1.00)
-    measerr=0.001
+    evals=(1.01, 1.01, 0.99)
+    measerr=0.01
 
     samples = []
     for i in range(100):
@@ -50,33 +50,47 @@ def test():
     sg = RockPy.SampleGroup(sample_list=samples)
     study = RockPy.Study(samplegroups=sg)
 
-    pdf_pages = PdfPages('out_sushi__ev%.2f_%.2f_%.2f_err%.3f.pdf' % (evals[0], evals[1], evals[2], measerr))
+    #filename = 'out_sushi__ev%.2f_%.2f_%.2f_err%.3f.pdf' % (evals[0], evals[1], evals[2], measerr)
+    filename = 'out_sushi_dir90_45var_ev%.2f_%.2f_%.2f_err%.3f.pdf' % (evals[0], evals[1], evals[2], measerr)
+    print "writing to %s" % filename
 
-
-    startoffset = 0
-
-    for s in samples:
-        s.measurements[0]._data['data']['D'] = s.measurements[0]._data['data']['D'].v + startoffset-1
+    pdf_pages = PdfPages(filename)
 
 
     # values for all offsets
-    Ds, Tmeans, Pmeans, Lmeans, Fmeans, E12means, E13means, E23means, sdmeans, QFmeans = [], [], [], [], [], [], [], [], [], []
+    Ds, Tmeans, Pmeans, Lmeans, Fmeans, E12means, E13means, E23means, sdpermeans, QFmeans = [], [], [], [], [], [], [], [], [], []
 
 
-    for d in range(5):
-        for s in samples:
-            #modify reference directions
-            #add to inclination
-            #m._data['data']['I'] = m._data['data']['I'].v + 2
-            #add to declination
-            s.measurements[0]._data['data']['D'] = s.measurements[0]._data['data']['D'].v + 1
+    # make numbers formatting float
+    samples[0].measurements[0]._data['data'].showfmt['floatfmt'] = '.1f'
+    samples[0].measurements[0]._data['data'].showfmt['show_rowlabels'] = False
+
+    for d in range(10):
+        if d != 0:
+            for s in samples:
+                #modify reference directions
+                #add to inclination
+                #m._data['data']['I'] = m._data['data']['I'].v + 2
+                #add to declination
+                refD = s.measurements[0]._data['data']['D'].v
+                #print refD
+                #change all declinations
+                #refD += 1
+                #change declination of position 3
+                refD[2] += 1
+                s.measurements[0]._data['data']['D'] = refD
+
+
 
         aniplt = RockPy.Visualize.anisotropy.Anisotropy(study, plt_primary="samples", plt_secondary=None)
 
         # get figure
         fig1 = aniplt.figs[aniplt.name][0]
+        fig1.text(0.02, 0.02, str( samples[0].measurements[0]._data['data']['D','I']))
+        #print str( samples[0].measurements[0]._data['data']['D', 'I'].v)
 
-        L, F, T, P, E12, E13, E23, sd, QF = [], [], [], [], [], [], [], [], []
+
+        L, F, T, P, E12, E13, E23, sdper, QF = [], [], [], [], [], [], [], [], []
 
         samples[0].measurements[0].calculate_tensor()
         #print samples[0].measurements[0].results
@@ -89,7 +103,7 @@ def test():
             E12.extend(s.measurements[0].results['E12'].v)
             E13.extend(s.measurements[0].results['E13'].v)
             E23.extend(s.measurements[0].results['E23'].v)
-            sd.extend(s.measurements[0].results['stddev'].v)
+            sdper.extend(s.measurements[0].results['stddev'].v / s.measurements[0].results['M'].v * 100)
             QF.extend(s.measurements[0].results['QF'].v)
 
 
@@ -101,7 +115,7 @@ def test():
         do_box_plot(axarr[4], E12, 'E12', (0, 90))
         do_box_plot(axarr[5], E13, 'E13', (0, 90))
         do_box_plot(axarr[6], E23, 'E23', (0, 90))
-        do_box_plot(axarr[7], sd, 'stddev', None)
+        do_box_plot(axarr[7], sdper, 'stddev %', None)
         do_box_plot(axarr[8], QF, 'QF', None)
 
 
@@ -109,7 +123,7 @@ def test():
         pyplot.tight_layout()
 
         fig1.suptitle("sushi geometry, meas_err: %.3f, evals: %.2f,%.2f,%.2f, D offset: %d" %
-                      (measerr, evals[0], evals[1], evals[2], d+startoffset))
+                      (measerr, evals[0], evals[1], evals[2], d))
 
         pdf_pages.savefig(fig1)
         pdf_pages.savefig(fig2)
@@ -121,12 +135,12 @@ def test():
         E12means.append(np.mean(E12))
         E13means.append(np.mean(E13))
         E23means.append(np.mean(E23))
-        sdmeans.append(np.mean(sd))
+        sdpermeans.append(np.mean(sdper))
         QFmeans.append(np.mean(QF))
 
 
-        print d+startoffset
-        Ds.append(d+startoffset)
+        print d
+        Ds.append(d)
 
 
     fig3, (axu, axd) = pyplot.subplots(2, 1)

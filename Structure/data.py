@@ -166,6 +166,8 @@ class RockPyData(object):
 
         self.data = RockPyData._convert_to_data3D(data)
 
+        self.showfmt = {'show_rowlabels': True, 'floatfmt': '.3e'}
+
         if row_names is None:
             self._row_names = None  # don't use row names
         else:
@@ -756,10 +758,14 @@ class RockPyData(object):
 
         colidxs = self._keyseq2colseq(key)
 
-        return RockPyData(column_names=self.column_indices_to_names(colidxs),
+        rpd = RockPyData(column_names=self.column_indices_to_names(colidxs),
                           row_names=self.row_names,
                           units=None,
                           data=self.data[:, colidxs])
+
+        rpd.showfmt = self.showfmt
+
+        return rpd
 
         # return appropriate columns from self.data numpy array
         # d = self.values[:, self._column_dict[key]]
@@ -1055,17 +1061,24 @@ class RockPyData(object):
         :return:
         """
 
-        header = ['row_name'] + self.column_names
+        if self.showfmt['show_rowlabels']:
+            header = ['row_name'] + self.column_names
+        else:
+            header = self.column_names
         tab = []
         for i in range(self.row_count):
             linestrs = tuple(['%s +- %s' % (str(v), str(u)) if not np.isnan(u) else str(v) for (v, u) in self.data[i]])
-            if self.row_names is None:
-                l = (i,) + linestrs  # if there are no row labels, put numeric index in first column
+            if self.showfmt['show_rowlabels']:
+                if self.row_names is None:
+                    l = (i,) + linestrs  # if there are no row labels, put numeric index in first column
+                else:
+                    l = (self.row_names[i],) + linestrs  # otherwise put row label in first column
             else:
-                l = (self.row_names[i],) + linestrs  # otherwise put row label in first column
+                l = linestrs
+
             tab.append(l)
 
-        return tabulate(tab, header, floatfmt=".3e")
+        return tabulate(tab, header, floatfmt=self.showfmt['floatfmt'])
 
     """ METHODS returning ARRAYS """
 

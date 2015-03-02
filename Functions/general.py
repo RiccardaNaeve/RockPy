@@ -150,30 +150,31 @@ def DIL2XYZ( DIL):
     Z = H*tan(radians(I))
     return (X, Y, Z)
 
-def MirrorDirectionToNegativeInclination( dec, inc):
+def MirrorDirectionToNegativeInclination(dec, inc):
     if inc > 0:
         return (dec + 180) % 360, -inc
     else:
         return dec, inc
 
-def MirrorDirectionToPositiveInclination( dec, inc):
+def MirrorDirectionToPositiveInclination(dec, inc):
     if inc < 0:
         return (dec + 180) % 360, -inc
     else:
         return dec, inc
 
-def MirrorVectorToNegativeInclination( x,y,z):
+def MirrorVectorToNegativeInclination(x, y, z):
     if z > 0: return -x,-y,-z
     else: return x,y,z
 
-def MirrorVectorToPositiveInclination( x,y,z):
+def MirrorVectorToPositiveInclination(x, y, z):
     if z < 0: return -x, -y, -z
     else: return x,y,z
 
 
 def Proj_A_on_B_scalar( A, B):
     """
-
+    project a vector A on a vector B and return the scalar result
+    see http://en.wikipedia.org/wiki/Vector_projection
     :param A: vector which will be projected on vector B
     :param B: vector defining the direction
     :return: scalar value of the projection A on B

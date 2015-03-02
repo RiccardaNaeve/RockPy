@@ -14,7 +14,7 @@ class TestHysteresis(TestCase):
         self.sample = RockPy.Sample('test')
         self.VSM_test = RockPy.Sample('test')
         self.VSM_hys = self.VSM_test.add_measurement(mtype='hysteresis', mfile=vsm_file, machine='vsm')
-        self.simulation = self.sample.add_simulation(mtype='hysteresis', mrs_ms=0.5, ms=5., b_sat=0.8, hf_sus=1)
+        self.simulation = self.sample.add_simulation(mtype='hysteresis', mrs_ms=0.5, ms=5., b_sat=0.8, hf_sus=0)
 
     def test_simulate(self):
         hys = self.sample.add_simulation(mtype='hysteresis', mrs_ms=0.2, ms=5., b_sat=0.5, hf_sus=0.)
@@ -40,4 +40,4 @@ class TestHysteresis(TestCase):
         self.simulation.calculate_bc()
         res = self.simulation.results['bc'].v[0]
         self.simulation.plt_hys()
-        self.assertAlmostEquals(res, 0.20, delta=0.20 * 0.01)
+        self.assertAlmostEquals(res, 0.165798, delta=0.165798 * 0.01)

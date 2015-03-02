@@ -66,15 +66,14 @@ class Hysteresis(base.Measurement):
 
         # uf = float(ms) * np.array([tanh(3*(i-bc)/b_sat) for i in fields]) + hf_sus * fields
         # df = float(ms) * np.array([tanh(3*(i+bc)/b_sat) for i in fields]) + hf_sus * fields
-        rev_mag = float(ms) * np.array([tanh( 2 * i / b_sat) for i in fields]) + hf_sus * fields
+        rev_mag = float(ms) * np.array([tanh(2 * i / b_sat) for i in fields]) + hf_sus * fields
         # irrev_mag = float(ms) * mrs_ms * np.array([cosh(i * (5.5 / b_sat)) ** -1 for i in fields])
-        irrev_mag = float(ms) * mrs_ms * np.array([cosh(i / (4. * bc)) ** -2 for i in fields])
+        irrev_mag = float(ms) * mrs_ms * np.array([cosh(3.5 * i / b_sat) ** -1 for i in fields])
 
         data['down_field'] = RockPyData(column_names=['field', 'mag'], data=np.c_[fields, rev_mag + irrev_mag])
         data['up_field'] = RockPyData(column_names=['field', 'mag'], data=np.c_[fields, rev_mag - irrev_mag][::-1])
-
-        # plt.plot(fields, uf)
-        # plt.plot(fields, df)
+        #
+        # plt.plot(fields, rev_mag)
         # plt.plot(fields, irrev_mag)
         # plt.plot(fields, rev_mag + irrev_mag)
         # plt.plot(fields, rev_mag - irrev_mag)

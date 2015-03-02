@@ -89,7 +89,7 @@ class Backfield(base.Measurement):
 
         .. doctest::
            >>> from Structure.sample import Sample
-           >>> vftb_file = TTutorialss
+           >>> vftb_file = Tutorials
            >>> sample = Sample(name='vftb_test_sample')
            >>> M = sample.add_measurement(mtype='backfield', mfile=vftb_file, machine='vftb')
            >>> M.calculate_bcr()

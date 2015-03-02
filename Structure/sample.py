@@ -520,7 +520,8 @@ class Sample(object):
 
     def mean_measurement(self,
                          mtype=None, ttype=None, tval=None, tval_range=None, mlist=None,
-                         interpolate=False, recalc_mag=False):
+                         interpolate=False, recalc_mag=False,
+                         substfunc='mean'):
         """
         takes a list of measurements and creates a mean measurement out of all measurements data
 
@@ -557,7 +558,7 @@ class Sample(object):
         if measurement.initial_state:
             for dtype in measurement.initial_state.data:
                 dtype_list = [m.initial_state.data[dtype] for m in mlist if m.initial_state]
-                measurement.initial_state.data[dtype] = condense(dtype_list)
+                measurement.initial_state.data[dtype] = condense(dtype_list, substfunc=substfunc)
                 measurement.initial_state.data[dtype] = measurement.initial_state.data[dtype].sort('variable')
                 if recalc_mag:
                     measurement.initial_state.data[dtype].define_alias('m', ( 'x', 'y', 'z'))

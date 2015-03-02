@@ -362,7 +362,8 @@ class SampleGroup(object):
     def mean_sample(self, reference=None,
                     rtype='mag', vval=None,
                     norm_method='max',
-                    interpolate=True):
+                    interpolate=True,
+                    substfunc='mean'):
 
         #create new sample_obj
         mean_sample = Sample(name='mean ' + self.name)
@@ -379,7 +380,8 @@ class SampleGroup(object):
                     mean_sample.measurements.extend(measurements)
 
                     if mtype not in ['diameter', 'height', 'mass']:
-                        M = mean_sample.mean_measurement(mtype=mtype, ttype=ttype, tval=tval)
+                        # calculating the mean of all measurements
+                        M = mean_sample.mean_measurement(mtype=mtype, ttype=ttype, tval=tval, substfunc=substfunc)
                         if reference or vval:
                             M.is_normalized= True
                             M.norm = [reference, rtype, vval, norm_method, np.nan]

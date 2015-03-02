@@ -36,7 +36,7 @@ def test():
     # create samples
     evals=(1.01, 1.01, 0.99)
     measerr=0.01
-    method='full'  # 'proj' or 'full'
+    method='proj'  # 'proj' or 'full'
 
     samples = []
     for i in range(100):
@@ -59,7 +59,7 @@ def test():
 
 
     # values for all offsets
-    Ds, Tmeans, Pmeans, Lmeans, Fmeans, E12means, E13means, E23means, sdpermeans, QFmeans = [], [], [], [], [], [], [], [], [], []
+    Ds, Tmedians, Pmedians, Lmedians, Fmedians, E12medians, E13medians, E23medians, sdpermedians, QFmedians = [], [], [], [], [], [], [], [], [], []
 
 
     # make numbers formatting float
@@ -108,7 +108,7 @@ def test():
             QF.extend(s.measurements[0].results['QF'].v)
 
 
-        fig2, axarr = pyplot.subplots(1, 9)
+        fig2, axarr = pyplot.subplots(1, 8)
         do_box_plot(axarr[0], P, 'P', (.99, 1.15))
         do_box_plot(axarr[1], L, 'L', (.99, 1.15))
         do_box_plot(axarr[2], F, 'F', (.99, 1.15))
@@ -117,27 +117,27 @@ def test():
         do_box_plot(axarr[5], E13, 'E13', (0, 90))
         do_box_plot(axarr[6], E23, 'E23', (0, 90))
         do_box_plot(axarr[7], sdper, 'stddev %', None)
-        do_box_plot(axarr[8], QF, 'QF', None)
+        #do_box_plot(axarr[8], QF, 'QF', None)
 
 
 
         pyplot.tight_layout()
 
-        fig1.suptitle("sushi geometry, meas_err: %.3f, evals: %.2f,%.2f,%.2f, D offset: %d" %
-                      (measerr, evals[0], evals[1], evals[2], d))
+        fig1.suptitle("meas_err: %.3f, evals: %.2f,%.2f,%.2f, P: %.2f, D offset: %d, method: %s" %
+                      (measerr, evals[0], evals[1], evals[2], evals[0]/evals[2], d, method))
 
         pdf_pages.savefig(fig1)
         pdf_pages.savefig(fig2)
 
-        Pmeans.append(np.mean(P))
-        Tmeans.append(np.mean(T))
-        Lmeans.append(np.mean(L))
-        Fmeans.append(np.mean(F))
-        E12means.append(np.mean(E12))
-        E13means.append(np.mean(E13))
-        E23means.append(np.mean(E23))
-        sdpermeans.append(np.mean(sdper))
-        QFmeans.append(np.mean(QF))
+        Pmedians.append(np.median(P))
+        Tmedians.append(np.median(T))
+        Lmedians.append(np.median(L))
+        Fmedians.append(np.median(F))
+        E12medians.append(np.median(E12))
+        E13medians.append(np.median(E13))
+        E23medians.append(np.median(E23))
+        sdpermedians.append(np.median(sdper))
+        QFmedians.append(np.median(QF))
 
 
         print d
@@ -146,11 +146,11 @@ def test():
 
     fig3, (axu, axd) = pyplot.subplots(2, 1)
     l = []
-    l.append(axu.plot(Ds, Pmeans, color='blue', marker='+', label='P'))
-    l.append(axu.plot(Ds, Lmeans, color='springgreen', marker='+', label='L'))
-    l.append(axu.plot(Ds, Fmeans, color='forestgreen', marker='+', label='F'))
+    l.append(axu.plot(Ds, Pmedians, color='blue', marker='+', label='P'))
+    l.append(axu.plot(Ds, Lmedians, color='springgreen', marker='+', label='L'))
+    l.append(axu.plot(Ds, Fmedians, color='forestgreen', marker='+', label='F'))
     axu2 = axu.twinx()
-    l.append(axu2.plot(Ds, Tmeans, color='peru', marker='+', label='T'))
+    l.append(axu2.plot(Ds, Tmedians, color='peru', marker='+', label='T'))
     axu.set_ylim((0.99, 1.15))
     axu2.set_ylim((-1.05, 1.05))
 
@@ -158,11 +158,17 @@ def test():
     axu2.legend(loc='upper right', bbox_to_anchor=(1.0, 1.20), fancybox=True, shadow=True)
 
 
-    l.append(axd.plot(Ds, E12means, 'r+-', label='E12'))
-    l.append(axd.plot(Ds, E13means, 'rx-', label='E13'))
-    l.append(axd.plot(Ds, E23means, 'r*-', label='E23'))
+    l.append(axd.plot(Ds, E12medians, 'r+-', label='E12'))
+    l.append(axd.plot(Ds, E13medians, 'rx-', label='E13'))
+    l.append(axd.plot(Ds, E23medians, 'r*-', label='E23'))
+    axd2 = axd.twinx()
+    l.append(axd2.plot(Ds, sdpermedians, 'bx-', label='stdev %'))
     axd.set_ylim((0.0, 90.0))
-    axd.legend(loc='lower center', bbox_to_anchor=(0.5, -0.3), fancybox=True, shadow=True, ncol=10)
+    axd.set_ylabel('degree')
+    #axd2.set_ylim((0, 10))
+    axd2.set_ylabel('%')
+    axd.legend(loc='lower center', bbox_to_anchor=(0.2, -0.3), fancybox=True, shadow=True, ncol=10)
+    axd2.legend(loc='lower right', bbox_to_anchor=(1.0, -0.3), fancybox=True, shadow=True, ncol=10)
 
 
     pdf_pages.savefig(fig3)

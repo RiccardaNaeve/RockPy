@@ -100,7 +100,6 @@ class Anisotropy(base.Measurement):
             # make design matrix for directional measurement (same direction as applied field)
             A = np.zeros((len(mdirs), 6), 'f')
 
-
             for i in range(len(XYZ)):
                 A[i] = XYZ[i][0]*B[i*3+0] + XYZ[i][1]*B[i*3+1] + XYZ[i][2]*B[i*3+2]
 

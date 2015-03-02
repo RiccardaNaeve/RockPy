@@ -21,7 +21,7 @@ class Anisotropy(Stereo):
         self.standard_features.append(self.feature_eigenvectors)  # plot eigenvectors by default
 
     def feature_eigenvectors(self, m_obj, **plt_opt):
-        m_obj.calculate_tensor()
+        m_obj.calculate_tensor(method=self.options.get('method', 'full'))
 
         # define color
 

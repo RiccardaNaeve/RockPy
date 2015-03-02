@@ -4,7 +4,7 @@ import base
 import logging
 from math import cos, sin, atan, radians, log, exp, sqrt, degrees
 import numpy as np
-from RockPy.Functions.general import XYZ2DIL, DIL2XYZ, MirrorDirectionToPositiveInclination
+from RockPy.Functions.general import XYZ2DIL, DIL2XYZ, DI2XYZ, MirrorDirectionToPositiveInclination, Proj_A_on_B_scalar
 from RockPy.Structure.data import RockPyData
 from random import random
 
@@ -99,7 +99,6 @@ class Anisotropy(base.Measurement):
         else:
             # make design matrix for directional measurement (same direction as applied field)
             A = np.zeros((len(mdirs), 6), 'f')
-
 
             for i in range(len(XYZ)):
                 A[i] = XYZ[i][0]*B[i*3+0] + XYZ[i][1]*B[i*3+1] + XYZ[i][2]*B[i*3+2]
@@ -370,6 +369,8 @@ class Anisotropy(base.Measurement):
         self.calc_result(parameter={}, recalc=recalc, force_method='tensor')
     def result_eval3(self, recalc=False):
         self.calc_result(parameter={}, recalc=recalc, force_method='tensor')
+    def result_M(self, recalc=False):
+        self.calc_result(parameter={}, recalc=recalc, force_method='tensor')
     def result_I1(self, recalc=False):
         self.calc_result(parameter={}, recalc=recalc, force_method='tensor')
     def result_D1(self, recalc=False):
@@ -418,12 +419,35 @@ class Anisotropy(base.Measurement):
 
     ''' CALCULATION SECTION '''
 
-    def calculate_tensor(self):
+    def calculate_tensor(self, method='full'):
+        """
+        calculates the anisotropy tensor and derived statistical results for given data and reference directions
+        :param method: determines which method is used to calculate the tensor
+                    'full': use all measurement values, i.e. 3 components of AARM and calculate best fit
+                    'proj': in case of vectorial measurement -> use projection of vector on reference direction and
+                            find least squares solution for those (basically: AARM -> AMS method)
+        :return: nothing, results are stored in self.results dictionary
+        """
         # calculate design matrix
         mdirs = self._data['data']['D', 'I'].v.tolist()
-        dm = Anisotropy.makeDesignMatrix(mdirs, self._data['data'].column_exists('Z'))
+        if method == 'full':
+            xyz = self._data['data'].column_exists('Z')
+        elif method == 'proj':
+            xyz = False  # calculate design matrix for one component per measurement
+        else:
+            raise RuntimeError('calcualte_tensor: unknown method %s', str(method))
+
+        dm = Anisotropy.makeDesignMatrix(mdirs, xyz)
+
+        # get measurements
+        raw_meas = self._data['data']['dep_var'].v.flatten().tolist()
+        if method == 'full':
+            measurements = raw_meas
+        elif method == 'proj':
+            # calculate projections on reference direction
+            measurements = [Proj_A_on_B_scalar(raw_meas[i*3:i*3+3], DI2XYZ(mdirs[i])) for i in range(len(mdirs))]
+
         # calculate tensor and all other results
-        measurements = self._data['data']['dep_var'].v.flatten().tolist()
         self.aniso_dict = Anisotropy.CalcAnisoTensor(dm, measurements)
         self.results['t11'] = self.aniso_dict['R'][0][0]
         self.results['t12_21'] = self.aniso_dict['R'][0][1]
@@ -437,5 +461,5 @@ class Anisotropy(base.Measurement):
         self.results['eval3'] = self.aniso_dict['eigvals'][2]
 
 
-        for k in ('I1', 'D1', 'I2', 'D2', 'I3', 'D3', 'P', 'P1', 'F', 'L', 'T', 'E12', 'E13', 'E23', 'E', 'Q', 'U', 'F0', 'F12', 'F23', 'stddev', 'QF'):
+        for k in ('I1', 'D1', 'I2', 'D2', 'I3', 'D3', 'P', 'P1', 'F', 'L', 'T', 'E12', 'E13', 'E23', 'E', 'Q', 'U', 'F0', 'F12', 'F23', 'stddev', 'QF', 'M'):
             self.results[k] = self.aniso_dict[k]

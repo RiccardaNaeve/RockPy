@@ -34,15 +34,16 @@ def test():
 
 
     # create samples
-    evals=(0.99, 1.01, 1.00)
-    measerr=0.001
+    evals=(1.01, 1.01, 0.99)
+    measerr=0.01
+    method='proj'  # 'proj' or 'full'
 
     samples = []
     for i in range(100):
         s = Sample(name=str(i))
         m = s.add_simulation(mtype='anisotropy', color=(random(), random(), random()), evals=evals,
-                                mdirs=[[225.0, 0.0], [135.0, 0.0], [90.0, 45.0],
-                                       [90.0, -45.0], [0.0, -45.0], [0.0, 45.0]],
+                                mdirs=[[225.0, 0.0], [45.0, 0.0], [135.0, 0.0], [315.0, 0.0], [90.0, 45.0], [270.0, -45.0],
+                                       [90.0, -45.0], [270.0, 45.0], [0.0, -45.0], [180.0, 45.0], [0.0, 45.0], [180.0, -45.0]],
                                 measerr=measerr)
 
         samples.append(s)
@@ -50,38 +51,52 @@ def test():
     sg = RockPy.SampleGroup(sample_list=samples)
     study = RockPy.Study(samplegroups=sg)
 
-    pdf_pages = PdfPages('out_sushi__ev%.2f_%.2f_%.2f_err%.3f.pdf' % (evals[0], evals[1], evals[2], measerr))
+    #filename = 'out_sushi__ev%.2f_%.2f_%.2f_err%.3f.pdf' % (evals[0], evals[1], evals[2], measerr)
+    filename = 'out_sushi_dir90_45var_ev%.2f_%.2f_%.2f_err%.3f_%s.pdf' % (evals[0], evals[1], evals[2], measerr, method)
+    print "writing to %s" % filename
 
-
-    startoffset = 0
-
-    for s in samples:
-        s.measurements[0]._data['data']['D'] = s.measurements[0]._data['data']['D'].v + startoffset-1
+    pdf_pages = PdfPages(filename)
 
 
     # values for all offsets
-    Ds, Tmeans, Pmeans, Lmeans, Fmeans, E12means, E13means, E23means, sdmeans, QFmeans = [], [], [], [], [], [], [], [], [], []
+    Ds, Tmedians, Pmedians, Lmedians, Fmedians, E12medians, E13medians, E23medians, sdpermedians, QFmedians = [], [], [], [], [], [], [], [], [], []
 
 
-    for d in range(5):
-        for s in samples:
-            #modify reference directions
-            #add to inclination
-            #m._data['data']['I'] = m._data['data']['I'].v + 2
-            #add to declination
-            s.measurements[0]._data['data']['D'] = s.measurements[0]._data['data']['D'].v + 1
+    # make numbers formatting float
+    samples[0].measurements[0]._data['data'].showfmt['floatfmt'] = '.1f'
+    samples[0].measurements[0]._data['data'].showfmt['show_rowlabels'] = False
 
-        aniplt = RockPy.Visualize.anisotropy.Anisotropy(study, plt_primary="samples", plt_secondary=None)
+    for d in range(10):
+        if d != 0:
+            for s in samples:
+                #modify reference directions
+                #add to inclination
+                #m._data['data']['I'] = m._data['data']['I'].v + 2
+                #add to declination
+                refD = s.measurements[0]._data['data']['D'].v
+                #print refD
+                #change all declinations
+                #refD += 1
+                #change declination of position 3
+                refD[2] += 1
+                s.measurements[0]._data['data']['D'] = refD
+
+
+
+        aniplt = RockPy.Visualize.anisotropy.Anisotropy(study, plt_primary="samples", plt_secondary=None, method=method)
 
         # get figure
         fig1 = aniplt.figs[aniplt.name][0]
+        fig1.text(0.02, 0.02, str(samples[0].measurements[0]._data['data']['D', 'I']))
+        #print str( samples[0].measurements[0]._data['data']['D', 'I'].v)
 
-        L, F, T, P, E12, E13, E23, sd, QF = [], [], [], [], [], [], [], [], []
 
-        samples[0].measurements[0].calculate_tensor()
+        L, F, T, P, E12, E13, E23, sdper, QF = [], [], [], [], [], [], [], [], []
+
+        #samples[0].measurements[0].calculate_tensor()
         #print samples[0].measurements[0].results
         for s in samples:
-            s.measurements[0].calculate_tensor()
+            s.measurements[0].calculate_tensor(method='proj')
             T.extend(s.measurements[0].results['T'].v)
             L.extend(s.measurements[0].results['L'].v)
             F.extend(s.measurements[0].results['F'].v)
@@ -89,11 +104,11 @@ def test():
             E12.extend(s.measurements[0].results['E12'].v)
             E13.extend(s.measurements[0].results['E13'].v)
             E23.extend(s.measurements[0].results['E23'].v)
-            sd.extend(s.measurements[0].results['stddev'].v)
+            sdper.extend(s.measurements[0].results['stddev'].v / s.measurements[0].results['M'].v * 100)
             QF.extend(s.measurements[0].results['QF'].v)
 
 
-        fig2, axarr = pyplot.subplots(1, 9)
+        fig2, axarr = pyplot.subplots(1, 8)
         do_box_plot(axarr[0], P, 'P', (.99, 1.15))
         do_box_plot(axarr[1], L, 'L', (.99, 1.15))
         do_box_plot(axarr[2], F, 'F', (.99, 1.15))
@@ -101,41 +116,41 @@ def test():
         do_box_plot(axarr[4], E12, 'E12', (0, 90))
         do_box_plot(axarr[5], E13, 'E13', (0, 90))
         do_box_plot(axarr[6], E23, 'E23', (0, 90))
-        do_box_plot(axarr[7], sd, 'stddev', None)
-        do_box_plot(axarr[8], QF, 'QF', None)
+        do_box_plot(axarr[7], sdper, 'stddev %', None)
+        #do_box_plot(axarr[8], QF, 'QF', None)
 
 
 
         pyplot.tight_layout()
 
-        fig1.suptitle("sushi geometry, meas_err: %.3f, evals: %.2f,%.2f,%.2f, D offset: %d" %
-                      (measerr, evals[0], evals[1], evals[2], d+startoffset))
+        fig1.suptitle("meas_err: %.3f, evals: %.2f,%.2f,%.2f, P: %.2f, D offset: %d, method: %s" %
+                      (measerr, evals[0], evals[1], evals[2], evals[0]/evals[2], d, method))
 
         pdf_pages.savefig(fig1)
         pdf_pages.savefig(fig2)
 
-        Pmeans.append(np.mean(P))
-        Tmeans.append(np.mean(T))
-        Lmeans.append(np.mean(L))
-        Fmeans.append(np.mean(F))
-        E12means.append(np.mean(E12))
-        E13means.append(np.mean(E13))
-        E23means.append(np.mean(E23))
-        sdmeans.append(np.mean(sd))
-        QFmeans.append(np.mean(QF))
+        Pmedians.append(np.median(P))
+        Tmedians.append(np.median(T))
+        Lmedians.append(np.median(L))
+        Fmedians.append(np.median(F))
+        E12medians.append(np.median(E12))
+        E13medians.append(np.median(E13))
+        E23medians.append(np.median(E23))
+        sdpermedians.append(np.median(sdper))
+        QFmedians.append(np.median(QF))
 
 
-        print d+startoffset
-        Ds.append(d+startoffset)
+        print d
+        Ds.append(d)
 
 
     fig3, (axu, axd) = pyplot.subplots(2, 1)
     l = []
-    l.append(axu.plot(Ds, Pmeans, color='blue', marker='+', label='P'))
-    l.append(axu.plot(Ds, Lmeans, color='springgreen', marker='+', label='L'))
-    l.append(axu.plot(Ds, Fmeans, color='forestgreen', marker='+', label='F'))
+    l.append(axu.plot(Ds, Pmedians, color='blue', marker='+', label='P'))
+    l.append(axu.plot(Ds, Lmedians, color='springgreen', marker='+', label='L'))
+    l.append(axu.plot(Ds, Fmedians, color='forestgreen', marker='+', label='F'))
     axu2 = axu.twinx()
-    l.append(axu2.plot(Ds, Tmeans, color='peru', marker='+', label='T'))
+    l.append(axu2.plot(Ds, Tmedians, color='peru', marker='+', label='T'))
     axu.set_ylim((0.99, 1.15))
     axu2.set_ylim((-1.05, 1.05))
 
@@ -143,11 +158,17 @@ def test():
     axu2.legend(loc='upper right', bbox_to_anchor=(1.0, 1.20), fancybox=True, shadow=True)
 
 
-    l.append(axd.plot(Ds, E12means, 'r+-', label='E12'))
-    l.append(axd.plot(Ds, E13means, 'rx-', label='E13'))
-    l.append(axd.plot(Ds, E23means, 'r*-', label='E23'))
+    l.append(axd.plot(Ds, E12medians, 'r+-', label='E12'))
+    l.append(axd.plot(Ds, E13medians, 'rx-', label='E13'))
+    l.append(axd.plot(Ds, E23medians, 'r*-', label='E23'))
+    axd2 = axd.twinx()
+    l.append(axd2.plot(Ds, sdpermedians, 'bx-', label='stdev %'))
     axd.set_ylim((0.0, 90.0))
-    axd.legend(loc='lower center', bbox_to_anchor=(0.5, -0.3), fancybox=True, shadow=True, ncol=10)
+    axd.set_ylabel('degree')
+    #axd2.set_ylim((0, 10))
+    axd2.set_ylabel('%')
+    axd.legend(loc='lower center', bbox_to_anchor=(0.2, -0.3), fancybox=True, shadow=True, ncol=10)
+    axd2.legend(loc='lower right', bbox_to_anchor=(1.0, -0.3), fancybox=True, shadow=True, ncol=10)
 
 
     pdf_pages.savefig(fig3)

@@ -420,12 +420,34 @@ class Anisotropy(base.Measurement):
 
     ''' CALCULATION SECTION '''
 
-    def calculate_tensor(self):
+    def calculate_tensor(self, method='full'):
+        """
+        calculates the anisotropy tensor and derived statitical results for given data and reference directions
+        :param method: determines which method is used to calculate the tensor
+                    'full': use all measurement values, i.e. 3 components of AARM and calculate best fit
+                    'proj': in case of vectorial measurement -> use projection of vector on reference direction and
+                            find least squares solution for those (basically: AARM -> AMS method)
+        :return: nothing, results are stored in self.results dictionary
+        """
         # calculate design matrix
         mdirs = self._data['data']['D', 'I'].v.tolist()
-        dm = Anisotropy.makeDesignMatrix(mdirs, self._data['data'].column_exists('Z'))
+        if method == 'full':
+            xyz = self._data['data'].column_exists('Z')
+        elif method == 'proj':
+            xyz = False  # calculate design matrix for one component per measurement
+        else:
+            raise RuntimeError( 'calcualte_tensor: unknown method %s', str( method))
+
+        dm = Anisotropy.makeDesignMatrix(mdirs, xyz)
+
+        # get measurements
+        if method == 'full':
+            measurements = self._data['data']['dep_var'].v.flatten().tolist()
+        elif method == 'proj':
+            # calculate projections on reference direction
+            measurements = None ###
+
         # calculate tensor and all other results
-        measurements = self._data['data']['dep_var'].v.flatten().tolist()
         self.aniso_dict = Anisotropy.CalcAnisoTensor(dm, measurements)
         self.results['t11'] = self.aniso_dict['R'][0][0]
         self.results['t12_21'] = self.aniso_dict['R'][0][1]

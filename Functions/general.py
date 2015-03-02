@@ -141,7 +141,7 @@ def DIL2XYZ( DIL):
     """
     Convert a tuple of D,I,L components to a tuple of x,y,z.
     :param DIL:
-    :return:
+    :return: (x, y, z)
     """
     (D, I, L) = DIL
     H = L*cos(radians(I))
@@ -149,6 +149,15 @@ def DIL2XYZ( DIL):
     Y = H*sin(radians(D))
     Z = H*tan(radians(I))
     return (X, Y, Z)
+
+def DI2XYZ( DI):
+    """
+    Convert a tuple of D,I to a tuple of x,y,z. Assuming unit length
+    :param DI: declination, inclination
+    :return: (x, y, z)
+    """
+    DI.append(1)
+    return DIL2XYZ(DI)
 
 def MirrorDirectionToNegativeInclination(dec, inc):
     if inc > 0:

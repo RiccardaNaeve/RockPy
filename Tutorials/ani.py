@@ -36,13 +36,14 @@ def test():
     # create samples
     evals=(1.01, 1.01, 0.99)
     measerr=0.01
+    method='full'  # 'proj' or 'full'
 
     samples = []
     for i in range(100):
         s = Sample(name=str(i))
         m = s.add_simulation(mtype='anisotropy', color=(random(), random(), random()), evals=evals,
-                                mdirs=[[225.0, 0.0], [135.0, 0.0], [90.0, 45.0],
-                                       [90.0, -45.0], [0.0, -45.0], [0.0, 45.0]],
+                                mdirs=[[225.0, 0.0], [45.0, 0.0], [135.0, 0.0], [315.0, 0.0], [90.0, 45.0], [270.0, -45.0],
+                                       [90.0, -45.0], [270.0, 45.0], [0.0, -45.0], [180.0, 45.0], [0.0, 45.0], [180.0, -45.0]],
                                 measerr=measerr)
 
         samples.append(s)
@@ -51,7 +52,7 @@ def test():
     study = RockPy.Study(samplegroups=sg)
 
     #filename = 'out_sushi__ev%.2f_%.2f_%.2f_err%.3f.pdf' % (evals[0], evals[1], evals[2], measerr)
-    filename = 'out_sushi_dir90_45var_ev%.2f_%.2f_%.2f_err%.3f.pdf' % (evals[0], evals[1], evals[2], measerr)
+    filename = 'out_sushi_dir90_45var_ev%.2f_%.2f_%.2f_err%.3f_%s.pdf' % (evals[0], evals[1], evals[2], measerr, method)
     print "writing to %s" % filename
 
     pdf_pages = PdfPages(filename)
@@ -82,20 +83,20 @@ def test():
 
 
 
-        aniplt = RockPy.Visualize.anisotropy.Anisotropy(study, plt_primary="samples", plt_secondary=None)
+        aniplt = RockPy.Visualize.anisotropy.Anisotropy(study, plt_primary="samples", plt_secondary=None, method=method)
 
         # get figure
         fig1 = aniplt.figs[aniplt.name][0]
-        fig1.text(0.02, 0.02, str( samples[0].measurements[0]._data['data']['D','I']))
+        fig1.text(0.02, 0.02, str(samples[0].measurements[0]._data['data']['D', 'I']))
         #print str( samples[0].measurements[0]._data['data']['D', 'I'].v)
 
 
         L, F, T, P, E12, E13, E23, sdper, QF = [], [], [], [], [], [], [], [], []
 
-        samples[0].measurements[0].calculate_tensor()
+        #samples[0].measurements[0].calculate_tensor()
         #print samples[0].measurements[0].results
         for s in samples:
-            s.measurements[0].calculate_tensor()
+            s.measurements[0].calculate_tensor(method='proj')
             T.extend(s.measurements[0].results['T'].v)
             L.extend(s.measurements[0].results['L'].v)
             F.extend(s.measurements[0].results['F'].v)

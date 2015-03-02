@@ -13,7 +13,7 @@ from numbers import Number
 from tabulate import tabulate
 from RockPy.Structure import ureg
 from RockPy.Functions import general
-
+from scipy import stats
 general.create_logger(__name__)
 log = logging.getLogger(__name__)
 
@@ -1172,7 +1172,7 @@ class RockPyData(object):
             val = np.nanmean(self.values, axis=0)[np.newaxis, :, np.newaxis]
             err = np.nanstd(self.values, axis=0)[np.newaxis, :, np.newaxis]
         elif kind == 'median':
-            val = np.nanmedian(self.values, axis=0)[np.newaxis, :, np.newaxis]
+            val = stats.nanmedian(self.values, axis=0)[np.newaxis, :, np.newaxis]
             err = np.nanstd(self.values, axis=0)[np.newaxis, :, np.newaxis]
         elif kind == 'min':
             minidx = np.nanargmin(self.values, axis=0)

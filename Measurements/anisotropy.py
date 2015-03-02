@@ -4,7 +4,7 @@ import base
 import logging
 from math import cos, sin, atan, radians, log, exp, sqrt, degrees
 import numpy as np
-from RockPy.Functions.general import XYZ2DIL, DIL2XYZ, MirrorDirectionToPositiveInclination
+from RockPy.Functions.general import XYZ2DIL, DIL2XYZ, MirrorDirectionToPositiveInclination, Proj_A_on_B_scalar
 from RockPy.Structure.data import RockPyData
 from random import random
 
@@ -422,7 +422,7 @@ class Anisotropy(base.Measurement):
 
     def calculate_tensor(self, method='full'):
         """
-        calculates the anisotropy tensor and derived statitical results for given data and reference directions
+        calculates the anisotropy tensor and derived statistical results for given data and reference directions
         :param method: determines which method is used to calculate the tensor
                     'full': use all measurement values, i.e. 3 components of AARM and calculate best fit
                     'proj': in case of vectorial measurement -> use projection of vector on reference direction and
@@ -436,16 +436,17 @@ class Anisotropy(base.Measurement):
         elif method == 'proj':
             xyz = False  # calculate design matrix for one component per measurement
         else:
-            raise RuntimeError( 'calcualte_tensor: unknown method %s', str( method))
+            raise RuntimeError('calcualte_tensor: unknown method %s', str( method))
 
         dm = Anisotropy.makeDesignMatrix(mdirs, xyz)
 
         # get measurements
+        raw_meas = self._data['data']['dep_var'].v.flatten().tolist()
         if method == 'full':
-            measurements = self._data['data']['dep_var'].v.flatten().tolist()
+            measurements = raw_meas
         elif method == 'proj':
             # calculate projections on reference direction
-            measurements = None ###
+            measurements = [Proj_A_on_B_scalar(raw_meas[i], mdirs[i]) for i in range(len(mdirs))]
 
         # calculate tensor and all other results
         self.aniso_dict = Anisotropy.CalcAnisoTensor(dm, measurements)

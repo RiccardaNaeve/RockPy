@@ -163,12 +163,14 @@ def MirrorDirectionToPositiveInclination(dec, inc):
         return dec, inc
 
 def MirrorVectorToNegativeInclination(x, y, z):
-    if z > 0: return -x,-y,-z
-    else: return x,y,z
+    if z > 0:
+        return -x, -y, -z
+    else:
+        return x, y, z
 
 def MirrorVectorToPositiveInclination(x, y, z):
     if z < 0: return -x, -y, -z
-    else: return x,y,z
+    else: return x, y, z
 
 
 def Proj_A_on_B_scalar( A, B):

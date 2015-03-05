@@ -296,6 +296,25 @@ class Anisotropy(base.Measurement):
         QF = (P-1) / (stddev / M)
         aniso_dict['QF'] = QF
 
+
+        # claculate errors of principal values (Hext 63)
+        # A = design matrix
+        #AA = (A^T*A)^(-1)
+        AA = np.linalg.inv(np.dot(np.transpose(A), A))
+        eigval_errs = []
+        # t_alpha for 95% and n_f = 6: 2.45
+        t_alpha = 2.45
+
+        #todo: automatically get right t and F values for error calculation
+
+        for ev in eigvecs:
+            # av = (X^2 Y^2 Z^2 2XY 2YZ 2XZ)
+            av = np.array((ev[0]**2, ev[1]**2, ev[2]**2, 2*ev[0]*ev[1], 2*ev[1]*ev[2], 2*ev[0]*ev[2]))
+            eigval_errs.append(t_alpha*stddev*np.sqrt(np.dot(np.transpose(av), np.dot(AA, av))))
+
+        print eigval_errs
+
+
         # calculate confidence ellipses
         #F = 3.89 --> looked up from tauxe lecture 2005; F-table
         f = sqrt(2 * 3.89)

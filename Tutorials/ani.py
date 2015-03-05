@@ -34,7 +34,7 @@ def test():
 
 
     # create samples
-    evals=(1.01, 1.01, 0.99)
+    evals=(0.99, 1.01, 1.01)
     measerr=0.01
     method='proj'  # 'proj' or 'full'
 

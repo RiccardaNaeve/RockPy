@@ -7,6 +7,8 @@ import numpy as np
 from RockPy.Functions.general import XYZ2DIL, DIL2XYZ, DI2XYZ, MirrorDirectionToPositiveInclination, Proj_A_on_B_scalar
 from RockPy.Structure.data import RockPyData
 from random import random
+from scipy.stats import distributions
+
 
 class Anisotropy(base.Measurement):
     """
@@ -285,8 +287,11 @@ class Anisotropy(base.Measurement):
         S0 = np.dot(d, d)
         aniso_dict['S0'] = S0
 
+        # degrees of freedom
+        nf = len(d)-6
+
         #calculate variance
-        var = S0 / (len(d)-6)
+        var = S0 / nf
         # len(d) == 18 for 6 directions (12 measured)
         #calc standard deviation
         stddev = sqrt(var)
@@ -303,9 +308,7 @@ class Anisotropy(base.Measurement):
         AA = np.linalg.inv(np.dot(np.transpose(A), A))
         eigval_errs = []
         # t_alpha for 95% and n_f = 6: 2.45
-        t_alpha = 2.45
-
-        #todo: automatically get right t and F values for error calculation
+        t_alpha = d.t.ppf(0.975, nf)
 
         for ev in eigvecs:
             # av = (X^2 Y^2 Z^2 2XY 2YZ 2XZ)
@@ -317,7 +320,7 @@ class Anisotropy(base.Measurement):
 
         # calculate confidence ellipses
         #F = 3.89 --> looked up from tauxe lecture 2005; F-table
-        f = sqrt(2 * 3.89)
+        f = sqrt(2 * d.f.ppf(0.95, 2, nf))
         E12 = abs(degrees(atan(f * stddev / (2 * (eigvals[1]-eigvals[0])))))
         E23 = abs(degrees(atan(f * stddev / (2 * (eigvals[1]-eigvals[2])))))
         E13 = abs(degrees(atan(f * stddev / (2 * (eigvals[2]-eigvals[0])))))

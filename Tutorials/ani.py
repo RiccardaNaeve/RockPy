@@ -34,7 +34,7 @@ def test():
 
 
     # create samples
-    evals=(1.01, 1.01, 0.99)
+    evals=(1.10, 1.10, 0.90)
     measerr=0.01
     method='proj'  # 'proj' or 'full'
 
@@ -52,7 +52,7 @@ def test():
     study = RockPy.Study(samplegroups=sg)
 
     #filename = 'out_sushi__ev%.2f_%.2f_%.2f_err%.3f.pdf' % (evals[0], evals[1], evals[2], measerr)
-    filename = 'out_sushi_dir90_45var_ev%.2f_%.2f_%.2f_err%.3f_%s.pdf' % (evals[0], evals[1], evals[2], measerr, method)
+    filename = 'out_sushi0__45anti_I_var_ev%.2f_%.2f_%.2f_err%.3f_%s.pdf' % (evals[0], evals[1], evals[2], measerr, method)
     print "writing to %s" % filename
 
     pdf_pages = PdfPages(filename)
@@ -60,7 +60,7 @@ def test():
 
     # values for all offsets
     Ds, Tmedians, Pmedians, Lmedians, Fmedians, E12medians, E13medians, E23medians, sdpermedians, QFmedians = [], [], [], [], [], [], [], [], [], []
-
+    eval1_err_per_medians, eval2_err_per_medians, eval3_err_per_medians = [], [], []
 
     # make numbers formatting float
     samples[0].measurements[0]._data['data'].showfmt['floatfmt'] = '.1f'
@@ -73,13 +73,18 @@ def test():
                 #add to inclination
                 #m._data['data']['I'] = m._data['data']['I'].v + 2
                 #add to declination
+                refI = s.measurements[0]._data['data']['I'].v
                 refD = s.measurements[0]._data['data']['D'].v
                 #print refD
                 #change all declinations
                 #refD += 1
+                refI[8] += 1
+                refI[9] -= 1
                 #change declination of position 3
-                refD[2] += 1
+                #refD[2] += 1
+
                 s.measurements[0]._data['data']['D'] = refD
+                s.measurements[0]._data['data']['I'] = refI
 
 
 
@@ -91,7 +96,7 @@ def test():
         #print str( samples[0].measurements[0]._data['data']['D', 'I'].v)
 
 
-        L, F, T, P, E12, E13, E23, sdper, QF = [], [], [], [], [], [], [], [], []
+        L, F, T, P, E12, E13, E23, sdper, QF, eval1_err_per, eval2_err_per, eval3_err_per = [], [], [], [], [], [], [], [], [], [], [], []
 
         #samples[0].measurements[0].calculate_tensor()
         #print samples[0].measurements[0].results
@@ -104,27 +109,33 @@ def test():
             E12.extend(s.measurements[0].results['E12'].v)
             E13.extend(s.measurements[0].results['E13'].v)
             E23.extend(s.measurements[0].results['E23'].v)
+            eval1_err_per.extend(s.measurements[0].results['eval1_err'].v/s.measurements[0].results['eval1'].v*100)
+            eval2_err_per.extend(s.measurements[0].results['eval2_err'].v/s.measurements[0].results['eval2'].v*100)
+            eval3_err_per.extend(s.measurements[0].results['eval3_err'].v/s.measurements[0].results['eval3'].v*100)
             sdper.extend(s.measurements[0].results['stddev'].v / s.measurements[0].results['M'].v * 100)
             QF.extend(s.measurements[0].results['QF'].v)
 
 
-        fig2, axarr = pyplot.subplots(1, 8)
-        do_box_plot(axarr[0], P, 'P', (.99, 1.15))
-        do_box_plot(axarr[1], L, 'L', (.99, 1.15))
-        do_box_plot(axarr[2], F, 'F', (.99, 1.15))
+        fig2, axarr = pyplot.subplots(1, 11)
+        do_box_plot(axarr[0], P, 'P', (.99, 1.25))
+        do_box_plot(axarr[1], L, 'L', (.99, 1.25))
+        do_box_plot(axarr[2], F, 'F', (.99, 1.25))
         do_box_plot(axarr[3], T, 'T', (-1.0, 1.0))
-        do_box_plot(axarr[4], E12, 'E12', (0, 90))
-        do_box_plot(axarr[5], E13, 'E13', (0, 90))
-        do_box_plot(axarr[6], E23, 'E23', (0, 90))
-        do_box_plot(axarr[7], sdper, 'stddev %', None)
+        do_box_plot(axarr[4], eval1_err_per, 'eval1_err_per', (0,8))
+        do_box_plot(axarr[5], eval2_err_per, 'eval2_err_per', (0,8))
+        do_box_plot(axarr[6], eval3_err_per, 'eval3_err_per', (0,8))
+        do_box_plot(axarr[7], E12, 'E12', (0, 90))
+        do_box_plot(axarr[8], E13, 'E13', (0, 90))
+        do_box_plot(axarr[9], E23, 'E23', (0, 90))
+        do_box_plot(axarr[10], sdper, 'stddev %', None)
         #do_box_plot(axarr[8], QF, 'QF', None)
 
 
 
         pyplot.tight_layout()
 
-        fig1.suptitle("meas_err: %.3f, evals: %.2f,%.2f,%.2f, P: %.2f, D offset: %d, method: %s" %
-                      (measerr, evals[0], evals[1], evals[2], evals[0]/evals[2], d, method))
+        fig1.suptitle("meas_err: %.3f, evals: %.2f,%.2f,%.2f, P: %.2f, I offset: %d, method: %s" %
+                      (measerr, evals[0], evals[1], evals[2], max( evals[2], evals[0]) / min( evals[2], evals[0]), d, method))
 
         pdf_pages.savefig(fig1)
         pdf_pages.savefig(fig2)
@@ -138,6 +149,9 @@ def test():
         E23medians.append(np.median(E23))
         sdpermedians.append(np.median(sdper))
         QFmedians.append(np.median(QF))
+        eval1_err_per_medians.append(np.median(eval1_err_per))
+        eval2_err_per_medians.append(np.median(eval2_err_per))
+        eval3_err_per_medians.append(np.median(eval3_err_per))
 
 
         print d
@@ -151,25 +165,33 @@ def test():
     l.append(axu.plot(Ds, Fmedians, color='forestgreen', marker='+', label='F'))
     axu2 = axu.twinx()
     l.append(axu2.plot(Ds, Tmedians, color='peru', marker='+', label='T'))
-    axu.set_ylim((0.99, 1.15))
+    axu.set_ylim((0.99, 1.25))
     axu2.set_ylim((-1.05, 1.05))
 
-    axu.legend(loc='upper left', bbox_to_anchor=(0, 1.20), fancybox=True, shadow=True, ncol=10)
-    axu2.legend(loc='upper right', bbox_to_anchor=(1.0, 1.20), fancybox=True, shadow=True)
-
-
-    l.append(axd.plot(Ds, E12medians, 'r+-', label='E12'))
-    l.append(axd.plot(Ds, E13medians, 'rx-', label='E13'))
-    l.append(axd.plot(Ds, E23medians, 'r*-', label='E23'))
+    l.append(axd.plot(Ds, E12medians, 'g+-', label=r'$\varepsilon_{12}$'))
+    l.append(axd.plot(Ds, E13medians, 'gx-', label=r'$\varepsilon_{13}$'))
+    l.append(axd.plot(Ds, E23medians, 'g*-', label=r'$\varepsilon_{23}$'))
     axd2 = axd.twinx()
-    l.append(axd2.plot(Ds, sdpermedians, 'bx-', label='stdev %'))
+    l.append(axd2.plot(Ds, sdpermedians, 'bx-', label=r'$\sigma (\%)$'))
+    l.append(axd2.plot(Ds, eval1_err_per_medians, 'r+-', label=r'$\Delta \lambda_1 (\%)$'))
+    l.append(axd2.plot(Ds, eval2_err_per_medians, 'rx-', label=r'$\Delta \lambda_2 (\%)$'))
+    l.append(axd2.plot(Ds, eval3_err_per_medians, 'r*-', label=r'$\Delta \lambda_3 (\%)$'))
     axd.set_ylim((0.0, 90.0))
     axd.set_ylabel('degree')
-    #axd2.set_ylim((0, 10))
+    axd2.set_ylim((0.0, 2.5))
     axd2.set_ylabel('%')
-    axd.legend(loc='lower center', bbox_to_anchor=(0.2, -0.3), fancybox=True, shadow=True, ncol=10)
-    axd2.legend(loc='lower right', bbox_to_anchor=(1.0, -0.3), fancybox=True, shadow=True, ncol=10)
 
+
+    # make legends
+    axd.legend(loc='center left', bbox_to_anchor=(1.1, 0.7), fancybox=True, shadow=True, ncol=1)
+    axd2.legend(loc='center left', bbox_to_anchor=(1.1, 0.1), fancybox=True, shadow=True, ncol=1)
+    axu.legend(loc='center left', bbox_to_anchor=(1.1, 0.7), fancybox=True, shadow=True, ncol=1)
+    axu2.legend(loc='center left', bbox_to_anchor=(1.1, 0.1), fancybox=True, shadow=True)
+
+    # Shrink all x axes by 20%
+    for ax in (axu, axu2, axd, axd2):
+        box = ax.get_position()
+        ax.set_position([box.x0, box.y0, box.width * 0.8, box.height])
 
     pdf_pages.savefig(fig3)
     pdf_pages.close()

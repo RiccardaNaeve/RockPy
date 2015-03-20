@@ -7,6 +7,8 @@ import numpy as np
 from RockPy.Functions.general import XYZ2DIL, DIL2XYZ, DI2XYZ, MirrorDirectionToPositiveInclination, Proj_A_on_B_scalar
 from RockPy.Structure.data import RockPyData
 from random import random
+from scipy.stats import distributions
+
 
 class Anisotropy(base.Measurement):
     """
@@ -285,8 +287,11 @@ class Anisotropy(base.Measurement):
         S0 = np.dot(d, d)
         aniso_dict['S0'] = S0
 
+        # degrees of freedom
+        nf = len(d)-6
+
         #calculate variance
-        var = S0 / (len(d)-6)
+        var = S0 / nf
         # len(d) == 18 for 6 directions (12 measured)
         #calc standard deviation
         stddev = sqrt(var)
@@ -296,9 +301,26 @@ class Anisotropy(base.Measurement):
         QF = (P-1) / (stddev / M)
         aniso_dict['QF'] = QF
 
+
+        # claculate errors of principal values (Hext 63)
+        # A = design matrix
+        #AA = (A^T*A)^(-1)
+        AA = np.linalg.inv(np.dot(np.transpose(A), A))
+        eigval_errs = []
+        # t_alpha for 95% and n_f = 6: 2.45
+        t_alpha = distributions.t.ppf(0.975, nf)
+
+        for ev in eigvecs:
+            # av = (X^2 Y^2 Z^2 2XY 2YZ 2XZ)
+            av = np.array((ev[0]**2, ev[1]**2, ev[2]**2, 2*ev[0]*ev[1], 2*ev[1]*ev[2], 2*ev[0]*ev[2]))
+            eigval_errs.append(t_alpha*stddev*np.sqrt(np.dot(np.transpose(av), np.dot(AA, av))))
+
+        aniso_dict['eval_err'] = eigval_errs
+
+
         # calculate confidence ellipses
         #F = 3.89 --> looked up from tauxe lecture 2005; F-table
-        f = sqrt(2 * 3.89)
+        f = sqrt(2 * distributions.f.ppf(0.95, 2, nf))
         E12 = abs(degrees(atan(f * stddev / (2 * (eigvals[1]-eigvals[0])))))
         E23 = abs(degrees(atan(f * stddev / (2 * (eigvals[1]-eigvals[2])))))
         E13 = abs(degrees(atan(f * stddev / (2 * (eigvals[2]-eigvals[0])))))
@@ -368,6 +390,12 @@ class Anisotropy(base.Measurement):
     def result_eval2(self, recalc=False):
         self.calc_result(parameter={}, recalc=recalc, force_method='tensor')
     def result_eval3(self, recalc=False):
+        self.calc_result(parameter={}, recalc=recalc, force_method='tensor')
+    def result_eval1_err(self, recalc=False):
+        self.calc_result(parameter={}, recalc=recalc, force_method='tensor')
+    def result_eval2_err(self, recalc=False):
+        self.calc_result(parameter={}, recalc=recalc, force_method='tensor')
+    def result_eval3_err(self, recalc=False):
         self.calc_result(parameter={}, recalc=recalc, force_method='tensor')
     def result_M(self, recalc=False):
         self.calc_result(parameter={}, recalc=recalc, force_method='tensor')
@@ -459,6 +487,10 @@ class Anisotropy(base.Measurement):
         self.results['eval1'] = self.aniso_dict['eigvals'][0]
         self.results['eval2'] = self.aniso_dict['eigvals'][1]
         self.results['eval3'] = self.aniso_dict['eigvals'][2]
+
+        self.results['eval1_err'] = self.aniso_dict['eval_err'][0]
+        self.results['eval2_err'] = self.aniso_dict['eval_err'][1]
+        self.results['eval3_err'] = self.aniso_dict['eval_err'][2]
 
 
         for k in ('I1', 'D1', 'I2', 'D2', 'I3', 'D3', 'P', 'P1', 'F', 'L', 'T', 'E12', 'E13', 'E23', 'E', 'Q', 'U', 'F0', 'F12', 'F23', 'stddev', 'QF', 'M'):

@@ -14,7 +14,6 @@ from RockPy.Readin import *
 from copy import deepcopy
 import inspect
 
-#todo initial states are not pickled
 class Measurement(object):
     """
 
@@ -364,13 +363,6 @@ class Measurement(object):
 
     # ## DATA RELATED
     ### Calculation and parameters
-    @property
-    def generic(self):
-        '''
-        helper function that returns the value for a given statistical method. If result not available will calculate
-        it with standard parameters
-        '''
-        return self.result_generic()
 
     def result_generic(self, recalc=False):
         '''

@@ -763,7 +763,7 @@ class RockPyData(object):
                           units=None,
                           data=self.data[:, colidxs])
 
-        rpd.showfmt = self.showfmt
+        # rpd.showfmt = self.showfmt
 
         return rpd
 

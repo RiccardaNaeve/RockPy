@@ -96,7 +96,6 @@ def extract_info_from_filename(fname, data_dir):
     parameter = rest[2]
 
     STD = [i for i in rest if 'std' in i.lower()]
-    print fname, sample_info
 
     try:
         options = [i.split('_') for i in rest[4].split('.')[0].split(';')]
@@ -120,11 +119,13 @@ def extract_info_from_filename(fname, data_dir):
         sample_info[2][0] = float(sample_info[2][0])
     except ValueError:
         pass
-
     if sample_info[1][1] and sample_info[2][1]:
         if sample_info[1][1] != sample_info[2][1]:
             sample_info[1][0] = sample_info[1][0] * getattr(ureg, sample_info[2][1]).to(
                 getattr(ureg, sample_info[1][1])).magnitude
+
+    sample[2] = sample[2].upper() #convert to upper for ease of checking
+    sample[3] = sample[3].upper() #convert to upper for ease of checking
 
     abbrev = {'HYS': 'hysteresis',
               'COE': 'backfield',

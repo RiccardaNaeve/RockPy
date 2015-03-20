@@ -13,6 +13,9 @@ class Vsm(base.Machine):
         self.raw_out = [i for i in reader_object][self.measurement_header['meta']['numberoflines']:]  # without header
         self.header_idx = {v: i for i, v in enumerate(self.header)}
 
+        self.data_header = [i for i in self.raw_out[0].split(' ') if i != '' if i != '\n']
+        self.data_header_idx = {v.lower(): i for i, v in enumerate(self.data_header)}
+
     @property
     def header(self):
         """
@@ -71,8 +74,10 @@ class Vsm(base.Machine):
                               '-')][0]  # first idx of all indices with + or - (data)
 
         # setting up all data indices
-        data_indices = [data_start_idx] + [data_start_idx + i for i in list(map(int, self.segment_info['final index'].v))] + [len(self.raw_out[data_start_idx:])+data_start_idx-1]
-        data = [self.raw_out[data_indices[i]:data_indices[i+1]] for i in range(len(data_indices)-1)]
+        data_indices = [data_start_idx] + [data_start_idx + i for i in
+                                           list(map(int, self.segment_info['final index'].v))] + [
+                           len(self.raw_out[data_start_idx:]) + data_start_idx - 1]
+        data = [self.raw_out[data_indices[i]:data_indices[i + 1]] for i in range(len(data_indices) - 1)]
 
         data = [[j.strip('\n').split(',') for j in i if not j == '\n'] for i in data]
         data = [np.array([map(float, j) for j in i]) for i in data]
@@ -80,18 +85,40 @@ class Vsm(base.Machine):
         # reformating to T / Am2 / Celsius
         if self.measurement_header['INSTRUMENT']['Units of measure'] == 'cgs':
             for i in range(len(data)):
-                data[i][:,1] *= 1e-3 # emu to Am2
-                data[i][:,self.header_idx['field']] *= 1e-4 # oe to T
+                data[i][:, 1] *= 1e-3  # emu to Am2
+                data[i][:, self.header_idx['field']] *= 1e-4  # oe to T
 
         if self.measurement_header['INSTRUMENT']['Temperature in'] == 'Kelvin':
             for i in range(len(data)):
                 # data[i][:,] *= 1e-3 # emu to Am2
                 try:
-                    data[i][:,self.header_idx['temperature']] -= 0#273.15 # K to C
+                    data[i][:, self.header_idx['temperature']] -= 0  # 273.15 # K to C
                 except KeyError:
                     self.log.debug('No temperature data stored')
 
         return data
+
+    def forc(self):
+        out = [i for i in self.raw_out if i.startswith('+') or i.startswith('-') or i.split() == []]
+        out_data = []
+        aux = []
+        for i in out:
+            if len(i) != 1:
+                if i.strip() != '':
+                    d = i.strip('\n').split(',')
+                    try:
+                        d = map(float, d)
+                        aux.append(d)
+                    except:
+                        if 'Adjusted' in d[0].split():
+                            adj = True
+                        pass
+            else:
+                aux = np.array(aux)
+                out_data.append(aux)
+                aux = []
+        out_data = np.array(out_data)
+        return out_data
 
     def readMicroMagHeader(self, lines):
         sectionstart = False
@@ -104,7 +131,7 @@ class Vsm(base.Machine):
             lc += 1
             sl = l.strip()  # take away any leading and trailing whitespaces
             if lc == 1 and not sl.startswith("MicroMag 2900/3900 Data File"):  # check first line
-                #self.log.error("No valid MicroMag file. Header not found in first line.")
+                # self.log.error("No valid MicroMag file. Header not found in first line.")
                 return None
 
             if len(sl) == 0:  # empty line

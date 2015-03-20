@@ -375,18 +375,14 @@ class Hysteresis(base.Measurement):
             idx = np.argmin(abs(data))  # index of closest to 0
             if data[idx] < 0:
                 if data[idx + 1] < 0:
-                    idx1 = idx
-                    idx2 = idx - 1
+                    idx1, idx2 = (idx, idx - 1)
                 else:
-                    idx1 = idx + 1
-                    idx2 = idx
+                    idx1, idx2 = (idx + 1, idx)
             else:
                 if data[idx + 1] < 0:
-                    idx1 = idx + 1
-                    idx2 = idx
+                    idx1, idx2 = (idx + 1, idx)
                 else:
-                    idx1 = idx - 1
-                    idx2 = idx
+                    idx1, idx2 = (idx - 1, idx)
 
             i = [idx1, idx2]
             d = d.filter_idx(i)

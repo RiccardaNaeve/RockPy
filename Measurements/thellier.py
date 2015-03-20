@@ -389,7 +389,7 @@ class Thellier(base.Measurement):
     
     """
 
-    def result_slope(self, t_min=None, t_max=None, component=None, recalc=False):
+    def result_slope(self, t_min=None, t_max=None, component=None, recalc=False, **options):
         """
         Gives result for calculate_slope(t_min, t_max), returns slope value if not calculated already
         """
@@ -401,7 +401,7 @@ class Thellier(base.Measurement):
         self.calc_result(parameter, recalc)
         return self.results['slope']
 
-    def result_n(self, t_min=None, t_max=None, component=None, recalc=False):
+    def result_n(self, t_min=None, t_max=None, component=None, recalc=False, **options):
         """
         Gives result for calculate_slope(t_min, t_max), returns slope value if not calculated already
         """
@@ -932,7 +932,6 @@ class Thellier(base.Measurement):
                         if v == v2
                         if v >= t_min
                         if v <= t_max])
-
         ck_data = self.ck.filter_idx(out[:, 1]) #ck data in temperatre range
         ptrm_ij = self.get_pTRM_ij(ck_data) # calculate the
 

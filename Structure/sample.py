@@ -8,8 +8,7 @@ from RockPy.Measurements.base import Measurement
 from RockPy.Structure.data import RockPyData, condense
 import RockPy.Visualize.base
 
-RockPy.Functions.general.create_logger(__name__)
-
+# RockPy.Functions.general.create_logger(__name__)
 
 class Sample(object):
     """

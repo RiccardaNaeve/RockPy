@@ -13,8 +13,7 @@ from math import tanh, cosh
 from os.path import join
 from pprint import pprint
 
-
-class Hys(base.Measurement):
+class Hysteresis(base.Measurement):
     """
     Measurement Class for Hysteresis Measurements
 
@@ -146,7 +145,7 @@ class Hys(base.Measurement):
                  mtype, mfile, machine,
                  **options):
 
-        super(Hys, self).__init__(sample_obj, mtype, mfile, machine, **options)
+        super(Hysteresis, self).__init__(sample_obj, mtype, mfile, machine, **options)
 
         self.paramag_correction = None
 
@@ -155,10 +154,12 @@ class Hys(base.Measurement):
         return self.set_get_attr('_correction', value=list())
 
     @property
-    def data(self):
-        if not self._data:
-            self._data = deepcopy(self._raw_data)
-        return self._data
+    def grid_data(self):
+        return self.set_get_attr('_grid_data', value=self.data_gridding())
+
+    @property
+    def corrected_data(self):
+        return self.set_get_attr('_corrected_data', deepcopy(self.data))
 
     # ## formatting functions
     def format_vftb(self):
@@ -171,23 +172,23 @@ class Hys(base.Measurement):
            down_field: down field branch
            up_field: up field branch
         """
-        # get data
+        #get data
         data = self.machine_data.out_hysteresis()
         # get header
         header = self.machine_data.header
-        raw_data = RockPyData(column_names=header, data=data[0])  #todo maybe not as attribute
-        dfield = np.diff(raw_data['field'].v)
+        self._data['all'] = RockPyData(column_names=header, data=data[0]) #todo maybe not as attribute
+        dfield = np.diff(self._data['all']['field'].v)
 
         #get index where change of field value is negative
-        idx = [i for i in range(len(dfield)) if dfield[i] <= 0]  # todo implement signchanges in RockPy.data
-        idx += [max(idx) + 1]  # add 1 point so down and up field branches start at same values
+        idx = [i for i in range(len(dfield)) if dfield[i] <= 0] # todo implement signchanges in RockPy.data
+        idx += [max(idx) + 1] # add 1 point so down and up field branches start at same values
         virgin_idx = range(0, idx[0])
         down_field_idx = idx
         up_field_idx = range(idx[-1], len(dfield) + 1)
 
-        self._raw_data['virgin'] = raw_data.filter_idx(virgin_idx)
-        self._raw_data['down_field'] = raw_data.filter_idx(down_field_idx)
-        self._raw_data['up_field'] = raw_data.filter_idx(up_field_idx)
+        self._data['virgin'] = self._data['all'].filter_idx(virgin_idx)
+        self._data['down_field'] = self._data['all'].filter_idx(down_field_idx)
+        self._data['up_field'] = self._data['all'].filter_idx(up_field_idx)
 
     def format_vsm(self):
         header = self.machine_data.header
@@ -202,32 +203,32 @@ class Hys(base.Measurement):
             header[header.index('adjusted moment')] = 'moment'
 
         if len(segments['segment number'].v) == 3:
-            self._raw_data['virgin'] = RockPyData(column_names=header, data=self.machine_data.out_hysteresis()[0])
-            self._raw_data['down_field'] = RockPyData(column_names=header, data=self.machine_data.out_hysteresis()[1])
-            self._raw_data['up_field'] = RockPyData(column_names=header, data=self.machine_data.out_hysteresis()[2])
+            self._data['virgin'] = RockPyData(column_names=header, data=self.machine_data.out_hysteresis()[0])
+            self._data['down_field'] = RockPyData(column_names=header, data=self.machine_data.out_hysteresis()[1])
+            self._data['up_field'] = RockPyData(column_names=header, data=self.machine_data.out_hysteresis()[2])
 
         if len(segments['segment number'].v) == 2:
-            self._raw_data['virgin'] = None
-            self._raw_data['down_field'] = RockPyData(column_names=header, data=self.machine_data.out_hysteresis()[0])
-            self._raw_data['up_field'] = RockPyData(column_names=header, data=self.machine_data.out_hysteresis()[1])
+            self._data['virgin'] = None
+            self._data['down_field'] = RockPyData(column_names=header, data=self.machine_data.out_hysteresis()[0])
+            self._data['up_field'] = RockPyData(column_names=header, data=self.machine_data.out_hysteresis()[1])
 
         if len(segments['segment number'].v) == 1:
-            self._raw_data['virgin'] = RockPyData(column_names=header, data=self.machine_data.out_hysteresis()[0])
-            self._raw_data['down_field'] = None
-            self._raw_data['up_field'] = None
+            self._data['virgin'] = RockPyData(column_names=header, data=self.machine_data.out_hysteresis()[0])
+            self._data['down_field'] = None
+            self._data['up_field'] = None
 
         try:
-            self._raw_data['virgin'].rename_column('moment', 'mag')
+            self.data['virgin'].rename_column('moment', 'mag')
         except AttributeError:
             pass
 
         try:
-            self._raw_data['up_field'].rename_column('moment', 'mag')
+            self.data['up_field'].rename_column('moment', 'mag')
         except AttributeError:
             pass
 
         try:
-            self._raw_data['down_field'].rename_column('moment', 'mag')
+            self.data['down_field'].rename_column('moment', 'mag')
         except AttributeError:
             pass
 
@@ -240,17 +241,22 @@ class Hys(base.Measurement):
         down_field_idx = [i for i in range(len(dfield)) if dfield[i] < 0]
         up_field_idx = [i for i in range(len(dfield)) if dfield[i] > 0]
 
-        self._raw_data['down_field'] = self.raw_data.filter_idx(down_field_idx)
-        self._raw_data['down_field'].define_alias('field', 'raw_applied_field_for_plot_')
-        self._raw_data['down_field'].define_alias('mag', 'raw_signal_mx')
-        self._raw_data['down_field']['field'] *= 0.1 * 1e-3  # conversion Oe to Tesla
+        self._data['down_field'] = self.raw_data.filter_idx(down_field_idx)
+        self._data['down_field'].define_alias('field', 'raw_applied_field_for_plot_')
+        self._data['down_field'].define_alias('mag', 'raw_signal_mx')
+        self._data['down_field']['field'] *= 0.1 * 1e-3  # conversion Oe to Tesla
 
-        self._raw_data['up_field'] = self.raw_data.filter_idx(up_field_idx)
-        self._raw_data['up_field'].define_alias('field', 'raw_applied_field_for_plot_')
-        self._raw_data['up_field'].define_alias('mag', 'raw_signal_mx')
-        self._raw_data['up_field']['field'] *= 0.1 * 1e-3  # conversion Oe to Tesla
+        self._data['up_field'] = self.raw_data.filter_idx(up_field_idx)
+        self._data['up_field'].define_alias('field', 'raw_applied_field_for_plot_')
+        self._data['up_field'].define_alias('mag', 'raw_signal_mx')
+        self._data['up_field']['field'] *= 0.1 * 1e-3  # conversion Oe to Tesla
 
     # ## calculations
+
+    def irrev(self, **options):
+        irrev = self.data['down_field']
+        irrev -= self.data['up_field']
+        return irrev
 
     """ RESULTS """
 
@@ -487,30 +493,17 @@ class Hys(base.Measurement):
 
     """ CORRECTIONS """
 
-    def correct_outliers(self, threshold=4, check=False):
-        """
-
-        :param threshold:
-        :return:
-        """
-
-        mx = max(self.data['down_field']['mag'].v)
-        for dtype in self.data:
-            print len(self.data[dtype]['field'].v[1:]), len(np.diff(self.data[dtype]['mag'].v) / mx)
-
-            plt.plot(self.data[dtype]['field'].v[1:], np.diff(self.data[dtype]['mag'].v) / mx)
-        plt.show()
-
     def correct_hsym(self):
         raise NotImplementedError
 
     def correct_vsym(self):
         raise NotImplementedError
 
+
     def simple_paramag_cor(self, **parameter):
 
         # if not self.paramag_correction:
-        # self.calculate_ms(**parameter)
+        #     self.calculate_ms(**parameter)
 
         slope = np.mean(self.paramag_correction[:, 0])
         intercept = np.mean(self.paramag_correction[:, 2])
@@ -646,18 +639,18 @@ class Hys(base.Measurement):
             return out
 
         # def simple_grid(dtype):
-        # print self.grid_data
-        if method == 'simple':
+        #     print self.grid_data
+        if method =='simple':
             for dtype in self.corrected_data:
                 self.corrected_data[dtype] = simple(dtype)
-        if method == 'simple_grid':
+        if method =='simple_grid':
             for dtype in self.corrected_data:
                 self.corrected_data[dtype] = self.grid_data[dtype]
                 print dtype
                 print self.corrected_data[dtype]
                 self.corrected_data[dtype] = simple(dtype)
 
-                # print self.corrected_data['up_field']['mag'].v[0]
+        # print self.corrected_data['up_field']['mag'].v[0]
 
 
     def correct_slope(self):
@@ -782,12 +775,3 @@ class Hys(base.Measurement):
 
     def export_vftb(self, folder=None, filename=None):
         import os
-
-
-if __name__ == '__main__':
-    import RockPy
-
-    mfile = RockPy.join(RockPy.test_data_path, 'MUCVSM_test.hys')
-    s = RockPy.Sample(name='test_sample')
-    m = s.add_measurement(mtype='hys', mfile=mfile, machine='vsm')
-    m.correct_outliers(check=True)

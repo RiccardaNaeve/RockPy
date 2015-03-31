@@ -106,6 +106,7 @@ class Measurement(object):
         self.color = color
         self.has_data = True
         self._data = {}
+        self._raw_data = {}
         self.is_initial_state = False
         self.is_mean = False # flag for mean measurements
 
@@ -216,6 +217,7 @@ class Measurement(object):
 
         self.is_normalized = False # normalized flag for visuals, so its not normalized twize
         self.norm = None # the actual parameters
+
 
     def __getstate__(self):
         '''

@@ -54,6 +54,7 @@ class AfDemag(base.Measurement):
     def result_mdf(self, component='mag', interpolation='linear', recalc=False):
         """
         Calculates the MDF (median destructive field from data using linear interpolation between closest points
+
         :param parameter: interpolation:
            interpolation methods:
 

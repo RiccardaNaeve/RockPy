@@ -13,7 +13,7 @@ __author__ = 'mike'
 class TestGeneric(TestCase):
     def setUp(self):
         self.sample = RP.Sample(name='test_sample')
-        self.sample.add_measurement(mtype='thellier', mfile='../Tutorials/test_data/NLCRY_Thellier_test.TT',
+        self.sample.add_measurement(mtype='thellier', mfile='../tutorials.rst/test_data/NLCRY_Thellier_test.TT',
                                     machine='cryomag')
         self.sample_group = RP.SampleGroup(sample_list=self.sample)
         self.Plot = Visualize.base.Generic()

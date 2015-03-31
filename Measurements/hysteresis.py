@@ -33,30 +33,41 @@ class Hysteresis(base.Measurement):
         """
         Simulation of hysteresis loop using sngle tanh and sech functions.
 
-        Parameters:
-        -----------
-        m_idx: int
-            index of measurement
-        ms: float
+        :Parameters:
+           m_idx: int
+              index of measurement
 
-        mrs_ms: float
-            :math:`M_{rs}/M_{s}` ratio
-        bc:
-        hf_sus:
-        bmax:
-        b_sat: float
-            Field at which 99% of the moment is saturated
-        steps:
-        sample_obj:
-        color:
-        parameter:
+           ms: float
 
-        Returns:
-        --------
+           mrs_ms: float
+              :math:`M_{rs}/M_{s}` ratio
 
-        Note:
-        ----
+           bc:
+
+           hf_sus:
+
+           bmax:
+
+           b_sat: float
+              Field at which 99% of the moment is saturated
+
+           steps:
+
+           sample_obj:
+
+           color:
+
+           parameter:
+
+        :Returns:
+
+        :Note:
+
         Increasing the Mrs/Ms ratio to more then 0.5 results in weird looking hysteresis loops
+
+        :TODO:
+
+           Not working properly, yet. Use with caution
         """
 
         data = {'up_field': None,
@@ -118,7 +129,9 @@ class Hysteresis(base.Measurement):
     def format_vftb(self):
         """
         format function that takes vftb.machine_data and transforms it into HYsteresis.RockPydata objects.
+
         :needed:
+
            virgin: virgin branch
            down_field: down field branch
            up_field: up field branch
@@ -214,15 +227,30 @@ class Hysteresis(base.Measurement):
     def result_ms(self, method='auto', recalc=False, **parameter):
         """
         calculates the Ms value with a linear fit
-        :param recalc:
-        :param parameter:
-            - from_field : field value in % of max. field above which slope seems linear
-        :return:
 
-        :methods auto: simple
-        :methods simple: Calculates a simple linear regression of the high field magnetization. The y-intercept
-                         is Ms.
-        : method approach_to_sat: Calculates a simple approach to saturation :cite:`Dobeneck1996a`
+        :Parameters:
+
+           recalc: str standard(False)
+              if True result will be forced to be recalculated
+
+
+           parameter:
+              - from_field : field value in % of max. field above which slope seems linear
+
+        :Return:
+
+            RockPyData
+
+        :Methods:
+
+           auto:
+             uses simple method
+
+           simple:
+              Calculates a simple linear regression of the high field magnetization. The y-intercept is Ms.
+
+           approach_to_sat:
+              Calculates a simple approach to saturation :cite:`Dobeneck1996a`
 
         """
 
@@ -429,7 +457,10 @@ class Hysteresis(base.Measurement):
 
     """ CORRECTIONS """
 
-    def check_if_msi(self):
+    def correct_hsym(self):
+        raise NotImplementedError
+
+    def correct_vsym(self):
         raise NotImplementedError
 
 
@@ -451,28 +482,27 @@ class Hysteresis(base.Measurement):
         """
         Data griding after :cite:`Dobeneck1996a`. Generates an interpolated hysteresis loop with
         :math:`M^{\pm}_{sam}(B^{\pm}_{exp})` at mathematically defined (grid) field values, identical for upper
-         and lower branch.
+        and lower branch.
 
         .. math::
 
-           B_{\text{grid}}(i) = \frac{|i|}{i} \frac{B_m}{\lambda} \left[(\lambda + 1 )^{|i|/n} - 1 \right]
+           B_{\text{grid}}(i) = \\frac{|i|}{i} \\frac{B_m}{\lambda} \\left[(\lambda + 1 )^{|i|/n} - 1 \\right]
 
+        :Parameters:
 
-        Parameters
-        ----------
-        method : str
-            method with wich the data is fitted between grid points.
-            first:
-                data is fitted using a first order polinomial :math:`M(B) = a_1 + a2*B`
-            second:
-                data is fitted using a second order polinomial :math:`M(B) = a_1 + a2*B +a3*B^2`
+           method: str
+              method with wich the data is fitted between grid points.
 
-        parameter: dict
-            Keyword arguments passed through
+              first:
+                  data is fitted using a first order polinomial :math:`M(B) = a_1 + a2*B`
+              second:
+                  data is fitted using a second order polinomial :math:`M(B) = a_1 + a2*B +a3*B^2`
 
-        See Also
-        --------
-        get_grid
+           parameter: dict
+              Keyword arguments passed through
+
+        :See Also:
+           get_grid
         """
 
         bmax = min([max(self.data['down_field']['field'].v), max(self.data['up_field']['field'].v)])
@@ -539,11 +569,14 @@ class Hysteresis(base.Measurement):
     def rotate_branch(self, branch, data='data'):
         """
         rotates a branch by 180 degrees, by multiplying the field and mag values by -1
-        :param data: str
-                     e.g. data, grid_data, corrected_data
-        :param branch: str
-                       up-field or down-field
-        :return:
+
+        :Parameters:
+
+           data: str
+              e.g. data, grid_data, corrected_data
+
+           branch: str
+              up-field or down-field
         """
         data = deepcopy(getattr(self, data)[branch])
         data['field'] = -data['field'].v[::-1]
@@ -580,7 +613,6 @@ class Hysteresis(base.Measurement):
                 self.corrected_data[dtype] = simple(dtype)
 
         # print self.corrected_data['up_field']['mag'].v[0]
-
 
 
     def correct_slope(self):
@@ -648,9 +680,16 @@ class Hysteresis(base.Measurement):
                                        p0=[max(df_neg['mag'].v), 1e-7, 0])
         return popt_pos, popt_neg
 
-
     def correct_holder(self):
         raise NotImplementedError
+
+
+    ### helper functions
+
+    def check_if_msi(self):
+        raise NotImplementedError
+
+
 
     # ## plotting functions
     def plt_hys(self, noshow=False):

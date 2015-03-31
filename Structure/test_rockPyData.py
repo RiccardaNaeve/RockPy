@@ -1,4 +1,4 @@
-from unittest import TestCase  # Unit Tutorials framework
+from unittest import TestCase  # Unit tutorials.rst framework
 import numpy as np  # numerical array functions
 from RockPy.Structure.data import RockPyData
 import copy

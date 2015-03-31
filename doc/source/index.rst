@@ -7,6 +7,8 @@ Contents:
    :maxdepth: 1
 
    modules
+   tutorials
+   measurements
    RockPy
    RockPy.Functions
    RockPy.Measurements

@@ -14,6 +14,6 @@ RockPy.Functions.general.create_logger('RockPy')
 import os
 from os.path import join
 
-test_data_path = join(os.getcwd().split('RockPy')[0], 'RockPy', 'Tutorials', 'test_data')
+test_data_path = join(os.getcwd().split('RockPy')[0], 'RockPy', 'tutorials.rst', 'test_data')
 
 # os.chdir(default_path)

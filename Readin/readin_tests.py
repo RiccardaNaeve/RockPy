@@ -7,7 +7,7 @@ import pmd
 
 class TestCryoMag(TestCase):
     def setUp(self):
-        self.file = '../Tutorials/test_data/NLCRYO_test.af'
+        self.file = '../tutorials.rst/test_data/NLCRYO_test.af'
 
     def test___init__(self):
         self.CMag_obj = cryomag.CryoMag(dfile=self.file, sample_name='DA6B')
@@ -21,7 +21,7 @@ class TestCryoMag(TestCase):
 
 class TestPMD(TestCase):
     def setUp(self):
-        self.file = '../Tutorials/test_data/HA2A.pmd'
+        self.file = '../tutorials.rst/test_data/HA2A.pmd'
 
     def test___init__(self):
         self.PMD_obj = pmd.PMD(dfile=self.file, sample_name='HA2A')

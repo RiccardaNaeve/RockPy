@@ -45,7 +45,7 @@ def get_af_demag_sample():
 
 def get_pmd_demag():
     S = RockPy.Sample(name='test_sample')
-    dm = 'RockPy/Tutorials/test_data/HA2A.pmd'
+    dm = 'RockPy/tutorials.rst/test_data/HA2A.pmd'
     S.add_measurement(mtype='afdemag', mfile=dm, machine='pmd')
     return S
 

@@ -9,7 +9,7 @@ from os.path import join
 
 class TestHysteresis(TestCase):
     def setUp(self):
-        vsm_file = '../Tutorials/test_data/MUCVSM_test.hys'
+        vsm_file = '../tutorials.rst/test_data/MUCVSM_test.hys'
         # vsm_file = join(RockPy.test_data_path, 'vsm', 'LTPY_527,1a_HYS_VSM#XX[mg]___#TEMP_300_K#STD000.000')
         self.sample = RockPy.Sample('test')
         self.VSM_test = RockPy.Sample('test')

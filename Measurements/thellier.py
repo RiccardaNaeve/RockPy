@@ -10,6 +10,54 @@ from RockPy.Functions import general
 
 
 class Thellier(base.Measurement):
+    """
+    Measurement class for Thellier Thellier Experiments
+
+    **Results**
+
+    Arai plot statistics:
+       result_n:
+
+       result_slope:
+
+       result_sigma:
+
+       result_x_int:
+
+       result_y_int:
+
+       result_b_anc:
+
+       result_sigma_b_anc:
+
+       result_vds:
+
+       result_f:
+
+       result_f_vds:
+
+       result_frac:
+
+       result_beta:
+
+       result_g:
+
+       result_gap:
+
+       result_q:
+
+       result_w:
+
+    Directional statistics
+
+    pTRM check statistics
+
+    pTRM tails check statistics
+
+    Additivity check statistics
+
+
+    """
     # todo format_sushibar
     # todo format_jr6
     _standard_parameter = {'slope': {'t_min': 20, 't_max': 700, 'component': 'mag'}}
@@ -1083,7 +1131,7 @@ class Thellier(base.Measurement):
 
         where `L` is the length of the best-fit line on the Arai plot. `L` is given by:
 
-        :math:
+        .. math::
 
            L=\sqrt{ (\Delta{x'})^2 + (\Delta{y'})^2 }
 
@@ -1103,9 +1151,10 @@ class Thellier(base.Measurement):
         Maximum absolute difference produced by a pTRM check, normalized by the length of the TRM segment of the
         best-fit line on the Arai plot (Blanco et al., 2012).
 
-        math::
+        .. math::
 
-           maxDEV=\\frac`{\max{\left\{\left|\delta{pTRM_{i,j}} \right| \right\}}_{i \leq end \textbf{ and } j \leq end}}{\Delta{x'}}\times{100}
+           maxDEV=\\frac{ \max \\left\{ \\left| \delta pTRM_{i,j} \\right| \\right\}_{i \\leq end \\; \\textbf{and} \\; j \\leq end}  }{\Delta{x'}} \\times 100
+
 
         """
         component = parameter.get('component', self.standard_parameter['slope']['component'])
@@ -1324,7 +1373,6 @@ class Thellier(base.Measurement):
     def get_d_tail(self, **parameter):
         """
         pTRM tails check statistics (TR)
-        ================================
 
         A pTRM tail check is a repeat demagnetization step to test for changes in a specimen's magnetization carried in the
         blocking temperature range above the temperature of the check. The difference between the first NRM measurement and
@@ -1485,80 +1533,6 @@ class Thellier(base.Measurement):
     def calculate_d_t(self, **parameter):
         """
         The extent of a pTRM tail after correction for angular dependence (Leonhardt et al., 2004a; 2004b).
-
-        The applied laboratory field vector (:math:`\mathbf{B}_{Lab}`) is typically applied along a principle axis in the
-        sample coordinate system (i.e., :math:`\pm x`, :math:`\pm y`, or :math:`\pm z`). Therefore,
-        for simplicity, :math:`\delta{t^*}` should be calculated in the sample coordinate system only.
-        Figure 7 is a schematic illustration of aspects of the calculation of :math:`\delta{t^*}`.
-
-        Figure 7.Schematic illustration of an NRM vector (:math:`\mathbf{NRM}_i`) and a pTRM tail
-        check vector (:math:`\mathbf{tail\_check}_i`) for a sample that exhibits a pTRM tail.
-        Modified after Leonhardt et al. (2004b).
-
-        Let :math:`N_{x,i}`, :math:`N_{y,i}`, and :math:`N_{z,i}` denote the Cartesian coordinates of the NRM
-        vector at step :math:`i` (i.e., :math:`\mathbf{NRM}_i = [N_{x,i}, N_{y,i}, N_{z,i}]`).
-        Similarly, let :math:`T_{x,i}`, :math:`T_{y,i}`, and :math:`T_{z,i}` denote the Cartesian
-        coordinates of the repeat demagnetization vector at step
-        :math:`i` (i.e., :math:`\mathbf{tail\_check}_i = ` [:math:`T_{x,i}`, :math:`T_{y,i}`, :math:`T_{z,i}`]).
-
-        Assuming that :math:`\mathbf{B}_{Lab}` is applied along the z-axis, the difference
-        in the horizontal (:math:`\delta{H_i}`) and vertical components (:math:`\delta{Z_i}`)
-        between :math:`\mathbf{NRM}_i` and :math:`\mathbf{tail\_check}_i` (Figure 7) are given by:
-        
-        .. math::
-        
-           \\delta{H_i}=\\sqrt{N_{x,i}^2 + N_{y,i}^2} - \\sqrt{T_{x,i}^2 + T_{y,i}^2} \\] and \\[ \\delta{Z_i}=N_{z,i} - T_{z,i}. \\]
-
-        pTRM tails have an angular dependence and the calculation of $$\delta{t^*}$$
-        requires two angular differences. Let $$\Delta{\theta}_i$$ denote the angle between
-        $$\mathbf{B}_{Lab}$$ and $$\mathbf{NRM}_i$$ (see Section 4 for advice on calculating the
-        angle between two vectors). Let $$\delta{Inc}_i$$ denote the difference in inclinations
-        between the $$\mathbf{B}_{Lab}$$ and $$\mathbf{NRM}_i$$:
-
-        .. math::
-        
-           \\delta{Inc_i}=Inc(\\mathbf{B}_{Lab}) - Inc(\\mathbf{NRM}_i)=\\arctan{\\left(\\\\frac`{B_{Lab,z}}{\\sqrt{B_{Lab,x}^2 + B_{Lab,y}^2}}\\right)} - \\arctan{\\left(\\\\frac`{N_{z,i}}{\\sqrt{N_{x,i}^2 + N_{x,i}^2}}\\right)}.
-
-        In the ThellierTool software (v4.22 and previous) :math:$$\mathbf{B}_{Lab}$$ is determined from
-        each :math:$$\mathbf{TRM}_i$$. Given that :math:$$\mathbf{B}_{Lab}$$ is almost always known, the convention of
-        SPD is to use the known :math:$$\mathbf{B}_{Lab}$$ and not as estimated from :math:$$\mathbf{TRM}_i$$,
-        which may suffer from the effects of experimental noise.
-
-        As will be seen below, the calculation of :math:$$\delta{t^*}$$ requires :math:$$\\frac`{1}{\tan{(\Delta{\theta}_i)}}$$.
-        As :math:$$\Delta{\theta}_i$$ approaches zero or 180 this fraction tends to infinity. To tackle this,
-        :math:$$\delta{t^*}$$ is calculated in a piecewise fashion that depends on upper and lower angular limits
-        (:math:$$Lim_{upper}$$ and :math:$$Lim_{lower}$$, respectively). Below is pseudo-code that describes the logic
-        of the calculation procedure.
-
-        In v4.22 of the ThellierTool :math:$$Lim_{lower} = 0.175$$ (:math:$$\approx10$$) radi
-
-
-        :math:$$\delta{t^*}$$ is then calculated as:
-
-        .. math::
-        
-           \\delta{t^*}=\\left\\{ \\begin{array}{lc}	\\max{ \\left\\{ t^*_i\\right\\} }_{i=1, \\ldots, end}	&	\\mbox{ if } (\\max{ \\left\\{ t^*_i\\right\\} }_{i=1, \\ldots, end} > 0)\\\\ 0	&	\\mbox{ if } (\\max{ \\left\\{ t^*_i\\right\\} }_{i=1, \\ldots, end} < 0)\\end{array}\\right.
-
-        Only positive values of :math:$$t^*$$ and :math:$$\delta{t^*}$$ can be attributed to the effects of pTRM
-        tails, hence :math:$$\delta{t^*}$$ is calculated as the maximum of :math:$$t^*$$ and not the maximum of :math:$$\left|t^*\right|$$.
-
-        It should be noted that an implicit assumption in the above calculations is that :math:$$\mathbf{B}_{Lab}$$
-        is applied along the :math:$$z$$-axis. In situations where :math:$$\mathbf{B}_{Lab}$$ is applied along the
-        :math:$$x$$- or :math:$$y$$-axes, the definition of ``horizontal'' and ``vertical'' can be redefined such that
-        :math:$$\mathbf{B}_{Lab}$$ is applied in the ``vertical'' direction. For example, if :math:$$\mathbf{B}_{Lab}$$
-        is along the :math:$$x$$-axis, :math:$$\delta{H_i}$$ and :math:$$\delta{Z_i}$$ can be defined as:
-
-        .. math::
-        
-           \\delta{H_i}=\\sqrt{N_{y,i}^2 + N_{z,i}^2} - \\sqrt{T_{y,i}^2 + T_{z,i}^2} \\] and \\[ \\delta{Z_i}=N_{x,i} - T_{x,i},
-
-        and
-        
-        .. math::
-        
-           \\delta{Inc_i}=\\arctan{\\left(\\frac{B_{Lab,x}}{\\sqrt{B_{Lab,y}^2 + B_{Lab,z}^2}}\\right)} - \\arctan{\\left(\\\\frac`{N_{x,i}}{\\sqrt{N_{y,i}^2 + N_{z,i}^2}}\\right)}.
-
-        The remaining calculations can proceed as described above.
         """
         self.results['delta_tr'] = np.nan
 

@@ -9,14 +9,15 @@ Contents:
    modules
    tutorials
    measurements
-   RockPy
+   guidlines
+   zreferences
    RockPy.Functions
    RockPy.Measurements
    RockPy.Readin
    RockPy.Structure
    RockPy.Treatments
    RockPy.Visualize
-   guidlines
+
 
 Indices and tables
 ==================
@@ -24,4 +25,6 @@ Indices and tables
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
+
+
 

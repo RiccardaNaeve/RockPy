@@ -10,20 +10,62 @@ from scipy.optimize import curve_fit
 from copy import deepcopy
 import scipy as sp
 from math import tanh, cosh
-
+from os.path import join
 from pprint import pprint
 
 class Hysteresis(base.Measurement):
     """
+    Measurement Class for Hysteresis Measurements
+
+    Corrections
+    -----------
+
+       correct_slope:
+          *not implemented* corrects data for high-field susceptibility
+
+       correct_hsym:
+          *not implemented* corrects data for horizontal assymetry
+
+       correct_vsym:
+          *not implemented* corrects data for vertical assymetry
+
+       correct_drift:
+          *not implemented* corrects data for machine drift
+
+       correct_pole_sat:
+          *not implemented* corrects data for pole piece saturation
+
+       correct_holder:
+          *not implemented* corrects data for holder magnetization
+
+       correct_outliers:
+          *not implemented* removes outliers from data
+
+    Results:
+
+    Decomposition:
+
+    Fitting
+    -------
+
+
 
     .. testsetup:: *
-
        >>> import RockPy
-       >>> vftb_file = RockPy.test_data_path + '/' +  'MUCVFTB_test.hys'
+       >>> from os.path import join
+       >>> vftb_file = join(RockPy.test_data_path,'MUCVFTB_test.hys')
        >>> sample = RockPy.Sample(name='vftb_test_sample')
        >>> M = sample.add_measurement(mtype='hysteresis', mfile=vftb_file, machine='vftb')
 
+    See Also
+    --------
+       :cite:`Dobeneck1996a`
+       :cite:`Fabian2003`
+       :cite:`Yu2005b`
 
+    **References**
+    .. bibliography:: hysteresis.bib
+       :cited:
     """
 
     @classmethod
@@ -33,17 +75,11 @@ class Hysteresis(base.Measurement):
         """
         Simulation of hysteresis loop using sngle tanh and sech functions.
 
-        :Parameters:
-           m_idx: int
-              index of measurement
-
-           ms: float
-
-           mrs_ms: float
-              :math:`M_{rs}/M_{s}` ratio
-
-           bc:
-
+        Parameters:
+           m_idx (int): index of measurement
+           ms (float): desired saturation magnetization
+           mrs_ms (float): :math:`M_{rs}/M_{s}` ratio
+           bc (float): desired bc
            hf_sus:
 
            bmax:
@@ -93,7 +129,7 @@ class Hysteresis(base.Measurement):
         return cls(sample_obj, 'hysteresis', mfile=None, mdata=data, machine='simulation', color=color)
 
     @classmethod
-    def get_grid(cls, bmax=1, n=30, tuning=5):
+    def get_grid(cls, bmax=1, n=20, tuning=2):
         grid = []
         # calculating the grid
         for i in xrange(-n, n + 1):
@@ -488,7 +524,8 @@ class Hysteresis(base.Measurement):
 
            B_{\text{grid}}(i) = \\frac{|i|}{i} \\frac{B_m}{\lambda} \\left[(\lambda + 1 )^{|i|/n} - 1 \\right]
 
-        :Parameters:
+        Parameters
+        ----------
 
            method: str
               method with wich the data is fitted between grid points.
@@ -501,7 +538,8 @@ class Hysteresis(base.Measurement):
            parameter: dict
               Keyword arguments passed through
 
-        :See Also:
+        See Also
+        --------
            get_grid
         """
 

@@ -11,6 +11,7 @@ from copy import deepcopy
 import scipy as sp
 from math import tanh, cosh
 
+from pprint import pprint
 
 class Hysteresis(base.Measurement):
     """
@@ -81,7 +82,7 @@ class Hysteresis(base.Measurement):
         return cls(sample_obj, 'hysteresis', mfile=None, mdata=data, machine='simulation', color=color)
 
     @classmethod
-    def get_grid(cls, bmax=1, n=20, tuning=8):
+    def get_grid(cls, bmax=1, n=30, tuning=5):
         grid = []
         # calculating the grid
         for i in xrange(-n, n + 1):
@@ -99,33 +100,39 @@ class Hysteresis(base.Measurement):
 
         super(Hysteresis, self).__init__(sample_obj, mtype, mfile, machine, **options)
 
-        self._grid_data = {}
-        self._corrected_data = {}
-
-        self.correction = []
         self.paramag_correction = None
 
     @property
+    def correction(self):
+        return self.set_get_attr('_correction', value=list())
+
+    @property
     def grid_data(self):
-        if not self._grid_data:
-            self.data_gridding()
-        return self._grid_data
+        return self.set_get_attr('_grid_data', value=self.data_gridding())
 
     @property
     def corrected_data(self):
-        if not self._corrected_data:
-            self._corrected_data = deepcopy(self.data)
-        else:
-            return self._corrected_data
+        return self.set_get_attr('_corrected_data', deepcopy(self.data))
 
     # ## formatting functions
     def format_vftb(self):
+        """
+        format function that takes vftb.machine_data and transforms it into HYsteresis.RockPydata objects.
+        :needed:
+           virgin: virgin branch
+           down_field: down field branch
+           up_field: up field branch
+        """
+        #get data
         data = self.machine_data.out_hysteresis()
+        # get header
         header = self.machine_data.header
-        self._data['all'] = RockPyData(column_names=header, data=data[0])
+        self._data['all'] = RockPyData(column_names=header, data=data[0]) #todo maybe not as attribute
         dfield = np.diff(self._data['all']['field'].v)
-        idx = [i for i in range(len(dfield)) if dfield[i] <= 0]
-        idx += [max(idx) + 1]
+
+        #get index where change of field value is negative
+        idx = [i for i in range(len(dfield)) if dfield[i] <= 0] # todo implement signchanges in RockPy.data
+        idx += [max(idx) + 1] # add 1 point so down and up field branches start at same values
         virgin_idx = range(0, idx[0])
         down_field_idx = idx
         up_field_idx = range(idx[-1], len(dfield) + 1)
@@ -428,8 +435,8 @@ class Hysteresis(base.Measurement):
 
     def simple_paramag_cor(self, **parameter):
 
-        if self.paramag_correction is None:
-            self.calculate_ms(**parameter)
+        # if not self.paramag_correction:
+        #     self.calculate_ms(**parameter)
 
         slope = np.mean(self.paramag_correction[:, 0])
         intercept = np.mean(self.paramag_correction[:, 2])
@@ -489,7 +496,7 @@ class Hysteresis(base.Measurement):
             """
             return a + b * x + c * x ** 2
 
-        for dtype in ['down_field', 'up_field']:
+        for dtype in ['down_field', 'up_field', 'virgin']:
             interp_data = RockPyData(column_names=['field', 'mag'])
             d = self.data[dtype]
             for i in range(1, len(grid) - 1):
@@ -542,6 +549,39 @@ class Hysteresis(base.Measurement):
         data['field'] = -data['field'].v[::-1]
         data['mag'] = -data['mag'].v[::-1]
         return data
+
+    def correct_paramag(self, method='simple', **parameter):
+        "corrects data according to specified method"
+
+        # print self.corrected_data['up_field']['mag'].v[0]
+        # definition of methods
+        def simple(dtype):
+            """
+            very simple correction, uses a linear fit from results_paramag_slope()
+            :param dtype:
+            :return:
+            """
+            out = deepcopy(self.corrected_data[dtype])
+            correct = out['field'].v * self.result_paramag_slope(**parameter).v[0]
+            out['mag'] = out['mag'].v - correct
+            # print correct
+            return out
+
+        # def simple_grid(dtype):
+        #     print self.grid_data
+        if method =='simple':
+            for dtype in self.corrected_data:
+                self.corrected_data[dtype] = simple(dtype)
+        if method =='simple_grid':
+            for dtype in self.corrected_data:
+                self.corrected_data[dtype] = self.grid_data[dtype]
+                print dtype
+                print self.corrected_data[dtype]
+                self.corrected_data[dtype] = simple(dtype)
+
+        # print self.corrected_data['up_field']['mag'].v[0]
+
+
 
     def correct_slope(self):
         """

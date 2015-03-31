@@ -827,3 +827,13 @@ class Measurement(object):
     def show_plots(self):
         for visual in self.plottable:
             self.plottable[visual](self, show=True)
+
+    def set_get_attr(self, attr, value = None):
+        """
+        checks if attribute exists, if not, creates attribute with value None
+        :param attr:
+        :return:
+        """
+        if not hasattr(self, attr):
+            setattr(self, attr, value)
+        return getattr(self, attr)

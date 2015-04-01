@@ -398,7 +398,7 @@ class Measurement(object):
 
         self.results['generic'] = 0
 
-    def calc_result(self, parameter={}, recalc=False, force_method=None):
+    def calc_result(self, parameter=None, recalc=False, force_method=None):
         '''
         Helper function:
         Calls any calculate_* function, but checks first:
@@ -421,7 +421,7 @@ class Measurement(object):
 
         :return:
         '''
-
+        if not parameter: parameter = dict()
         if force_method is not None:
             method = force_method
         else:

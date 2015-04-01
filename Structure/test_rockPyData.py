@@ -52,7 +52,7 @@ class TestRockPyData(TestCase):
         rpd.rename_column('Mx', 'M_x')
         self.RPD = self.RPD.append_rows(rpd)
         # TODO: add assert
-        print self.RPD
+        #print self.RPD
 
     def test_delete_rows(self):
         self.RPD = self.RPD.delete_rows((0, 2))
@@ -118,13 +118,17 @@ class TestRockPyData(TestCase):
     def test_interation(self):
         # TODO: add proper assertion
         for l in self.RPD:
-            print l
+            #print l
+            pass
 
     def test_add_errors(self):
         d = RockPyData(column_names=['A', 'B'])
-        d['A'].v = 1  # Attribute Error NoneType has no attribute, maybe initialize to np.nan?
-        d['B'] = 2
-        d['A'].e = 4
-        d['B'].e = 5
+        #d['A'].v = 1  # Attribute Error NoneType has no attribute, maybe initialize to np.nan?
+        #d['B'] = 2
+        #d['A'].e = 4
+        #d['B'].e = 5
+        d = d.append_rows([1, 2])
+        print d
+        d.e = [[4, 5]]
 
         self.assertEqual(5., d['B'].e)

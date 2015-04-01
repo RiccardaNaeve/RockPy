@@ -422,16 +422,18 @@ class Measurement(object):
         :return:
         '''
         if not parameter: parameter = dict()
+        caller = '_'.join(inspect.stack()[1][3].split('_')[1:])  # get calling function
+
         if force_method is not None:
             method = force_method
         else:
-            method = '_'.join(inspect.stack()[1][3].split('_')[1:])  # get clling function
+            method = caller
 
         if callable(getattr(self, 'calculate_' + method)):  # check if calculation function exists
             parameter = self.compare_parameters(method, parameter,
                                                 recalc)  # checks for None and replaces it with standard
-            if self.results[method] is None or self.results[
-                method] == np.nan or recalc:  # if results dont exist or force recalc
+            if self.results[caller] is None or self.results[
+                caller] == np.nan or recalc:  # if results dont exist or force recalc
                 if recalc:
                     Measurement.logger.debug('FORCED recalculation of << %s >>' % (method))
                 else:
@@ -473,12 +475,12 @@ class Measurement(object):
         """
         # caller = inspect.stack()[1][3].split('_')[-1]
 
-        for i, v in parameter.iteritems():
-            if v is None:
+        for key, value in parameter.iteritems():
+            if value is None:
                 if self.calculation_parameter[caller] and not recalc:
-                    parameter[i] = self.calculation_parameter[caller][i]
+                    parameter[key] = self.calculation_parameter[caller][key]
                 else:
-                    parameter[i] = self.standard_parameter[caller][i]
+                    parameter[key] = self.standard_parameter[caller][key]
         return parameter
 
     def delete_dtype_var_val(self, dtype, var, val):

@@ -130,25 +130,21 @@ class Hys(base.Measurement):
         return cls(sample_obj, 'hysteresis', mfile=None, mdata=data, machine='simulation', color=color)
 
     @classmethod
-    def get_grid(cls, bmax=1, n=20, tuning=2):
+    def get_grid(cls, bmax=1, grid_points=30, tuning=10):
         grid = []
         # calculating the grid
-        for i in xrange(-n, n + 1):
+        for i in xrange(-grid_points, grid_points + 1):
             if i != 0:
-                boi = (abs(i) / i) * (bmax / tuning) * ((tuning + 1) ** (abs(i) / float(n)) - 1.)
+                boi = (abs(i) / i) * (bmax / tuning) * ((tuning + 1) ** (abs(i) / float(grid_points)) - 1.)
             else:  # catch exception for i = 0
                 boi = 0
             grid.append(boi)
         return np.array(grid)
 
 
-    def __init__(self, sample_obj,
-                 mtype, mfile, machine,
-                 **options):
+    def __init__(self, sample_obj, mtype, mfile, machine, **options):
 
         super(Hys, self).__init__(sample_obj, mtype, mfile, machine, **options)
-
-        self.paramag_correction = None
 
     @property
     def correction(self):
@@ -163,7 +159,7 @@ class Hys(base.Measurement):
     # ## formatting functions
     def format_vftb(self):
         """
-        format function that takes vftb.machine_data and transforms it into HYsteresis.RockPydata objects.
+        format function that takes vftb.machine_data and transforms it into Hysteresis.RockPydata objects.
 
         :needed:
 
@@ -484,6 +480,45 @@ class Hys(base.Measurement):
 
         raise NotImplementedError
 
+    def get_irreversible(self):
+        """
+        Calculates the irreversible hysteretic components :math:`M_{ih}` from the data.
+
+        .. math::
+
+           M_{ih} = (M^+(H) + M^-(H)) / 2
+
+        where :math:`M^+(H)` and :math:`M^-(H)` are the upper and lower branches of the hysteresis loop
+
+        Returns
+        -------
+           Mih: RockPyData
+
+        """
+        M_ih = deepcopy(self.data['down_field'])
+        uf = self.data['up_field'].interpolate(self.data['down_field']['field'].v)
+        M_ih['mag'] = (M_ih['mag'].v + uf['mag'].v) / 2
+        return M_ih
+
+    def get_reversible(self):
+        """
+        Calculates the reversible hysteretic components :math:`M_{ih}` from the data.
+
+        .. math::
+
+           M_{ih} = (M^+(H) + M^-(H)) / 2
+
+        where :math:`M^+(H)` and :math:`M^-(H)` are the upper and lower branches of the hysteresis loop
+
+        Returns
+        -------
+           Mrh: RockPyData
+
+        """
+        M_rh = deepcopy(self.data['down_field'])
+        uf = self.data['up_field'].interpolate(self.data['down_field']['field'].v)
+        M_rh['mag'] = (M_rh['mag'].v - uf['mag'].v) / 2
+        return M_rh
 
     """ CORRECTIONS """
 
@@ -493,7 +528,7 @@ class Hys(base.Measurement):
         :param threshold:
         :return:
         """
-
+        raise NotImplementedError
         mx = max(self.data['down_field']['mag'].v)
         for dtype in self.data:
             print len(self.data[dtype]['field'].v[1:]), len(np.diff(self.data[dtype]['mag'].v) / mx)
@@ -501,11 +536,76 @@ class Hys(base.Measurement):
             plt.plot(self.data[dtype]['field'].v[1:], np.diff(self.data[dtype]['mag'].v) / mx)
         plt.show()
 
-    def correct_hsym(self):
-        raise NotImplementedError
+    def correct_vsym(self, method='auto', check='False'):
+        """
+        Correction of horizontal symmetry of hysteresis loop. Horizontal displacement is found by looking for the minimum
+         of the absolute magnetization value of the :math:`M_{ih}` curve. The hysteresis is then shifted by the field
+         value at this point.
 
-    def correct_vsym(self):
-        raise NotImplementedError
+        Parameter
+        ---------
+           method: str
+              for implementation of several methods of calculation
+           check: str
+              plot to check for consistency
+        """
+
+        if check: #for check plot
+            checkdata = deepcopy(self.data)
+
+        pos_max = np.mean([np.max(self.data['up_field']['mag'].v), np.max(self.data['down_field']['mag'].v)])
+        neg_min = np.mean([np.min(self.data['up_field']['mag'].v), np.min(self.data['down_field']['mag'].v)])
+        correct = (pos_max + neg_min) / 2
+
+        for dtype in self.data:
+            self.data[dtype]['mag'] = self.data[dtype]['mag'].v - correct
+
+        if check:
+            for dtype in self.data:
+                plt.plot(self.data[dtype]['field'].v, self.data[dtype]['mag'].v, 'b.-')
+                plt.plot(checkdata[dtype]['field'].v, checkdata[dtype]['mag'].v, 'r.-')
+            plt.xlabel('Moment')
+            plt.xlabel('Field')
+            plt.legend(['original', 'corrected'])
+            plt.xlim([min(self.data['down_field']['field'].v), max(self.data['down_field']['field'].v)])
+            plt.grid()
+            plt.show()
+
+    def correct_hsym(self, method='auto', check=False):
+        """
+        Correction of horizontal symmetry of hysteresis loop. Horizontal displacement is found by looking for the minimum
+         of the absolute magnetization value of the :math:`M_{ih}` curve. The hysteresis is then shifted by the field
+         value at this point.
+
+        Parameter
+        ---------
+           method: str
+              for implementation of several methods of calculation
+           check: str
+              plot to check for consistency
+        """
+
+
+        mir = self.get_irreversible()
+        idx = np.nanargmin(abs(mir['mag'].v))
+        correct = mir['field'].v[idx] / 2
+
+        for dtype in self.data:
+            self.data[dtype]['field'] = self.data[dtype]['field'].v - correct
+
+        if check: #for check plot
+            checkdata = self.get_irreversible()
+
+        if check:
+            plt.plot(mir['field'].v, abs(mir['mag'].v), 'k--', alpha = 0.5)
+            plt.plot(mir['field'].v, mir['mag'].v, 'r-')
+            plt.plot(checkdata['field'].v, checkdata['mag'].v, 'b-')
+            plt.xlabel('Moment')
+            plt.xlabel('Field')
+            plt.legend(['abs($M_ir$)', 'original', 'corrected'])
+            plt.xlim([min(self.data[dtype]['field'].v), max(self.data[dtype]['field'].v)])
+            plt.grid()
+            plt.show()
 
     def simple_paramag_cor(self, **parameter):
 
@@ -521,7 +621,7 @@ class Hys(base.Measurement):
                 d[:, 1] -= d[:, 0] * slope
 
 
-    def data_gridding(self, method='second', **parameter):
+    def data_gridding(self, method='first', **parameter):
         """
         Data griding after :cite:`Dobeneck1996a`. Generates an interpolated hysteresis loop with
         :math:`M^{\pm}_{sam}(B^{\pm}_{exp})` at mathematically defined (grid) field values, identical for upper
@@ -554,7 +654,7 @@ class Hys(base.Measurement):
         bmin = min([min(self.data['down_field']['field'].v), min(self.data['up_field']['field'].v)])
         bm = min([abs(bmax), abs(bmin)])
 
-        grid = Hysteresis.get_grid(bmax=bm, **parameter)
+        grid = Hys.get_grid(bmax=bm, **parameter)
         # interpolate the magnetization values M_int(Bgrid(i)) for i = -n+1 .. n-1
         # by fitting M_{measured}(B_{experimental}) individually in all intervals [Bgrid(i-1), Bgrid(i+1)]
         # with first or second order polinomials
@@ -592,7 +692,7 @@ class Hys(base.Measurement):
                         self.logger.error(
                             'consider reducing number of points for interpolation or lower tuning parameter')
                         mag = np.mean(data['mag'].v)
-            self._grid_data.update({dtype: interp_data})
+            self.data.update({dtype: interp_data})
 
 
     def correct_center(self, data='grid_data'):
@@ -787,7 +887,10 @@ class Hys(base.Measurement):
 if __name__ == '__main__':
     import RockPy
 
-    mfile = RockPy.join(RockPy.test_data_path, 'MUCVSM_test.hys')
+    vsm_file = RockPy.join(RockPy.test_data_path, 'MUCVSM_test.hys')
+    vftb_file = RockPy.join(RockPy.test_data_path, 'MUCVFTB_test.hys')
     s = RockPy.Sample(name='test_sample')
-    m = s.add_measurement(mtype='hys', mfile=mfile, machine='vsm')
-    m.correct_outliers(check=True)
+    # m = s.add_measurement(mtype='hys', mfile=vsm_file, machine='vsm')
+    m = s.add_measurement(mtype='hys', mfile=vftb_file, machine='vftb')
+    # m.data_gridding(grid_points=10,tuning=1)
+    m.correct_vsym(check=True)

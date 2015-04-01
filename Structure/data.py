@@ -346,8 +346,7 @@ class RockPyData(object):
         :param errors: numerical array of errors
         :return:
         """
-
-        if errors is None or errors.all() == np.NAN:
+        if errors is None or np.all(np.isnan(errors)):
             self._data[:, :, 1] = np.NAN
         else:
             # todo: check type of errors

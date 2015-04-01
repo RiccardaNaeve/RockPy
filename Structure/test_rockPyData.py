@@ -123,3 +123,12 @@ class TestRockPyData(TestCase):
     def test_interation(self):
         for l in self.RPD:
             print l
+
+    def test_add_errors(self):
+        d = RockPyData(column_names=['A', 'B'])
+        d['A'].v = 1 # Attribute Error NoneType has no attribute, maybe initialize to np.nan?
+        d['B'] = 2
+        d['A'].e = 4
+        d['B'].e = 5
+
+        self.assertEqual(5., d['B'].e)

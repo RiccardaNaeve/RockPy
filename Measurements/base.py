@@ -206,7 +206,7 @@ class Measurement(object):
         # dynamically generating the calculation and standard parameters for each calculation method.
         # This just sets the values to non, the values have to be specified in the class itself
         self.calculation_methods = [i for i in dir(self) if i.startswith('calculate_') if not i.endswith('generic')]
-        self.calculation_parameter = {i[10:]: None for i in self.calculation_methods}
+        self.calculation_parameter = {i: dict() for i in self.result_methods}
         self._standard_parameter = {i[10:]: None for i in dir(self) if i.startswith('calculate_') if
                                     not i.endswith('generic')}
 
@@ -425,12 +425,12 @@ class Measurement(object):
         caller = '_'.join(inspect.stack()[1][3].split('_')[1:])  # get calling function
 
         if force_method is not None:
-            method = force_method
+            method = force_method # method for calculation if any: result_CALLER_method
         else:
-            method = caller
+            method = caller # if CALLER = METHOD
 
         if callable(getattr(self, 'calculate_' + method)):  # check if calculation function exists
-            parameter = self.compare_parameters(method, parameter,
+            parameter = self.compare_parameters(caller, parameter,
                                                 recalc)  # checks for None and replaces it with standard
             if self.results[caller] is None or self.results[
                 caller] == np.nan or recalc:  # if results dont exist or force recalc
@@ -441,7 +441,7 @@ class Measurement(object):
                 getattr(self, 'calculate_' + method)(**parameter)  # calling calculation method
             else:
                 Measurement.logger.debug('FOUND previous << %s >> parameters' % (method))
-                if self.check_parameters(method, parameter):  # are parameters equal to previous parameters
+                if self.check_parameters(caller, parameter):  # are parameters equal to previous parameters
                     Measurement.logger.debug('RESULT parameters different from previous calculation -> recalculating')
                     getattr(self, 'calculate_' + method)(**parameter)  # recalculating if parameters different
                 else:

@@ -59,7 +59,7 @@ class Viscosity(base.Measurement):
 
         self.data['data'].data = self.data['data'].data[n:]
 
-    def result_visc_decay(self, ommit_first_n=0, recalc=False, **options):
+    def result_visc_decay(self, ommit_first_n=0, normalized=True, recalc=False, **options):
         """
 
         :param recalc:
@@ -72,6 +72,19 @@ class Viscosity(base.Measurement):
         self.calc_result(parameter, recalc=recalc)
         return self.results['visc_decay']
 
+    def result_visc_decay_norm(self, ommit_first_n=0, recalc=False, **options):
+        """
+
+        :param recalc:
+        :return:
+        """
+
+        parameter = dict(ommit_first_n=ommit_first_n)
+        parameter.update(options)
+
+        self.calc_result(parameter, recalc=recalc, force_method='visc_decay')
+        return self.results['visc_decay']
+
 
     def calculate_visc_decay(self, **parameter):
         """
@@ -79,13 +92,13 @@ class Viscosity(base.Measurement):
         :return:
         """
         ommit_first_n = parameter.get('ommit_first_n', 0)
-        slope, intercept, std_err, r_value = self.fit_viscous_relaxation(self.data['data']['ln_time'].v[ommit_first_n:], self.data['data']['mag'].v[ommit_first_n:])
-
-
+        ln_time = self.data['data']['ln_time'].v[ommit_first_n:]
+        mag = self.data['data']['mag'].v[ommit_first_n:]
+        norm_mag = mag / max(mag)
+        slope, intercept, std_err, r_value = self.fit_viscous_relaxation(ln_time=ln_time, mag=mag)
+        norm_slope, norm_intercept, norm_std_err, norm_r_value = self.fit_viscous_relaxation(ln_time=ln_time, mag=norm_mag)
         self.results['visc_decay'] = slope
-        self.results['visc_decay'].e = [[std_err]]
-
-        self.calculation_parameter['visc_decay'].update(parameter)
+        self.results['visc_decay_norm'] = norm_slope
         return slope, std_err
 
     def plt_viscosity(self):

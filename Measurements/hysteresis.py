@@ -283,7 +283,7 @@ class Hys(base.Measurement):
         if method == 'auto':
             method = 'simple'
 
-        calc_method = '_'.join(method)
+        calc_method = '_'.join(['ms', method])
         self.calc_result(parameter, recalc, force_method=calc_method)
         return self.results['ms']
 
@@ -378,16 +378,16 @@ class Hys(base.Measurement):
         if method in implemented:
             getattr(self, method)(**parameter)
 
-    def calculate_ms_simple(self, saturation_field=75, **parameter):
+    def calculate_ms_simple(self, saturation_percent=75, **parameter):
         """
         Calculates the value for Ms
         :param parameter: from_field: from % of this value a linear interpolation will be calculated for all branches (+ & -)
         :return:
         """
-        ms_all, slope_all = self.fit_hf_slope(saturation_field=saturation_field)
+        ms_all, slope_all = self.fit_hf_slope(saturation_percent=saturation_percent)
 
         self.results['ms'].v = np.median(ms_all)
-        self.results['ms'].e = np.std(ms_all)
+        # self.results['ms'].e = np.std(ms_all)
         parameter.update(dict(method='simple'))
         self.calculation_parameter['ms'].update(parameter)
 
@@ -480,7 +480,23 @@ class Hys(base.Measurement):
 
         '''
 
-        raise NotImplementedError
+        pass
+
+    def calculate_E_hys(self, **parameter):
+        '''
+        Method calculates the :math:`E^{\Delta}_t` value for the hysteresis.
+        It uses scipy.integrate.simps for calculation of the area under the down_field branch for positive fields and
+        later subtracts the area under the Msi curve.
+
+        The energy is:
+
+        .. math::
+
+           E^{\delta}_t = 2 \int_0^{B_{max}} (M^+(B) - M_{si}(B)) dB
+
+        '''
+
+        pass
 
     def calculate_hf_sus_simple(self, saturation_percent=75, **parameter):
 

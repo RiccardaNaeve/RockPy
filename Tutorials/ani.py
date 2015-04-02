@@ -34,7 +34,7 @@ def test():
 
 
     # create samples
-    evals=(1.10, 1.10, 0.90)
+    evals=(1.0, 1.0, 1.0)
     measerr=0.01
     method='proj'  # 'proj' or 'full'
 
@@ -52,7 +52,7 @@ def test():
     study = RockPy.Study(samplegroups=sg)
 
     #filename = 'out_sushi__ev%.2f_%.2f_%.2f_err%.3f.pdf' % (evals[0], evals[1], evals[2], measerr)
-    filename = 'out_sushi0__45anti_I_var_ev%.2f_%.2f_%.2f_err%.3f_%s.pdf' % (evals[0], evals[1], evals[2], measerr, method)
+    filename = 'out_sushi135_0_D_var_ev%.2f_%.2f_%.2f_err%.3f_%s.pdf' % (evals[0], evals[1], evals[2], measerr, method)
     print "writing to %s" % filename
 
     pdf_pages = PdfPages(filename)
@@ -78,10 +78,10 @@ def test():
                 #print refD
                 #change all declinations
                 #refD += 1
-                refI[8] += 1
-                refI[9] -= 1
+                #refI[8] += 1
+                #refI[9] -= 1
                 #change declination of position 3
-                #refD[2] += 1
+                refD[2] += 1
 
                 s.measurements[0]._data['data']['D'] = refD
                 s.measurements[0]._data['data']['I'] = refI

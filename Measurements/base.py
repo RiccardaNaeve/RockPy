@@ -8,7 +8,7 @@ import numpy as np
 import RockPy
 import RockPy.Functions.general
 import RockPy.Readin.base
-from RockPy.Structure.data import RockPyData
+from RockPy.Structure.data import RockPyData, _to_tuple
 from RockPy import Treatments
 from RockPy.Readin import *
 from copy import deepcopy
@@ -360,8 +360,9 @@ class Measurement(object):
 
     @property
     def data(self):
+        if not self._data:
+            self._data = deepcopy(self._raw_data)
         return self._data
-
 
     # ## DATA RELATED
     ### Calculation and parameters
@@ -660,14 +661,65 @@ class Measurement(object):
     +++++++++++++++++++
     """
 
-    def normalize(self, reference, rtype='mag', vval=None, norm_method='max'):
+    def normalizeNEW(self, reference='data', rtype='mag', ntypes='all', vval=None, norm_method='max'):
         """
         normalizes all available data to reference value, using norm_method
 
-        :reference: reference state, to which to normalize to e.g. 'NRM'
-        :rtype: component, if applicable. standard - 'mag'
-        :vval: variable value, if reference == value then it will search for the point closest to the vval
-        :norm_method: how the norm_factor is generated, could be min
+        Parameter
+        ---------
+           reference: str
+              reference state, to which to normalize to e.g. 'NRM'
+              also possible to normalize to mass
+            rtype: str
+               component of the reference, if applicable. standard - 'mag'
+            ntypes: list
+               dtype to be normalized, if dtype = 'all' all variables will be normalized
+            vval: float
+               variable value, if reference == value then it will search for the point closest to the vval
+            norm_method: str
+               how the norm_factor is generated, could be min
+        """
+        #todo normalize by results
+        #getting normalization factor
+        norm_factor = self._get_norm_factor(reference, rtype, vval, norm_method)
+        ntypes = _to_tuple(ntypes) # make sure its a list/tuple
+
+        for dtype, dtype_data in self.data.iteritems(): #cycling through all dtypes in data
+            if 'all' in ntypes: # if all, all non ttype data will be normalized
+                ntypes = [i for i in dtype_data.column_names if not 'ttype' in i]
+            for ntype in ntypes: #else use ntypes specified
+                dtype_data[ntype] = dtype_data[ntype].v / norm_factor
+
+            if 'mag' in dtype_data.column_names:
+                try:
+                    self.data[dtype]['mag'] = self.data[dtype].magnitude(('x', 'y', 'z'))
+                except:
+                    self.logger.debug('no (x,y,z) data found keeping << mag >>')
+
+        if self.initial_state:
+            for dtype, dtype_rpd in self.initial_state.data.iteritems():
+                self.initial_state.data[dtype] = dtype_rpd / norm_factor
+                if 'mag' in self.initial_state.data[dtype].column_names:
+                    self.initial_state.data[dtype]['mag'] = self.initial_state.data[dtype].magnitude(('x', 'y', 'z'))
+        return self
+
+    def normalize(self, reference='data', rtype='mag', dtype='mag', vval=None, norm_method='max'):
+        """
+        normalizes all available data to reference value, using norm_method
+
+        Parameter
+        ---------
+           reference: str
+              reference state, to which to normalize to e.g. 'NRM'
+              also possible to normalize to mass
+            rtype: str
+               component of the reference, if applicable. standard - 'mag'
+            dtype: str
+               dtype to be normalized, if dtype = 'all' all variables will be normalized
+            vval: float
+               variable value, if reference == value then it will search for the point closest to the vval
+            norm_method: str
+               how the norm_factor is generated, could be min
         """
 
         norm_factor = self._get_norm_factor(reference, rtype, vval, norm_method)
@@ -694,6 +746,22 @@ class Measurement(object):
         return self
 
     def _get_norm_factor(self, reference, rtype, vval, norm_method):
+        """
+        Calculates the normalization factor from the data according to specified input
+
+        Parameter
+        ---------
+           reference: str
+              the type of data to be referenced. e.g. 'NRM' -> norm_factor will be calculated from self.data['NRM']
+              if not given, will return 1
+           rtype:
+           vval:
+           norm_method:
+
+        Returns
+        -------
+           normalization factor: float
+        """
         norm_factor = 1  # inititalize
 
         if reference:
@@ -714,7 +782,6 @@ class Measurement(object):
                 norm_factor = m.data['data']['mass'].v[0]
             if isinstance(reference, float) or isinstance(reference, int):
                 norm_factor = float(reference)
-
         return norm_factor
 
     def _norm_method(self, norm_method, vval, rtype, data):
@@ -722,7 +789,6 @@ class Measurement(object):
                    'min': min,
                    # 'val': self.get_val_from_data,
         }
-
         if not vval:
             if not norm_method in methods:
                 raise NotImplemented('NORMALIZATION METHOD << %s >>' % norm_method)

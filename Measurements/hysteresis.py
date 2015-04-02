@@ -171,10 +171,10 @@ class Hys(base.Measurement):
         data = self.machine_data.out_hysteresis()
         # get header
         header = self.machine_data.header
-        raw_data = RockPyData(column_names=header, data=data[0])  #todo maybe not as attribute
+        raw_data = RockPyData(column_names=header, data=data[0])  # todo maybe not as attribute
         dfield = np.diff(raw_data['field'].v)
 
-        #get index where change of field value is negative
+        # get index where change of field value is negative
         idx = [i for i in range(len(dfield)) if dfield[i] <= 0]  # todo implement signchanges in RockPy.data
         idx += [max(idx) + 1]  # add 1 point so down and up field branches start at same values
         virgin_idx = range(0, idx[0])
@@ -327,10 +327,17 @@ class Hys(base.Measurement):
         self.calc_result(dict(), recalc)
         return self.results['brh']
 
-    def result_paramag_slope(self, from_field=80, recalc=False, **options):
-        parameter = {'from_field': from_field}
-        self.calc_result(parameter, recalc, force_method='ms')
-        return self.results['paramag_slope']
+    def result_hf_sus(self, saturation_field=80, method='auto', recalc=False, **options):
+        if method == 'auto':
+            method = 'simple'
+
+        calc_method = '_'.join(['hf_sus', method])
+
+        parameter = dict(saturation_field=saturation_field)
+        parameter.update(options)
+
+        self.calc_result(parameter, recalc=recalc, force_method=calc_method)
+        return self.results['hf_sus']
 
     def result_E_delta_t(self, recalc=False, **options):
         self.calc_result(dict(), recalc)
@@ -341,6 +348,22 @@ class Hys(base.Measurement):
         return self.results['E_hys']
 
     """ CALCULATIONS """
+
+    def fit_hf_slope(self, saturation_percent=75., ommit_last=5):
+        saturation_percent /= 100.0
+        ms_all, slope_all = [], []
+
+        for dtype in ['down_field', 'up_field']:
+            b_sat = max(self.data[dtype]['field'].v) * saturation_percent
+            data_plus = self.data[dtype].filter(self.data[dtype]['field'].v >= b_sat)
+            data_minus = self.data[dtype].filter(self.data[dtype]['field'].v <= -b_sat)
+
+            for dir in [data_plus, data_minus]:
+                slope, intercept, r_value, p_value, std_err = stats.linregress(abs(dir['field'].v), abs(dir['mag'].v))
+                ms_all.append(intercept)
+                slope_all.append(slope)
+
+        return ms_all, slope_all
 
     ## MS
     def calculate_ms(self, method='simple', **parameter):
@@ -355,39 +378,18 @@ class Hys(base.Measurement):
         if method in implemented:
             getattr(self, method)(**parameter)
 
-    def calculate_ms_simple(self, from_field=75, **parameter):
+    def calculate_ms_simple(self, saturation_field=75, **parameter):
         """
         Calculates the value for Ms
         :param parameter: from_field: from % of this value a linear interpolation will be calculated for all branches (+ & -)
         :return:
         """
-        from_field /= 100.0
+        ms_all, slope_all = self.fit_hf_slope(saturation_field=saturation_field)
 
-        df_fields = self.data['down_field']['field'].v / max(self.data['down_field']['field'].v)
-        uf_fields = self.data['up_field']['field'].v / max(self.data['up_field']['field'].v)
-
-        # get the indices of the fields larger that from_field
-        df_plus = [i for i, v in enumerate(df_fields) if v >= from_field]
-        df_minus = [i for i, v in enumerate(df_fields) if v <= -from_field]
-        uf_plus = [i for i, v in enumerate(uf_fields) if v >= from_field]
-        uf_minus = [i for i, v in enumerate(uf_fields) if v <= -from_field]
-
-        dfp = self.data['down_field'].filter_idx(df_plus).lin_regress(column_name_x='field', column_name_y='mag')
-        dfm = self.data['down_field'].filter_idx(df_minus).lin_regress(column_name_x='field', column_name_y='mag')
-        ufp = self.data['down_field'].filter_idx(uf_plus).lin_regress(column_name_x='field', column_name_y='mag')
-        ufm = self.data['down_field'].filter_idx(uf_minus).lin_regress(column_name_x='field', column_name_y='mag')
-        self.paramag_correction = np.array([dfp, dfm, ufp, ufm])
-
-        ms_all = [abs(dfp[2]), abs(dfm[2]), abs(ufp[2]), abs(ufm[2])]
-        slope_all = [abs(dfp[0]), abs(dfm[0]), abs(ufp[0]), abs(ufm[0])]
-
-        self.results['ms'] = np.median(ms_all)
-        self.results['sigma_ms'] = np.std(ms_all)
-        self.results['paramag_slope'] = np.median(slope_all)
-
-        self.calculation_parameter['ms'] = parameter
-        self.calculation_parameter['paramag_slope'] = parameter
-        self.calculation_parameter['method'] = 'simple'
+        self.results['ms'].v = np.median(ms_all)
+        self.results['ms'].e = np.std(ms_all)
+        parameter.update(dict(method='simple'))
+        self.calculation_parameter['ms'].update(parameter)
 
     def calculate_mrs(self, **parameter):
 
@@ -480,6 +482,15 @@ class Hys(base.Measurement):
 
         raise NotImplementedError
 
+    def calculate_hf_sus_simple(self, saturation_percent=75, **parameter):
+
+        ms_all, slope_all = self.fit_hf_slope(saturation_percent=saturation_percent)
+        self.results['hf_sus'].data = [[[np.mean(slope_all), np.std(slope_all)]]]
+        self.results['hf_sus'] = np.mean(slope_all)
+
+        parameter.update(dict(method='simple'))
+        self.calculation_parameter['hf_sus'].update(parameter)
+
     def get_irreversible(self):
         """
         Calculates the irreversible hysteretic components :math:`M_{ih}` from the data.
@@ -536,7 +547,7 @@ class Hys(base.Measurement):
             plt.plot(self.data[dtype]['field'].v[1:], np.diff(self.data[dtype]['mag'].v) / mx)
         plt.show()
 
-    def correct_vsym(self, method='auto', check='False'):
+    def correct_vsym(self, method='auto', check=False):
         """
         Correction of horizontal symmetry of hysteresis loop. Horizontal displacement is found by looking for the minimum
          of the absolute magnetization value of the :math:`M_{ih}` curve. The hysteresis is then shifted by the field
@@ -550,7 +561,7 @@ class Hys(base.Measurement):
               plot to check for consistency
         """
 
-        if check: #for check plot
+        if check:  # for check plot
             checkdata = deepcopy(self.data)
 
         pos_max = np.mean([np.max(self.data['up_field']['mag'].v), np.max(self.data['down_field']['mag'].v)])
@@ -559,6 +570,7 @@ class Hys(base.Measurement):
 
         for dtype in self.data:
             self.data[dtype]['mag'] = self.data[dtype]['mag'].v - correct
+        self.correction.append('vysm')
 
         if check:
             for dtype in self.data:
@@ -585,27 +597,18 @@ class Hys(base.Measurement):
               plot to check for consistency
         """
 
-
         mir = self.get_irreversible()
         idx = np.nanargmin(abs(mir['mag'].v))
         correct = mir['field'].v[idx] / 2
 
+        if check:  # for check plot
+            uncorrected_data = deepcopy(self.data)
+
         for dtype in self.data:
             self.data[dtype]['field'] = self.data[dtype]['field'].v - correct
-
-        if check: #for check plot
-            checkdata = self.get_irreversible()
-
+        self.correction.append('hysm')
         if check:
-            plt.plot(mir['field'].v, abs(mir['mag'].v), 'k--', alpha = 0.5)
-            plt.plot(mir['field'].v, mir['mag'].v, 'r-')
-            plt.plot(checkdata['field'].v, checkdata['mag'].v, 'b-')
-            plt.xlabel('Moment')
-            plt.xlabel('Field')
-            plt.legend(['abs($M_ir$)', 'original', 'corrected'])
-            plt.xlim([min(self.data[dtype]['field'].v), max(self.data[dtype]['field'].v)])
-            plt.grid()
-            plt.show()
+            self.check_plot(uncorrected_data)
 
     def simple_paramag_cor(self, **parameter):
 
@@ -728,36 +731,40 @@ class Hys(base.Measurement):
         data['mag'] = -data['mag'].v[::-1]
         return data
 
-    def correct_paramag(self, method='simple', **parameter):
+
+    def correct_paramag(self, saturation_percent=75., method='simple', check=False, **parameter):
         "corrects data according to specified method"
+        hf_sus = self.result_hf_sus(method=method).v[0]
 
-        # print self.corrected_data['up_field']['mag'].v[0]
-        # definition of methods
-        def simple(dtype):
-            """
-            very simple correction, uses a linear fit from results_paramag_slope()
-            :param dtype:
-            :return:
-            """
-            out = deepcopy(self.corrected_data[dtype])
-            correct = out['field'].v * self.result_paramag_slope(**parameter).v[0]
-            out['mag'] = out['mag'].v - correct
-            # print correct
-            return out
+        if check:
+            uncorrected_data = deepcopy(self.data)
 
-        # def simple_grid(dtype):
-        # print self.grid_data
-        if method == 'simple':
-            for dtype in self.corrected_data:
-                self.corrected_data[dtype] = simple(dtype)
-        if method == 'simple_grid':
-            for dtype in self.corrected_data:
-                self.corrected_data[dtype] = self.grid_data[dtype]
-                print dtype
-                print self.corrected_data[dtype]
-                self.corrected_data[dtype] = simple(dtype)
+        for dtype in self.data:
+            correction = hf_sus * self.data[dtype]['field'].v
+            self.data[dtype]['mag'] = self.data[dtype]['mag'].v - correction
 
-                # print self.corrected_data['up_field']['mag'].v[0]
+        self.correction.append('paramag')
+
+        if check:
+            ms_all, slope_all = self.fit_hf_slope(saturation_percent=saturation_percent)
+            i = 0
+
+            for dtype in ['down_field', 'up_field']:
+                b_sat = max(self.data[dtype]['field'].v) * (saturation_percent / 100)
+                data_plus = self.data[dtype].filter(self.data[dtype]['field'].v >= b_sat)
+                data_minus = self.data[dtype].filter(self.data[dtype]['field'].v <= -b_sat)
+                std, = plt.plot(abs(data_plus['field'].v), abs(data_plus['mag'].v))
+                plt.plot(abs(data_plus['field'].v), ms_all[i] + abs(data_plus['field'].v) * slope_all[i], '--',
+                         color=std.get_color())
+                i += 1
+
+                std, = plt.plot(abs(data_minus['field'].v), abs(data_minus['mag'].v))
+                plt.plot(abs(data_minus['field'].v), ms_all[i] + abs(data_minus['field'].v) * slope_all[i], '--',
+                         color=std.get_color())
+                i += 1
+            plt.legend(loc='best')
+            plt.show()
+            self.check_plot(uncorrected_data)
 
 
     def correct_slope(self):
@@ -880,6 +887,29 @@ class Hys(base.Measurement):
         '''
         self.plt_hys()
 
+    def check_plot(self, uncorrected_data):
+        """
+        Helper function for consistent check visualization
+
+        Parameters
+        ----------
+           uncorrected_data: RockPyData
+              the pre-correction data.
+        """
+
+        for dtype in self.data:
+            plt.plot(self.data[dtype]['field'].v, self.data[dtype]['mag'].v, color='g')
+            plt.plot(uncorrected_data[dtype]['field'].v, uncorrected_data[dtype]['mag'].v, color='r')
+
+        plt.xlabel('Moment')
+        plt.xlabel('Field')
+        plt.legend(['original', 'corrected'])
+        plt.grid(zorder=1)
+        plt.axhline(color='k', zorder=1)
+        plt.axvline(color='k', zorder=1)
+        plt.xlim([min(self.data['down_field']['field'].v), max(self.data['down_field']['field'].v)])
+        plt.show()
+
     def export_vftb(self, folder=None, filename=None):
         import os
 
@@ -890,7 +920,10 @@ if __name__ == '__main__':
     vsm_file = RockPy.join(RockPy.test_data_path, 'MUCVSM_test.hys')
     vftb_file = RockPy.join(RockPy.test_data_path, 'MUCVFTB_test.hys')
     s = RockPy.Sample(name='test_sample')
-    # m = s.add_measurement(mtype='hys', mfile=vsm_file, machine='vsm')
-    m = s.add_measurement(mtype='hys', mfile=vftb_file, machine='vftb')
-    # m.data_gridding(grid_points=10,tuning=1)
+    m = s.add_measurement(mtype='hys', mfile=vsm_file, machine='vsm')
+    # m = s.add_measurement(mtype='hys', mfile=vftb_file, machine='vftb')
+    m.data_gridding(grid_points=40, tuning=5)
+    m.correct_hsym(check=True)
     m.correct_vsym(check=True)
+    m.correct_paramag(method='simple', check=True)
+    print m.correction

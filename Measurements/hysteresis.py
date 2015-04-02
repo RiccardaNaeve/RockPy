@@ -296,11 +296,11 @@ class Hys(base.Measurement):
         self.calc_result(dict(), recalc)
         return self.results['brh']
 
-    def result_E_delta_t(self, recalc=False, **options):
+    def result_e_delta_t(self, recalc=False, **options):
         self.calc_result(dict(), recalc)
         return self.results['E_delta_t']
 
-    def result_E_hys(self, recalc=False, **options):
+    def result_e_hys(self, recalc=False, **options):
         self.calc_result(dict(), recalc)
         return self.results['E_hys']
 
@@ -492,8 +492,8 @@ class Hys(base.Measurement):
     def calculate_brh(self, **parameter):
         pass  # todo implement
 
-    def calculate_E_delta_t(self, **parameter):
-        '''
+    def calculate_e_delta_t(self, **parameter):
+        """
         Method calculates the :math:`E^{\Delta}_t` value for the hysteresis.
         It uses scipy.integrate.simps for calculation of the area under the down_field branch for positive fields and
         later subtracts the area under the Msi curve.
@@ -504,11 +504,11 @@ class Hys(base.Measurement):
 
            E^{\delta}_t = 2 \int_0^{B_{max}} (M^+(B) - M_{si}(B)) dB
 
-        '''
+        """
 
         pass
 
-    def calculate_E_hys(self, **parameter):
+    def calculate_e_hys(self, **parameter):
         '''
         Method calculates the :math:`E^{\Delta}_t` value for the hysteresis.
         It uses scipy.integrate.simps for calculation of the area under the down_field branch for positive fields and
@@ -690,7 +690,7 @@ class Hys(base.Measurement):
             plt.show()
             self.check_plot(uncorrected_data)
 
-    def correct_center(self, data='grid_data'):
+    def correct_center(self, data='grid_data'): #todo rewrite for data
         uf_rotate = self.rotate_branch('up_field', data)
 
         # copy data and average with opposite rotated branch
@@ -706,7 +706,7 @@ class Hys(base.Measurement):
         self._corrected_data.update({'down_field': df_corrected})
         self._corrected_data.update({'up_field': uf_corrected})
 
-    def correct_slope(self):
+    def correct_slope(self): # todo redundant
         """
         The magnetization curve in this region can be expressed as
         .. math::

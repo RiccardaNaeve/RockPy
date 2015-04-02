@@ -99,11 +99,11 @@ class TestRockPyData(TestCase):
     def test_sort(self):
         self.assertTrue(np.array_equal(self.RPD.sort('Mx')['Mx'].v, np.array((2, 2, 6, 6))))
 
-    def test_interpolate(self):
-        self.RPD.define_alias('variable', 'My')
-        iv = (1, 11, 33, 55, 100)
-        self.assertTrue(np.array_equal((self.RPD.interpolate(iv))['My'].v, np.array(iv)))
-        self.assertTrue(np.array_equal((self.RPD.interpolate(iv))['Mx'].v[1:-1], np.array([2., 4., 6.])))
+    #def test_interpolate(self):
+    #    self.RPD.define_alias('variable', 'My')
+    #    iv = (1, 11, 33, 55, 100)
+    #    self.assertTrue(np.array_equal((self.RPD.interpolate(iv))['My'].v, np.array(iv)))
+    #    self.assertTrue(np.array_equal((self.RPD.interpolate(iv))['Mx'].v[1:-1], np.array([2., 4., 6.])))
 
 
     def test_magnitude(self):
@@ -128,7 +128,16 @@ class TestRockPyData(TestCase):
         #d['A'].e = 4
         #d['B'].e = 5
         d = d.append_rows([1, 2])
-        print d
+        #print d
         d.e = [[4, 5]]
 
         self.assertEqual(5., d['B'].e)
+
+    def test_data_assignment(self):
+        print self.RPD
+        # set only values
+        self.RPD['Mx'] = [1.1, 1.2, 1.3, 1.4]
+        print self.RPD
+        # set values and errors
+        self.RPD['Mx'] = [[[1.1, 0.11]], [[1.2, 0.12]], [[1.3, 0.13]], [[1.4, 0.14]]]
+        print self.RPD

@@ -104,6 +104,7 @@ def extract_info_from_filename(fname, data_dir):
         options = None
     # convert mass to float
     try:
+        sample_info[0][0] = sample_info[0][0].replace(',', '.')
         sample_info[0][0] = float(sample_info[0][0])
     except ValueError:
         pass
@@ -127,7 +128,7 @@ def extract_info_from_filename(fname, data_dir):
     sample[2] = sample[2].upper() #convert to upper for ease of checking
     sample[3] = sample[3].upper() #convert to upper for ease of checking
 
-    abbrev = {'HYS': 'hysteresis',
+    abbrev = {'HYS': 'hys',
               'COE': 'backfield',
               'RMP': 'thermocurve',
               'TT': 'thellier',
@@ -137,7 +138,9 @@ def extract_info_from_filename(fname, data_dir):
               'IRM': 'IRM',
               'CRY': 'cryomag',
               'SUSH': 'sushibar',
-              'VSM':'VSM'
+              'VSM':'VSM',
+              'FORC':'forc',
+              'VISC':'viscosity',
               }
 
     rev_abbrev = {v: k for k, v in abbrev.iteritems()}
@@ -223,6 +226,7 @@ def import_folder(folder, name='study', study=None):
 
     files = [i for i in os.listdir(folder) if not i == '.DS_Store' if not i.startswith('#')]
     samples = defaultdict(list)
+
     for i in files:
         d = RockPy.extract_info_from_filename(i, folder)
         samples[d['name']].append(d)

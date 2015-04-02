@@ -772,38 +772,28 @@ class RockPyData(object):
         # d = d.T[0]
         #return d
 
-    def __setitem__(self, key, values):
+    def __setitem__(self, key, data):
         """
         allows access to data columns by index (names)
         e.g. data['Mx'] = (1,2,3)
         """
 
-        if values is None:
+        if data is None:
             return
 
         # check if key is valid
         if key not in self._column_dict:
             raise KeyError('key %s is not a valid column name or alias' % key)
 
-        if not isinstance(values, np.ndarray):
-            values = np.array(values)
+        data = RockPyData._convert_to_data3D(data, column=True)  # since we are indexing columns, a 1D array should be treated as a column
 
         # if we have no data, initialize everything to np.NAN with number of lines matching the new data
         if self._data is None:
-            try:
-                values.shape[0]
-            except IndexError:
-                values = values.reshape((1,))
-
-            self._data = np.empty((values.shape[0], self.column_count, 2))
+            self._data = np.empty((data.shape[0], self.column_count, 2))
             self._data[:] = np.NAN
 
-        # make sure data is 2 dim, even if there is only one column
-        if values.ndim == 1:
-            values = values.reshape(values.shape[0], 1)
+        self._data[:, self._column_dict[key]] = data
 
-        self._data[:, self._column_dict[key], 0] = values
-        self.errors = None
 
     def cleardata(self):
         """

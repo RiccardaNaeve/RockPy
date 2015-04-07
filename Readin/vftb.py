@@ -29,15 +29,17 @@ class Vftb(base.Machine):
         return units
 
     def get_data(self):
-        data = np.array([np.array(self.raw_data[i[0] + 2:i[1] - 1]) for i in self.set_idx])
-        data = [self.replace_na(i) for i in data]
+        """
+        Formats data into usable format. Using set indices for multiple measurements
+        :return:
+        """
+        data = np.array([np.array(self.raw_data[i[0] + 2:i[1]]) for i in self.set_idx])
+        data = map(self.replace_na, data)
+        # data = [self.replace_na(i) for i in data]
         data = np.array([i.astype(float) for i in data])
         data = self.convert_to_T(data)
         return data
 
-    def out_hysteresis(self):
-        data = self.get_data()
-        return data
 
     def out_backfield(self):
         data = self.get_data()

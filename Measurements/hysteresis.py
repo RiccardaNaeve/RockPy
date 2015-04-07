@@ -142,7 +142,7 @@ class Hys(base.Measurement):
         return np.array(grid)
 
     @staticmethod
-    def approach2sat_func(x, ms, chi, alpha, beta=-1):
+    def approach2sat_func(h, ms, chi, alpha):
         """
         General approach to saturation function
 
@@ -162,7 +162,7 @@ class Hys(base.Measurement):
            ndarray:
               :math:`M_s \chi * B + \alpha * B^{\beta = -2}`
         """
-        return ms + chi * x + alpha * x ** -1 #beta
+        return ms + chi * h - alpha * h ** -2  # beta
 
     def __init__(self, sample_obj, mtype, mfile, machine, **options):
 
@@ -190,7 +190,7 @@ class Hys(base.Measurement):
            up_field: up field branch
         """
         # get data
-        data = self.machine_data.out_hysteresis()
+        data = self.machine_data.get_data()
         # get header
         header = self.machine_data.header
         raw_data = RockPyData(column_names=header, data=data[0])  # todo maybe not as attribute
@@ -199,7 +199,8 @@ class Hys(base.Measurement):
         # get index where change of field value is negative
         idx = [i for i in range(len(dfield)) if dfield[i] <= 0]  # todo implement signchanges in RockPy.data
         idx += [max(idx) + 1]  # add 1 point so down and up field branches start at same values
-        virgin_idx = range(0, idx[0])
+
+        virgin_idx = range(0, idx[0] + 1)
         down_field_idx = idx
         up_field_idx = range(idx[-1], len(dfield) + 1)
 
@@ -298,13 +299,13 @@ class Hys(base.Measurement):
 
     def result_e_delta_t(self, recalc=False, **options):
         self.calc_result(dict(), recalc)
-        return self.results['E_delta_t']
+        return self.results['e_delta_t']
 
     def result_e_hys(self, recalc=False, **options):
         self.calc_result(dict(), recalc)
-        return self.results['E_hys']
+        return self.results['e_hys']
 
-    def result_hf_sus(self, saturation_percent=80, method='simple', recalc=False, **options):
+    def result_hf_sus(self, saturation_percent=75., method='simple', remove_last=0, recalc=False, **options):
         """
         Calculates the result for high field susceptibility using the specified method
 
@@ -326,7 +327,10 @@ class Hys(base.Measurement):
         """
         calc_method = '_'.join(['hf_sus', method])
 
-        parameter = dict(saturation_field=saturation_percent)
+        parameter = dict(saturation_percent=saturation_percent,
+                         remove_last = remove_last,
+                         method=method)
+
         parameter.update(options)
 
         self.calc_result(parameter, recalc=recalc, force_method=calc_method)
@@ -336,7 +340,7 @@ class Hys(base.Measurement):
         self.calc_result(dict(), recalc)
         return self.results['mrs']
 
-    def result_ms(self, method='auto', recalc=False, **parameter):
+    def result_ms(self, method='simple', recalc=False, **parameter):
         """
         calculates the Ms value with a linear fit
 
@@ -366,21 +370,14 @@ class Hys(base.Measurement):
 
         """
 
-        if method == 'auto':
-            method = 'simple'
-
         calc_method = '_'.join(['ms', method])
         self.calc_result(parameter, recalc, force_method=calc_method)
         return self.results['ms']
 
 
-
-
-
-
     """ CALCULATIONS """
 
-    def fit_hf_slope(self, saturation_percent=75.): #todo ommit_last n points
+    def fit_hf_slope(self, saturation_percent=75.):  # todo ommit_last n points
         saturation_percent /= 100.0
         ms_all, slope_all = [], []
 
@@ -416,8 +413,7 @@ class Hys(base.Measurement):
         """
         ms_all, slope_all = self.fit_hf_slope(saturation_percent=saturation_percent)
 
-        self.results['ms'].v = np.median(ms_all)
-        # self.results['ms'].e = np.std(ms_all)
+        self.results['ms'] = [[[np.mean(ms_all), np.std(ms_all)]]]
         parameter.update(dict(method='simple'))
         self.calculation_parameter['ms'].update(parameter)
 
@@ -452,7 +448,8 @@ class Hys(base.Measurement):
 
         df = calc('down_field')
         uf = calc('up_field')
-        self.results['mrs'] = np.mean([df, uf])
+        self.results['mrs'] = [[[np.mean([df, uf]), np.std([df, uf])]]]
+        return np.mean([df, uf]), np.std([df, uf])
 
     def calculate_bc(self, **parameter):
         '''
@@ -505,27 +502,50 @@ class Hys(base.Measurement):
            E^{\delta}_t = 2 \int_0^{B_{max}} (M^+(B) - M_{si}(B)) dB
 
         """
+        if not self.msi_exists:
+            self.logger.error('Msi branch does not exist or not properly saturated. Please check datafile')
+            self.results['e_delta_t'] = np.nan
+            return np.nan
 
-        pass
+        # getting data for positive down field branch
+        df_pos_fields = [v for v in self.data['down_field']['field'].v if v >=0 ] + [0.0] # need to add 0 to fields
+        df_pos = self.data['down_field'].interpolate(df_pos_fields) # interpolate value for 0
+        df_pos_area = abs(sp.integrate.simps(y=df_pos['mag'].v, x=df_pos['field'].v)) # calculate area under downfield
+
+        msi_area = abs(sp.integrate.simps(y=self.data['virgin']['mag'].v, x=self.data['virgin']['field'].v)) # calulate area under virgin
+
+        self.results['e_delta_t'] = 2 * (df_pos_area - msi_area)
+        self.calculation_parameter['e_delta_t'].update(parameter)
+
 
     def calculate_e_hys(self, **parameter):
         '''
-        Method calculates the :math:`E^{\Delta}_t` value for the hysteresis.
-        It uses scipy.integrate.simps for calculation of the area under the down_field branch for positive fields and
-        later subtracts the area under the Msi curve.
+        Method calculates the :math:`E^{Hys}` value for the hysteresis.
+        It uses scipy.integrate.simps for calculation of the area under the down_field branch and
+        later subtracts the area under the up-field branch.
 
         The energy is:
 
         .. math::
 
-           E^{\delta}_t = 2 \int_0^{B_{max}} (M^+(B) - M_{si}(B)) dB
+           E^{Hys} = \int_{-B_{max}}^{B_{max}} (M^+(B) - M^-(B)) dB
 
         '''
 
-        pass
+        df_area = sp.integrate.simps(y=self.data['down_field']['mag'].v[::-1], x=self.data['down_field']['field'].v[::-1]) # calulate area under down_field
+        uf_area = sp.integrate.simps(y=self.data['up_field']['mag'].v, x=self.data['up_field']['field'].v) # calulate area under up_field
 
-    def calculate_hf_sus_simple(self, saturation_percent=75, **parameter):
 
+        self.results['e_hys'] = abs(df_area - uf_area)
+        self.calculation_parameter['e_hys'].update(parameter)
+
+    def calculate_hf_sus_simple(self, **parameter):
+        """
+        Calculates High-Field susceptibility using a simple linear regression on all branches
+        :param parameter:
+        :return:
+        """
+        saturation_percent = parameter.get('saturation_percent', 75.)
         ms_all, slope_all = self.fit_hf_slope(saturation_percent=saturation_percent)
         self.results['hf_sus'].data = [[[np.mean(slope_all), np.std(slope_all)]]]
         self.results['hf_sus'] = np.mean(slope_all)
@@ -538,11 +558,22 @@ class Hys(base.Measurement):
         Calculates the high field susceptibility using approach to saturation
         :return:
         """
-        res_uf1, res_uf2 = self.calc_approach2sat(branch='up_field')
-        res_df1, res_df2 = self.calc_approach2sat(branch='down_field')
+        saturation_percent = parameter.get('saturation_percent', 75.)
+        remove_last = parameter.get('remove_last', 0)
+
+        res_uf1, res_uf2 = self.calc_approach2sat(saturation_percent=saturation_percent, branch='up_field',
+                                                  remove_last=remove_last)
+        res_df1, res_df2 = self.calc_approach2sat(saturation_percent=saturation_percent, branch='down_field',
+                                                  remove_last=remove_last)
         res = np.c_[res_uf1, res_uf2, res_df1, res_df2]
-        print res
-        print np.mean(np.fabs(res), axis=1)
+
+        self.results['ms'] = [[[np.mean(res, axis=1)[0], np.std(res, axis=1)[0]]]]
+        self.results['hf_sus'] = [[[np.mean(res, axis=1)[1], np.std(res, axis=1)[1]]]]
+        self.results = self.results.append_columns(column_names=['alpha'],
+                                                   data=[[[np.mean(res, axis=1)[2], np.std(res, axis=1)[2]]]])
+
+        parameter.update(dict(method='app2sat'))
+        self.calculation_parameter['hf_sus'].update(parameter)
 
     def get_irreversible(self):
         """
@@ -613,7 +644,6 @@ class Hys(base.Measurement):
            check: str
               plot to check for consistency
         """
-
 
         if check:  # for check plot
             uncorrected_data = deepcopy(self.data)
@@ -690,7 +720,7 @@ class Hys(base.Measurement):
             plt.show()
             self.check_plot(uncorrected_data)
 
-    def correct_center(self, data='grid_data'): #todo rewrite for data
+    def correct_center(self, data='grid_data'):  # todo rewrite for data
         uf_rotate = self.rotate_branch('up_field', data)
 
         # copy data and average with opposite rotated branch
@@ -706,7 +736,7 @@ class Hys(base.Measurement):
         self._corrected_data.update({'down_field': df_corrected})
         self._corrected_data.update({'up_field': uf_corrected})
 
-    def correct_slope(self): # todo redundant
+    def correct_slope(self):  # todo redundant
         """
         The magnetization curve in this region can be expressed as
         .. math::
@@ -746,11 +776,22 @@ class Hys(base.Measurement):
 
 
     ### helper functions
+    @property
+    def msi_exists(self):
+        """
+        Checks if Msi branch is present in data by comparing the starting point of the virginbranch with Ms.
+        If virgin(0) >= 0.7 * Ms it returns True
 
-    def check_if_msi(self):
-        raise NotImplementedError
+        Returns
+        -------
+           bool
+        """
+        if self.data['virgin']:
+            ms = self.result_mrs().v
+            if abs(self.data['virgin']['mag'].v[0]) >= 0.7 * ms:
+                return True
 
-    def data_gridding(self, method='first', **parameter):
+    def data_gridding(self, method='second', grid_points=30, tuning=1.5, **parameter):
         """
         Data griding after :cite:`Dobeneck1996a`. Generates an interpolated hysteresis loop with
         :math:`M^{\pm}_{sam}(B^{\pm}_{exp})` at mathematically defined (grid) field values, identical for upper
@@ -779,11 +820,16 @@ class Hys(base.Measurement):
            get_grid
         """
 
-        bmax = min([max(self.data['down_field']['field'].v), max(self.data['up_field']['field'].v)])
-        bmin = min([min(self.data['down_field']['field'].v), min(self.data['up_field']['field'].v)])
-        bm = min([abs(bmax), abs(bmin)])
+        if len(self.data['down_field']['field'].v) <= 50:
+            self.logger.warning('Hysteresis branches have less than 50 (%i) points, gridding not possible' % (
+            len(self.data['down_field']['field'].v)))
+            return
 
-        grid = Hys.get_grid(bmax=bm, **parameter)
+        bmax = max([max(self.data['down_field']['field'].v), max(self.data['up_field']['field'].v)])
+        bmin = min([min(self.data['down_field']['field'].v), min(self.data['up_field']['field'].v)])
+        bm = max([abs(bmax), abs(bmin)])
+
+        grid = Hys.get_grid(bmax=bm, grid_points=grid_points, tuning=tuning, **parameter)
         # interpolate the magnetization values M_int(Bgrid(i)) for i = -n+1 .. n-1
         # by fitting M_{measured}(B_{experimental}) individually in all intervals [Bgrid(i-1), Bgrid(i+1)]
         # with first or second order polinomials
@@ -803,9 +849,10 @@ class Hys(base.Measurement):
         for dtype in ['down_field', 'up_field', 'virgin']:
             interp_data = RockPyData(column_names=['field', 'mag'])
             d = self.data[dtype]
-            for i in range(1, len(grid) - 1):
-                idx = [j for j, v in enumerate(d['field'].v) if grid[i - 1] <= v <= grid[i + 1]]
-                if len(idx) > 0:
+            for i in range(1, len(grid) - 1):  # cycle through gridpoints
+                idx = [j for j, v in enumerate(d['field'].v) if
+                       grid[i - 1] <= v <= grid[i + 1]]  #indices of points within the grid points
+                if len(idx) > 0:  # if no points between gridpoints -> no interpolation
                     data = deepcopy(d.filter_idx(idx))
                     try:
                         if method == 'first':
@@ -817,10 +864,9 @@ class Hys(base.Measurement):
                             mag = second(grid[i], *popt)
                             interp_data = interp_data.append_rows(data=[grid[i], mag])
                     except TypeError:
-                        self.logger.error('Length of data for interpolation < 2. mag = mean(data)')
+                        self.logger.error('Length of data for interpolation < 2')
                         self.logger.error(
                             'consider reducing number of points for interpolation or lower tuning parameter')
-                        mag = np.mean(data['mag'].v)
             self.data.update({dtype: interp_data})
 
     def rotate_branch(self, branch, data='data'):
@@ -840,27 +886,28 @@ class Hys(base.Measurement):
         data['mag'] = -data['mag'].v[::-1]
         return data
 
-    def calc_approach2sat(self, branch):
+    def calc_approach2sat(self, saturation_percent, branch, remove_last):
         """
         calculates approach to saturation
         :param branch:
         :return:
         """
+        saturation_percent /= 100.0
+
         #### POSITIVE BRANCH
         # get idx of downfield branch where b > 0
-        idx = [i for i, v in enumerate(self.data[branch]['field'].v) if
-               v >= 0.7 * max(self.data[branch]['field'].v)]
-        df_pos = deepcopy(self.data[branch].filter_idx(idx))  # down field with positive field data
+        df_pos = deepcopy(self.data[branch].filter(self.data[branch]['field'].v >= saturation_percent * max(
+            self.data[branch]['field'].v)))  # down field with positive field data
 
-        popt_pos, pcov_pos = curve_fit(self.approach2sat_func, df_pos['field'].v, df_pos['mag'].v,
-                                       p0=[max(df_pos['mag'].v), 0, 0])
+        df_neg = deepcopy(self.data[branch].filter(self.data[branch]['field'].v <= -saturation_percent * max(
+            self.data[branch]['field'].v)))  # down field with positive field data
+        df_neg['field'] = -df_neg['field'].v
+        df_neg['mag'] = -df_neg['mag'].v
 
-        idx = [i for i, v in enumerate(self.data[branch]['field'].v) if
-               v <= 0.4 * min(self.data[branch]['field'].v)]
-        df_neg = deepcopy(self.data[branch].filter_idx(idx))  # down field with positive field data
-
-        popt_neg, pcov_neg = curve_fit(self.approach2sat_func, df_neg['field'].v[::-1], df_neg['mag'].v[::-1],
-                                       p0=[max(df_neg['mag'].v), 1e-7, 0])
+        popt_pos, pcov_pos = curve_fit(self.approach2sat_func, df_pos['field'].v,
+                                       df_pos['mag'].v, p0=[max(df_pos['mag'].v), 1e-3, 0])
+        popt_neg, pcov_neg = curve_fit(self.approach2sat_func, df_neg['field'].v,
+                                       df_neg['mag'].v, p0=[max(df_pos['mag'].v), 1e-3, 0])
         return popt_pos, popt_neg
 
     # ## plotting functions
@@ -875,7 +922,6 @@ class Hys(base.Measurement):
                  color=std.get_color(),
                  zorder=1)
         plt.plot(0, self.results['mrs'].v[0], 'x')
-
 
         if not self.data['virgin'] is None:
             plt.plot(self.data['virgin']['field'].v, self.data['virgin']['mag'].v, color=std.get_color(), zorder=1)
@@ -925,14 +971,38 @@ class Hys(base.Measurement):
         import os
 
 
+def plot_app2sat(m, sat_perc=80):
+    sat_perc /=100
+    dfp = m.data['down_field'].filter(m.data['down_field']['field'].v > sat_perc * max(m.data['down_field']['field'].v))
+    dfm = m.data['down_field'].filter(m.data['down_field']['field'].v < -sat_perc * max(m.data['down_field']['field'].v))
+    ufp = m.data['up_field'].filter(m.data['up_field']['field'].v > sat_perc * max(m.data['up_field']['field'].v))
+    ufm = m.data['up_field'].filter(m.data['up_field']['field'].v < -sat_perc * max(m.data['up_field']['field'].v))
+    x = np.linspace(sat_perc * max(m.data['up_field']['field'].v), max(m.data['up_field']['field'].v))
+    y = [m.approach2sat_func(i, m.results['ms'].v, m.results['hf_sus'].v, m.results['alpha'].v) for i in x]
+    plt.plot(dfp['field'].v, dfp['mag'].v)
+    plt.plot(-dfm['field'].v, -dfm['mag'].v)
+    plt.plot(-ufm['field'].v, -ufm['mag'].v)
+    plt.plot(ufp['field'].v, ufp['mag'].v)
+    plt.plot(x, y)
+    # plt.xlim([1, 2])
+    # plt.ylim([0.000296, 0.000299])
+    plt.show()
+
+
 if __name__ == '__main__':
     import RockPy
 
-    vsm_file = RockPy.join(RockPy.test_data_path, 'MUCVSM_test.hys')
+    vsm_file = RockPy.join(RockPy.test_data_path, 'vsm', 'LTPY_527,1a_HYS_VSM#XX[mg]___#TEMP_300_K#STD000.000')
     vftb_file = RockPy.join(RockPy.test_data_path, 'MUCVFTB_test.hys')
     s = RockPy.Sample(name='test_sample')
     m = s.add_measurement(mtype='hys', mfile=vsm_file, machine='vsm')
     # m = s.add_measurement(mtype='hys', mfile=vftb_file, machine='vftb')
-    m.result_hf_sus(method='app2sat')
+    m.correct_hsym()
+    m.correct_vsym()
+    m.calc_all()
+    # m.result_e_delta_t()
+    # m.data_gridding()
+    # m.plt_hysteresis()
+    m.result_hf_sus(method='app2sat', saturation_percent=80)
+    plot_app2sat(m)
     print m.results
-    m.plt_hysteresis()

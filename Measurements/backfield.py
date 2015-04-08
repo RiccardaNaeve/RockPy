@@ -26,6 +26,10 @@ class Backfield(base.Measurement):
        self.remanence: the remanence measurement after the field was applied (normal measurement mode for e.g. VFTB or VSM)
        self.induced: the induced moment measurement while the field is applied (only VSM)
 
+    Notes
+    -----
+    - VSM- files with irm acquisition will add a new irm_acquisition measurement to the sample
+
     """
 
     def __init__(self, sample_obj,
@@ -48,7 +52,7 @@ class Backfield(base.Measurement):
         '''
         data = self.machine_data.out_backfield()
         header = self.machine_data.header
-        self._data['remanence'] = RockPyData(column_names=header, data=data[0])
+        self._raw_data['remanence'] = RockPyData(column_names=header, data=data[0])
 
     def format_vsm(self):
         """
@@ -68,7 +72,7 @@ class Backfield(base.Measurement):
         self._raw_data['remanence'] = RockPyData(column_names=['field', 'mag'], data=data[data_idx][:, [0, 1]])
 
         if self.machine_data.measurement_header['SCRIPT']['Include direct moment?'] == 'Yes':
-            self._data['induced'] = RockPyData(column_names=['field', 'mag'], data=data[data_idx+1][:, [0, 2]])
+            self._raw_data['induced'] = RockPyData(column_names=['field', 'mag'], data=data[data_idx+1][:, [0, 2]])
 
 
     @property

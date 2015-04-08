@@ -38,8 +38,8 @@ class Irm_Acquisition(base.Measurement):
 
         data = self.machine_data.out_trm()
         header = self.machine_data.float_header
-        self.remanence = RockPyData(column_names=header, data=data)
-        self.induced = None
+        self._raw_data['remanence'] = RockPyData(column_names=header, data=data)
+        self._raw_data['induced'] = None
 
 
     def plt_irm(self):

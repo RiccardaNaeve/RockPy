@@ -23,8 +23,8 @@ class ThermoCurve(base.Measurement):
             print('LENGTH of machine.out_thermocurve =! 2. Assuming data[0] = heating data[1] = cooling')
             # self.log.warning('LENGTH of machine.out_thermocurve =! 2. Assuming data[0] = heating data[1] = cooling')
         if len(data) > 1:
-            self._data['up_temp'] = RockPyData(column_names=header, data=data[0])
-            self._data['down_temp'] = RockPyData(column_names=header, data=data[1])
+            self._raw_data ['up_temp'] = RockPyData(column_names=header, data=data[0])
+            self._raw_data ['down_temp'] = RockPyData(column_names=header, data=data[1])
         else:
             print('LENGTH of machine.out_thermocurve < 2.')
             # self.log.error('LENGTH of machine.out_thermocurve < 2.')

@@ -19,10 +19,19 @@ class Irm_Acquisition(base.Measurement):
         data = self.machine_data.get_data()
         header = self.machine_data.header
         # self.log.debug('FORMATTING << %s >> raw_data for << VFTB >> data structure' % (self.mtype))
-        self._data['remanence'] = RockPyData(column_names=header, data=data[0])
+        self._raw_data['remanence'] = RockPyData(column_names=header, data=data[0])
 
     def format_vsm(self):
-        raise NotImplemented
+        """
+        formats the vsm output to be compatible with backfield measurements
+        :return:
+        """
+        data = self.machine_data.out_backfield()
+        header = self.machine_data.header
+
+        #check for IRM acquisition
+        if self.machine_data.measurement_header['SCRIPT']['Include IRM?'] == 'Yes':
+            self._raw_data['remanence'] = RockPyData(column_names=['field', 'mag'], data=data[0][:, [0, 1]])
 
     def format_cryomag(self):
         #self.log.debug('FORMATTING << %s >> raw_data for << cryomag >> data structure' % (self.mtype))

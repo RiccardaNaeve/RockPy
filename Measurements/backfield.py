@@ -57,10 +57,18 @@ class Backfield(base.Measurement):
         """
         data = self.machine_data.out_backfield()
         header = self.machine_data.header
-        self._data['remanence'] = RockPyData(column_names=['field', 'mag'], data=data[0][:, [0, 1]])
+
+        #check for IRM acquisition -> index is changed
+        data_idx = 0
+        if self.machine_data.measurement_header['SCRIPT']['Include IRM?'] == 'Yes':
+            data_idx += 1
+            self.logger.info('IRM acquisition measured, adding new measurement')
+            self.sample_obj.add_measurement(mtype='irm_acquisition', mfile=self.mfile, machine=self.machine)
+
+        self._raw_data['remanence'] = RockPyData(column_names=['field', 'mag'], data=data[data_idx][:, [0, 1]])
 
         if self.machine_data.measurement_header['SCRIPT']['Include direct moment?'] == 'Yes':
-            self._data['induced'] = RockPyData(column_names=['field', 'mag'], data=data[0][:, [0, 2]])
+            self._data['induced'] = RockPyData(column_names=['field', 'mag'], data=data[data_idx+1][:, [0, 2]])
 
 
     @property

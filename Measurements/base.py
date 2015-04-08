@@ -218,7 +218,6 @@ class Measurement(object):
         self.is_normalized = False # normalized flag for visuals, so its not normalized twize
         self.norm = None # the actual parameters
 
-
     def __getstate__(self):
         '''
         returned dict will be pickled
@@ -228,7 +227,7 @@ class Measurement(object):
                      (
                          'mtype', 'machine', 'mfile',
                          'has_data', 'machine_data',
-                         '_data',
+                         '_raw_data', '_data',
                          'initial_state', 'is_initial_state',
                          'sample_obj',
                          '_treatment_opt',
@@ -251,8 +250,8 @@ class Measurement(object):
 
     def __getattr__(self, attr):
         # print attr, self.__dict__.keys()
-        if attr in self.__getattribute__('data').keys():
-            return self.data[attr]
+        if attr in self.__getattribute__('_data').keys():
+            return self._data[attr]
         if attr in self.__getattribute__('result_methods'):
             return getattr(self, 'result_' + attr)().v[0]
         raise AttributeError

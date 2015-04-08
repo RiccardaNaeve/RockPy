@@ -15,6 +15,8 @@ class Vsm(base.Machine):
 
         self.data_header = [i for i in self.raw_out[0].split(' ') if i != '' if i != '\n']
         self.data_header_idx = {v.lower(): i for i, v in enumerate(self.data_header)}
+        print self.units
+        print self.header
 
     @property
     def header(self):
@@ -22,24 +24,32 @@ class Vsm(base.Machine):
         returns the actual data header, not th file/measurement header of the data
         """
         # vsm segemnts start with 'segment'
-        new_line_idx = [i for i, v in enumerate(self.raw_out) if v == '\n']  # all indices with new line
-        # print new_line_idx
-        data_start_idx = [i for i, v in enumerate(self.raw_out) if
-                          v.strip().lower().startswith('+') or v.strip().lower().startswith(
-                              '-')]  # all indices with new line
-        data_header = self.raw_out[new_line_idx[0] + 1: data_start_idx[0]]
+        new_line_idx = min(i for i, v in enumerate(self.raw_out) if v == '\n')  # all indices with new line
+
+        # find first data index
+        data_start_idx = min(i for i,v in enumerate(self.raw_out) if v.startswith('+') or v.startswith('-')) # first index of data
+
+        data_header = self.raw_out[new_line_idx + 1: data_start_idx-1]
         data_header = [i for i in data_header]
-
-        sifw = [len(i) + 1 for i in self.raw_out[data_start_idx[0]].split(',')]
-        sifw += [len(self.raw_out[data_start_idx[0]])]
+        sifw = [len(i) + 1 for i in self.raw_out[data_start_idx].split(',')]
+        sifw += [len(self.raw_out[data_start_idx])]
         sifw = [sum(sifw[:i]) for i in range(len(sifw))]
-
         data_header = np.array(
             [[v[sifw[i]: sifw[i + 1]] for i in range(len(sifw) - 1)] for j, v in enumerate(data_header)]).T
+
         data_header = [" ".join(i) for i in data_header]
         data_header = [' '.join(j.split()) for j in data_header]
         data_header = [j.split(' (')[0].lower() for j in data_header]
         return data_header
+
+    @property
+    def units(self):
+        idx = min(i for i,v in enumerate(self.raw_out) if v.startswith('+') or v.startswith('-'))-1
+        out = self.raw_out[idx].replace('\xb2', '^2').replace('(', '').replace(')', '').split()
+
+        if 'Am^2' in out: # Pint does not know Am there has to be a ' '
+            out[out.index('Am^2')] = 'A m^2'
+        return out
 
     @property
     def segment_info(self):
@@ -52,8 +62,6 @@ class Vsm(base.Machine):
         sifw += [len(segment_data[0])]
         sifw = [sum(sifw[:i]) for i in range(len(sifw))]
         segment_data = np.array(segment_data).astype(float)
-        # print segment_data.shape
-
         segment_info = np.array(
             [[v[sifw[i]: sifw[i + 1]] for i in range(len(sifw) - 1)] for j, v in enumerate(self.raw_out) if
              j in segment_start_idx]).T
@@ -67,7 +75,6 @@ class Vsm(base.Machine):
         # ### header part
         data_header = [i.split('\n')[0] for i in self.raw_out if
                        not i.startswith('+') and not i.startswith('-') and not i.split() == []][:-1]
-
         # getting first data line
         data_start_idx = [i for i, v in enumerate(self.raw_out) if
                           v.strip().lower().startswith('+') or v.strip().lower().startswith(

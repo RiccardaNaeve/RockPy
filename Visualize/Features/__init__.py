@@ -3,3 +3,4 @@ import generic
 import arai
 import hysteresis, day
 import af_demag, rmp
+import henkel

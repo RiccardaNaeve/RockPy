@@ -12,7 +12,8 @@ import scipy as sp
 from math import tanh, cosh
 from os.path import join
 from pprint import pprint
-
+from pint import UnitRegistry
+ureg = UnitRegistry()
 
 class Hys(base.Measurement):
     """
@@ -969,7 +970,20 @@ class Hys(base.Measurement):
 
     def export_vftb(self, folder=None, filename=None):
         import os
-
+        if self.get_mtype_prior_to(mtype='mass'):
+            mass = self.get_mtype_prior_to(mtype='mass').data['data']['mass'].v * 1e5
+        line_one = 'name: ' + self.sample_obj.name + '\t'+'weight: ' + '%.0f mg' %mass
+        line_two = ''
+        line_three = 'Set 1:'
+        line_four = ' field / Oe	mag / emu / g	temp / centigrade	time / s	std dev / %	suscep / emu / g / Oe'
+        field, mag, temp, time, std, sus = (None,)*6
+        for dtype in ['virgin', 'down_field', 'up_field']:
+            if 'field' in self.data[dtype].column_names:
+                field = self.data[dtype]['field'].v
+            # if 'temperature' in self.data[dtype].column_names:
+            # if 'temperature' in self.data[dtype].column_names:
+        print line_one
+        print field, mag, temp, time, std, sus
 
 def plot_app2sat(m, sat_perc=80):
     sat_perc /=100
@@ -994,15 +1008,16 @@ if __name__ == '__main__':
 
     vsm_file = RockPy.join(RockPy.test_data_path, 'vsm', 'LTPY_527,1a_HYS_VSM#XX[mg]___#TEMP_300_K#STD000.000')
     vftb_file = RockPy.join(RockPy.test_data_path, 'MUCVFTB_test.hys')
-    s = RockPy.Sample(name='test_sample')
+    s = RockPy.Sample(name='test_sample', mass=10, mass_unit='mg')
     m = s.add_measurement(mtype='hys', mfile=vsm_file, machine='vsm')
-    # m = s.add_measurement(mtype='hys', mfile=vftb_file, machine='vftb')
-    m.correct_hsym()
-    m.correct_vsym()
-    m.calc_all()
-    # m.result_e_delta_t()
-    # m.data_gridding()
-    # m.plt_hysteresis()
-    m.result_hf_sus(method='app2sat', saturation_percent=80)
-    plot_app2sat(m)
-    print m.results
+    m.export_vftb()
+    # # m = s.add_measurement(mtype='hys', mfile=vftb_file, machine='vftb')
+    # m.correct_hsym()
+    # m.correct_vsym()
+    # m.calc_all()
+    # # m.result_e_delta_t()
+    # # m.data_gridding()
+    # # m.plt_hysteresis()
+    # m.result_hf_sus(method='app2sat', saturation_percent=80)
+    # plot_app2sat(m)
+    # print m.results

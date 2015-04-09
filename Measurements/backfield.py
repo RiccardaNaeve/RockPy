@@ -7,7 +7,6 @@ import base
 
 
 class Backfield(base.Measurement):
-
     logger = logging.getLogger('RockPy.MEASUREMENT.Backfield')
     """
     A Backfield Curve can give information on:
@@ -35,7 +34,7 @@ class Backfield(base.Measurement):
     def __init__(self, sample_obj,
                  mtype, mfile, machine,
                  **options):
-        
+
         self._data = {'remanence': None,
                       'induced': None}
         # TODO: check if the above makes sense. super resets self._data ????
@@ -62,7 +61,7 @@ class Backfield(base.Measurement):
         data = self.machine_data.out_backfield()
         header = self.machine_data.header
 
-        #check for IRM acquisition -> index is changed
+        # check for IRM acquisition -> index is changed
         data_idx = 0
         if self.machine_data.measurement_header['SCRIPT']['Include IRM?'] == 'Yes':
             data_idx += 1
@@ -72,7 +71,7 @@ class Backfield(base.Measurement):
         self._raw_data['remanence'] = RockPyData(column_names=['field', 'mag'], data=data[data_idx][:, [0, 1]])
 
         if self.machine_data.measurement_header['SCRIPT']['Include direct moment?'] == 'Yes':
-            self._raw_data['induced'] = RockPyData(column_names=['field', 'mag'], data=data[data_idx+1][:, [0, 2]])
+            self._raw_data['induced'] = RockPyData(column_names=['field', 'mag'], data=data[data_idx + 1][:, [0, 2]])
 
 
     @property
@@ -146,18 +145,15 @@ class Backfield(base.Measurement):
         Backfield.logger.info('CALCULATING << Bcr >> parameter from linear interpolation')
         Backfield.logger.info('               ---    If sample is not saturated, value could be too low')
 
-        idx = np.argmin(np.abs(self._data['remanence']['mag'].v))  # index of closest to 0
+        idx = np.argmin(np.abs(self.data['remanence']['mag'].v))  # index of closest to 0
 
-        if self._data['remanence']['mag'].v[idx] < 0:
-            idx1 = idx
-            idx2 = idx - 1
+        if self.data['remanence']['mag'].v[idx] < 0:
+            i = [idx - 1, idx]
         else:
-            idx1 = idx + 1
-            idx2 = idx
+            i = [idx, idx + 1]
+        # tf_array = [True if x in i else False for x in range(len(self.data['remanence']['mag'].v))]
+        d = self.data['remanence'].filter_idx(i)
 
-        i = [idx1, idx2]
-        tf_array = [True if x in i else False for x in range(len(self._data['remanence']['mag'].v))]
-        d = self._data['remanence'].filter(tf_array=tf_array)
         slope, sigma, y_intercept, x_intercept = d.lin_regress('field', 'mag')
         bcr = - y_intercept / slope
         self.results['bcr'] = abs(bcr)
@@ -175,17 +171,13 @@ class Backfield(base.Measurement):
             self.results['s300'] = np.nan
             return
 
-        if abs(self._data['remanence']['field'].v[idx]) < 0.300:
-            idx2 = idx
-            idx1 = idx + 1
+        if abs(self.data['remanence']['field'].v[idx]) < 0.3:
+            i = [idx - 1, idx]
         else:
-            idx1 = idx
-            idx2 = idx - 1
+            i = [idx, idx + 1]
 
-        i = [idx1, idx2]
-        tf_array = [True if x in i else False for x in range(len(self._data['remanence']['mag'].v))]
 
-        d = self._data['remanence'].filter(tf_array=tf_array)
+        d = self._data['remanence'].filter_idx(i)
         slope, sigma, y_intercept, x_intercept = d.lin_regress('field', 'mag')
 
         m300 = y_intercept + (slope * 0.3)

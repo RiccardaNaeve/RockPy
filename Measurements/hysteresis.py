@@ -222,17 +222,17 @@ class Hys(base.Measurement):
             header[header.index('adjusted moment')] = 'moment'
 
         if len(segments['segment number'].v) == 3:
-            self._raw_data['virgin'] = RockPyData(column_names=header, data=self.machine_data.out_hysteresis()[0])
-            self._raw_data['down_field'] = RockPyData(column_names=header, data=self.machine_data.out_hysteresis()[1])
-            self._raw_data['up_field'] = RockPyData(column_names=header, data=self.machine_data.out_hysteresis()[2])
+            self._raw_data['virgin'] = RockPyData(column_names=header, data=self.machine_data.out_hysteresis()[0], units=self.machine_data.units)
+            self._raw_data['down_field'] = RockPyData(column_names=header, data=self.machine_data.out_hysteresis()[1], units=self.machine_data.units)
+            self._raw_data['up_field'] = RockPyData(column_names=header, data=self.machine_data.out_hysteresis()[2], units=self.machine_data.units)
 
         if len(segments['segment number'].v) == 2:
             self._raw_data['virgin'] = None
-            self._raw_data['down_field'] = RockPyData(column_names=header, data=self.machine_data.out_hysteresis()[0])
-            self._raw_data['up_field'] = RockPyData(column_names=header, data=self.machine_data.out_hysteresis()[1])
+            self._raw_data['down_field'] = RockPyData(column_names=header, data=self.machine_data.out_hysteresis()[0], units=self.machine_data.units)
+            self._raw_data['up_field'] = RockPyData(column_names=header, data=self.machine_data.out_hysteresis()[1], units=self.machine_data.units)
 
         if len(segments['segment number'].v) == 1:
-            self._raw_data['virgin'] = RockPyData(column_names=header, data=self.machine_data.out_hysteresis()[0])
+            self._raw_data['virgin'] = RockPyData(column_names=header, data=self.machine_data.out_hysteresis()[0], units=self.machine_data.units)
             self._raw_data['down_field'] = None
             self._raw_data['up_field'] = None
 
@@ -426,20 +426,15 @@ class Hys(base.Measurement):
             idx = np.argmin(abs(data))  # index of closest to 0
             if data[idx] < 0:
                 if data[idx + 1] < 0:
-                    idx1 = idx
-                    idx2 = idx - 1
+                    i = [idx, idx - 1]
                 else:
-                    idx1 = idx + 1
-                    idx2 = idx
+                    i = [idx + 1, idx]
             else:
                 if data[idx + 1] < 0:
-                    idx1 = idx + 1
-                    idx2 = idx
+                    i = [idx + 1, idx]
                 else:
-                    idx1 = idx - 1
-                    idx2 = idx
+                    i = [idx - 1, idx]
 
-            i = [idx1, idx2]
             d = d.filter_idx(i)
 
             x = d['field'].v
@@ -460,7 +455,7 @@ class Hys(base.Measurement):
         # Hysteresis.logger.info('CALCULATING << Bc >> parameter from linear interpolation between points closest to m=0')
 
         def calc(direction):
-            d = getattr(self, direction)
+            d = self.data[direction]
             data = d['mag'].v
             idx = np.argmin(abs(data))  # index of closest to 0
             if data[idx] < 0:
@@ -971,7 +966,7 @@ class Hys(base.Measurement):
     def export_vftb(self, folder=None, filename=None):
         import os
         if self.get_mtype_prior_to(mtype='mass'):
-            mass = self.get_mtype_prior_to(mtype='mass').data['data']['mass'].v * 1e5
+            mass = self.get_mtype_prior_to(mtype='mass').data['data']['mass'].v * 1e5 # mass converted from kg to mg
         line_one = 'name: ' + self.sample_obj.name + '\t'+'weight: ' + '%.0f mg' %mass
         line_two = ''
         line_three = 'Set 1:'
@@ -979,7 +974,16 @@ class Hys(base.Measurement):
         field, mag, temp, time, std, sus = (None,)*6
         for dtype in ['virgin', 'down_field', 'up_field']:
             if 'field' in self.data[dtype].column_names:
-                field = self.data[dtype]['field'].v
+                field = self.data[dtype]['field'].v * 10000 # converted from tesla to Oe #todo unit check and conversion
+            if 'mag' in self.data[dtype].column_names:
+                mag = self.data[dtype]['mag'].v / mass # converted from tesla to Oe #todo unit check and conversion
+            if 'temperature' in self.data[dtype].column_names:
+                temp = self.data[dtype]['temperature'].v
+            if 'std' in self.data[dtype].column_names:
+                std = self.data[dtype]['std'].v
+            if 'sus' in self.data[dtype].column_names:
+                sus = self.data[dtype]['sus'].v
+
             # if 'temperature' in self.data[dtype].column_names:
             # if 'temperature' in self.data[dtype].column_names:
         print line_one

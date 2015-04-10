@@ -15,8 +15,6 @@ class Vsm(base.Machine):
 
         self.data_header = [i for i in self.raw_out[0].split(' ') if i != '' if i != '\n']
         self.data_header_idx = {v.lower(): i for i, v in enumerate(self.data_header)}
-        print self.units
-        print self.header
 
     @property
     def header(self):
@@ -47,27 +45,34 @@ class Vsm(base.Machine):
         idx = min(i for i,v in enumerate(self.raw_out) if v.startswith('+') or v.startswith('-'))-1
         out = self.raw_out[idx].replace('\xb2', '^2').replace('(', '').replace(')', '').split()
 
-        if 'Am^2' in out: # Pint does not know Am there has to be a ' '
-            out[out.index('Am^2')] = 'A m^2'
+        for i,v in enumerate(out):
+            if v == 'Am^2': # Pint does not know Am there has to be a ' '
+                out[i] = 'A m^2'
+
+            if v == 'Am': # Pint does not know Am there has to be a ' '
+                out[i] = 'A m'
         return out
 
     @property
     def segment_info(self):
         segment_start_idx = [i for i, v in enumerate(self.raw_out) if
                              v.strip().lower().startswith('segment') or v.strip().lower().startswith('number')]
-        segment_numbers_idx = [i for i, v in enumerate(self.raw_out) if v.startswith('0')]
+        if segment_start_idx:
+            segment_numbers_idx = [i for i, v in enumerate(self.raw_out) if v.startswith('0')]
 
-        segment_data = [v.strip('\n').split(',') for i, v in enumerate(self.raw_out) if i in segment_numbers_idx]
-        sifw = [len(i) + 1 for i in segment_data[0]]
-        sifw += [len(segment_data[0])]
-        sifw = [sum(sifw[:i]) for i in range(len(sifw))]
-        segment_data = np.array(segment_data).astype(float)
-        segment_info = np.array(
-            [[v[sifw[i]: sifw[i + 1]] for i in range(len(sifw) - 1)] for j, v in enumerate(self.raw_out) if
-             j in segment_start_idx]).T
-        segment_info = [' '.join(i) for i in segment_info]
-        segment_info = np.array([' '.join(j.split()).lower() for j in segment_info])
-        out = RockPyData(column_names=segment_info, data=segment_data)
+            segment_data = [v.strip('\n').split(',') for i, v in enumerate(self.raw_out) if i in segment_numbers_idx]
+            sifw = [len(i) + 1 for i in segment_data[0]]
+            sifw += [len(segment_data[0])]
+            sifw = [sum(sifw[:i]) for i in range(len(sifw))]
+            segment_data = np.array(segment_data).astype(float)
+            segment_info = np.array(
+                [[v[sifw[i]: sifw[i + 1]] for i in range(len(sifw) - 1)] for j, v in enumerate(self.raw_out) if
+                 j in segment_start_idx]).T
+            segment_info = [' '.join(i) for i in segment_info]
+            segment_info = np.array([' '.join(j.split()).lower() for j in segment_info])
+            out = RockPyData(column_names=segment_info, data=segment_data)
+        else:
+            out = None
         return out
 
     @property

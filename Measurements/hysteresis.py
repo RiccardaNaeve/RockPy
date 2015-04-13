@@ -16,6 +16,8 @@ from pprint import pprint
 from profilehooks import profile
 from lmfit import minimize, Parameters, Parameter, report_fit
 from profilehooks import profile
+
+
 class Hys(base.Measurement):
     """
     Measurement Class for Hysteresis Measurements
@@ -196,7 +198,6 @@ class Hys(base.Measurement):
         Gt4 = params['Gt4'].value
         Et = params['Et'].value
 
-
         model = Bt1 * np.tanh(Gt1 * x)
         model += Bt2 * np.tanh(Gt2 * x)
         model += Bt3 * np.tanh(Gt3 * x)
@@ -233,10 +234,10 @@ class Hys(base.Measurement):
         Gs3 = params['Gs3'].value
         Gs4 = params['Gs4'].value
 
-        model = Bs1 * (1 / np.cosh(Gs1 * x))
-        model += Bs2 * (1 / np.cosh(Gs2 * x))
-        model += Bs3 * (1 / np.cosh(Gs3 * x))
-        model += Bs4 * (1 / np.cosh(Gs4 * x))
+        model = Bs1 * np.cosh(Gs1 * x) ** -1
+        model += Bs2 * np.cosh(Gs2 * x) ** -1
+        model += Bs3 * np.cosh(Gs3 * x) ** -1
+        model += Bs4 * np.cosh(Gs4 * x) ** -1
         return np.array(model - data)
 
     @staticmethod
@@ -411,7 +412,7 @@ class Hys(base.Measurement):
         calc_method = '_'.join(['hf_sus', method])
 
         parameter = dict(saturation_percent=saturation_percent,
-                         remove_last = remove_last,
+                         remove_last=remove_last,
                          method=method)
 
         parameter.update(options)
@@ -586,11 +587,12 @@ class Hys(base.Measurement):
             return np.nan
 
         # getting data for positive down field branch
-        df_pos_fields = [v for v in self.data['down_field']['field'].v if v >=0 ] + [0.0] # need to add 0 to fields
-        df_pos = self.data['down_field'].interpolate(df_pos_fields) # interpolate value for 0
-        df_pos_area = abs(sp.integrate.simps(y=df_pos['mag'].v, x=df_pos['field'].v)) # calculate area under downfield
+        df_pos_fields = [v for v in self.data['down_field']['field'].v if v >= 0] + [0.0]  # need to add 0 to fields
+        df_pos = self.data['down_field'].interpolate(df_pos_fields)  # interpolate value for 0
+        df_pos_area = abs(sp.integrate.simps(y=df_pos['mag'].v, x=df_pos['field'].v))  # calculate area under downfield
 
-        msi_area = abs(sp.integrate.simps(y=self.data['virgin']['mag'].v, x=self.data['virgin']['field'].v)) # calulate area under virgin
+        msi_area = abs(sp.integrate.simps(y=self.data['virgin']['mag'].v,
+                                          x=self.data['virgin']['field'].v))  # calulate area under virgin
 
         self.results['e_delta_t'] = 2 * (df_pos_area - msi_area)
         self.calculation_parameter['e_delta_t'].update(parameter)
@@ -609,9 +611,10 @@ class Hys(base.Measurement):
 
         '''
 
-        df_area = sp.integrate.simps(y=self.data['down_field']['mag'].v[::-1], x=self.data['down_field']['field'].v[::-1]) # calulate area under down_field
-        uf_area = sp.integrate.simps(y=self.data['up_field']['mag'].v, x=self.data['up_field']['field'].v) # calulate area under up_field
-
+        df_area = sp.integrate.simps(y=self.data['down_field']['mag'].v[::-1],
+                                     x=self.data['down_field']['field'].v[::-1])  # calulate area under down_field
+        uf_area = sp.integrate.simps(y=self.data['up_field']['mag'].v,
+                                     x=self.data['up_field']['field'].v)  # calulate area under up_field
 
         self.results['e_hys'] = abs(df_area - uf_area)
         self.calculation_parameter['e_hys'].update(parameter)
@@ -652,7 +655,7 @@ class Hys(base.Measurement):
         parameter.update(dict(method='app2sat'))
         self.calculation_parameter['hf_sus'].update(parameter)
 
-    def get_irreversible(self):
+    def get_irreversible(self, correct_symmetry=True):
         """
         Calculates the irreversible hysteretic components :math:`M_{ih}` from the data.
 
@@ -667,9 +670,19 @@ class Hys(base.Measurement):
            Mih: RockPyData
 
         """
-        M_ih = deepcopy(self.data['down_field'])
-        uf = self.data['up_field'].interpolate(self.data['down_field']['field'].v)
-        M_ih['mag'] = (M_ih['mag'].v + uf['mag'].v) / 2
+        field_data = sorted(list(set(self.data['down_field']['field'].v) | set(self.data['up_field']['field'].v)))
+        uf = self.data['up_field'].interpolate(field_data)
+        df = self.data['down_field'].interpolate(field_data)
+        M_ih = deepcopy(uf)
+        M_ih['mag'] = (df['mag'].v + uf['mag'].v) / 2
+
+        if correct_symmetry:
+            M_ih_pos = M_ih.filter(M_ih['field'].v >= 0)
+            M_ih_neg = M_ih.filter(M_ih['field'].v <= 0)
+
+            mean_data = np.mean(np.c_[M_ih_pos['mag'].v, -M_ih_neg['mag'].v], axis=1)
+            M_ih['mag'] = list(-mean_data[::-1]).extend(list(mean_data))
+
         return M_ih.filter(~np.isnan(M_ih['mag'].v))
 
     def get_reversible(self):
@@ -687,10 +700,29 @@ class Hys(base.Measurement):
            Mrh: RockPyData
 
         """
-        M_rh = deepcopy(self.data['down_field'])
-        uf = self.data['up_field'].interpolate(self.data['down_field']['field'].v)
-        M_rh['mag'] = (M_rh['mag'].v - uf['mag'].v) / 2
+        field_data = sorted(list(set(self.data['down_field']['field'].v) | set(self.data['up_field']['field'].v)))
+        uf = self.data['up_field'].interpolate(field_data)
+        df = self.data['down_field'].interpolate(field_data)
+        M_rh = deepcopy(uf)
+        M_rh['mag'] = (df['mag'].v - uf['mag'].v) / 2
         return M_rh.filter(~np.isnan(M_rh['mag'].v))
+
+    def get_interpolated(self, branch):
+        """
+        calculates interpolated mag values for all field values for up and down field branch
+        :param branch:
+        :return:
+        """
+        field_data = sorted(list(set(self.data['down_field']['field'].v) | set(self.data['up_field']['field'].v)))
+        uf = self.data['up_field'].interpolate(field_data)
+        df = self.data['down_field'].interpolate(field_data)
+
+        if branch == 'down_field':
+            return df
+        if branch == 'up_field':
+            return uf
+        if branch == 'all':
+            return df, uf
 
     """ CORRECTIONS """
 
@@ -797,21 +829,38 @@ class Hys(base.Measurement):
             plt.show()
             self.check_plot(uncorrected_data)
 
-    def correct_center(self, data='grid_data'):  # todo rewrite for data
-        uf_rotate = self.rotate_branch('up_field', data)
+    def correct_center(self, interpolate=False):  # todo rewrite for data
 
-        # copy data and average with opposite rotated branch
-        df_corrected = getattr(self, data)['down_field']
-        shift = (max(getattr(self, data)['down_field']['mag'].v) - min(getattr(self, data)['up_field']['mag'].v) + \
-                 min(getattr(self, data)['down_field']['mag'].v) - max(getattr(self, data)['up_field']['mag'].v)) / 4
+        df = self.data['down_field']
+        uf = self.data['up_field']
 
-        df_corrected['mag'] = (df_corrected['mag'].v + uf_rotate['mag'].v) / 2 - shift
-        uf_corrected = deepcopy(df_corrected)
-        uf_corrected['field'] = -uf_corrected['field'].v
-        uf_corrected['mag'] = -uf_corrected['mag'].v
+        uf_rotate = self.rotate_branch(uf)
+        df_rotate = self.rotate_branch(df)
 
-        self._corrected_data.update({'down_field': df_corrected})
-        self._corrected_data.update({'up_field': uf_corrected})
+        fields = sorted(
+            list(set(df['field'].v) | set(uf['field'].v) | set(df_rotate['field'].v) | set(uf_rotate['field'].v)))
+
+        # interpolate al branches and rotations
+        df = df.interpolate(fields[::-1])
+        uf = uf.interpolate(fields)
+        df_rotate = df_rotate.interpolate(fields)
+        uf_rotate = uf_rotate.interpolate(fields)
+
+        down_field_corrected = deepcopy(df)
+        up_field_corrected = deepcopy(uf)
+        down_field_corrected['mag'] = (df['mag'].v - uf_rotate['mag'].v) / 2. - (df['mag'].v - uf['mag'].v + df_rotate['mag'].v -
+                                                                  uf_rotate['mag'].v) / 4.
+        up_field_corrected['mag'] = - down_field_corrected['mag'].v
+
+        plt.plot(down_field_corrected['field'].v, down_field_corrected['mag'].v)
+        plt.plot(up_field_corrected['field'].v, up_field_corrected['mag'].v)
+        # plt.plot(df_rotate['field'].v, df_rotate['mag'].v)
+        # plt.plot(uf_rotate['field'].v, uf_rotate['mag'].v)
+        # plt.plot(df['field'].v, df_rotate['mag'].v)
+        # plt.plot(uf['field'].v, df_rotate['mag'].v)
+
+        plt.show()
+
 
     def correct_slope(self):  # todo redundant
         """
@@ -863,18 +912,18 @@ class Hys(base.Measurement):
 
         # create a set of Parameters
         params = Parameters()
-        params.add('Bt1',   value= ms,  min=0)
-        params.add('Bt2',   value= ms,  min=0)
-        params.add('Bt3',   value= ms,  min=0)
-        params.add('Bt4',   value= ms,  min=0)
+        params.add('Bt1', value=ms, min=0)
+        params.add('Bt2', value=ms, min=0)
+        params.add('Bt3', value=ms, min=0)
+        params.add('Bt4', value=ms, min=0)
 
-        params.add('Gt1',   value= 0.1)
-        params.add('Gt2',   value= 0.1)
-        params.add('Gt3',   value= 0.1)
-        params.add('Gt4',   value= 0.1)
+        params.add('Gt1', value=0.1)
+        params.add('Gt2', value=0.1)
+        params.add('Gt3', value=0.1)
+        params.add('Gt4', value=0.1)
 
         # params.add('Et',   value= 9.81e-5,  vary=False)
-        params.add('Et',   value= hf_sus,  vary=False)
+        params.add('Et', value=hf_sus, vary=True)
 
         # set parameters to zero and fix them if less functions are required
         if nfunc < 4:
@@ -888,7 +937,12 @@ class Hys(base.Measurement):
         result = minimize(self.fit_tanh, params, args=(data['field'].v, data['mag'].v))
 
         if check:
-            print 'FITTING RESULTS FOR IRREVERSIBLE (TANH) %i COMPONENTS'%nfunc
+            plt.plot(data['field'].v, data['mag'].v / max(data['mag'].v))
+            plt.plot(data['field'].v, (data['mag'].v + result.residual) / max(data['mag'].v))
+            plt.plot(data['field'].v, result.residual / max(result.residual))
+            plt.show()
+
+            print 'FITTING RESULTS FOR IRREVERSIBLE (TANH) %i COMPONENTS' % nfunc
             report_fit(params)
 
         return result
@@ -903,15 +957,15 @@ class Hys(base.Measurement):
         mrs = self.result_mrs().v[0]
         # create a set of Parameters
         rev_params = Parameters()
-        rev_params.add('Bs1',   value= mrs,  min=0)
-        rev_params.add('Bs2',   value= mrs,  min=0)
-        rev_params.add('Bs3',   value= mrs,  min=0)
-        rev_params.add('Bs4',   value= mrs,  min=0)
+        rev_params.add('Bs1', value=mrs, min=0)
+        rev_params.add('Bs2', value=mrs, min=0)
+        rev_params.add('Bs3', value=mrs, min=0)
+        rev_params.add('Bs4', value=mrs, min=0)
 
-        rev_params.add('Gs1',   value= 1,  min=0)
-        rev_params.add('Gs2',   value= 1,  min=0)
-        rev_params.add('Gs3',   value= 1,  min=0)
-        rev_params.add('Gs4',   value= 1,  min=0)
+        rev_params.add('Gs1', value=1)
+        rev_params.add('Gs2', value=1)
+        rev_params.add('Gs3', value=1)
+        rev_params.add('Gs4', value=1)
 
         # set parameters to zero and fix them if less functions are required
         if nfunc < 4:
@@ -924,14 +978,19 @@ class Hys(base.Measurement):
         data = self.get_reversible()
         result = minimize(self.fit_sech, rev_params, args=(data['field'].v, data['mag'].v))
         if check:
-            print 'FITTING RESULTS FOR REVERSIBLE (SECH) %i COMPONENTS'%nfunc
+            plt.plot(data['field'].v, data['mag'].v / max(data['mag'].v))
+            plt.plot(data['field'].v, (data['mag'].v + result.residual) / max(data['mag'].v))
+            plt.plot(data['field'].v, result.residual / max(result.residual))
+            plt.show()
+
+            print 'FITTING RESULTS FOR REVERSIBLE (SECH) %i COMPONENTS' % nfunc
             report_fit(rev_params)
         return result
 
     # @profile
-    def fit_hysteresis(self, nfunc=1, check=False):
+    def fit_hysteresis(self, nfunc=1, correct_symmetry=True, check=False):
         """
-        Fitting of hysteresis functions
+        Fitting of hysteresis functions. Removes virgin branch in process.
         :param nfunc:
         :return:
         """
@@ -939,7 +998,7 @@ class Hys(base.Measurement):
             initial_data = deepcopy(self.data)
 
         # calclate irrev & reversible data
-        irrev_data = self.get_irreversible()
+        irrev_data = self.get_irreversible(correct_symmetry=correct_symmetry)
         rev_data = self.get_reversible()
 
         # calculate fit for each component
@@ -951,12 +1010,14 @@ class Hys(base.Measurement):
         irrev_mag = self.fit_tanh(irrev_result.params, fields)
         rev_mag = self.fit_sech(rev_result.params, fields)
 
-        df_data = RockPyData(column_names=['field', 'mag'], data=np.array([[fields[i], irrev_mag[i]+rev_mag[i]] for i in xrange(len(fields))]))
-        uf_data = RockPyData(column_names=['field', 'mag'], data=np.array([[fields[i], irrev_mag[i]-rev_mag[i]] for i in xrange(len(fields))]))
+        df_data = RockPyData(column_names=['field', 'mag'],
+                             data=np.array([[fields[i], irrev_mag[i] + rev_mag[i]] for i in xrange(len(fields))]))
+        uf_data = RockPyData(column_names=['field', 'mag'],
+                             data=np.array([[fields[i], irrev_mag[i] - rev_mag[i]] for i in xrange(len(fields))]))
 
-        self.data['down_field'] =  df_data
-        self.data['up_field'] =  uf_data
-        self.data['virgin'] =  None
+        self.data['down_field'] = df_data
+        self.data['up_field'] = uf_data
+        self.data['virgin'] = None
 
         if check:
             self.check_plot(uncorrected_data=initial_data)
@@ -1008,7 +1069,7 @@ class Hys(base.Measurement):
 
         if len(self.data['down_field']['field'].v) <= 50:
             self.logger.warning('Hysteresis branches have less than 50 (%i) points, gridding not possible' % (
-            len(self.data['down_field']['field'].v)))
+                len(self.data['down_field']['field'].v)))
             return
 
         bmax = max([max(self.data['down_field']['field'].v), max(self.data['up_field']['field'].v)])
@@ -1037,7 +1098,7 @@ class Hys(base.Measurement):
             d = self.data[dtype]
             for i in range(1, len(grid) - 1):  # cycle through gridpoints
                 idx = [j for j, v in enumerate(d['field'].v) if
-                       grid[i - 1] <= v <= grid[i + 1]]  #indices of points within the grid points
+                       grid[i - 1] <= v <= grid[i + 1]]  # indices of points within the grid points
                 if len(idx) > 0:  # if no points between gridpoints -> no interpolation
                     data = deepcopy(d.filter_idx(idx))
                     try:
@@ -1064,10 +1125,14 @@ class Hys(base.Measurement):
            data: str
               e.g. data, grid_data, corrected_data
 
-           branch: str
+           branch: str or. RockPyData
               up-field or down-field
+              RockPyData: will rotate the data
         """
-        data = deepcopy(getattr(self, data)[branch])
+        if isinstance(branch, str):
+            data = deepcopy(getattr(self, data)[branch])
+        if isinstance(branch, RockPyData):
+            data = branch
         data['field'] = -data['field'].v[::-1]
         data['mag'] = -data['mag'].v[::-1]
         return data
@@ -1130,7 +1195,7 @@ class Hys(base.Measurement):
         '''
         self.plt_hys()
 
-    def check_plot(self, uncorrected_data):
+    def check_plot(self, corrected_data=None, uncorrected_data=None, noshow=False):
         """
         Helper function for consistent check visualization
 
@@ -1139,50 +1204,57 @@ class Hys(base.Measurement):
            uncorrected_data: RockPyData
               the pre-correction data.
         """
+        if not corrected_data:
+            corrected_data = self.data
+        f, ax = plt.subplots()
 
-        for dtype in self.data:
+        for dtype in corrected_data:
             try:
-                plt.plot(self.data[dtype]['field'].v, self.data[dtype]['mag'].v, color='g')
-                plt.plot(uncorrected_data[dtype]['field'].v, uncorrected_data[dtype]['mag'].v, color='r', marker='.', ls='')
+                ax.plot(corrected_data[dtype]['field'].v, corrected_data[dtype]['mag'].v, color='g')
+                ax.plot(uncorrected_data[dtype]['field'].v, uncorrected_data[dtype]['mag'].v, color='r', marker='.',
+                        ls='')
             except TypeError:
                 pass
 
-        plt.xlabel('Moment')
-        plt.xlabel('Field')
-        plt.legend(['corrected / fitted', 'original'], loc='best')
-        plt.grid(zorder=1)
-        plt.axhline(color='k', zorder=1)
-        plt.axvline(color='k', zorder=1)
-        plt.xlim([min(self.data['down_field']['field'].v), max(self.data['down_field']['field'].v)])
-        plt.show()
+        if not noshow:
+            ax.set_ylabel('Moment')
+            ax.set_xlabel('Field')
+            ax.legend(['corrected / fitted', 'original'], loc='best')
+            ax.grid(zorder=1)
+            ax.axhline(color='k', zorder=1)
+            ax.axvline(color='k', zorder=1)
+            ax.set_xlim([min(corrected_data['down_field']['field'].v), max(corrected_data['down_field']['field'].v)])
+            plt.show()
 
     def export_vftb(self, folder=None, filename=None):
         from os import path
 
-        abbrev = {'hys': 'hys', 'backfield':'coe', 'irm_acquisition':'irm', 'temp_ramp':'rmp'}
+        abbrev = {'hys': 'hys', 'backfield': 'coe', 'irm_acquisition': 'irm', 'temp_ramp': 'rmp'}
 
         if not folder:
             folder = RockPy.join(path.expanduser('~'), 'Desktop')
 
         if self.get_mtype_prior_to(mtype='mass'):
-            mass = self.get_mtype_prior_to(mtype='mass').data['data']['mass'].v[0] * 1e5 # mass converted from kg to mg
+            mass = self.get_mtype_prior_to(mtype='mass').data['data']['mass'].v[0] * 1e5  # mass converted from kg to mg
 
         if not filename:
             filename = RockPy.generate_file_name(sample_group='RockPy', sample_name=self.sample_obj.name,
-                                                 mtype='HYS', machine=self.machine, mass = mass, mass_unit='mg')[:-4].replace('.', ',') \
+                                                 mtype='HYS', machine=self.machine, mass=mass, mass_unit='mg')[
+                       :-4].replace('.', ',') \
                        + '.' + abbrev[self.mtype]
 
-
-        line_one = 'name: ' + self.sample_obj.name + '\t'+'weight: ' + '%.0f mg' %mass
+        line_one = 'name: ' + self.sample_obj.name + '\t' + 'weight: ' + '%.0f mg' % mass
         line_two = ''
         line_three = 'Set 1:'
         line_four = ' field / Oe	mag / emu / g	temp / centigrade	time / s	std dev / %	suscep / emu / g / Oe'
         field, mag, temp, time, std, sus = [], [], [], [], [], []
         for dtype in ['virgin', 'down_field', 'up_field']:
             if 'field' in self.data[dtype].column_names:
-                field.extend(self.data[dtype]['field'].v * 10000)# converted from tesla to Oe #todo unit check and conversion
+                field.extend(
+                    self.data[dtype]['field'].v * 10000)  # converted from tesla to Oe #todo unit check and conversion
             if 'mag' in self.data[dtype].column_names:
-                mag.extend(self.data[dtype]['mag'].v / mass) # converted from tesla to Oe #todo unit check and conversion
+                mag.extend(
+                    self.data[dtype]['mag'].v / mass)  # converted from tesla to Oe #todo unit check and conversion
             if 'temperature' in self.data[dtype].column_names:
                 temp.extend(self.data[dtype]['temperature'].v - 274.15)
             else:
@@ -1200,20 +1272,21 @@ class Hys(base.Measurement):
             else:
                 sus = np.zeros(len(field))
         data = np.c_[field, mag, temp, time, std, sus]
-        data = [ '\t'.join(map(str,i)) for i in data]
+        data = ['\t'.join(map(str, i)) for i in data]
         data = '\n'.join(data)
         with open(RockPy.join(folder, filename), 'w+') as f:
-            f.writelines(line_one+'\n')
-            f.writelines(line_two+'\n')
-            f.writelines(line_three+'\n')
-            f.writelines(line_four+'\n')
+            f.writelines(line_one + '\n')
+            f.writelines(line_two + '\n')
+            f.writelines(line_three + '\n')
+            f.writelines(line_four + '\n')
             f.writelines(data)
 
 
 def plot_app2sat(m, sat_perc=80):
-    sat_perc /=100
+    sat_perc /= 100
     dfp = m.data['down_field'].filter(m.data['down_field']['field'].v > sat_perc * max(m.data['down_field']['field'].v))
-    dfm = m.data['down_field'].filter(m.data['down_field']['field'].v < -sat_perc * max(m.data['down_field']['field'].v))
+    dfm = m.data['down_field'].filter(
+        m.data['down_field']['field'].v < -sat_perc * max(m.data['down_field']['field'].v))
     ufp = m.data['up_field'].filter(m.data['up_field']['field'].v > sat_perc * max(m.data['up_field']['field'].v))
     ufm = m.data['up_field'].filter(m.data['up_field']['field'].v < -sat_perc * max(m.data['up_field']['field'].v))
     x = np.linspace(sat_perc * max(m.data['up_field']['field'].v), max(m.data['up_field']['field'].v))
@@ -1232,15 +1305,16 @@ if __name__ == '__main__':
     import RockPy
 
     vsm_file = RockPy.join(RockPy.test_data_path, 'vsm', 'LTPY_527,1a_HYS_VSM#XX[mg]___#TEMP_300_K#STD000.000')
-    # vftb_file = RockPy.join(RockPy.test_data_path, 'MUCVFTB_test.hys')
+    vftb_file = RockPy.join(RockPy.test_data_path, 'MUCVFTB_test.hys')
     vftb_file = '/Users/mike/Dropbox/Software/RockMagAnalyzer1.1/Examples/example1.hys'
     s = RockPy.Sample(name='test_sample', mass=146.8, mass_unit='mg')
-    # m = s.add_measurement(mtype='hys', mfile=vsm_file, machine='vsm')
-    m = s.add_measurement(mtype='hys', mfile=vftb_file, machine='vftb')
-    m.normalizeNEW(reference='mass', ntypes='mag')
-    m.fit_hysteresis(nfunc=3, check = True)
-    m.calc_all()
-    print m.results
+    m = s.add_measurement(mtype='hys', mfile=vsm_file, machine='vsm')
+    m.correct_center()
+    # m = s.add_measurement(mtype='hys', mfile=vftb_file, machine='vftb')
+    # m.normalizeNEW(reference='mass', ntypes='mag')
+    # m.fit_hysteresis(nfunc=2, check=True)
+    # m.calc_all()
+    # print m.results
     # # m = s.add_measurement(mtype='hys', mfile=vftb_file, machine='vftb')
     # m.correct_hsym()
     # m.correct_vsym()

@@ -2,7 +2,7 @@ __author__ = 'mike'
 import numpy as np
 
 import base
-
+from profilehooks import profile
 
 class Vftb(base.Machine):
     def __init__(self, dfile, sample_name):

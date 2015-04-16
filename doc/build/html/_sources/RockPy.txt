@@ -13,7 +13,6 @@ Subpackages
     RockPy.Structure
     RockPy.Treatments
     RockPy.Visualize
-    RockPy.testing
 
 Module contents
 ---------------

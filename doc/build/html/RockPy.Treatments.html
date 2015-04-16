@@ -14,7 +14,7 @@
   
 
   
-  <link href='https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Lato:400,700,400italic,700italic|Roboto+Slab:400,700|Inconsolata:400,700&subset=latin,cyrillic' rel='stylesheet' type='text/css'>
 
   
   
@@ -25,6 +25,8 @@
   
   
     <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
   
 
   
@@ -44,9 +46,12 @@
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-nav-search">
-        <a href="index.html" class="fa fa-home"> RockPy</a>
-        <div role="search">
-  <form id ="rtd-search-form" class="wy-form" action="search.html" method="get">
+        
+          <a href="index.html" class="fa fa-home"> RockPy</a>
+        
+        
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
@@ -56,22 +61,34 @@
 
       <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
         
-        
-            <ul class="current">
+          
+          
+              <ul class="current">
 <li class="toctree-l1 current"><a class="reference internal" href="RockPy.html">RockPy package</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="RockPy.html#subpackages">Subpackages</a></li>
 <li class="toctree-l2"><a class="reference internal" href="RockPy.html#module-RockPy">Module contents</a></li>
 </ul>
 </li>
-<li class="toctree-l1 current"><a class="reference internal" href="RockPy.html">RockPy package</a><ul class="current">
-<li class="toctree-l2 current"><a class="reference internal" href="RockPy.html#subpackages">Subpackages</a></li>
-<li class="toctree-l2"><a class="reference internal" href="RockPy.html#module-RockPy">Module contents</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tutorials.html#importing-rockpy">Importing RockPy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials.html#the-sample">The Sample</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="measurements.html">Measurements</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="measurements.html#hysteresis">Hysteresis</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="guidlines.html">Programming Guidlines:</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="guidlines.html#adding-a-measurement">Adding a measurement</a></li>
+<li class="toctree-l2"><a class="reference internal" href="guidlines.html#adding-a-machine">Adding a machine</a></li>
+<li class="toctree-l2"><a class="reference internal" href="guidlines.html#adding-a-visualization">Adding a Visualization</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="zreferences.html">References</a></li>
 <li class="toctree-l1"><a class="reference internal" href="RockPy.Functions.html">Functions Package</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="RockPy.Functions.html#id1"><tt class="docutils literal"><span class="pre">Functions</span></tt> Package</a></li>
-<li class="toctree-l2"><a class="reference internal" href="RockPy.Functions.html#module-RockPy.Functions.convert"><tt class="docutils literal"><span class="pre">convert</span></tt> Module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="RockPy.Functions.html#module-RockPy.Functions.general"><tt class="docutils literal"><span class="pre">general</span></tt> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Functions.html#id1"><code class="docutils literal"><span class="pre">Functions</span></code> Package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Functions.html#module-RockPy.Functions.convert"><code class="docutils literal"><span class="pre">convert</span></code> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Functions.html#module-RockPy.Functions.general"><code class="docutils literal"><span class="pre">general</span></code> Module</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="RockPy.Measurements.html">Measurements Package</a><ul>
@@ -88,46 +105,41 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="RockPy.Readin.html">Readin Package</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="RockPy.Readin.html#id1"><tt class="docutils literal"><span class="pre">Readin</span></tt> Package</a></li>
-<li class="toctree-l2"><a class="reference internal" href="RockPy.Readin.html#module-RockPy.Readin.base"><tt class="docutils literal"><span class="pre">base</span></tt> Module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="RockPy.Readin.html#module-RockPy.Readin.cryomag"><tt class="docutils literal"><span class="pre">cryomag</span></tt> Module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="RockPy.Readin.html#module-RockPy.Readin.generic"><tt class="docutils literal"><span class="pre">generic</span></tt> Module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="RockPy.Readin.html#machines-module"><tt class="docutils literal"><span class="pre">machines</span></tt> Module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="RockPy.Readin.html#module-RockPy.Readin.microsense"><tt class="docutils literal"><span class="pre">microsense</span></tt> Module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="RockPy.Readin.html#module-RockPy.Readin.spinner"><tt class="docutils literal"><span class="pre">spinner</span></tt> Module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="RockPy.Readin.html#module-RockPy.Readin.vftb"><tt class="docutils literal"><span class="pre">vftb</span></tt> Module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="RockPy.Readin.html#module-RockPy.Readin.vsm"><tt class="docutils literal"><span class="pre">vsm</span></tt> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Readin.html#id1"><code class="docutils literal"><span class="pre">Readin</span></code> Package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Readin.html#module-RockPy.Readin.base"><code class="docutils literal"><span class="pre">base</span></code> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Readin.html#module-RockPy.Readin.cryomag"><code class="docutils literal"><span class="pre">cryomag</span></code> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Readin.html#module-RockPy.Readin.generic"><code class="docutils literal"><span class="pre">generic</span></code> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Readin.html#machines-module"><code class="docutils literal"><span class="pre">machines</span></code> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Readin.html#module-RockPy.Readin.microsense"><code class="docutils literal"><span class="pre">microsense</span></code> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Readin.html#module-RockPy.Readin.spinner"><code class="docutils literal"><span class="pre">spinner</span></code> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Readin.html#module-RockPy.Readin.vftb"><code class="docutils literal"><span class="pre">vftb</span></code> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Readin.html#module-RockPy.Readin.vsm"><code class="docutils literal"><span class="pre">vsm</span></code> Module</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="RockPy.Structure.html">Structure Package</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="RockPy.Structure.html#id1"><tt class="docutils literal"><span class="pre">Structure</span></tt> Package</a></li>
-<li class="toctree-l2"><a class="reference internal" href="RockPy.Structure.html#module-RockPy.Structure.data"><tt class="docutils literal"><span class="pre">data</span></tt> Module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="RockPy.Structure.html#project-module"><tt class="docutils literal"><span class="pre">project</span></tt> Module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="RockPy.Structure.html#module-RockPy.Structure.samplegroup"><tt class="docutils literal"><span class="pre">samplegroup</span></tt> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Structure.html#id1"><code class="docutils literal"><span class="pre">Structure</span></code> Package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Structure.html#module-RockPy.Structure.data"><code class="docutils literal"><span class="pre">data</span></code> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Structure.html#project-module"><code class="docutils literal"><span class="pre">project</span></code> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Structure.html#module-RockPy.Structure.samplegroup"><code class="docutils literal"><span class="pre">samplegroup</span></code> Module</a></li>
 </ul>
 </li>
 <li class="toctree-l1 current"><a class="current reference internal" href="">Treatments Package</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#id1"><tt class="docutils literal"><span class="pre">Treatments</span></tt> Package</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#module-RockPy.Treatments.base"><tt class="docutils literal"><span class="pre">base</span></tt> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id1"><code class="docutils literal"><span class="pre">Treatments</span></code> Package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-RockPy.Treatments.base"><code class="docutils literal"><span class="pre">base</span></code> Module</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="RockPy.Visualize.html">Visualize Package</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="RockPy.Visualize.html#id1"><tt class="docutils literal"><span class="pre">Visualize</span></tt> Package</a></li>
-<li class="toctree-l2"><a class="reference internal" href="RockPy.Visualize.html#arai-module"><tt class="docutils literal"><span class="pre">arai</span></tt> Module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="RockPy.Visualize.html#backfield-module"><tt class="docutils literal"><span class="pre">backfield</span></tt> Module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="RockPy.Visualize.html#module-RockPy.Visualize.base"><tt class="docutils literal"><span class="pre">base</span></tt> Module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="RockPy.Visualize.html#module-RockPy.Visualize.demag"><tt class="docutils literal"><span class="pre">demag</span></tt> Module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="RockPy.Visualize.html#thellier-module"><tt class="docutils literal"><span class="pre">thellier</span></tt> Module</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="guidlines.html">Programming Guidlines:</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="guidlines.html#adding-a-measurement">Adding a measurement</a></li>
-<li class="toctree-l2"><a class="reference internal" href="guidlines.html#adding-a-machine">Adding a machine</a></li>
-<li class="toctree-l2"><a class="reference internal" href="guidlines.html#adding-a-visualization">Adding a Visualization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Visualize.html#id1"><code class="docutils literal"><span class="pre">Visualize</span></code> Package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Visualize.html#arai-module"><code class="docutils literal"><span class="pre">arai</span></code> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Visualize.html#backfield-module"><code class="docutils literal"><span class="pre">backfield</span></code> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Visualize.html#module-RockPy.Visualize.base"><code class="docutils literal"><span class="pre">base</span></code> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Visualize.html#module-RockPy.Visualize.demag"><code class="docutils literal"><span class="pre">demag</span></code> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Visualize.html#thellier-module"><code class="docutils literal"><span class="pre">thellier</span></code> Module</a></li>
 </ul>
 </li>
 </ul>
 
+          
         
       </div>
       &nbsp;
@@ -158,27 +170,27 @@
   </ul>
   <hr/>
 </div>
-          <div role="main">
+          <div role="main" class="document">
             
   <div class="section" id="treatments-package">
 <h1>Treatments Package<a class="headerlink" href="#treatments-package" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="id1">
-<h2><tt class="xref py py-mod docutils literal"><span class="pre">Treatments</span></tt> Package<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<h2><code class="xref py py-mod docutils literal"><span class="pre">Treatments</span></code> Package<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
 <span class="target" id="module-RockPy.Treatments"></span></div>
 <div class="section" id="module-RockPy.Treatments.base">
-<span id="base-module"></span><h2><tt class="xref py py-mod docutils literal"><span class="pre">base</span></tt> Module<a class="headerlink" href="#module-RockPy.Treatments.base" title="Permalink to this headline">¶</a></h2>
+<span id="base-module"></span><h2><code class="xref py py-mod docutils literal"><span class="pre">base</span></code> Module<a class="headerlink" href="#module-RockPy.Treatments.base" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="RockPy.Treatments.base.Generic">
-<em class="property">class </em><tt class="descclassname">RockPy.Treatments.base.</tt><tt class="descname">Generic</tt><big>(</big><em>ttype</em>, <em>value</em>, <em>unit</em>, <em>comment=None</em><big>)</big><a class="headerlink" href="#RockPy.Treatments.base.Generic" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<em class="property">class </em><code class="descclassname">RockPy.Treatments.base.</code><code class="descname">Generic</code><span class="sig-paren">(</span><em>ttype</em>, <em>value</em>, <em>unit</em>, <em>comment=None</em><span class="sig-paren">)</span><a class="headerlink" href="#RockPy.Treatments.base.Generic" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
 <dl class="method">
 <dt id="RockPy.Treatments.base.Generic.add_value">
-<tt class="descname">add_value</tt><big>(</big><em>type</em>, <em>value</em>, <em>unit=None</em><big>)</big><a class="headerlink" href="#RockPy.Treatments.base.Generic.add_value" title="Permalink to this definition">¶</a></dt>
+<code class="descname">add_value</code><span class="sig-paren">(</span><em>type</em>, <em>value</em>, <em>unit=None</em><span class="sig-paren">)</span><a class="headerlink" href="#RockPy.Treatments.base.Generic.add_value" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="RockPy.Treatments.base.Generic.label">
-<tt class="descname">label</tt><a class="headerlink" href="#RockPy.Treatments.base.Generic.label" title="Permalink to this definition">¶</a></dt>
+<code class="descname">label</code><a class="headerlink" href="#RockPy.Treatments.base.Generic.label" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -192,7 +204,7 @@
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="RockPy.Visualize.html" class="btn btn-neutral float-right" title="Visualize Package"/>Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="RockPy.Visualize.html" class="btn btn-neutral float-right" title="Visualize Package">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="RockPy.Structure.html" class="btn btn-neutral" title="Structure Package"><span class="fa fa-arrow-circle-left"></span> Previous</a>
@@ -208,7 +220,8 @@
     </p>
   </div>
 
-  <a href="https://github.com/snide/sphinx_rtd_theme">Sphinx theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+  
 </footer>
         </div>
       </div>
@@ -233,7 +246,7 @@
       <script type="text/javascript" src="_static/jquery.js"></script>
       <script type="text/javascript" src="_static/underscore.js"></script>
       <script type="text/javascript" src="_static/doctools.js"></script>
-      <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 
   
 

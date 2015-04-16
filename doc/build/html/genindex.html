@@ -74,7 +74,8 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="measurements.html">Measurements</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="measurements.html#hysteresis">Hysteresis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="thellier.html">Thellier-Thellier</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hysteresis.html">Hysteresis</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="guidlines.html">Programming Guidlines:</a><ul>
@@ -101,6 +102,7 @@
 <li class="toctree-l2"><a class="reference internal" href="RockPy.Measurements.html#module-RockPy.Measurements.thellier">Thellier-Thellier</a></li>
 <li class="toctree-l2"><a class="reference internal" href="RockPy.Measurements.html#module-RockPy.Measurements.thermocurve">Thermocurve</a></li>
 <li class="toctree-l2"><a class="reference internal" href="RockPy.Measurements.html#module-RockPy.Measurements.trm">TRM - single moment</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Measurements.html#module-RockPy.Measurements.viscosity">Viscosity</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="RockPy.Readin.html">Readin Package</a><ul>
@@ -522,12 +524,12 @@
   <dt><a href="RockPy.Measurements.html#RockPy.Measurements.thellier.Thellier.calculate_n_ac">calculate_n_ac() (RockPy.Measurements.thellier.Thellier method)</a>
   </dt>
 
-  </dl></td>
-  <td style="width: 33%" valign="top"><dl>
       
   <dt><a href="RockPy.Measurements.html#RockPy.Measurements.thellier.Thellier.calculate_n_ptrm">calculate_n_ptrm() (RockPy.Measurements.thellier.Thellier method)</a>
   </dt>
 
+  </dl></td>
+  <td style="width: 33%" valign="top"><dl>
       
   <dt><a href="RockPy.Measurements.html#RockPy.Measurements.thellier.Thellier.calculate_n_tail">calculate_n_tail() (RockPy.Measurements.thellier.Thellier method)</a>
   </dt>
@@ -554,6 +556,10 @@
 
       
   <dt><a href="RockPy.Measurements.html#RockPy.Measurements.thellier.Thellier.calculate_vds">calculate_vds() (RockPy.Measurements.thellier.Thellier method)</a>
+  </dt>
+
+      
+  <dt><a href="RockPy.Measurements.html#RockPy.Measurements.viscosity.Viscosity.calculate_visc_decay">calculate_visc_decay() (RockPy.Measurements.viscosity.Viscosity method)</a>
   </dt>
 
       
@@ -638,6 +644,10 @@
 
       
   <dt><a href="RockPy.Measurements.html#RockPy.Measurements.hysteresis.Hys.correct_hsym">correct_hsym() (RockPy.Measurements.hysteresis.Hys method)</a>
+  </dt>
+
+      
+  <dt><a href="RockPy.Measurements.html#RockPy.Measurements.viscosity.Viscosity.correct_ommit_first_n">correct_ommit_first_n() (RockPy.Measurements.viscosity.Viscosity method)</a>
   </dt>
 
       
@@ -865,6 +875,10 @@
   </dl></td>
   <td style="width: 33%" valign="top"><dl>
       
+  <dt><a href="RockPy.Measurements.html#RockPy.Measurements.viscosity.Viscosity.fit_viscous_relaxation">fit_viscous_relaxation() (RockPy.Measurements.viscosity.Viscosity static method)</a>
+  </dt>
+
+      
   <dt><a href="RockPy.Readin.html#RockPy.Readin.cryomag.CryoMag.float_data">float_data (RockPy.Readin.cryomag.CryoMag attribute)</a>
   </dt>
 
@@ -965,6 +979,10 @@
 
         
   <dt><a href="RockPy.Measurements.html#RockPy.Measurements.thermocurve.ThermoCurve.format_vsm">(RockPy.Measurements.thermocurve.ThermoCurve method)</a>
+  </dt>
+
+        
+  <dt><a href="RockPy.Measurements.html#RockPy.Measurements.viscosity.Viscosity.format_vsm">(RockPy.Measurements.viscosity.Viscosity method)</a>
   </dt>
 
       </dl></dd>
@@ -1471,6 +1489,10 @@
   </dt>
 
       
+  <dt><a href="RockPy.Measurements.html#RockPy.Measurements.viscosity.Viscosity.plt_viscosity">plt_viscosity() (RockPy.Measurements.viscosity.Viscosity method)</a>
+  </dt>
+
+      
   <dt><a href="RockPy.Structure.html#RockPy.Structure.samplegroup.SampleGroup.pop_sample">pop_sample() (RockPy.Structure.samplegroup.SampleGroup method)</a>
   </dt>
 
@@ -1668,8 +1690,6 @@
   <dt><a href="RockPy.Measurements.html#RockPy.Measurements.thellier.Thellier.result_sigma">result_sigma() (RockPy.Measurements.thellier.Thellier method)</a>
   </dt>
 
-  </dl></td>
-  <td style="width: 33%" valign="top"><dl>
       
   <dt><a href="RockPy.Measurements.html#RockPy.Measurements.thellier.Thellier.result_sigma_b_anc">result_sigma_b_anc() (RockPy.Measurements.thellier.Thellier method)</a>
   </dt>
@@ -1678,12 +1698,22 @@
   <dt><a href="RockPy.Measurements.html#RockPy.Measurements.backfield.Backfield.result_sigma_mrs">result_sigma_mrs() (RockPy.Measurements.backfield.Backfield method)</a>
   </dt>
 
+  </dl></td>
+  <td style="width: 33%" valign="top"><dl>
       
   <dt><a href="RockPy.Measurements.html#RockPy.Measurements.thellier.Thellier.result_slope">result_slope() (RockPy.Measurements.thellier.Thellier method)</a>
   </dt>
 
       
   <dt><a href="RockPy.Measurements.html#RockPy.Measurements.thellier.Thellier.result_vds">result_vds() (RockPy.Measurements.thellier.Thellier method)</a>
+  </dt>
+
+      
+  <dt><a href="RockPy.Measurements.html#RockPy.Measurements.viscosity.Viscosity.result_visc_decay">result_visc_decay() (RockPy.Measurements.viscosity.Viscosity method)</a>
+  </dt>
+
+      
+  <dt><a href="RockPy.Measurements.html#RockPy.Measurements.viscosity.Viscosity.result_visc_decay_norm">result_visc_decay_norm() (RockPy.Measurements.viscosity.Viscosity method)</a>
   </dt>
 
       
@@ -1756,6 +1786,10 @@
 
       
   <dt><a href="RockPy.Measurements.html#module-RockPy.Measurements.trm">RockPy.Measurements.trm (module)</a>
+  </dt>
+
+      
+  <dt><a href="RockPy.Measurements.html#module-RockPy.Measurements.viscosity">RockPy.Measurements.viscosity (module)</a>
   </dt>
 
       
@@ -2054,10 +2088,14 @@
   <dt><a href="RockPy.Structure.html#RockPy.Structure.data.RockPyData.values">values (RockPy.Structure.data.RockPyData attribute)</a>
   </dt>
 
+      
+  <dt><a href="RockPy.Readin.html#RockPy.Readin.vftb.Vftb">Vftb (class in RockPy.Readin.vftb)</a>
+  </dt>
+
   </dl></td>
   <td style="width: 33%" valign="top"><dl>
       
-  <dt><a href="RockPy.Readin.html#RockPy.Readin.vftb.Vftb">Vftb (class in RockPy.Readin.vftb)</a>
+  <dt><a href="RockPy.Measurements.html#RockPy.Measurements.viscosity.Viscosity">Viscosity (class in RockPy.Measurements.viscosity)</a>
   </dt>
 
       

@@ -159,7 +159,7 @@ class Hys(base.Measurement):
         Returns
         -------
            ndarray:
-              :math:`M_s \chi * B + \alpha * B^{\beta = -2}`
+              :math:`M_s \chi * B + \\alpha * B^{\\beta = -2}`
         """
         return ms + chi * h - alpha * h ** -2  # beta
 

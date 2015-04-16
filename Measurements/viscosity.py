@@ -51,19 +51,35 @@ class Viscosity(base.Measurement):
         """
         ommits the first n points of the data.
 
-        Parameter
-        ---------
+        Parameters
+        ----------
            n: int
               number of points at beginning of dataset to be ommitted in subsequent analysis
         """
 
         self.data['data'].data = self.data['data'].data[n:]
 
-    def result_visc_decay(self, ommit_first_n=0, normalized=True, recalc=False, **options):
+    def result_visc_decay(self, ommit_first_n=0, recalc=False, **options):
         """
+        Calculates the result for the viscous decay
 
-        :param recalc:
-        :return:
+        Parameters
+        ----------
+           ommit_first_n: int
+              the first n data points are not used for the calculation of the result
+              *default* = 0
+           recalc: bool
+              if True it gets forced recalculated
+              if False it is only recalculated if not previoiusly calculated or if the result has been calculated with
+              different parameters
+        Returns
+        -------
+           RockPyData
+              result for viscous decay, not normalized
+
+        Note
+        ----
+           For normalized viscous decay use :py:func:`result_visc_decay_norm`
         """
 
         parameter = dict(ommit_first_n=ommit_first_n)
@@ -74,9 +90,25 @@ class Viscosity(base.Measurement):
 
     def result_visc_decay_norm(self, ommit_first_n=0, recalc=False, **options):
         """
+        Calculates the result for the normalized viscous decay. Data is devided by the max(mag) before calculation.
 
-        :param recalc:
-        :return:
+        Parameters
+        ----------
+           ommit_first_n: int
+              the first n data points are not used for the calculation of the result
+              *default* = 0
+           recalc: bool
+              if True it gets forced recalculated
+              if False it is only recalculated if not previoiusly calculated or if the result has been calculated with
+              different parameters
+        Returns
+        -------
+           RockPyData
+              result for viscous decay, *normalized*
+
+        Note
+        ----
+           For non-normalized viscous decay use :py:func:`result_visc_decay`
         """
 
         parameter = dict(ommit_first_n=ommit_first_n)

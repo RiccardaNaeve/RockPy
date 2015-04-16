@@ -31,7 +31,7 @@
 
   
     <link rel="top" title="RockPy pyrite documentation" href="index.html"/>
-        <link rel="next" title="Programming Guidlines:" href="guidlines.html"/>
+        <link rel="next" title="Thellier-Thellier" href="thellier.html"/>
         <link rel="prev" title="Tutorials" href="tutorials.html"/> 
 
   
@@ -75,7 +75,8 @@
 </ul>
 </li>
 <li class="toctree-l1 current"><a class="current reference internal" href="">Measurements</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#hysteresis">Hysteresis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="thellier.html">Thellier-Thellier</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hysteresis.html">Hysteresis</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="guidlines.html">Programming Guidlines:</a><ul>
@@ -102,6 +103,7 @@
 <li class="toctree-l2"><a class="reference internal" href="RockPy.Measurements.html#module-RockPy.Measurements.thellier">Thellier-Thellier</a></li>
 <li class="toctree-l2"><a class="reference internal" href="RockPy.Measurements.html#module-RockPy.Measurements.thermocurve">Thermocurve</a></li>
 <li class="toctree-l2"><a class="reference internal" href="RockPy.Measurements.html#module-RockPy.Measurements.trm">TRM - single moment</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Measurements.html#module-RockPy.Measurements.viscosity">Viscosity</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="RockPy.Readin.html">Readin Package</a><ul>
@@ -163,94 +165,13 @@
 </div>
           <div role="main" class="document">
             
-  <div class="toctree-wrapper compound">
-<ul class="simple">
-</ul>
-</div>
-<div class="section" id="measurements">
+  <div class="section" id="measurements">
 <h1>Measurements<a class="headerlink" href="#measurements" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="hysteresis">
-<h2>Hysteresis<a class="headerlink" href="#hysteresis" title="Permalink to this headline">¶</a></h2>
-<div class="section" id="corrections">
-<h3>Corrections<a class="headerlink" href="#corrections" title="Permalink to this headline">¶</a></h3>
-<div class="section" id="slope-correction">
-<h4>Slope Correction<a class="headerlink" href="#slope-correction" title="Permalink to this headline">¶</a></h4>
-<div class="topic">
-<p class="topic-title first">Methods</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">linear:</th><td class="field-body">fits data linearly above certain threshold</td>
-</tr>
-<tr class="field-even field"><th class="field-name">non-linear:</th><td class="field-body">approach to saturation</td>
-</tr>
-</tbody>
-</table>
-</div>
-<div class="section" id="linear">
-<h5>linear<a class="headerlink" href="#linear" title="Permalink to this headline">¶</a></h5>
-</div>
-<div class="section" id="non-linear">
-<h5>non-linear<a class="headerlink" href="#non-linear" title="Permalink to this headline">¶</a></h5>
-</div>
-</div>
-<div class="section" id="horizontal-symmetry-correction">
-<h4>Horizontal Symmetry Correction<a class="headerlink" href="#horizontal-symmetry-correction" title="Permalink to this headline">¶</a></h4>
-</div>
-<div class="section" id="vertical-symmetry-correction">
-<h4>Vertical Symmetry Correction<a class="headerlink" href="#vertical-symmetry-correction" title="Permalink to this headline">¶</a></h4>
-</div>
-<div class="section" id="drift-correction">
-<h4>Drift Correction<a class="headerlink" href="#drift-correction" title="Permalink to this headline">¶</a></h4>
-</div>
-<div class="section" id="pole-piece-saturation-correction">
-<h4>Pole Piece Saturation correction<a class="headerlink" href="#pole-piece-saturation-correction" title="Permalink to this headline">¶</a></h4>
-</div>
-<div class="section" id="holder-correction">
-<h4>Holder Correction<a class="headerlink" href="#holder-correction" title="Permalink to this headline">¶</a></h4>
-</div>
-</div>
-<div class="section" id="results">
-<h3>Results<a class="headerlink" href="#results" title="Permalink to this headline">¶</a></h3>
-<div class="section" id="high-field-susceptibility">
-<h4>High Field Susceptibility<a class="headerlink" href="#high-field-susceptibility" title="Permalink to this headline">¶</a></h4>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Methods:</th><td class="field-body">linear: fits data linearly above certain threshold
-non-linear: approach to saturation</td>
-</tr>
-</tbody>
-</table>
-<div class="section" id="id1">
-<h5>linear<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h5>
-</div>
-<div class="section" id="id2">
-<h5>non-linear<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h5>
-<p><a class="reference internal" href="RockPy.Measurements.html#fabian2003" id="id3">[Fab03]</a></p>
-</div>
-</div>
-<div class="section" id="saturation-magnetization">
-<h4>Saturation Magnetization<a class="headerlink" href="#saturation-magnetization" title="Permalink to this headline">¶</a></h4>
-</div>
-<div class="section" id="saturation-remanent-magnetization">
-<h4>Saturation Remanent Magnetization<a class="headerlink" href="#saturation-remanent-magnetization" title="Permalink to this headline">¶</a></h4>
-</div>
-<div class="section" id="coercivity">
-<h4>Coercivity<a class="headerlink" href="#coercivity" title="Permalink to this headline">¶</a></h4>
-<p>#for measurements with initial magnetization (Msi) branch</p>
-</div>
-<div class="section" id="transient-energy-dissipation">
-<h4>Transient Energy Dissipation<a class="headerlink" href="#transient-energy-dissipation" title="Permalink to this headline">¶</a></h4>
-<p><a class="reference internal" href="RockPy.Measurements.html#fabian2003" id="id4">[Fab03]</a></p>
-</div>
-<div class="section" id="transient-hysteresis">
-<h4>Transient hysteresis<a class="headerlink" href="#transient-hysteresis" title="Permalink to this headline">¶</a></h4>
-<p><a class="reference internal" href="RockPy.Measurements.html#yu2005b" id="id5">[YT05]</a></p>
-</div>
-</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="thellier.html">Thellier-Thellier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hysteresis.html">Hysteresis</a></li>
+</ul>
 </div>
 </div>
 
@@ -260,7 +181,7 @@ non-linear: approach to saturation</td>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="guidlines.html" class="btn btn-neutral float-right" title="Programming Guidlines:">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="thellier.html" class="btn btn-neutral float-right" title="Thellier-Thellier">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="tutorials.html" class="btn btn-neutral" title="Tutorials"><span class="fa fa-arrow-circle-left"></span> Previous</a>

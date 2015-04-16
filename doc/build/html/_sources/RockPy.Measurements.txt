@@ -80,3 +80,11 @@ TRM - single moment
     :members:
     :undoc-members:
     :show-inheritance:
+
+Viscosity
+---------
+
+.. automodule:: RockPy.Measurements.viscosity
+    :members:
+    :undoc-members:
+    :show-inheritance:

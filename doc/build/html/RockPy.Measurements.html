@@ -75,7 +75,8 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="measurements.html">Measurements</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="measurements.html#hysteresis">Hysteresis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="thellier.html">Thellier-Thellier</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hysteresis.html">Hysteresis</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="guidlines.html">Programming Guidlines:</a><ul>
@@ -102,6 +103,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#module-RockPy.Measurements.thellier">Thellier-Thellier</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-RockPy.Measurements.thermocurve">Thermocurve</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-RockPy.Measurements.trm">TRM - single moment</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-RockPy.Measurements.viscosity">Viscosity</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="RockPy.Readin.html">Readin Package</a><ul>
@@ -430,7 +432,7 @@ self.induced: the induced moment measurement while the field is applied (only VS
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><span class="math">\(M_s \chi * B + lpha * B^{eta = -2}\)</span></p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><span class="math">\(M_s \chi * B + \alpha * B^{\beta = -2}\)</span></p>
 </td>
 </tr>
 <tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">ndarray</p>
@@ -1470,18 +1472,15 @@ gap between two points determined by vector arithmetic.</p>
 <dl class="method">
 <dt id="RockPy.Measurements.thellier.Thellier.calculate_md_vds">
 <code class="descname">calculate_md_vds</code><span class="sig-paren">(</span><em>**parameter</em><span class="sig-paren">)</span><a class="headerlink" href="#RockPy.Measurements.thellier.Thellier.calculate_md_vds" title="Permalink to this definition">¶</a></dt>
-<dd><blockquote>
-<div><p>Maximum absolute difference produced by a pTRM tail check, normalized by the vector difference sum of the
+<dd><p>Maximum absolute difference produced by a pTRM tail check, normalized by the vector difference sum of the
 NRM (Tauxe and Staudigel, 2004).</p>
 <div class="math">
-\[MD_{VDS}=\frac`{\max{\{\left| \delta{tail_i}\]</div>
-</div></blockquote>
-<p>ight|}}_{i=1, ldots, end}}{VDS}       imes{100}</p>
-<blockquote>
-<div><blockquote>
-<div>Some versions of PmagPy and ThellierGUI use a pTRM tail check statistic called $$MD(%)$$. This is identical
-to $$MD_{VDS}$$, but the change in name emphasizes its calculation method.</div></blockquote>
-</div></blockquote>
+\[MD_{VDS}=\frac`{\max{\{\left| \delta{tail_i} \right|\}}_{i=1, \ldots, end}}{VDS}     imes{100}\]</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Some versions of PmagPy and ThellierGUI use a pTRM tail check statistic called <span class="math">\(MD(\%)\)</span>. This is identical
+to <span class="math">\(MD_{VDS}\)</span>, but the change in name emphasizes its calculation method.</p>
+</div>
 </dd></dl>
 
 <dl class="method">
@@ -2075,6 +2074,142 @@ in the analysis, <span class="math">\(T_i\)</span> must be less than or equal to
 <dt id="RockPy.Measurements.trm.Trm.format_cryomag">
 <code class="descname">format_cryomag</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#RockPy.Measurements.trm.Trm.format_cryomag" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-RockPy.Measurements.viscosity">
+<span id="viscosity"></span><h2>Viscosity<a class="headerlink" href="#module-RockPy.Measurements.viscosity" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="RockPy.Measurements.viscosity.Viscosity">
+<em class="property">class </em><code class="descclassname">RockPy.Measurements.viscosity.</code><code class="descname">Viscosity</code><span class="sig-paren">(</span><em>sample_obj</em>, <em>mtype</em>, <em>mfile</em>, <em>machine</em>, <em>ommit_first_n_values=2</em>, <em>**options</em><span class="sig-paren">)</span><a class="headerlink" href="#RockPy.Measurements.viscosity.Viscosity" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">RockPy.Measurements.base.Measurement</span></code></p>
+<dl class="method">
+<dt id="RockPy.Measurements.viscosity.Viscosity.calculate_visc_decay">
+<code class="descname">calculate_visc_decay</code><span class="sig-paren">(</span><em>**parameter</em><span class="sig-paren">)</span><a class="headerlink" href="#RockPy.Measurements.viscosity.Viscosity.calculate_visc_decay" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="RockPy.Measurements.viscosity.Viscosity.correct_ommit_first_n">
+<code class="descname">correct_ommit_first_n</code><span class="sig-paren">(</span><em>n=2</em><span class="sig-paren">)</span><a class="headerlink" href="#RockPy.Measurements.viscosity.Viscosity.correct_ommit_first_n" title="Permalink to this definition">¶</a></dt>
+<dd><p>ommits the first n points of the data.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>n</strong> (<em>int</em>) &#8211; number of points at beginning of dataset to be ommitted in subsequent analysis</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="RockPy.Measurements.viscosity.Viscosity.fit_viscous_relaxation">
+<em class="property">static </em><code class="descname">fit_viscous_relaxation</code><span class="sig-paren">(</span><em>ln_time</em>, <em>mag</em><span class="sig-paren">)</span><a class="headerlink" href="#RockPy.Measurements.viscosity.Viscosity.fit_viscous_relaxation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fits a line through ln(time) and magnetic moment</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>ln_time</strong> (<em>ndarray</em>) &#8211; natural logarithm of time</li>
+<li><strong>mag</strong> (<em>ndarray</em>) &#8211; magnetic moments</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
+<li><strong>slope</strong> (<em>float</em>)</li>
+<li><strong>intercept</strong> (<em>float</em>)</li>
+<li><strong>std_error</strong> (<em>float</em>)</li>
+<li><strong>r_value</strong> (<em>float</em>)</li>
+</ul>
+</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="RockPy.Measurements.viscosity.Viscosity.format_vsm">
+<code class="descname">format_vsm</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#RockPy.Measurements.viscosity.Viscosity.format_vsm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Formatting for viscosity Measurements from VSM machine</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="RockPy.Measurements.viscosity.Viscosity.plt_viscosity">
+<code class="descname">plt_viscosity</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#RockPy.Measurements.viscosity.Viscosity.plt_viscosity" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="RockPy.Measurements.viscosity.Viscosity.result_visc_decay">
+<code class="descname">result_visc_decay</code><span class="sig-paren">(</span><em>ommit_first_n=0</em>, <em>recalc=False</em>, <em>**options</em><span class="sig-paren">)</span><a class="headerlink" href="#RockPy.Measurements.viscosity.Viscosity.result_visc_decay" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the result for the viscous decay</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>ommit_first_n</strong> (<em>int</em>) &#8211; the first n data points are not used for the calculation of the result
+<em>default</em> = 0</li>
+<li><strong>recalc</strong> (<em>bool</em>) &#8211; if True it gets forced recalculated
+if False it is only recalculated if not previoiusly calculated or if the result has been calculated with
+different parameters</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">result for viscous decay, not normalized</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference internal" href="RockPy.Structure.html#RockPy.Structure.data.RockPyData" title="RockPy.Structure.data.RockPyData">RockPyData</a></p>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">For normalized viscous decay use <a class="reference internal" href="#RockPy.Measurements.viscosity.Viscosity.result_visc_decay_norm" title="RockPy.Measurements.viscosity.Viscosity.result_visc_decay_norm"><code class="xref py py-func docutils literal"><span class="pre">result_visc_decay_norm()</span></code></a></p>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="RockPy.Measurements.viscosity.Viscosity.result_visc_decay_norm">
+<code class="descname">result_visc_decay_norm</code><span class="sig-paren">(</span><em>ommit_first_n=0</em>, <em>recalc=False</em>, <em>**options</em><span class="sig-paren">)</span><a class="headerlink" href="#RockPy.Measurements.viscosity.Viscosity.result_visc_decay_norm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the result for the normalized viscous decay. Data is devided by the max(mag) before calculation.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>ommit_first_n</strong> (<em>int</em>) &#8211; the first n data points are not used for the calculation of the result
+<em>default</em> = 0</li>
+<li><strong>recalc</strong> (<em>bool</em>) &#8211; if True it gets forced recalculated
+if False it is only recalculated if not previoiusly calculated or if the result has been calculated with
+different parameters</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">result for viscous decay, <em>normalized</em></p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference internal" href="RockPy.Structure.html#RockPy.Structure.data.RockPyData" title="RockPy.Structure.data.RockPyData">RockPyData</a></p>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">For non-normalized viscous decay use <a class="reference internal" href="#RockPy.Measurements.viscosity.Viscosity.result_visc_decay" title="RockPy.Measurements.viscosity.Viscosity.result_visc_decay"><code class="xref py py-func docutils literal"><span class="pre">result_visc_decay()</span></code></a></p>
+</div>
+</dd></dl>
 
 </dd></dl>
 

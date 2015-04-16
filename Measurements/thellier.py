@@ -1517,13 +1517,12 @@ class Thellier(base.Measurement):
 
         .. math::
 
-           MD_{VDS}=\\frac`{\max{\{\left| \delta{tail_i} \right|\}}_{i=1, \ldots, end}}{VDS}\times{100}
+           MD_{VDS}=\\frac`{\max{\{\\left| \delta{tail_i} \\right|\}}_{i=1, \ldots, end}}{VDS}\times{100}
 
-        Notes
-        -----
-
-           Some versions of PmagPy and ThellierGUI use a pTRM tail check statistic called $$MD(\%)$$. This is identical
-           to $$MD_{VDS}$$, but the change in name emphasizes its calculation method.
+        Note
+        ----
+           Some versions of PmagPy and ThellierGUI use a pTRM tail check statistic called :math:`MD(\%)`. This is identical
+           to :math:`MD_{VDS}`, but the change in name emphasizes its calculation method.
         """
         component = parameter.get('component', self.standard_parameter['slope']['component'])
 
@@ -1846,8 +1845,10 @@ class Thellier(base.Measurement):
 if __name__ == '__main__':
     s = RockPy.Sample(name='ThellierTest')
     m = s.add_simulation(mtype='thellier', sim_params={'max_moment':10})
+    res= sorted(['calculate_'+i for i in m.calculation_methods])
+    print res
     # for dtype in m.data:
     #     print dtype
     #     print m.data[dtype]
-    print s.calc_all()
-    m.export_tdt()
+    # print s.calc_all()
+    # m.export_tdt()

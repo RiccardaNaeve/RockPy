@@ -115,11 +115,14 @@ class Viscosity(base.Measurement):
         parameter.update(options)
 
         self.calc_result(parameter, recalc=recalc, force_method='visc_decay')
-        return self.results['visc_decay']
+        return self.results['visc_decay_norm']
 
 
     def calculate_visc_decay(self, **parameter):
         """
+        Parameters
+        ----------
+           ommit_first_n: int
 
         :return:
         """
@@ -129,9 +132,9 @@ class Viscosity(base.Measurement):
         norm_mag = mag / max(mag)
         slope, intercept, std_err, r_value = self.fit_viscous_relaxation(ln_time=ln_time, mag=mag)
         norm_slope, norm_intercept, norm_std_err, norm_r_value = self.fit_viscous_relaxation(ln_time=ln_time, mag=norm_mag)
-        self.results['visc_decay'] = slope
-        self.results['visc_decay_norm'] = norm_slope
-        return slope, std_err
+        self.results['visc_decay'] = [[[slope, std_err]]]
+        self.results['visc_decay_norm'] = [[[norm_slope, norm_std_err]]]
+        return slope, std_err, norm_slope, norm_std_err
 
     def plt_viscosity(self):
         plt.plot(self.data['data']['log_time'].v, self.data['data']['mag'].v)

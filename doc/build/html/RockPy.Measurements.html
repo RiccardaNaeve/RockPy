@@ -96,7 +96,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#module-RockPy.Measurements.af_demag">AF-demag</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-RockPy.Measurements.backfield">Backfield</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-RockPy.Measurements.hysteresis">Hysteresis</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#irm-single-moment">IRM - single moment</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-RockPy.Measurements.single_moment">IRM - single moment</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-RockPy.Measurements.nrm">NRM - single moment</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-RockPy.Measurements.parameters">Parameters</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-RockPy.Measurements.thellier">Thellier-Thellier</a></li>
@@ -109,7 +109,6 @@
 <li class="toctree-l2"><a class="reference internal" href="RockPy.Readin.html#module-RockPy.Readin.base"><code class="docutils literal"><span class="pre">base</span></code> Module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="RockPy.Readin.html#module-RockPy.Readin.cryomag"><code class="docutils literal"><span class="pre">cryomag</span></code> Module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="RockPy.Readin.html#module-RockPy.Readin.generic"><code class="docutils literal"><span class="pre">generic</span></code> Module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="RockPy.Readin.html#machines-module"><code class="docutils literal"><span class="pre">machines</span></code> Module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="RockPy.Readin.html#module-RockPy.Readin.microsense"><code class="docutils literal"><span class="pre">microsense</span></code> Module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="RockPy.Readin.html#module-RockPy.Readin.spinner"><code class="docutils literal"><span class="pre">spinner</span></code> Module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="RockPy.Readin.html#module-RockPy.Readin.vftb"><code class="docutils literal"><span class="pre">vftb</span></code> Module</a></li>
@@ -119,22 +118,14 @@
 <li class="toctree-l1"><a class="reference internal" href="RockPy.Structure.html">Structure Package</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="RockPy.Structure.html#id1"><code class="docutils literal"><span class="pre">Structure</span></code> Package</a></li>
 <li class="toctree-l2"><a class="reference internal" href="RockPy.Structure.html#module-RockPy.Structure.data"><code class="docutils literal"><span class="pre">data</span></code> Module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="RockPy.Structure.html#project-module"><code class="docutils literal"><span class="pre">project</span></code> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Structure.html#module-RockPy.Structure.sample"><code class="docutils literal"><span class="pre">sample</span></code> Module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="RockPy.Structure.html#module-RockPy.Structure.samplegroup"><code class="docutils literal"><span class="pre">samplegroup</span></code> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Structure.html#module-RockPy.Structure.study"><code class="docutils literal"><span class="pre">study</span></code> Module</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="RockPy.Treatments.html">Treatments Package</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="RockPy.Treatments.html#id1"><code class="docutils literal"><span class="pre">Treatments</span></code> Package</a></li>
 <li class="toctree-l2"><a class="reference internal" href="RockPy.Treatments.html#module-RockPy.Treatments.base"><code class="docutils literal"><span class="pre">base</span></code> Module</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="RockPy.Visualize.html">Visualize Package</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="RockPy.Visualize.html#id1"><code class="docutils literal"><span class="pre">Visualize</span></code> Package</a></li>
-<li class="toctree-l2"><a class="reference internal" href="RockPy.Visualize.html#arai-module"><code class="docutils literal"><span class="pre">arai</span></code> Module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="RockPy.Visualize.html#backfield-module"><code class="docutils literal"><span class="pre">backfield</span></code> Module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="RockPy.Visualize.html#module-RockPy.Visualize.base"><code class="docutils literal"><span class="pre">base</span></code> Module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="RockPy.Visualize.html#module-RockPy.Visualize.demag"><code class="docutils literal"><span class="pre">demag</span></code> Module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="RockPy.Visualize.html#thellier-module"><code class="docutils literal"><span class="pre">thellier</span></code> Module</a></li>
 </ul>
 </li>
 </ul>
@@ -422,43 +413,28 @@ self.induced: the induced moment measurement while the field is applied (only VS
 <p>Results:</p>
 <p>Decomposition:</p>
 <p><strong>Fitting</strong></p>
-<p><strong>References</strong>
-.. bibliography:: hysteresis.bib</p>
-<blockquote>
-<div><table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">cited:</th><td class="field-body"></td>
-</tr>
-</tbody>
-</table>
-</div></blockquote>
 <dl class="staticmethod">
 <dt id="RockPy.Measurements.hysteresis.Hys.approach2sat_func">
 <em class="property">static </em><code class="descname">approach2sat_func</code><span class="sig-paren">(</span><em>h</em>, <em>ms</em>, <em>chi</em>, <em>alpha</em><span class="sig-paren">)</span><a class="headerlink" href="#RockPy.Measurements.hysteresis.Hys.approach2sat_func" title="Permalink to this definition">¶</a></dt>
 <dd><p>General approach to saturation function</p>
-<blockquote>
-<div><dl class="docutils">
-<dt>x: ndarray</dt>
-<dd>field</dd>
-<dt>ms: float</dt>
-<dd>saturation magnetization</dd>
-<dt>chi: float</dt>
-<dd>susceptibility</dd>
-</dl>
-<p>alpha: float
-beta: float</p>
-<blockquote>
-<div>not fitted assumed -2</div></blockquote>
-</div></blockquote>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><span class="math">\(M_s \chi * B + lpha * B^{eta = -2}\)</span></td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>x</strong> (<em>ndarray</em>) &#8211; field</li>
+<li><strong>ms</strong> (<em>float</em>) &#8211; saturation magnetization</li>
+<li><strong>chi</strong> (<em>float</em>) &#8211; susceptibility</li>
+<li><strong>alpha</strong> (<em>float</em>) &#8211; </li>
+<li><strong>beta</strong> (<em>float</em>) &#8211; not fitted assumed -2</li>
+</ul>
+</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">ndarray</td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><span class="math">\(M_s \chi * B + lpha * B^{eta = -2}\)</span></p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">ndarray</p>
+</td>
 </tr>
 </tbody>
 </table>
@@ -535,16 +511,18 @@ later subtracts the area under the up-field branch.</p>
 <dl class="method">
 <dt id="RockPy.Measurements.hysteresis.Hys.calculate_ms">
 <code class="descname">calculate_ms</code><span class="sig-paren">(</span><em>method='simple'</em>, <em>**parameter</em><span class="sig-paren">)</span><a class="headerlink" href="#RockPy.Measurements.hysteresis.Hys.calculate_ms" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="docutils">
-<dt>Wrapper so one can call calculate_ms on its own, giving the method as an argument</dt>
-<dd>method:
-parameter:</dd>
-</dl>
+<dd><p>Wrapper so one can call calculate_ms on its own, giving the method as an argument</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"></td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>method</strong> (<em>str</em>) &#8211; the method used for calculation
+simple:
+app2sat:</li>
+<li><strong>parameter</strong> (<em>dict</em>) &#8211; additional parameters needed for calculation. If nothin is provided standard parameter will be used.</li>
+</ul>
+</td>
 </tr>
 </tbody>
 </table>
@@ -553,15 +531,13 @@ parameter:</dd>
 <dl class="method">
 <dt id="RockPy.Measurements.hysteresis.Hys.calculate_ms_simple">
 <code class="descname">calculate_ms_simple</code><span class="sig-paren">(</span><em>saturation_percent=75</em>, <em>**parameter</em><span class="sig-paren">)</span><a class="headerlink" href="#RockPy.Measurements.hysteresis.Hys.calculate_ms_simple" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="docutils">
-<dt>Calculates the value for Ms</dt>
-<dd>parameter: from_field: from % of this value a linear interpolation will be calculated for all branches (+ &amp; -)</dd>
-</dl>
+<dd><p>Calculates the value for Ms</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"></td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>parameter</strong> (<em>dict</em>) &#8211; from_field: float
+from % of this value a linear interpolation will be calculated for all branches (+ &amp; -)</td>
 </tr>
 </tbody>
 </table>
@@ -599,26 +575,29 @@ parameter:</dd>
 <dd>of the absolute magnetization value of the <span class="math">\(M_{ih}\)</span> curve. The hysteresis is then shifted by the field
 value at this point.</dd>
 </dl>
-<blockquote>
-<div><dl class="docutils">
-<dt>method: str</dt>
-<dd>for implementation of several methods of calculation</dd>
-<dt>check: str</dt>
-<dd>plot to check for consistency</dd>
-</dl>
-</div></blockquote>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>method</strong> (<em>str</em>) &#8211; for implementation of several methods of calculation</li>
+<li><strong>check</strong> (<em>str</em>) &#8211; plot to check for consistency</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="RockPy.Measurements.hysteresis.Hys.correct_outliers">
 <code class="descname">correct_outliers</code><span class="sig-paren">(</span><em>threshold=4</em>, <em>check=False</em><span class="sig-paren">)</span><a class="headerlink" href="#RockPy.Measurements.hysteresis.Hys.correct_outliers" title="Permalink to this definition">¶</a></dt>
-<dd><blockquote>
-<div>threshold:</div></blockquote>
+<dd><p>Method that corrects outliers</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"></td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>threshold</strong> (<em>int</em>) &#8211; standard deviation away from fit</td>
 </tr>
 </tbody>
 </table>
@@ -651,14 +630,18 @@ value at this point.</dd>
 <dd>of the absolute magnetization value of the <span class="math">\(M_{ih}\)</span> curve. The hysteresis is then shifted by the field
 value at this point.</dd>
 </dl>
-<blockquote>
-<div><dl class="docutils">
-<dt>method: str</dt>
-<dd>for implementation of several methods of calculation</dd>
-<dt>check: str</dt>
-<dd>plot to check for consistency</dd>
-</dl>
-</div></blockquote>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>method</strong> (<em>str</em>) &#8211; for implementation of several methods of calculation</li>
+<li><strong>check</strong> (<em>str</em>) &#8211; plot to check for consistency</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="attribute">
@@ -754,25 +737,24 @@ and lower branch.</p>
 <dt id="RockPy.Measurements.hysteresis.Hys.fit_sech">
 <em class="property">static </em><code class="descname">fit_sech</code><span class="sig-paren">(</span><em>params</em>, <em>x</em>, <em>data=0</em><span class="sig-paren">)</span><a class="headerlink" href="#RockPy.Measurements.hysteresis.Hys.fit_sech" title="Permalink to this definition">¶</a></dt>
 <dd><p>Function for fitting up to four sech functions to reversible branch of hysteresis</p>
-<blockquote>
-<div><dl class="docutils">
-<dt>params: Parameterclass lmfit</dt>
-<dd>Bsi: saturation magnetization of ith component
-Gsi: curvature of ith component related to coercivity</dd>
-<dt>x: array-like</dt>
-<dd>x-values of data for fit</dd>
-<dt>data: array-like</dt>
-<dd>y-values of data for fit</dd>
-</dl>
-</div></blockquote>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><strong>residual</strong> &#8211;
-Residual of fitted data and measured data</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>params</strong> (<em>Parameterclass lmfit</em>) &#8211; Bsi: saturation magnetization of ith component
+Gsi: curvature of ith component related to coercivity</li>
+<li><strong>x</strong> (<em>array-like</em>) &#8211; x-values of data for fit</li>
+<li><strong>data</strong> (<em>array-like</em>) &#8211; y-values of data for fit</li>
+</ul>
+</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">array-like</td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>residual</strong> &#8211;
+Residual of fitted data and measured data</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">array-like</p>
+</td>
 </tr>
 </tbody>
 </table>
@@ -782,25 +764,24 @@ Residual of fitted data and measured data</td>
 <dt id="RockPy.Measurements.hysteresis.Hys.fit_tanh">
 <em class="property">static </em><code class="descname">fit_tanh</code><span class="sig-paren">(</span><em>params</em>, <em>x</em>, <em>data=0</em><span class="sig-paren">)</span><a class="headerlink" href="#RockPy.Measurements.hysteresis.Hys.fit_tanh" title="Permalink to this definition">¶</a></dt>
 <dd><p>Function for fitting up to four tanh functions to reversible branch of hysteresis</p>
-<blockquote>
-<div><dl class="docutils">
-<dt>params: Parameterclass lmfit</dt>
-<dd>Bti: saturation magnetization of ith component
-Gti: curvature of ith component related to coercivity</dd>
-<dt>x: array-like</dt>
-<dd>x-values of data for fit</dd>
-<dt>data: array-like</dt>
-<dd>y-values of data for fit</dd>
-</dl>
-</div></blockquote>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><strong>residual</strong> &#8211;
-Residual of fitted data and measured data</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>params</strong> (<em>Parameterclass lmfit</em>) &#8211; Bti: saturation magnetization of ith component
+Gti: curvature of ith component related to coercivity</li>
+<li><strong>x</strong> (<em>array-like</em>) &#8211; x-values of data for fit</li>
+<li><strong>data</strong> (<em>array-like</em>) &#8211; y-values of data for fit</li>
+</ul>
+</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">array-like</td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>residual</strong> &#8211;
+Residual of fitted data and measured data</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">array-like</p>
+</td>
 </tr>
 </tbody>
 </table>
@@ -953,28 +934,24 @@ M.result_bc()
 <dt id="RockPy.Measurements.hysteresis.Hys.result_hf_sus">
 <code class="descname">result_hf_sus</code><span class="sig-paren">(</span><em>saturation_percent=75.0</em>, <em>method='simple'</em>, <em>remove_last=0</em>, <em>recalc=False</em>, <em>**options</em><span class="sig-paren">)</span><a class="headerlink" href="#RockPy.Measurements.hysteresis.Hys.result_hf_sus" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculates the result for high field susceptibility using the specified method</p>
-<blockquote>
-<div><dl class="docutils">
-<dt>saturation_percent: float</dt>
-<dd>field at which saturation is assumed. Only data at higher (or lower negative) is used for analysis</dd>
-<dt>method: str</dt>
-<dd><p class="first">method of analysis
-simple:</p>
-<blockquote class="last">
-<div>uses  simple linear regression above saturation_percent</div></blockquote>
-</dd>
-<dt>recalc: bool</dt>
-<dd>forced recalculation of result</dd>
-</dl>
-<p>options:</p>
-</div></blockquote>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"></td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>saturation_percent</strong> (<em>float</em>) &#8211; field at which saturation is assumed. Only data at higher (or lower negative) is used for analysis</li>
+<li><strong>method</strong> (<em>str</em>) &#8211; method of analysis
+:simple: uses simple linear regression above saturation_percent</li>
+<li><strong>recalc</strong> (<em>bool</em>) &#8211; forced recalculation of result</li>
+<li><strong>options</strong> (<em>dict</em>) &#8211; additional arguments</li>
+</ul>
+</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="RockPy.Structure.html#RockPy.Structure.data.RockPyData" title="RockPy.Structure.data.RockPyData">RockPyData</a></td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"></p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference internal" href="RockPy.Structure.html#RockPy.Structure.data.RockPyData" title="RockPy.Structure.data.RockPyData">RockPyData</a></p>
+</td>
 </tr>
 </tbody>
 </table>
@@ -1103,15 +1080,48 @@ Field at which 99% of the moment is saturated</li>
 <dd></dd></dl>
 
 </div>
-<div class="section" id="irm-single-moment">
-<h2>IRM - single moment<a class="headerlink" href="#irm-single-moment" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-RockPy.Measurements.single_moment">
+<span id="irm-single-moment"></span><h2>IRM - single moment<a class="headerlink" href="#module-RockPy.Measurements.single_moment" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="RockPy.Measurements.single_moment.Arm">
+<em class="property">class </em><code class="descclassname">RockPy.Measurements.single_moment.</code><code class="descname">Arm</code><span class="sig-paren">(</span><em>sample_obj</em>, <em>mtype</em>, <em>mfile</em>, <em>machine</em>, <em>**options</em><span class="sig-paren">)</span><a class="headerlink" href="#RockPy.Measurements.single_moment.Arm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#RockPy.Measurements.single_moment.generic_moment" title="RockPy.Measurements.single_moment.generic_moment"><code class="xref py py-class docutils literal"><span class="pre">RockPy.Measurements.single_moment.generic_moment</span></code></a></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="RockPy.Measurements.single_moment.Irm">
+<em class="property">class </em><code class="descclassname">RockPy.Measurements.single_moment.</code><code class="descname">Irm</code><span class="sig-paren">(</span><em>sample_obj</em>, <em>mtype</em>, <em>mfile</em>, <em>machine</em>, <em>**options</em><span class="sig-paren">)</span><a class="headerlink" href="#RockPy.Measurements.single_moment.Irm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#RockPy.Measurements.single_moment.generic_moment" title="RockPy.Measurements.single_moment.generic_moment"><code class="xref py py-class docutils literal"><span class="pre">RockPy.Measurements.single_moment.generic_moment</span></code></a></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="RockPy.Measurements.single_moment.generic_moment">
+<em class="property">class </em><code class="descclassname">RockPy.Measurements.single_moment.</code><code class="descname">generic_moment</code><span class="sig-paren">(</span><em>sample_obj</em>, <em>mtype</em>, <em>mfile</em>, <em>machine</em>, <em>**options</em><span class="sig-paren">)</span><a class="headerlink" href="#RockPy.Measurements.single_moment.generic_moment" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">RockPy.Measurements.base.Measurement</span></code></p>
+<dl class="method">
+<dt id="RockPy.Measurements.single_moment.generic_moment.format_cryomag">
+<code class="descname">format_cryomag</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#RockPy.Measurements.single_moment.generic_moment.format_cryomag" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="RockPy.Measurements.single_moment.generic_moment.format_jr6">
+<code class="descname">format_jr6</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#RockPy.Measurements.single_moment.generic_moment.format_jr6" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="RockPy.Measurements.single_moment.generic_moment.format_sushibar">
+<code class="descname">format_sushibar</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#RockPy.Measurements.single_moment.generic_moment.format_sushibar" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
 </div>
 <div class="section" id="module-RockPy.Measurements.nrm">
 <span id="nrm-single-moment"></span><h2>NRM - single moment<a class="headerlink" href="#module-RockPy.Measurements.nrm" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="RockPy.Measurements.nrm.Nrm">
 <em class="property">class </em><code class="descclassname">RockPy.Measurements.nrm.</code><code class="descname">Nrm</code><span class="sig-paren">(</span><em>sample_obj</em>, <em>mtype</em>, <em>mfile</em>, <em>machine</em>, <em>**options</em><span class="sig-paren">)</span><a class="headerlink" href="#RockPy.Measurements.nrm.Nrm" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">RockPy.Measurements.single_moment.generic_moment</span></code></p>
+<dd><p>Bases: <a class="reference internal" href="#RockPy.Measurements.single_moment.generic_moment" title="RockPy.Measurements.single_moment.generic_moment"><code class="xref py py-class docutils literal"><span class="pre">RockPy.Measurements.single_moment.generic_moment</span></code></a></p>
 </dd></dl>
 
 </div>
@@ -1268,14 +1278,8 @@ of the best-fit line and the x-axis on an Arai plot; Leonhardt et al., 2004a).</
 <dd><blockquote>
 <div><p>Maximum absolute difference produced by a pTRM check, normalized by the total TRM (obtained from the
 intersection of the best-fit line and the x-axis on an Arai plot; Leonhardt et al., 2004a).</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">math:</th><td class="field-body">delta{CK}=frac`{max{ left{ left| delta{pTRM_{i,j}}</td>
-</tr>
-</tbody>
-</table>
+<div class="math">
+\[\delta{CK}=\frac`{\max{ \left\{ \left| \delta{pTRM_{i,j}}\]</div>
 </div></blockquote>
 <p>ight|
 ight} }_{i leq end    extbf{ and } j leq end}}{left|X_{Int.}
@@ -1346,14 +1350,8 @@ ight|}  imes{100}</p>
 <dd><blockquote>
 <div><p>Maximum absolute difference produced by a pTRM check, normalized by the length of the best-fit line
 (Selkin and Tauxe, 2000).</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">math:</th><td class="field-body">DRAT=frac`{max{left{left|delta{pTRM_{i,j}}</td>
-</tr>
-</tbody>
-</table>
+<div class="math">
+\[DRAT=\frac`{\max{\left\{\left|\delta{pTRM_{i,j}}\]</div>
 </div></blockquote>
 <p>ight|
 ight}}_{i leq end     extbf{ and } j leq end}}{L}    imes{100},</p>
@@ -1480,8 +1478,10 @@ NRM (Tauxe and Staudigel, 2004).</p>
 </div></blockquote>
 <p>ight|}}_{i=1, ldots, end}}{VDS}       imes{100}</p>
 <blockquote>
+<div><blockquote>
 <div>Some versions of PmagPy and ThellierGUI use a pTRM tail check statistic called $$MD(%)$$. This is identical
 to $$MD_{VDS}$$, but the change in name emphasizes its calculation method.</div></blockquote>
+</div></blockquote>
 </dd></dl>
 
 <dl class="method">
@@ -1741,7 +1741,8 @@ multiple ways of calculating <span class="math">\(x_0\)</span> and <span class="
 <dl class="method">
 <dt id="RockPy.Measurements.thellier.Thellier.get_d_ac">
 <code class="descname">get_d_ac</code><span class="sig-paren">(</span><em>**parameter</em><span class="sig-paren">)</span><a class="headerlink" href="#RockPy.Measurements.thellier.Thellier.get_d_ac" title="Permalink to this definition">¶</a></dt>
-<dd><p>An additivity check is a repeat demagnetization step to test the validity of Thellier&#8217;s law of additivity
+<dd><p><strong>Additivity check statistics</strong></p>
+<p>An additivity check is a repeat demagnetization step to test the validity of Thellier&#8217;s law of additivity
 (Krasa et al., 2003). In the course of a paleointensity experiment, a pTRM at temperature <span class="math">\(T_j\)</span> is imparted,
 pTRM(<span class="math">\(T_j\)</span>, <span class="math">\(T_0\)</span>), where <span class="math">\(T_0\)</span> is room temperature. An additivity check demagnetizes
 pTRM(<span class="math">\(T_j\)</span>, <span class="math">\(T_0\)</span>) by heating to <span class="math">\(T_i\)</span>, where <span class="math">\(T_i &lt; T_j\)</span>. The remaining pTRM
@@ -2069,7 +2070,7 @@ in the analysis, <span class="math">\(T_i\)</span> must be less than or equal to
 <dl class="class">
 <dt id="RockPy.Measurements.trm.Trm">
 <em class="property">class </em><code class="descclassname">RockPy.Measurements.trm.</code><code class="descname">Trm</code><span class="sig-paren">(</span><em>sample_obj</em>, <em>mtype</em>, <em>mfile</em>, <em>machine</em>, <em>**options</em><span class="sig-paren">)</span><a class="headerlink" href="#RockPy.Measurements.trm.Trm" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">RockPy.Measurements.single_moment.generic_moment</span></code></p>
+<dd><p>Bases: <a class="reference internal" href="#RockPy.Measurements.single_moment.generic_moment" title="RockPy.Measurements.single_moment.generic_moment"><code class="xref py py-class docutils literal"><span class="pre">RockPy.Measurements.single_moment.generic_moment</span></code></a></p>
 <dl class="method">
 <dt id="RockPy.Measurements.trm.Trm.format_cryomag">
 <code class="descname">format_cryomag</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#RockPy.Measurements.trm.Trm.format_cryomag" title="Permalink to this definition">¶</a></dt>

@@ -215,7 +215,7 @@ class Thellier(base.Measurement):
     def data(self, data_dict):
         for dtype in data_dict:
             setattr(self, dtype, data_dict[dtype])
-        if not 'ptrm' in data_dict:
+        if 'ptrm' not in data_dict:
             self.reset__data()
 
     def format_cryomag(self):
@@ -1104,7 +1104,7 @@ class Thellier(base.Measurement):
         Maximum absolute difference produced by a pTRM check, normalized by the total TRM (obtained from the
         intersection of the best-fit line and the x-axis on an Arai plot; Leonhardt et al., 2004a).
 
-        :math:
+        .. math::
 
            \delta{CK}=\\frac`{\max{ \left\{ \left| \delta{pTRM_{i,j}} \right| \right\} }_{i \leq end \textbf{ and } j \leq end}}{\left|X_{Int.}\right|}\times{100}
 
@@ -1125,7 +1125,7 @@ class Thellier(base.Measurement):
         Maximum absolute difference produced by a pTRM check, normalized by the length of the best-fit line
         (Selkin and Tauxe, 2000).
 
-        :math:
+        .. math::
 
            DRAT=\\frac`{\max{\left\{\left|\delta{pTRM_{i,j}} \right| \right\}}_{i \leq end \textbf{ and } j \leq end}}{L}\times{100},
 
@@ -1519,9 +1519,11 @@ class Thellier(base.Measurement):
 
            MD_{VDS}=\\frac`{\max{\{\left| \delta{tail_i} \right|\}}_{i=1, \ldots, end}}{VDS}\times{100}
 
-        .. note::
-        Some versions of PmagPy and ThellierGUI use a pTRM tail check statistic called $$MD(\%)$$. This is identical
-        to $$MD_{VDS}$$, but the change in name emphasizes its calculation method.
+        Notes
+        -----
+
+           Some versions of PmagPy and ThellierGUI use a pTRM tail check statistic called $$MD(\%)$$. This is identical
+           to $$MD_{VDS}$$, but the change in name emphasizes its calculation method.
         """
         component = parameter.get('component', self.standard_parameter['slope']['component'])
 
@@ -1568,8 +1570,7 @@ class Thellier(base.Measurement):
 
     def get_d_ac(self, **parameter):
         """
-        Additivity check statistics
-        ===========================
+        **Additivity check statistics**
 
         An additivity check is a repeat demagnetization step to test the validity of Thellier's law of additivity
         (Krasa et al., 2003). In the course of a paleointensity experiment, a pTRM at temperature :math:`T_j` is imparted,

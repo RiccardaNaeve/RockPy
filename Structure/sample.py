@@ -7,97 +7,40 @@ import itertools
 from RockPy.Measurements.base import Measurement
 from RockPy.Structure.data import RockPyData, condense
 import RockPy.Visualize.base
+import tabulate
 
 # RockPy.Functions.general.create_logger(__name__)
 
 class Sample(object):
     """
     Sample in a way a container for measurements
-
-    HowTo:
-    ======
-       MTYPES
-       ++++++
-        want all measurement type (e.g. hysteresis, thellier, backfield...):
-
-        as list: sample.mtypes
-           print sample.mtypes
-           >>> ['diameter', 'height', 'mass', 'thellier']
-        as dictionary with corresponding measurements as value: sample.mdict
-           print sample.mdict
-           >>> {'diameter': [<RockPy.Measurements.parameters.Diameter object at 0x10d085910>],
-                'thellier': [<RockPy.Measurements.thellier.Thellier object at 0x10d0a59d0>],
-                'mass': [<RockPy.Measurements.parameters.Mass object at 0x10d085790>],
-                'height': [<RockPy.Measurements.parameters.Height object at 0x10d085a90>]}
-
-       TTYPES
-       ++++++
-        want all treatment type (e.g. pressure, temperature...):
-
-        as list: sample.ttypes
-           print sample.ttypes
-           >>> ['none', 'pressure']
-        as dictionary with corresponding measurements as value: sample.tdict
-           print sample.tdict
-           >>> {'pressure': [<RockPy.Measurements.thellier.Thellier object at 0x10d0a59d0>,
-                             <RockPy.Measurements.thellier.Thellier object at 0x10d0a5910>],
-                'none': [<RockPy.Measurements.parameters.Mass object at 0x10d085790>,
-                         <RockPy.Measurements.parameters.Diameter object at 0x10d085910>,
-                         <RockPy.Measurements.parameters.Height object at 0x10d085a90>]}
-
-            none is always given, if a measurement did not receive any treatment, or a treatment is not explicitely given
-
-        MTYPES & TTYPES
-        +++++++++++++++
-        want to know what type of measurement has which kinds of treatments:
-
-        dictionary: sample.mtype_ttype_dict
-           print sample.mtype_ttype_dict
-           >>> {'diameter': ['none'], 'thellier': ['pressure'], 'mass': ['none'], 'height': ['none']}
-
-        TTYPES & TVALUES
-        ++++++++++++++++
-        want to know what treatment has been done with wich values?
-
-        dictionary: sample.ttype_tval_dict
-           print sample.ttype_tval_dict
-           >>> {'pressure': [0.0, 0.6, 1.2, 1.8], 'none': [0]}
-
-
-        MTYPES & TTYPE & TVALUES
-        ++++++++++++++++++++++++
-        want to know what measurement has which treatments at what values?
-
-        dictionary: sample.mtype_ttype_tval_dict
-
-           print sample.mtype_ttype_tval_dict
-           >>> {'diameter': {'none':
-                               {0: [<RockPy.Measurements.parameters.Diameter object at 0x10e1bd8d0>]}},
-                'thellier': {'pressure':
-                               {0.0: [<RockPy.Measurements.thellier.Thellier object at 0x10e1dd990>],
-                                0.6: [<RockPy.Measurements.thellier.Thellier object at 0x10e1dd8d0>],
-                                1.2: [<RockPy.Measurements.thellier.Thellier object at 0x10e406850>],
-                                1.8: [<RockPy.Measurements.thellier.Thellier object at 0x10e40be10>]}},
-                'mass': {'none': {0: [<RockPy.Measurements.parameters.Mass object at 0x10e1bd750>]}},
-                'height': {'none': {0: [<RockPy.Measurements.parameters.Height object at 0x10e1bda50>]}}}
-
     """
     logger = logging.getLogger(__name__)
+    snum = 0
 
     def __init__(self, name,
                  mass=None, mass_unit='kg', mass_machine='generic',
                  height=None, diameter=None, length_unit='mm', length_machine='generic', color=None,
                  **options):
         """
-
-        :param name: str - name of the sample.
-        :param mass: float - mass of the sample. If not kg then please specify the mass_unit. It is stored in kg.
-        :param mass_unit: str - has to be specified in order to calculate the sample mass properly.
-        :param height: float - sample height - stored in 'm'
-        :param diameter: float - sample diameter - stored in 'm'
-        :param length_unit: str - if not 'm' please specify
-        :param length_machine: str - if not 'm' please specify
-        :param color: color - used in plots if specified
+        Parameters
+        ----------
+           name: str
+              name of the sample.
+           mass: float
+              mass of the sample. If not kg then please specify the mass_unit. It is stored in kg.
+           mass_unit: str
+              has to be specified in order to calculate the sample mass properly.
+           height: float
+              sample height - stored in 'm'
+           diameter: float
+              sample diameter - stored in 'm'
+           length_unit: str
+              if not 'm' please specify
+           length_machine: str
+              if not 'm' please specify
+           color: color
+              used in plots if specified
         """
         self.color = color
         self.name = name
@@ -113,8 +56,6 @@ class Sample(object):
         self._filtered_data = None
         self._info_dict = self.__create_info_dict()
 
-        self.color = None
-
         if mass is not None:
             self.add_measurement(mtype='mass', mfile=None, machine=mass_machine,
                                  value=float(mass), unit=mass_unit)
@@ -124,10 +65,20 @@ class Sample(object):
         if height is not None:
             self.add_measurement(mtype='height', mfile=None, machine=length_machine,
                                  value=float(height), unit=length_unit)
+        self.index = Sample.snum
+        Sample.snum +=1
 
     """ INFO DICTIONARY """
 
     def __create_info_dict(self):
+        """
+        creates all info dictionaries
+
+        Returns
+        -------
+           dict
+              Dictionary with a permutation of ,type, ttype and tval.
+        """
         d = ['mtype', 'ttype', 'tval']
         keys = ['_'.join(i) for n in range(4) for i in itertools.permutations(d, n) if not len(i) == 0]
         out = {i: {} for i in keys}
@@ -220,11 +171,13 @@ class Sample(object):
         '''
         All measurements have to be added here
 
-        :param mtype: str - the type of measurement
-        :param mfile: str -  the measurement file
-        :param machine: str - the machine from which the file is output
-        :param idx:
-        :param mdata: any kind of data that must fit the required structure of the data of the measurement
+        Parameters
+        ----------
+           mtype: str - the type of measurement
+           mfile: str -  the measurement file
+           machine: str - the machine from which the file is output
+           idx:
+           mdata: any kind of data that must fit the required structure of the data of the measurement
                     will be used instead of data from file
         :return: RockPy.measurement object
 
@@ -257,9 +210,11 @@ class Sample(object):
         """
         add simulated measurements
 
-        :param mtype: str - the type of simulated measurement
-        :param idx:
-        :param sim_param: dict of parameters to specifiy simulation
+        Parameters
+        ----------
+           mtype: str - the type of simulated measurement
+           idx:
+           sim_param: dict of parameters to specifiy simulation
         :return: RockPy.measurement object
         """
         mtype = mtype.lower()
@@ -283,12 +238,20 @@ class Sample(object):
     def calc_all(self, **parameter):
         """
         Calculates all results using specified parameter for all available measurements
-        .. Note::
 
+        Parameters
+        ----------
+           parameter: calculation parameter e.g. t_min, t_max @ Thellier-Thellier
+
+        Returns
+        -------
+           RockPyData
+              containing all results calculated possible
+
+        Notes
+        -----
            always recalculates everything
 
-        :param parameter: calculation parameter e.g. t_min, t_max @ Thellier-Thellier
-        :return:
         """
         self.results = self.all_results(**parameter)
         return self.results
@@ -379,12 +342,13 @@ class Sample(object):
         """
         used to filter measurement data.
 
-        :param mtype: mtype to be filtered for, if not specified all mtypes are returned
-        :param ttype: ttype to be filtered for, if not specified all ttypes are returned
-        :param tval: tval to be filtered for, can only be used in conjuction with ttype
-        :param tval_range: tval_range to be filtered for, can only be used in conjuction with ttype
-        :param kwargs:
-        :return:
+        Parameters
+        ----------
+           mtype: mtype to be filtered for, if not specified all mtypes are returned
+           ttype: ttype to be filtered for, if not specified all ttypes are returned
+           tval: tval to be filtered for, can only be used in conjuction with ttype
+           tval_range: tval_range to be filtered for, can only be used in conjuction with ttype
+           kwargs:
         """
         self._filtered_data = self.get_measurements(mtype=mtype,
                                                     ttype=ttype, tval=tval, tval_range=tval_range, filtered=False)
@@ -410,18 +374,25 @@ class Sample(object):
         """
         Returns a list of measurements of type = mtype
 
-        :param ttype:
-        :param tval:
-        :param tval_range:
-        :param is_mean:
-        :param filtered:
-        :param revesed: if reversed true it returns only measurements that do not meet criteria
-        :tval_range: can be used to look up measurements within a certain range. if only one value is given,
+        Parameters
+        ----------
+           ttype: str
+              treatment type
+           tval: float
+              treatment value
+           tval_range: list
+              treatment range e.g. tval_range = [0,2] will give all from 0 to 2
+           is_mean:
+           filtered:
+           revesed:
+              if reversed true it returns only measurements that do not meet criteria
+           tval_range:
+              can be used to look up measurements within a certain range. if only one value is given,
                      it is assumed to be an upper limit and the range is set to [0, tval_range]
 
-        :filtered: if true measurements will only be searched in filtered data
-        :param mtype:
-        :return:
+           filtered:
+              if true measurements will only be searched in filtered data
+           mtype:
         """
         if tval is None:
             tvalue = np.nan
@@ -482,9 +453,11 @@ class Sample(object):
         """
         takes a list of measurements and creates a mean measurement out of all measurements data
 
-        :param mlist:
-        :param interpolate:
-        :param recalc_mag:
+        Parameters
+        ----------
+           mlist:
+           interpolate:
+           recalc_mag:
         :return:
         """
         mlist = _to_list(mlist)
@@ -524,9 +497,11 @@ class Sample(object):
         """
         takes a list of measurements and creates a mean measurement out of all measurements data
 
-        :param mlist:
-        :param interpolate:
-        :param recalc_mag:
+        Parameters
+        ----------
+           mlist:
+           interpolate:
+           recalc_mag:
         :return:
         """
         if not mtype:
@@ -573,8 +548,11 @@ class Sample(object):
                     **parameter):
         """
         calculates all results for a list of measurements and stores them in a RockPy data object
-        :param mlist:
-        :param parameter:
+
+        Parameters
+        ----------
+           mlist:
+           parameter:
         :return:
         """
 
@@ -619,9 +597,11 @@ class Sample(object):
     def calc_all_mean_results(self, filtered=False, **parameter):
         """
         Calculates the mean out of all results
-        :param filtered:
-        :param parameter:
-        :return:
+
+        Parameters
+        ----------
+           filtered:
+           parameter:
         """
         out = None
         for mtype in self.mtypes:
@@ -654,13 +634,20 @@ class Sample(object):
         """
         calculates all results and returns the mean
 
-
-        :param filtered: bool is used to specify if the filtered_data_measurement list is used to get all corresponding
-                              measurements. In the case of a mean measurements it genreally is not wanted to have the
-                              result of the mean but get the mean of the result.
-                              if True the results(Mean) will be returned
-                              if False the Mean(Results) wil be returned, filtered data will still be calculated.
-        :return:
+        Parameters
+        ----------
+           mtype: str
+           ttype: str
+           tval: float
+           tval_range: list
+           mlist: list
+              *optional*
+           filtered: bool
+              is used to specify if the filtered_data_measurement list is used to get all corresponding
+              measurements. In the case of a mean measurements it genreally is not wanted to have the
+              result of the mean but get the mean of the result.
+              if *True* the results(Mean) will be returned
+              if *False* the Mean(Results) wil be returned, filtered data will still be calculated.
         """
 
         if not mlist:
@@ -693,7 +680,7 @@ class Sample(object):
     def __sort_list_set(self, values):
         """
         returns a sorted list of non duplicate values
-        :param values:
+           values:
         :return:
         """
         return sorted(list(set(values)))
@@ -701,7 +688,7 @@ class Sample(object):
     # def _sort_ttype_tval(self, mlist):
     # """
     #     sorts a list of measurements according to their tvals and ttypes
-    #     :param mlist:
+    #        mlist:
     #     :return:
     #     """
 
@@ -712,7 +699,6 @@ class Sample(object):
     def plottable(self):
         """
         returns a list of all possible Visuals for this sample
-        :return:
         """
         out = {}
         for visual in RockPy.Visualize.base.Generic.inheritors():
@@ -724,8 +710,14 @@ class Sample(object):
         """
         checks if the sample meets the requirements for a certain plot
 
-        :param require_list: list of requirements, usually comes from Visualize
-        :return: bool
+        Parameters
+        ----------
+           require_list: list
+              list of requirements, usually comes from Visualize
+
+        Returns
+        -------
+           bool
         """
         out = []
 
@@ -759,8 +751,10 @@ class Sample(object):
     """ INFO """
 
     def info(self):
-        import tabulate
-
+        """
+        Prints a tabel of the samples infos
+        :return:
+        """
         out = []
         header = ['Sample Name', 'Measurements', 'Treatments', 'Treatment values', 'Initial State']
         for m in self.measurements:

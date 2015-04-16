@@ -33,13 +33,6 @@ Readin Package
     :undoc-members:
     :show-inheritance:
 
-:mod:`machines` Module
-----------------------
-
-.. automodule:: RockPy.Readin.machines
-    :members:
-    :undoc-members:
-    :show-inheritance:
 
 :mod:`microsense` Module
 ------------------------

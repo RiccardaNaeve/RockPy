@@ -64,7 +64,7 @@ class Hysteresis(base.Measurement):
        :cite:`Yu2005b`
 
     **References**
-    .. bibliography:: hysteresis.bib
+    .. bibliography:: library.bib
        :cited:
     """
 

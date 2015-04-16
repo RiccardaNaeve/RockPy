@@ -77,4 +77,3 @@ Transient hysteresis
 :cite:`Yu2005b`
 
 
-.. bibliography:: hysteresis.bib

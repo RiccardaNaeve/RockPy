@@ -17,10 +17,11 @@ Structure Package
     :undoc-members:
     :show-inheritance:
 
-:mod:`project` Module
----------------------
 
-.. automodule:: RockPy.Structure.project
+:mod:`sample` Module
+-------------------------
+
+.. automodule:: RockPy.Structure.sample
     :members:
     :undoc-members:
     :show-inheritance:
@@ -29,6 +30,14 @@ Structure Package
 -------------------------
 
 .. automodule:: RockPy.Structure.samplegroup
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+:mod:`study` Module
+---------------------
+
+.. automodule:: RockPy.Structure.study
     :members:
     :undoc-members:
     :show-inheritance:

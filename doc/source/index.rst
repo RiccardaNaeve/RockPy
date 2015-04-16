@@ -16,7 +16,6 @@ Contents:
    RockPy.Readin
    RockPy.Structure
    RockPy.Treatments
-   RockPy.Visualize
 
 
 Indices and tables

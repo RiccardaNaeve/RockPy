@@ -21,7 +21,7 @@ log = logging.getLogger(__name__)
 def _to_tuple(oneormoreitems):
     """
     convert argument to tuple of elements
-    :param oneormoreitems: single number or string or list of numbers or strings
+       oneormoreitems: single number or string or list of numbers or strings
     :return: tuple of elements
     """
     return tuple(oneormoreitems) if hasattr(oneormoreitems, '__iter__') else (oneormoreitems, )
@@ -31,9 +31,14 @@ def condense(listofRPD, substfunc='mean'):
     """
     condenses a list of RockPyData objects into single one
     substfunc determines how this is done, default is "mean"
-    :param listofRPD: list of RockPyData object
-    :param substfunc: see eliminate_duplicate_variable_rows
-    :return: condensed RockPyData object
+
+    Parameters
+    ----------
+       listofRPD: list of RockPyData object
+       substfunc: see eliminate_duplicate_variable_rows
+    Returns
+    -------
+       condensed RockPyData object
     """
     listofRPD = _to_tuple(listofRPD)
     res = deepcopy(listofRPD[0])
@@ -71,8 +76,8 @@ class RockPyData(object):
     def _convert_to_2D(input, column=False):
         """
         convert given input to 2D numpy array
-        :param input: array data consisting of values or errors
-        :param column: if FALSE -> 1D data is treated as a single row, otherwise as single column
+           input: array data consisting of values or errors
+           column: if FALSE -> 1D data is treated as a single row, otherwise as single column
         :return: 2D numpy array, representing matrix of values or errors as used by RockPyData.data
         """
         # convert input data to a numpy array
@@ -96,8 +101,8 @@ class RockPyData(object):
     def _convert_to_data3D(input, column=False):
         """
         convert given data to 3D numpy array
-        :param input: array data consisting of values (and errors)
-        :param column: if FALSE -> 1D data is treated as a single row, otherwise as single column
+           input: array data consisting of values (and errors)
+           column: if FALSE -> 1D data is treated as a single row, otherwise as single column
         :return: 3D numpy array, representing matrix of values and errors as used by RockPyData.data
         """
         if input is None:
@@ -129,11 +134,11 @@ class RockPyData(object):
 
     def __init__(self, column_names, row_names=None, units=None, data=None):
         """
-            :param column_names: sequence of strings naming individual columns
-            :param row_names: optional sequence of strings niming individual rows
-            :param units:
-            :param values: numpy array with values
-            :param errors: numpy array with error estimates
+               column_names: sequence of strings naming individual columns
+               row_names: optional sequence of strings niming individual rows
+               units:
+               values: numpy array with values
+               errors: numpy array with error estimates
         """
         # log.info( 'Creating new ' + type(self).__name__)
 
@@ -297,7 +302,7 @@ class RockPyData(object):
         set values of data, set errors to nan
         checks whether number of data columns fits array shape
 
-        :param values:
+           values:
         :return:
         """
 
@@ -343,7 +348,7 @@ class RockPyData(object):
         set errors, shape of numpy array must match existing values
         set all entries to np.NAN if errors == None
 
-        :param errors: numerical array of errors
+           errors: numerical array of errors
         :return:
         """
         if errors is None or np.all(np.isnan(errors)):
@@ -383,8 +388,8 @@ class RockPyData(object):
         """
         define an alias as a sequence of numeric column indices
         if alias 'variable' is redefined, automatically updates 'dep_var' alias to all other columns
-        :param alias_name: str
-        :param column_indices: single or list of column indices
+           alias_name: str
+           column_indices: single or list of column indices
         :return: None
         """
         column_indices = _to_tuple(column_indices)
@@ -405,9 +410,17 @@ class RockPyData(object):
     def append_columns(self, column_names, data=None):
         """
         add one or more columns to values object
-        :param column_names: list(str)
-        :param data: array fo values (and errors) for the new columns
-        :return: new RockPyData object with appended data
+
+
+        Parameters
+        ----------
+           column_names: list(str)
+           data: array-like
+              array fo values (and errors) for the new columns
+
+        Returns
+        -------
+           new RockPyData object with appended data
 
         """
         #todo units
@@ -456,9 +469,16 @@ class RockPyData(object):
            d.column_names
            ['t', 'M']
 
-        :param old_key: str
-        :param new_key: str
-        :return: None
+           old_key: str
+           new_key: str
+
+        Parameters
+        ----------
+           old_cname: str
+           new_cname: str
+        Returns
+        -------
+           None
         """
 
         if self.column_exists(new_cname):
@@ -560,8 +580,13 @@ class RockPyData(object):
     def delete_rows(self, idx):
         """
         delete rows specified by idx
-        :param idx: single index or list of numeric row indices
-        :return: None
+
+        Parameters
+        ----------
+           idx: single index or list of numeric row indices
+
+        Returns
+        -------
         """
         self_copy = deepcopy(self)
         # delete rows from self_copy._data
@@ -575,7 +600,10 @@ class RockPyData(object):
     def _find_unique_variable_rows(self):
         """
         find rows with unique variables
-        :return: list of indices of rows with unique variables
+
+        Returns
+        -------
+           list: list of indices of rows with unique variables
         """
         dvr = self._find_duplicate_variable_rows()
         # flatten structure to get list of duplicate row indices
@@ -585,7 +613,10 @@ class RockPyData(object):
     def _find_duplicate_variable_rows(self):
         """
         find rows with identical variables
-        :return: list of arrays with indices of rows with identical variables
+
+        Returns
+        -------
+            list of arrays with indices of rows with identical variables
         """
 
         # create structured array
@@ -606,14 +637,21 @@ class RockPyData(object):
     def eliminate_duplicate_variable_rows(self, substfunc=None):
         """
         eliminate rows with non unique variables
-        :param substfunc: deleted rows will be replaced by the result of this function
-                    None: nothing, rows with identical variables are just deleted
-                    'max': maximum value of each column
-                    'min': minimum value of each column
-                    'mean': average value of all values removed values in each row, error is set to the standard deviation
-                    'median': median value of all values removed values in each row, error is set to the standard deviation
-                    'fist', 'last': first or last row with same variable
-        :return: returns modified copy of RockPyData object
+        
+        Parameters
+        ----------
+           substfunc: 
+              deleted rows will be replaced by the result of this function
+              None: nothing, rows with identical variables are just deleted
+              'max': maximum value of each column
+              'min': minimum value of each column
+              'mean': average value of all values removed values in each row, error is set to the standard deviation
+              'median': median value of all values removed values in each row, error is set to the standard deviation
+              'fist', 'last': first or last row with same variable
+        
+        Returns
+        -------
+           returns modified copy of RockPyData object
         """
 
         # find rows with identical variables
@@ -635,14 +673,25 @@ class RockPyData(object):
         """
         interpolate existing data columns to new variables
         first duplicated variables are averaged to make interpolation unique
-        :param new_variables: one or multiple values for which the data columns will be interpolated
-        :param method: defines interpolation method
-            'inter1d' works with single variable column only, uses scipy.interpolate.inter1p
-        :param kind: defines which kind of interpolation is done
-            for 'inter1d' this defaults to linear, other possible options: 'nearest', 'zero', 'slinear', 'quadratic', 'cubic'
-        :param substdupvarfunc: substfunc for eliminated duplicated rows
-        :param includesourcedata: if true, source data points within interpolation range will be included in result
-        :return: new RockPyData object with the interpolated data
+        
+        Parameters
+        ----------
+           new_variables:
+              one or multiple values for which the data columns will be interpolated
+           method:
+              defines interpolation method
+              'inter1d' works with single variable column only, uses scipy.interpolate.inter1p
+           kind:
+              defines which kind of interpolation is done
+              for 'inter1d' this defaults to linear, other possible options: 'nearest', 'zero', 'slinear', 'quadratic', 'cubic'
+           substdupvarfunc:
+              substfunc for eliminated duplicated rows
+           includesourcedata: bool
+              if true, source data points within interpolation range will be included in result
+
+        Returns
+        -------
+           new RockPyData object with the interpolated data
         """
 
         # average away duplicated variable rows and sort by variable
@@ -697,7 +746,7 @@ class RockPyData(object):
         """
         get column names for given indices
 
-        :param c_indices: list of indices
+           c_indices: list of indices
 
         :return list of strings
         """
@@ -707,7 +756,7 @@ class RockPyData(object):
         """
         get column names for given key
 
-        :param key: string
+           key: string
 
         :return list of strings
         """
@@ -715,9 +764,10 @@ class RockPyData(object):
 
     def column_names_to_indices(self, c_names):
         """
-
-        :param c_names: list of column names
-        :return:
+        Parameters
+        ----------
+           c_names: list
+               list of column names
         """
         return self._keyseq2colseq(c_names)
 
@@ -725,7 +775,10 @@ class RockPyData(object):
         """
         convert a given list of keys to a list of column indices
 
-        :param keys: can be single string or single int or sequence of those
+        Parameters
+        ----------
+           keys: str or int or list
+              can be single string or single int or sequence of those
         :return: tuple of column indices
         """
 
@@ -873,8 +926,13 @@ class RockPyData(object):
 
            A = B - C
 
-        :param other: rockpydata
-        :return: new rockpydat object with the results
+        Parameters
+        ----------
+           other: rockpydata
+
+        Returns
+        -------
+           new rockpydat object with the results
         """
         return self._arithmetic_op(other, '-')
 
@@ -887,8 +945,13 @@ class RockPyData(object):
 
            A = B + C
 
-        :param other: rockpydata
-        :return: new rockpydat object with the results
+        Parameters
+        ----------
+           other: rockpydata
+
+        Returns
+        -------
+           new rockpydat object with the results
         """
         return self._arithmetic_op(other, '+')
 
@@ -901,8 +964,13 @@ class RockPyData(object):
 
            A = B - C
 
-        :param other: rockpydata
-        :return: new rockpydat object with the results
+        Parameters
+        ----------
+           other: rockpydata
+
+        Returns
+        -------
+           new rockpydat object with the results
         """
         return self._arithmetic_op(other, '*')
 
@@ -915,8 +983,13 @@ class RockPyData(object):
 
            A = B/C
 
-        :param other: rockpydata
-        :return: new rockpydat object with the results
+        Parameters
+        ----------
+           other: rockpydata
+
+        Returns
+        -------
+           new rockpydat object with the results
         """
 
         return self._arithmetic_op(other, '/')
@@ -925,9 +998,13 @@ class RockPyData(object):
         """
         do arithmetic operation of two RockPyData objects or a RockPyData object and numbers
 
-        :param other: rockpydata, number, lit of numbers
-        :param op: operand ('+','-','/','*')
-        :return
+        Parameters
+        ----------
+           other: rockpydata, number, lit of numbers
+           op: operand ('+','-','/','*')
+
+        Returns
+        -------
         """
 
         numoperand = None  # numeric operand
@@ -1102,13 +1179,20 @@ class RockPyData(object):
         """
         Returns a copy of the data filtered by rows according to a True_False array. False entries are not returned.
 
-        tf_array = (d['Mx'].v > 10) & (d['Mx'].v < 20)
-        filtered_d = d.filter(tf_array)
+        Example
+        -------
+           tf_array = (d['Mx'].v > 10) & (d['Mx'].v < 20)
+           filtered_d = d.filter(tf_array)
 
-        :param column_name:
-        :param tf_array: array_like
-                       array with True/False values
-        :return: rockpydata
+        Parameters
+        ----------
+           column_name: str
+           tf_array: array_like
+              array with True/False values
+
+        Returns
+        -------
+           RockPyData
         """
         self_copy = deepcopy(self)
 
@@ -1125,8 +1209,8 @@ class RockPyData(object):
         """
         Returns a copy of the data filtered by rows according to indices specified in index_list.
 
-        :example:
-
+        Example
+        -------
         .. code-block:: python
 
            idx_list = [3,5,7,8]
@@ -1145,9 +1229,16 @@ class RockPyData(object):
            filtered_data['testdata']
            array([ 1.,  2.,  3.,  4.,  6.,  9.,  10.])
 
-        :param index_list:
-        :return: rockpydata
-               filtered data
+        Parameters
+        ----------
+           index_list: list
+              list of indices to be filtered
+           invert: bool
+              if true inverted list will be used
+        Returns
+        -------
+           RockPyData
+              filtered data
         """
         index_list = _to_tuple(index_list)
         if invert:
@@ -1177,7 +1268,7 @@ class RockPyData(object):
     def _multirow_op(self, kind):
         """
         calculate result row out of existing rows
-        :param kind: kind of operation
+           kind: kind of operation
         :return: RockPyData object with results
         """
         if kind == 'mean':
@@ -1277,9 +1368,13 @@ class RockPyData(object):
            [ 20. ,   1.5],
            [ 30. ,   2.2]])
 
-        :param key: str
-                  column_name or alias
-        :return: new RockPyData object with reordered rows
+        Parameters
+        ----------
+           key: str
+              column_name or alias
+        Returns
+        -------
+           new RockPyData object with reordered rows
         """
 
         self_copy = deepcopy(self)
@@ -1296,9 +1391,17 @@ class RockPyData(object):
     def lin_regress(self, column_name_x, column_name_y):
         """
         calculates a least squares linear regression for given x/y data
-        :param column_name_x:
-        :param column_name_y:
-        :returns : slope, sigma, y_intercept, x_intercept
+
+        Parameters
+        ----------
+           column_name_x:
+           column_name_y:
+        Returns
+        -------
+            slope
+            sigma
+            y_intercept
+            x_intercept
         """
 
         x = self[column_name_x].v
@@ -1341,9 +1444,15 @@ class RockPyData(object):
     def derivative(self, dependent_var, independent_var, smoothing=0):
         """
         calculate d( independent_var) / d( dependent_var)
-        :param dependent_var: column name
-        :param independent_var: column name
-        :return:
+
+        Parameters
+        ----------
+           dependent_var: column name
+           independent_var: column name
+
+        Returns
+        -------
+           RockPyData
         """
         x = self[independent_var].v
         y = self[dependent_var].v

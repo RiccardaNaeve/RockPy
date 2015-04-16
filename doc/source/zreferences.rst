@@ -1,5 +1,5 @@
 References
 ==========
 
-.. bibliography:: hysteresis.bib
+.. bibliography:: library.bib
    :all:

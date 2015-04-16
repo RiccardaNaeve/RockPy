@@ -22,8 +22,7 @@ class Hys(base.Measurement):
     """
     Measurement Class for Hysteresis Measurements
 
-    Corrections
-    -----------
+    **Corrections**
 
        correct_slope:
           *not implemented* corrects data for high-field susceptibility
@@ -50,10 +49,14 @@ class Hys(base.Measurement):
 
     Decomposition:
 
-    Fitting
-    -------
+    **Fitting**
 
+    See Also
+    --------
 
+       :cite:`Dobeneck1996a`
+       :cite:`Fabian2003`
+       :cite:`Yu2005b`
 
     .. testsetup:: *
        >>> import RockPy
@@ -62,15 +65,6 @@ class Hys(base.Measurement):
        >>> sample = RockPy.Sample(name='vftb_test_sample')
        >>> M = sample.add_measurement(mtype='hysteresis', mfile=vftb_file, machine='vftb')
 
-    See Also
-    --------
-       :cite:`Dobeneck1996a`
-       :cite:`Fabian2003`
-       :cite:`Yu2005b`
-
-    **References**
-    .. bibliography:: hysteresis.bib
-       :cited:
     """
 
     @classmethod
@@ -124,7 +118,7 @@ class Hys(base.Measurement):
         irrev_mag = float(ms) * mrs_ms * np.array([cosh(3.5 * i / b_sat) ** -1 for i in fields])
 
         data['down_field'] = RockPyData(column_names=['field', 'mag'], data=np.c_[fields, rev_mag + irrev_mag])
-        data['up_field'] = RockPyData(column_names=['field', 'mag'], data=np.c_[fields, rev_mag - irrev_mag][::-1])
+        data['up_field'] = RockPyData(column_names=['field', 'mag'], data=np.c_[fields, rev_mag - irrev_mag])
         #
         # plt.plot(fields, rev_mag)
         # plt.plot(fields, irrev_mag)
@@ -150,8 +144,8 @@ class Hys(base.Measurement):
         """
         General approach to saturation function
 
-        Parameter
-        ---------
+        Parameters
+        ----------
            x: ndarray
               field
            ms: float
@@ -161,6 +155,7 @@ class Hys(base.Measurement):
            alpha: float
            beta: float
               not fitted assumed -2
+
         Returns
         -------
            ndarray:
@@ -173,8 +168,8 @@ class Hys(base.Measurement):
         """
         Function for fitting up to four tanh functions to reversible branch of hysteresis
 
-        Parameter
-        ---------
+        Parameters
+        ----------
            params: Parameterclass lmfit
               Bti: saturation magnetization of ith component
               Gti: curvature of ith component related to coercivity
@@ -210,8 +205,8 @@ class Hys(base.Measurement):
         """
         Function for fitting up to four sech functions to reversible branch of hysteresis
 
-        Parameter
-        ---------
+        Parameters
+        ----------
            params: Parameterclass lmfit
               Bsi: saturation magnetization of ith component
               Gsi: curvature of ith component related to coercivity
@@ -288,9 +283,9 @@ class Hys(base.Measurement):
         down_field_idx = idx
         up_field_idx = range(idx[-1], len(dfield) + 1)
 
-        self._raw_data['virgin'] = raw_data.filter_idx(virgin_idx)
-        self._raw_data['down_field'] = raw_data.filter_idx(down_field_idx)
-        self._raw_data['up_field'] = raw_data.filter_idx(up_field_idx)
+        self._raw_data['virgin'] = raw_data.filter_idx(virgin_idx).sort('field')
+        self._raw_data['down_field'] = raw_data.filter_idx(down_field_idx).sort('field')
+        self._raw_data['up_field'] = raw_data.filter_idx(up_field_idx).sort('field')
 
     def format_vsm(self):
         header = self.machine_data.header
@@ -305,17 +300,17 @@ class Hys(base.Measurement):
             header[header.index('adjusted moment')] = 'moment'
 
         if len(segments['segment number'].v) == 3:
-            self._raw_data['virgin'] = RockPyData(column_names=header, data=data[0], units=self.machine_data.units)
-            self._raw_data['down_field'] = RockPyData(column_names=header, data=data[1], units=self.machine_data.units)
-            self._raw_data['up_field'] = RockPyData(column_names=header, data=data[2], units=self.machine_data.units)
+            self._raw_data['virgin'] = RockPyData(column_names=header, data=data[0], units=self.machine_data.units).sort('field')
+            self._raw_data['down_field'] = RockPyData(column_names=header, data=data[1], units=self.machine_data.units).sort('field')
+            self._raw_data['up_field'] = RockPyData(column_names=header, data=data[2], units=self.machine_data.units).sort('field')
 
         if len(segments['segment number'].v) == 2:
             self._raw_data['virgin'] = None
-            self._raw_data['down_field'] = RockPyData(column_names=header, data=data[0], units=self.machine_data.units)
-            self._raw_data['up_field'] = RockPyData(column_names=header, data=data[1], units=self.machine_data.units)
+            self._raw_data['down_field'] = RockPyData(column_names=header, data=data[0], units=self.machine_data.units).sort('field')
+            self._raw_data['up_field'] = RockPyData(column_names=header, data=data[1], units=self.machine_data.units).sort('field')
 
         if len(segments['segment number'].v) == 1:
-            self._raw_data['virgin'] = RockPyData(column_names=header, data=data[0], units=self.machine_data.units)
+            self._raw_data['virgin'] = RockPyData(column_names=header, data=data[0], units=self.machine_data.units).sort('field')
             self._raw_data['down_field'] = None
             self._raw_data['up_field'] = None
 
@@ -347,11 +342,13 @@ class Hys(base.Measurement):
         self._raw_data['down_field'].define_alias('field', 'raw_applied_field_for_plot_')
         self._raw_data['down_field'].define_alias('mag', 'raw_signal_mx')
         self._raw_data['down_field']['field'] *= 0.1 * 1e-3  # conversion Oe to Tesla
+        self._raw_data['down_field'] = self._raw_data['down_field'].sort('field')
 
         self._raw_data['up_field'] = self.raw_data.filter_idx(up_field_idx)
         self._raw_data['up_field'].define_alias('field', 'raw_applied_field_for_plot_')
         self._raw_data['up_field'].define_alias('mag', 'raw_signal_mx')
         self._raw_data['up_field']['field'] *= 0.1 * 1e-3  # conversion Oe to Tesla
+        self._raw_data['up_field'] = self._raw_data['up_field'].sort('field')
 
     # ## calculations
 
@@ -393,17 +390,17 @@ class Hys(base.Measurement):
         """
         Calculates the result for high field susceptibility using the specified method
 
-        Parameter
-        ---------
+        Parameters
+        ----------
            saturation_percent: float
               field at which saturation is assumed. Only data at higher (or lower negative) is used for analysis
            method: str
               method of analysis
-              simple:
-                 uses  simple linear regression above saturation_percent
+              :simple: uses simple linear regression above saturation_percent
            recalc: bool
               forced recalculation of result
-           options:
+           options: dict
+              additional arguments
 
         Returns
         -------
@@ -480,9 +477,16 @@ class Hys(base.Measurement):
     def calculate_ms(self, method='simple', **parameter):
         """
         Wrapper so one can call calculate_ms on its own, giving the method as an argument
-           method:
-           parameter:
-        :return:
+
+        Parameters
+        ----------
+           method: str
+              the method used for calculation
+                 simple:
+                 app2sat:
+           parameter: dict
+              additional parameters needed for calculation. If nothin is provided standard parameter will be used.
+
         """
         method = 'calculate_ms_' + method
         implemented = [i for i in dir(self) if i.startswith('calculate_ms_')]
@@ -492,8 +496,13 @@ class Hys(base.Measurement):
     def calculate_ms_simple(self, saturation_percent=75, **parameter):
         """
         Calculates the value for Ms
-           parameter: from_field: from % of this value a linear interpolation will be calculated for all branches (+ & -)
-        :return:
+
+        Parameters
+        ----------
+           parameter: dict
+              from_field: float
+                 from % of this value a linear interpolation will be calculated for all branches (+ & -)
+
         """
         ms_all, slope_all = self.fit_hf_slope(saturation_percent=saturation_percent)
 
@@ -611,8 +620,8 @@ class Hys(base.Measurement):
 
         '''
 
-        df_area = sp.integrate.simps(y=self.data['down_field']['mag'].v[::-1],
-                                     x=self.data['down_field']['field'].v[::-1])  # calulate area under down_field
+        df_area = sp.integrate.simps(y=self.data['down_field']['mag'].v,
+                                     x=self.data['down_field']['field'].v)  # calulate area under down_field
         uf_area = sp.integrate.simps(y=self.data['up_field']['mag'].v,
                                      x=self.data['up_field']['field'].v)  # calulate area under up_field
 
@@ -681,7 +690,7 @@ class Hys(base.Measurement):
             M_ih_neg = M_ih.filter(M_ih['field'].v <= 0)
 
             mean_data = np.mean(np.c_[M_ih_pos['mag'].v, -M_ih_neg['mag'].v], axis=1)
-            M_ih['mag'] = list(-mean_data[::-1]).extend(list(mean_data))
+            M_ih['mag'] = list(-mean_data).extend(list(mean_data))
 
         return M_ih.filter(~np.isnan(M_ih['mag'].v))
 
@@ -728,9 +737,13 @@ class Hys(base.Measurement):
 
     def correct_outliers(self, threshold=4, check=False):
         """
+        Method that corrects outliers
 
-           threshold:
-        :return:
+        Parameters
+        ----------
+           threshold: int
+              standard deviation away from fit
+
         """
         raise NotImplementedError
         mx = max(self.data['down_field']['mag'].v)
@@ -746,8 +759,8 @@ class Hys(base.Measurement):
          of the absolute magnetization value of the :math:`M_{ih}` curve. The hysteresis is then shifted by the field
          value at this point.
 
-        Parameter
-        ---------
+        Parameters
+        ----------
            method: str
               for implementation of several methods of calculation
            check: str
@@ -774,8 +787,8 @@ class Hys(base.Measurement):
          of the absolute magnetization value of the :math:`M_{ih}` curve. The hysteresis is then shifted by the field
          value at this point.
 
-        Parameter
-        ---------
+        Parameters
+        ----------
            method: str
               for implementation of several methods of calculation
            check: str
@@ -829,7 +842,10 @@ class Hys(base.Measurement):
             plt.show()
             self.check_plot(uncorrected_data)
 
-    def correct_center(self, interpolate=False):  # todo rewrite for data
+    def correct_center(self, check=True):  # todo rewrite for data
+
+        if check:
+            uncorrected_data = deepcopy(self.data)
 
         df = self.data['down_field']
         uf = self.data['up_field']
@@ -840,26 +856,24 @@ class Hys(base.Measurement):
         fields = sorted(
             list(set(df['field'].v) | set(uf['field'].v) | set(df_rotate['field'].v) | set(uf_rotate['field'].v)))
 
-        # interpolate al branches and rotations
-        df = df.interpolate(fields[::-1])
+        # interpolate all branches and rotations
+        df = df.interpolate(fields)
         uf = uf.interpolate(fields)
         df_rotate = df_rotate.interpolate(fields)
         uf_rotate = uf_rotate.interpolate(fields)
 
         down_field_corrected = deepcopy(df)
         up_field_corrected = deepcopy(uf)
-        down_field_corrected['mag'] = (df['mag'].v - uf_rotate['mag'].v) / 2. - (df['mag'].v - uf['mag'].v + df_rotate['mag'].v -
-                                                                  uf_rotate['mag'].v) / 4.
+        down_field_corrected['mag'] = (df['mag'].v + uf_rotate['mag'].v) / 2
+
+        up_field_corrected['field'] = - down_field_corrected['field'].v
         up_field_corrected['mag'] = - down_field_corrected['mag'].v
 
-        plt.plot(down_field_corrected['field'].v, down_field_corrected['mag'].v)
-        plt.plot(up_field_corrected['field'].v, up_field_corrected['mag'].v)
-        # plt.plot(df_rotate['field'].v, df_rotate['mag'].v)
-        # plt.plot(uf_rotate['field'].v, uf_rotate['mag'].v)
-        # plt.plot(df['field'].v, df_rotate['mag'].v)
-        # plt.plot(uf['field'].v, df_rotate['mag'].v)
+        self.data.update(dict(up_field=up_field_corrected, down_field=down_field_corrected))
 
-        plt.show()
+        if check:
+            self.check_plot(uncorrected_data=uncorrected_data)
+
 
 
     def correct_slope(self):  # todo redundant
@@ -1132,10 +1146,10 @@ class Hys(base.Measurement):
         if isinstance(branch, str):
             data = deepcopy(getattr(self, data)[branch])
         if isinstance(branch, RockPyData):
-            data = branch
-        data['field'] = -data['field'].v[::-1]
-        data['mag'] = -data['mag'].v[::-1]
-        return data
+            data = deepcopy(branch)
+        data['field'] = -data['field'].v
+        data['mag'] = -data['mag'].v
+        return data.sort()
 
     def calc_approach2sat(self, saturation_percent, branch, remove_last):
         """
@@ -1210,7 +1224,7 @@ class Hys(base.Measurement):
 
         for dtype in corrected_data:
             try:
-                ax.plot(corrected_data[dtype]['field'].v, corrected_data[dtype]['mag'].v, color='g')
+                ax.plot(corrected_data[dtype]['field'].v, corrected_data[dtype]['mag'].v, color='g', marker='.')
                 ax.plot(uncorrected_data[dtype]['field'].v, uncorrected_data[dtype]['mag'].v, color='r', marker='.',
                         ls='')
             except TypeError:
@@ -1308,9 +1322,11 @@ if __name__ == '__main__':
     vftb_file = RockPy.join(RockPy.test_data_path, 'MUCVFTB_test.hys')
     vftb_file = '/Users/mike/Dropbox/Software/RockMagAnalyzer1.1/Examples/example1.hys'
     s = RockPy.Sample(name='test_sample', mass=146.8, mass_unit='mg')
-    m = s.add_measurement(mtype='hys', mfile=vsm_file, machine='vsm')
+    # m = s.add_measurement(mtype='hys', mfile=vsm_file, machine='vsm')
+    m = s.add_measurement(mtype='hys', mfile=vftb_file, machine='vftb')
+    m.data['down_field']['mag'] = m.data['down_field']['mag'].v + 1.2e-7
+    m.data['up_field']['mag'] = m.data['up_field']['mag'].v + 1.2e-7
     m.correct_center()
-    # m = s.add_measurement(mtype='hys', mfile=vftb_file, machine='vftb')
     # m.normalizeNEW(reference='mass', ntypes='mag')
     # m.fit_hysteresis(nfunc=2, check=True)
     # m.calc_all()

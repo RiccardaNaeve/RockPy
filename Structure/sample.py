@@ -60,11 +60,14 @@ class Sample(object):
             self.add_measurement(mtype='mass', mfile=None, machine=mass_machine,
                                  value=float(mass), unit=mass_unit)
         if diameter is not None:
-            self.add_measurement(mtype='diameter', mfile=None, machine=length_machine,
+            diameter = self.add_measurement(mtype='diameter', mfile=None, machine=length_machine,
                                  value=float(diameter), unit=length_unit)
         if height is not None:
-            self.add_measurement(mtype='height', mfile=None, machine=length_machine,
+            height = self.add_measurement(mtype='height', mfile=None, machine=length_machine,
                                  value=float(height), unit=length_unit)
+        if height and diameter:
+            self.add_measurement(mtype='volume', height=height, diameter=diameter)
+
         self.index = Sample.snum
         Sample.snum +=1
 
@@ -691,7 +694,13 @@ class Sample(object):
     #        mlist:
     #     :return:
     #     """
+    ''' parameter properties '''
 
+    @property
+    def volume(self):
+        v = self.get_measurements(mtype='volume')
+        if v:
+            return v.data['data']['volume'].v
 
     ''' FOR PLOTTING FUNCTIONS '''
 

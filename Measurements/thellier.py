@@ -1373,7 +1373,7 @@ class Thellier(base.Measurement):
 
         """
         component = parameter.get('component', self.standard_parameter['slope']['component'])
-        # todo
+        # todo implement calculate_delta_pal
         #
         # dptrm = self.get_d_ptrm(**parameter)
         #

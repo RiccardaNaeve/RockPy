@@ -52,7 +52,7 @@ class Backfield(base.Measurement):
         data = self.machine_data.out_backfield()
         header = self.machine_data.header
         self._raw_data['remanence'] = RockPyData(column_names=header, data=data[0])
-
+        self._raw_data['induced'] = None
     def format_vsm(self):
         """
         formats the vsm output to be compatible with backfield measurements
@@ -72,6 +72,8 @@ class Backfield(base.Measurement):
 
         if self.machine_data.measurement_header['SCRIPT']['Include direct moment?'] == 'Yes':
             self._raw_data['induced'] = RockPyData(column_names=['field', 'mag'], data=data[data_idx + 1][:, [0, 2]])
+        else:
+            self._raw_data['induced'] = None
 
 
     @property
@@ -127,11 +129,6 @@ class Backfield(base.Measurement):
         self.calc_result(parameter, recalc)
         return self.results['ms']
 
-    def result_sigma_mrs(self, recalc=False):
-        parameter = {}
-        self.calc_result(parameter, recalc, force_method='mrs')
-        return self.results['sigma_mrs']
-
 
     def calculate_bcr(self, **parameter):
         '''
@@ -167,31 +164,34 @@ class Backfield(base.Measurement):
         Backfield.logger.info('CALCULATING << S300 >> parameter, assuming measurement started in saturation remanence')
         idx = np.argmin(np.abs(self._data['remanence']['field'].v + 0.300))
 
-        if self._data['remanence']['field'].v.all() < 0.300:
+        if self.data['remanence']['field'].v.all() > 0.300:
             self.results['s300'] = np.nan
             return
 
-        if abs(self.data['remanence']['field'].v[idx]) < 0.3:
+        if self.data['remanence']['field'].v[idx] > 0.3:
             i = [idx - 1, idx]
         else:
             i = [idx, idx + 1]
 
-
-        d = self._data['remanence'].filter_idx(i)
+        d = self.data['remanence'].filter_idx(i)
         slope, sigma, y_intercept, x_intercept = d.lin_regress('field', 'mag')
 
         m300 = y_intercept + (slope * 0.3)
-        mrs = self._data['remanence']['mag'].v[0]
+        mrs = self.data['remanence']['mag'].v[0]
 
         s300 = (1 - ( m300 / mrs)) / 2
 
         self.results['s300'] = s300
 
     def calculate_mrs(self, **parameter):
+        """
+        Magnetic Moment at last measurement point
+        :param parameter:
+        :return:
+        """
         start = self._data['remanence']['mag'].v[0]
         end = self._data['remanence']['mag'].v[-1]
         self.results['mrs'] = np.mean(np.fabs([end]))
-        self.results['sigma_mrs'] = np.std(np.fabs([end]))
 
     def calculate_ms(self, **parameter):
         self.results['ms'] = None
@@ -200,7 +200,7 @@ class Backfield(base.Measurement):
         plt.plot(self._data['remanence']['field'].v, self._data['remanence']['mag'].v, '.-', zorder=1)
         plt.plot(-self.bcr, 0.0, 'x', color='k')
 
-        if self._data['induced']:
+        if self.data['induced']:
             plt.plot(self._data['induced']['field'].v, self._data['induced']['mag'].v, zorder=1)
 
         plt.axhline(0, color='#808080')

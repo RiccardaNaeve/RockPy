@@ -15,20 +15,15 @@ def test():
 
     sg = RockPy.SampleGroup(sample_list=sample)
     study = RockPy.Study(samplegroups=sg)
-    ### saving to disk
-    d = numpyson.dumps(study)
-    print d
-    M2 = numpyson.loads(d)
-    print M2
     # get bcr
-    # M.calculate_bcr()  # prints the linear interpolation of the value (internal calculation)
-    # print 'bcr', M.bcr  # returns the calculated value
-    # print M.s300  # returns the S300 value
+    M.calculate_bcr()  # prints the linear interpolation of the value (internal calculation)
+    print 'bcr', M.bcr  # returns the calculated value
+    print M.s300  # returns the S300 value
 
-    # M.calc_all()  # calculates all possible results using standard parameters
-    # print M.results  # returns the calculated value
+    M.calc_all()  # calculates all possible results using standard parameters
+    print M.results  # returns the calculated value
     # rudimentary plot
-    # M.plt_backfield()
-    # sample.calc_all()
+    M.plt_backfield()
+    sample.calc_all()
 if __name__ == '__main__':
     test()

@@ -7,7 +7,9 @@ import base
 import RockPy
 import time
 from RockPy.Functions import general
-
+import RockPy.Visualize.core
+from RockPy.Visualize.Features import arai as arai_feature
+from RockPy.Visualize.Features import dunlop as dunlop_feature
 
 class Thellier(base.Measurement):
     """
@@ -384,23 +386,24 @@ class Thellier(base.Measurement):
 
     # ## plotting functions
     def plt_dunlop(self):
-        plt.plot(self.th['temp'], self.th['mag'], '.-', zorder=1)
+        plt.plot(self.data['th']['temp'].v, self.data['th']['mag'].v, '.-', zorder=1)
         # plt.plot(self.ptrm['temp'], self.ptrm['moment'], '.-', zorder=1)
-        plt.plot(self.ptrm['temp'], self.ptrm['mag'], '.-', zorder=1)
-        plt.plot(self.sum['temp'], self.sum['mag'], '.--', zorder=1)
-        plt.plot(self.tr['temp'], self.tr['mag'], 's')
+        plt.plot(self.data['ptrm']['temp'].v, self.data['ptrm']['mag'].v, '.-', zorder=1)
+        plt.plot(self.data['sum']['temp'].v, self.data['sum']['mag'].v, '.--', zorder=1)
+        plt.plot(self.data['tr']['temp'].v, self.data['tr']['mag'].v, 's')
         plt.grid()
         plt.title('Dunlop Plot %s' % (self.sample_obj.name))
         plt.xlabel('Temperature [%s]' % ('C'))
         plt.ylabel('Moment [%s]' % ('Am2'))
-        plt.xlim([min(self.th['temp']), max(self.th['temp'])])
+        # plt.xlim([min(self.th['temp'].v), max(self.th['temp']).v])
         plt.show()
 
     def plt_arai(self, **options):
         equal = set(self.th['temp'].v) & set(self.ptrm['temp'].v)
+        max_mag = max(set(self.th['mag'].v) | set(self.ptrm['mag'].v))
         idx = [i for i, v in enumerate(self.th['temp'].v) if v in equal]
         th = self.th.filter_idx(idx)
-        plt.plot(self.ptrm['mag'].v, th['mag'].v, '.-', zorder=1)
+        plt.plot(self.ptrm['mag'].v, th['mag'].v, 'o', zorder=1, markersize = 5)
         plt.plot([min(self.ptrm['mag'].v), max(self.ptrm['mag'].v)],
                  self.result_slope().v * np.array(
                      [min(self.ptrm['mag'].v), max(self.ptrm['mag'].v)]) + self.result_y_int().v, '--')
@@ -408,8 +411,36 @@ class Thellier(base.Measurement):
         plt.title('Arai Diagram %s' % (self.sample_obj.name))
         plt.xlabel('NRM remaining [%s]' % ('C'))
         plt.ylabel('pTRM gained [%s]' % ('Am2'))
+        plt.ylim([0, max_mag*1.1])
         plt.show()
 
+    def plt_thellier(self):
+        fig = RockPy.Visualize.core.generate_plots(2)
+        for i, feature in enumerate(['arai', 'dunlop']):
+            ax = RockPy.Visualize.core.get_subplot(fig, i)
+            if feature == 'arai':
+                arai_feature.arai_points(ax, self)
+                arai_feature.arai_fit(ax, self)
+                arai_feature.add_ck_check(ax, self)
+                ax.grid()
+                ax.set_title('Arai Diagram %s' % (self.sample_obj.name))
+                ax.set_xlabel('NRM remaining [%s]' % ('Am2'))
+                ax.set_ylabel('pTRM gained [%s]' % ('Am2'))
+                ax.set_ylim([0, max(self.th['mag'].v)*1.1])
+                ax.set_xlim([0, max(self.ptrm['mag'].v)*1.1])
+
+            if feature == 'dunlop':
+                max_mag = max(set(self.th['mag'].v) | set(self.ptrm['mag'].v))
+                dunlop_feature.dunlop_data(ax, self)
+                ax.set_title('Dunlop Plot %s' % (self.sample_obj.name))
+                ax.set_xlabel('Temperature [%s]' % ('C'))
+                ax.set_ylabel('magnetic moment [%s]' % ('Am2'))
+                ax.grid()
+                ax.legend(loc='best', )
+                ax.set_ylim([0, max_mag*1.1])
+
+        plt.tight_layout()
+        plt.show()
     def delete_temp(self, temp):
         for step in self.steps:
             o_len = len(getattr(self, step)['temp'].v)
@@ -1758,18 +1789,18 @@ class Thellier(base.Measurement):
             d_ck = np.array([ck[0], d_ck[0], d_ck[1], d_ck[2], ck[4] + th_j[4], ck[-2], d_ck_m])
 
             out.append([d_ck, th_i, ptrm_j, th_j])
-        for i in out:
-            from pprint import pprint
-
-            print i[0][0], i[1][0], i[2][0], i[3][0]
-            print 'ck_ij'
-            pprint(i[0])
-            print 'th_i'
-            pprint(i[1])
-            print 'ptrm_j'
-            pprint(i[2])
-            print 'th_j'
-            pprint(i[3])
+        # for i in out:
+        #     from pprint import pprint
+        #
+        #     print i[0][0], i[1][0], i[2][0], i[3][0]
+        #     print 'ck_ij'
+        #     pprint(i[0])
+        #     print 'th_i'
+        #     pprint(i[1])
+        #     print 'ptrm_j'
+        #     pprint(i[2])
+        #     print 'th_j'
+        #     pprint(i[3])
         return out
 
     def _get_ac_data(self):
@@ -1858,6 +1889,11 @@ class Thellier(base.Measurement):
 
 
 if __name__ == '__main__':
-    s = RockPy.Sample(name='ThellierTest')
+    import os.path
+
+    thellier_file = os.path.join(RockPy.test_data_path, 'cryomag', 'NLCRY_Thellier_test.TT')
+    s = RockPy.Sample(name='test_sample')
+    # m = s.add_measurement(mtype='thellier', machine='cryomag', mfile=thellier_file)
     m = s.add_simulation(mtype='thellier', sim_params={'max_moment': 10})
+    m.plt_thellier()
 

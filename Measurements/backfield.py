@@ -35,11 +35,6 @@ class Backfield(base.Measurement):
                  mtype, mfile, machine,
                  **options):
 
-        self._data = {'remanence': None,
-                      'induced': None}
-        # TODO: check if the above makes sense. super resets self._data ????
-
-
         super(Backfield, self).__init__(sample_obj,
                                         mtype, mfile, machine,
                                         **options)
@@ -197,7 +192,7 @@ class Backfield(base.Measurement):
         self.results['ms'] = None
 
     def plt_backfield(self):
-        plt.plot(self._data['remanence']['field'].v, self._data['remanence']['mag'].v, '.-', zorder=1)
+        plt.plot(self.data['remanence']['field'].v, self.data['remanence']['mag'].v, '.-', zorder=1)
         plt.plot(-self.bcr, 0.0, 'x', color='k')
 
         if self.data['induced']:

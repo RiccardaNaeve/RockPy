@@ -42,9 +42,12 @@ class Length(Measurement):
                  **options):
         super(Length, self).__init__(sample_obj=sample_obj,
                                      mtype=mtype, mfile=mfile, machine=machine,
+                                     direction=None,
                                      **options)
         self.mtype = mtype
         self.machine = machine
+        self.direction = direction
+
         length_conversion = convert2(unit, 'm', 'length')
 
         self._raw_data = {'data': RockPy.RockPyData(column_names=[mtype, 'time', 'std_dev'])}

@@ -8,7 +8,7 @@ from math import sin, cos, tan, asin, atan2
 
 def create_logger(name):
     log = logging.getLogger(name=name)
-    log.setLevel(logging.DEBUG)
+    log.setLevel(logging.INFO)
     formatter = logging.Formatter('%(asctime)s: %(levelname)-10s %(name)-20s %(message)s')
     # fh = logging.FileHandler('RPV3.log')
     # fh.setFormatter(formatter)

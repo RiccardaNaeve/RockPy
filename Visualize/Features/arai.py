@@ -11,10 +11,29 @@ def arai_points(ax, m_obj, component='mag', **plt_opt):
 
     marker = plt_opt.pop('marker', 's')
     markersize = plt_opt.pop('markersize', 3)
-    linestyle = plt_opt.pop('linestyle', '-')
+    linestyle = plt_opt.pop('linestyle', '')
 
     lines = ax.plot(x[component].v, y[component].v,
             marker=marker,
+            linestyle=linestyle,
+            markersize=markersize,
+            zorder=100,
+            label=m_obj.sample_obj.name,
+            **plt_opt)
+
+    return lines
+
+def arai_fit(ax, m_obj, component='mag', **plt_opt):
+    slope = m_obj.result_slope().v[0]
+    intercept = m_obj.result_y_int().v[0]
+    x = m_obj.data['ptrm']['mag'].v
+    y = x * slope + intercept
+    color = plt_opt.pop('color', '#808080')
+    markersize = plt_opt.pop('markersize', 3)
+    linestyle = plt_opt.pop('linestyle', '--')
+
+    lines = ax.plot(x, y,
+            marker='',
             linestyle=linestyle,
             markersize=markersize,
             zorder=100,

@@ -21,9 +21,9 @@ class Sample(object):
     def __init__(self, name,
                  mass=None, mass_unit='kg', mass_machine='generic',
                  height=None, diameter=None,
-                 x_len =None, y_len=None, z_len=None, # for cubic samples
+                 x_len=None, y_len=None, z_len=None,  # for cubic samples
                  length_unit='mm', length_machine='generic',
-                 sample_shape = 'cylinder',
+                 sample_shape='cylinder',
                  color=None,
                  **options):
         """
@@ -66,19 +66,51 @@ class Sample(object):
         self._info_dict = self.__create_info_dict()
 
         if mass is not None:
-            self.add_measurement(mtype='mass', mfile=None, machine=mass_machine,
+            mass = self.add_measurement(mtype='mass', mfile=None, machine=mass_machine,
                                  value=float(mass), unit=mass_unit)
         if diameter is not None:
             diameter = self.add_measurement(mtype='diameter', mfile=None, machine=length_machine,
-                                 value=float(diameter), unit=length_unit)
+                                            value=float(diameter), unit=length_unit)
         if height is not None:
             height = self.add_measurement(mtype='height', mfile=None, machine=length_machine,
-                                 value=float(height), unit=length_unit)
+                                          value=float(height), unit=length_unit)
+
+        if x_len is not None:
+            x_len = self.add_measurement(mtype='length', mfile=None, machine=length_machine,
+                                         value=float(x_len), unit=length_unit, direction='x')
+        if y_len is not None:
+            y_len = self.add_measurement(mtype='length', mfile=None, machine=length_machine,
+                                         value=float(y_len), unit=length_unit, direction='y')
+        if z_len is not None:
+            z_len = self.add_measurement(mtype='length', mfile=None, machine=length_machine,
+                                         value=float(z_len), unit=length_unit, direction='z')
+
         if height and diameter:
-            self.add_measurement(mtype='volume', height=height, diameter=diameter)
+            self.add_measurement(mtype='volume', sample_shape=sample_shape, height=height, diameter=diameter)
+        if x_len and y_len and z_len:
+            self.add_measurement(mtype='volume', sample_shape= sample_shape, x_len=x_len, y_len=y_len, z_len=z_len)
 
         self.index = Sample.snum
-        Sample.snum +=1
+        Sample.snum += 1
+
+    """ Parameter """
+    @property
+    def mass(self):
+        """
+        Searches for last mass measurement and returns value in kg
+        :return:
+        """
+        m = self.get_measurements(mtype='mass')[-1]
+        return m.data['data']['mass'].v[0]
+
+    @property
+    def volume(self):
+        """
+        Searches for last volume measurement and returns value in m^3
+        :return:
+        """
+        m = self.get_measurements(mtype='volume')[-1]
+        return m.data['data']['volume'].v[0]
 
     """ INFO DICTIONARY """
 
@@ -329,7 +361,7 @@ class Sample(object):
         """
         # out = {mtype: {ttype: self.get_measurements(mtype=mtype, ttype=ttype)
         # for ttype in self.mtype_ttype_dict[mtype]}
-        #        for mtype in self.mtypes}
+        # for mtype in self.mtypes}
         return self._info_dict['mtype_ttype']
 
     @property
@@ -342,7 +374,7 @@ class Sample(object):
     def mtype_ttype_tval_mdict(self):
         # out = {mt:
         # {tt: {tv: self.get_measurements(mtype=mt, ttype=tt, tval=tv)
-        #                  for tv in self.ttype_tval_dict[tt]}
+        # for tv in self.ttype_tval_dict[tt]}
         #             for tt in self.mtype_ttype_dict[mt]}
         #        for mt in self.mtypes}
         return self._info_dict['mtype_ttype_tval']
@@ -482,7 +514,7 @@ class Sample(object):
                 if len(varlist) > 1:
                     dtype_list = [m.interpolate(varlist) for m in dtype_list]
 
-            if len(dtype_list) > 1:  #for single measurements
+            if len(dtype_list) > 1:  # for single measurements
                 measurement.data[dtype] = condense(dtype_list)
                 measurement.data[dtype] = measurement.data[dtype].sort('variable')
 
@@ -588,7 +620,7 @@ class Sample(object):
             else:
                 # add new columns to all_results
                 # column_add_all_results = list(set(results.column_names) -
-                #                               set(all_results.column_names))  # cols in results but not in all_results
+                # set(all_results.column_names))  # cols in results but not in all_results
                 #
                 # all_results = all_results.append_columns(column_add_all_results)
                 #
@@ -671,7 +703,7 @@ class Sample(object):
 
         if 'ttype' in ''.join(all_results.column_names):  # check for ttype
             self.logger.warning('TREATMENT/S found check if measurement list correct'
-            )
+                                )
 
         v = np.nanmean(all_results.v, axis=0)
         errors = np.nanstd(all_results.v, axis=0)
@@ -699,18 +731,10 @@ class Sample(object):
 
     # def _sort_ttype_tval(self, mlist):
     # """
-    #     sorts a list of measurements according to their tvals and ttypes
+    # sorts a list of measurements according to their tvals and ttypes
     #        mlist:
     #     :return:
     #     """
-    ''' parameter properties '''
-
-    @property
-    def volume(self):
-        v = self.get_measurements(mtype='volume')
-        if v:
-            return v.data['data']['volume'].v
-
     ''' FOR PLOTTING FUNCTIONS '''
 
     @property

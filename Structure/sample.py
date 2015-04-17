@@ -20,7 +20,11 @@ class Sample(object):
 
     def __init__(self, name,
                  mass=None, mass_unit='kg', mass_machine='generic',
-                 height=None, diameter=None, length_unit='mm', length_machine='generic', color=None,
+                 height=None, diameter=None,
+                 x_len =None, y_len=None, z_len=None, # for cubic samples
+                 length_unit='mm', length_machine='generic',
+                 sample_shape = 'cylinder',
+                 color=None,
                  **options):
         """
         Parameters
@@ -39,6 +43,11 @@ class Sample(object):
               if not 'm' please specify
            length_machine: str
               if not 'm' please specify
+           sample_shape: str
+              needed for volume calculation
+              cylinder: needs height, diameter
+              cube: needs x_len, y_len, z_len
+              sphere: diameter
            color: color
               used in plots if specified
         """

@@ -430,8 +430,8 @@ class Measurement(object):
             method = caller # if CALLER = METHOD
 
         if callable(getattr(self, 'calculate_' + method)):  # check if calculation function exists
-            parameter = self.compare_parameters(caller, parameter,
-                                                recalc)  # checks for None and replaces it with standard
+            # check for None and replaces it with standard
+            parameter = self.compare_parameters(method, parameter, recalc)
             if self.results[caller] is None or self.results[
                 caller] == np.nan or recalc:  # if results dont exist or force recalc
                 if recalc:
@@ -618,22 +618,32 @@ class Measurement(object):
 
     def _add_tval_to_data(self, tobj):
         """
-        adds ttype ad tvals to data
-        :param tobj:
-        :return:
+        Adds ttype as a column and adds tvals to data. Only if ttype != none.
+
+        Parameter
+        ---------
+           tobj: treatment instance
         """
-        for dtype in self._data:
-            data = np.ones(len(self.data[dtype]['variable'].v)) * tobj.value
-            if not 'ttype ' + tobj.ttype in self.data[dtype].column_names:
-                self.data[dtype] = self.data[dtype].append_columns(column_names='ttype ' + tobj.ttype,
-                                                               data=data)  # , unit=tobj.unit) #todo add units
+        if tobj.ttype != 'none':
+            for dtype in self._raw_data:
+                data = np.ones(len(self.data[dtype]['variable'].v)) * tobj.value
+                if not 'ttype ' + tobj.ttype in self.data[dtype].column_names:
+                    self.data[dtype] = self.data[dtype].append_columns(column_names='ttype ' + tobj.ttype,
+                                                                   data=data)  # , unit=tobj.unit) #todo add units
 
     def _add_tval_to_results(self, tobj):
+        """
+        Adds the ttype as a column and the value as value to the results. Only if ttype != none.
 
-        # data = np.ones(len(self.results['variable'].v)) * tobj.value
-        if not 'ttype ' + tobj.ttype in self.results.column_names:
-            self.results = self.results.append_columns(column_names='ttype ' + tobj.ttype,
-                                                       data=[tobj.value])  # , unit=tobj.unit) #todo add units
+        Parameter
+        ---------
+           tobj: treatment instance
+        """
+        if tobj.ttype != 'none':
+            # data = np.ones(len(self.results['variable'].v)) * tobj.value
+            if not 'ttype ' + tobj.ttype in self.results.column_names:
+                self.results = self.results.append_columns(column_names='ttype ' + tobj.ttype,
+                                                           data=[tobj.value])  # , unit=tobj.unit) #todo add units
 
 
     def __sort_list_set(self, values):

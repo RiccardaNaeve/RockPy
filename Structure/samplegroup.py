@@ -416,8 +416,9 @@ class SampleGroup(object):
         return out
 
 
-    def mean_sample(self, reference=None,
-                    rtype='mag', vval=None,
+    def mean_sample(self,
+                    reference=None,
+                    rtype='mag', dtye='mag', vval=None,
                     norm_method='max',
                     interpolate=True,
                     substfunc='mean'):
@@ -425,53 +426,83 @@ class SampleGroup(object):
         # create new sample_obj
         mean_sample = Sample(name='mean ' + self.name)
 
-        for mtype in self.mtypes:
-            for ttype in self.mtype_ttype_dict[mtype]:
-                for tval in self.ttype_tval_dict[ttype]:
-                    measurements = self.get_measurements(mtype=mtype, ttype=ttype, tval=tval)
-                    if reference or vval:
-                        measurements = [m.normalize(reference=reference, rtype=rtype,
-                                                    vval=vval, norm_method=norm_method)
-                                        for m in measurements
-                                        if m.mtype not in ['diameter', 'height', 'mass']]
-                    mean_sample.measurements.extend(measurements)
-
-                    if mtype not in ['diameter', 'height', 'mass']:
-                        # calculating the mean of all measurements
-                        M = mean_sample.mean_measurement(mtype=mtype, ttype=ttype, tval=tval, substfunc=substfunc)
-                        if reference or vval:
-                            M.is_normalized = True
-                            M.norm = [reference, rtype, vval, norm_method, np.nan]
-
-                        mean_sample.mean_measurements.append(M)
+        for mtype in self.info_dict['mtype_ttype_tval']:
+            if not mtype in ['mass', 'diameter', 'height', 'volume', 'x_len', 'y_len', 'z_len']:
+                for ttype in self.info_dict['mtype_ttype_tval'][mtype]:
+                    for tval in self.info_dict['mtype_ttype_tval'][mtype][ttype]:
+                        samples = self.info_dict['mtype_ttype_tval'][mtype][ttype][tval]
+                        measurements = []
+                        for s in samples:
+                            measurements.extend(s.get_measurements(mtype=mtype, ttype=ttype, tval=tval))
+                        # print measurements
+                    # if reference or vval:
+                    #     measurements = [m.normalizeNEW(reference=reference, rtype=rtype,
+                    #                                 vval=vval, norm_method=norm_method)
+                    #                     for m in measurements
+                    #                     if m.mtype not in ['diameter', 'height', 'mass']]
+                    #
+                    # mean_sample.measurements.extend(measurements)
+                    #
+                    # if mtype not in ['diameter', 'height', 'mass']:
+                    #     # calculating the mean of all measurements
+                    #     M = mean_sample.mean_measurement(mtype=mtype, ttype=ttype, tval=tval, substfunc=substfunc)
+                    #     if reference or vval:
+                    #         M.is_normalized = True
+                    #         M.norm = [reference, rtype, vval, norm_method, np.nan]
+                    #
+                    #     mean_sample.mean_measurements.append(M)
 
         mean_sample.is_mean = True  #set is_mean flag after all measuerements are created
         return mean_sample
 
-    def average_sample(self, reference='nrm', name='mean_sample_group',
-                       rtype='mag', vval=None, norm_method='max', interpolate=True):
+    def average_sample(self, name=None,
+                       reference='data',
+                       rtype='mag', dtype = 'mag',
+                       vval=None, norm_method='max',
+                       interpolate=True):
+        """
+        Averages all samples and returns a sample with an average measurement for all measurements in all samples.
+        
+        Parameters
+        ----------
+           name: str
+              Name of the samplegroup. *default:* mean_*sample_group_name*
+           reference: str
+              used for normalize
+           rtype:
+           vval: 
+           norm_method: 
+           interpolate: bool
+              it True all measurements are interpolated to equal variables and then normalized
+        :return:
+        """
 
-        average_sample = Sample(name='mean ' + self.name)
+        if not name:
+            name = 'mean ' + self.name
+
+        average_sample = Sample(name=name)
         average_sample.is_mean = True
 
-        for mtype in ['diameter', 'height', 'mass']:
-            for ttype in self.mtype_ttype_dict[mtype]:
-                for tval in self.ttype_tval_dict[ttype]:
-                    measurements = self.get_measurements(mtype=mtype, ttype=ttype, tval=tval)
-                    M = average_sample.mean_measurement_from_list(measurements)
-                    average_sample.measurements.append(M)
-
-        for mtype in self.mtypes:
-            if mtype not in ['diameter', 'height', 'mass']:
+        for mtype in ['diameter', 'height', 'mass', 'volume']:
+            try:
                 for ttype in self.mtype_ttype_dict[mtype]:
                     for tval in self.ttype_tval_dict[ttype]:
                         measurements = self.get_measurements(mtype=mtype, ttype=ttype, tval=tval)
-                        measurements = [m.normalize(reference=reference, rtype=rtype,
+                        M = average_sample.mean_measurement_from_list(measurements)
+                        average_sample.measurements.append(M)
+            except:
+                self.log.info('NO %s found' %(mtype))
+                
+        for mtype in self.mtypes:
+            if mtype not in ['diameter', 'height', 'mass', 'volume']:
+                for ttype in self.mtype_ttype_dict[mtype]:
+                    for tval in self.ttype_tval_dict[ttype]:
+                        measurements = self.get_measurements(mtype=mtype, ttype=ttype, tval=tval)
+                        measurements = [m.normalize(reference=reference, rtype=rtype, dtype=dtype,
                                                     vval=vval, norm_method=norm_method)
                                         for m in measurements]
                         M = average_sample.mean_measurement_from_list(measurements, interpolate=interpolate)
                         # print average_sample.get_mean_results(mlist=measurements)
-
                         average_sample.measurements.append(M)
 
         return average_sample
@@ -504,8 +535,8 @@ class SampleGroup(object):
         """
         d = ['sample', 'mtype', 'ttype', 'tval']
         keys = ['_'.join(i) for n in range(5) for i in itertools.permutations(d, n) if not len(i) == 0]
-        self._info_dict = {i: {} for i in keys}
-        return self._info_dict
+        out = {i: {} for i in keys}
+        return out
 
     # @profile()
     def add_s2_info_dict(self, s):
@@ -525,54 +556,56 @@ class SampleGroup(object):
                   'mtype': s.mtypes,
                   'sample': [s.name]}
 
-        for key in keys:
-            # cycle through all permutations of the info_dict
-            split_keys = key.split('_')
-            num = len(split_keys)
-            if num == 1:
-                for i, k in enumerate(split_keys):
-                    for entry in s_info[k]:
-                        self._info_dict[key].setdefault(entry, []).append(s)
-            if num > 1:
-                for i, k in enumerate(split_keys):
-                    if i == 0:
-                        for entry in s_info[k]:
-                            self._info_dict[key].setdefault(entry, {})
-                    if i == 1:
-                        for first_entry in s_info[split_keys[0]]:
-                            for entry in s_info[k]:
-                                if i == num - 1:
-                                    self._info_dict[key][first_entry].setdefault(entry, [])
-                                    if not s in self._info_dict[key][first_entry][entry]:
-                                        self._info_dict[key][first_entry][entry].append(s)
+        aux = self.info_dict
+
+        levels = [key.split('_') for key in keys if len(key.split('_'))]
+
+        for level in levels:
+            key = '_'.join(level)
+            for i, v in enumerate(level):
+                name = '_'.join(level[:i+1])
+                if not 'sample' in level:
+                    for k1 in s.info_dict[name]:
+                        if isinstance(k1, str):
+                            print key, name, '1:', k1
+                            self._info_dict[key].setdefault(k1, {})
+                        # else:
+                        #     self._info_dict[key].setdefault(key, [])
+                        #
+                        #     if not s in self._info_dict[key]:
+                        #         self._info_dict[key].append(s)
+                        try:
+                            for k2 in s.info_dict[name][k1]:
+                                if isinstance(k2, str):
+                                    self._info_dict[key][k1].setdefault(k2, {})
                                 else:
-                                    self._info_dict[key][first_entry].setdefault(entry, {})
-                    if i == 2:
-                        for first_entry in s_info[split_keys[0]]:
-                            for second_entry in s_info[split_keys[1]]:
-                                for entry in s_info[k]:
-                                    if i == num - 1:
-                                        self._info_dict[key][first_entry][second_entry].setdefault(entry, []).append(s)
-                                        if not s in self._info_dict[key][first_entry][second_entry][entry]:
-                                            self._info_dict[key][first_entry][second_entry][entry].append(s)
-
-                                    else:
-                                        self._info_dict[key][first_entry][second_entry].setdefault(entry, {})
-                    if i == 3:
-                        for first_entry in s_info[split_keys[0]]:
-                            for second_entry in s_info[split_keys[1]]:
-                                for third_entry in s_info[split_keys[2]]:
-                                    for entry in s_info[k]:
-                                        if i == num - 1:
-                                            self._info_dict[key][first_entry][second_entry][third_entry].setdefault(
-                                                entry, []).append(s)
-                                        if not s in self._info_dict[key][first_entry][second_entry][third_entry][entry]:
-                                            self._info_dict[key][first_entry][second_entry][third_entry][entry].append(
-                                                s)
+                                    self._info_dict[key].setdefault(k1, [])
+                                    if not s in self._info_dict[key][k1]:
+                                        self._info_dict[key][k1].append(s)
+                                try:
+                                    for k3 in s.info_dict[name][k1][k2]:
+                                        if isinstance(k3, str):
+                                            self._info_dict[key][k1][k2].setdefault(k3, {})
                                         else:
-                                            self._info_dict[key][first_entry][second_entry][third_entry].setdefault(
-                                                entry, {})
-
+                                            self._info_dict[key][k1].setdefault(k2, [])
+                                            if not s in self._info_dict[key][k1][k2]:
+                                                self._info_dict[key][k1][k2].append(s)
+                                            # self._info_dict[key][k1][k2].setdefault(k3, [])
+                                        try:
+                                            for k4 in s.info_dict[name][k1][k2][k3]:
+                                                if isinstance(k4, str):
+                                                    self._info_dict[key][k1][k2][k3].setdefault(k4, {})
+                                                else:
+                                                    self._info_dict[key][k1][k2].setdefault(k3, [])
+                                                    if not s in self._info_dict[key][k1][k2][k3]:
+                                                        self._info_dict[key][k1][k2][k3].append(s)
+                                        except:
+                                            pass
+                                except:
+                                    pass
+                        except:
+                            pass
+        pprint(self._info_dict)
     @property
     def info_dict(self):
         """
@@ -599,7 +632,7 @@ def test():
 
     sg = RockPy.Tutorials.sample_group.get_hys_coe_irm_rmp_sample_group(load=True)
     # print sg.info_dict['sample_mtype_ttype']
-    print sg.info_dict.keys()
+    # print sg.info_dict.keys()
     # pprint(sg.info_dict)
 
 

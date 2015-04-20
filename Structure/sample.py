@@ -182,7 +182,7 @@ class Sample(object):
                      (
                          'name',
                          'measurements',
-                         '_filtered_data', '_info_dict',
+                         '_filtered_data', '_info_dict', 'sgroups',
                          'is_mean', 'mean_measurements', '_mean_results',
                          'results',
                      )}

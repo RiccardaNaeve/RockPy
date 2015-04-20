@@ -37,13 +37,15 @@ class SampleGroup(object):
 
         self.color = None
 
+
         if sample_file:
             self.import_multiple_samples(sample_file, **options)
+
+        self._info_dict = self.__create_info_dict()
 
         if sample_list:
             self.add_samples(sample_list)
 
-        self._info_dict = self.__create_info_dict()
 
 
     def __repr__(self):
@@ -502,9 +504,10 @@ class SampleGroup(object):
         """
         d = ['sample', 'mtype', 'ttype', 'tval']
         keys = ['_'.join(i) for n in range(5) for i in itertools.permutations(d, n) if not len(i) == 0]
-        return {i: {} for i in keys}
+        self._info_dict = {i: {} for i in keys}
+        return self._info_dict
 
-    @profile()
+    # @profile()
     def add_s2_info_dict(self, s):
         """
         Adds a sample to the infodict.
@@ -515,7 +518,7 @@ class SampleGroup(object):
               The sample that should be added to the dictionary
         """
 
-        keys = self.info_dict.keys()
+        keys = self._info_dict.keys()
 
         s_info = {'tval': s.tvals,
                   'ttype': s.ttypes,
@@ -577,6 +580,8 @@ class SampleGroup(object):
         """
         if not hasattr(self, '_info_dict'):
             self._info_dict = self.__create_info_dict()
+            for s in self.sample_list:
+                self.add_s2_info_dict(s)
         return self._info_dict
 
 
@@ -592,9 +597,9 @@ def _to_list(oneormoreitems):
 def test():
     import RockPy.Tutorials.sample_group
 
-    sg = RockPy.Tutorials.sample_group.get_hys_coe_irm_rmp_sample_group(load=False)
-    sg.info_dict()
-    # print sg.info_dict().keys()
+    sg = RockPy.Tutorials.sample_group.get_hys_coe_irm_rmp_sample_group(load=True)
+    # print sg.info_dict['sample_mtype_ttype']
+    print sg.info_dict.keys()
     # pprint(sg.info_dict)
 
 

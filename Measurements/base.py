@@ -582,7 +582,7 @@ class Measurement(object):
                 try:
                     i[1] = float(i[1])
                 except:
-                    raise TypeError('%s can not be converted to float')
+                    raise TypeError('%s can not be converted to float' %i)
         else:
             treatments = None
         return treatments

@@ -4,7 +4,8 @@ import numpy as np
 
 import base
 from RockPy.Structure.data import RockPyData
-
+import RockPy.Visualize.Features.rmp
+import RockPy.Visualize.core
 
 class ThermoCurve(base.Measurement):
     def __init__(self, sample_obj,
@@ -71,12 +72,12 @@ class ThermoCurve(base.Measurement):
         returns a RPdata with all warming data
         """
         out = None
-        for i in self._data:
+        for i in self.data:
             if 'warm' in i:
                 if not out:
-                    out = self._data[i]
+                    out = self.data[i]
                 else:
-                    out = out.append_rows(self._data[i])
+                    out = out.append_rows(self.data[i])
         return out
 
     @property
@@ -85,16 +86,19 @@ class ThermoCurve(base.Measurement):
         returns a RPdata with all cooling data
         """
         out = None
-        for i in self._data:
+        for i in self.data:
             if 'cool' in i:
                 if not out:
                     out = self._data[i]
                 else:
-                    out = out.append_rows(self._data[i])
+                    out = out.append_rows(self.data[i])
         return out
 
     def plt_thermocurve(self):
-        import RockPy.Visualize.demag
-
-        plot = RockPy.Visualize.demag.ThermoCurve(self)
-        plot.show()
+        fig = RockPy.Visualize.core.generate_plots(n=1)
+        ax = RockPy.Visualize.core.get_subplot(fig, 0)
+        ax2 = ax.twinx()
+        RockPy.Visualize.Features.rmp.mom_temp(ax, rmp_obj=self, plt_opt=dict(marker=''))
+        RockPy.Visualize.Features.rmp.dmom_dtemp(ax2, rmp_obj=self, plt_opt=dict(marker=''))
+        ax.grid()
+        plt.show()

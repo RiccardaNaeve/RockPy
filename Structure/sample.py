@@ -91,6 +91,8 @@ class Sample(object):
             self.add_measurement(mtype='volume', sample_shape= sample_shape, x_len=x_len, y_len=y_len, z_len=z_len)
 
         self.index = Sample.snum
+        self.sgroups = []
+        self.study = None
         Sample.snum += 1
 
     """ Parameter """
@@ -299,6 +301,10 @@ class Sample(object):
         """
         self.results = self.all_results(**parameter)
         return self.results
+
+    @property
+    def info_dict(self):
+        return self._info_dict
 
     @property
     def mtypes(self):

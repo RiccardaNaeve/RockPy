@@ -7,9 +7,59 @@ import base
 import RockPy
 import time
 from RockPy.Functions import general
-
+import RockPy.Visualize.core
+from RockPy.Visualize.Features import arai as arai_feature
+from RockPy.Visualize.Features import dunlop as dunlop_feature
 
 class Thellier(base.Measurement):
+    """
+    Measurement class for Thellier Thellier Experiments
+
+    **Results**
+
+    Arai plot statistics:
+       result_n:
+
+       result_slope:
+
+       result_sigma:
+
+       result_x_int:
+
+       result_y_int:
+
+       result_b_anc:
+
+       result_sigma_b_anc:
+
+       result_vds:
+
+       result_f:
+
+       result_f_vds:
+
+       result_frac:
+
+       result_beta:
+
+       result_g:
+
+       result_gap:
+
+       result_q:
+
+       result_w:
+
+    Directional statistics
+
+    pTRM check statistics
+
+    pTRM tails check statistics
+
+    Additivity check statistics
+
+
+    """
     # todo format_sushibar
     # todo format_jr6
     _standard_parameter = {'slope': {'t_min': 20, 't_max': 700, 'component': 'mag'}}
@@ -26,7 +76,7 @@ class Thellier(base.Measurement):
         check_freq = parameter.get('check_freq', 2)
         # temps = parameter.get('temps', [20, 300, 450, 490, 500, 510, 515, 520, 525, 530, 535, 540, 545, 550, 560])
         temps = parameter.get('temps', [20] + range(100, 650, 25))
-        max_moment = parameter.get('max_moment', len(temps)/np.sqrt(3))
+        max_moment = parameter.get('max_moment', len(temps) / np.sqrt(3))
         th_steps = []
         pt_steps = []
 
@@ -51,7 +101,7 @@ class Thellier(base.Measurement):
                 n += 1
 
         th_steps = np.array(th_steps)
-        pt_steps = np.array(pt_steps)#[1:]
+        pt_steps = np.array(pt_steps)  # [1:]
         ac_steps = np.array(ac_steps)
         ck_steps = np.array(ck_steps)
         tr_steps = np.array(tr_steps)
@@ -77,9 +127,9 @@ class Thellier(base.Measurement):
 
         mdata['pt']['temp'] = pt_steps[:, 1]
         mdata['pt']['time'] = pt_steps[:, 0]
-        mdata['pt']['x'] = np.ones(len(pt_steps[:, 0]))* max_moment
-        mdata['pt']['y'] = np.ones(len(pt_steps[:, 0]))* max_moment
-        mdata['pt']['z'] = np.ones(len(pt_steps[:, 0]))* max_moment
+        mdata['pt']['x'] = np.ones(len(pt_steps[:, 0])) * max_moment
+        mdata['pt']['y'] = np.ones(len(pt_steps[:, 0])) * max_moment
+        mdata['pt']['z'] = np.ones(len(pt_steps[:, 0])) * max_moment
 
         mdata['nrm'] = mdata['th'].filter_idx([0])
 
@@ -116,7 +166,7 @@ class Thellier(base.Measurement):
         mdata['ac']['temp'] = ac_steps[:, 1]
 
         for dtype in mdata:
-            for d in ['x', 'y','z']:
+            for d in ['x', 'y', 'z']:
                 mdata[dtype][d] = mdata[dtype][d].v + np.random.normal(0.0, 0.1, len(mdata[dtype][d].v))
                 mdata[dtype][d] = np.round(mdata[dtype][d].v)
             mdata[dtype].define_alias('m', ( 'x', 'y', 'z'))
@@ -167,7 +217,7 @@ class Thellier(base.Measurement):
     def data(self, data_dict):
         for dtype in data_dict:
             setattr(self, dtype, data_dict[dtype])
-        if not 'ptrm' in data_dict:
+        if 'ptrm' not in data_dict:
             self.reset__data()
 
     def format_cryomag(self):
@@ -209,9 +259,25 @@ class Thellier(base.Measurement):
                 self._data.update({step: None})
         self.reset__data()
 
-    def format_generic(self):
-        for step in ['nrm', 'th', 'pt', 'ac', 'tr', 'ck']:
-            self._data.update({step: None})
+    def format_tdt(self):
+        """
+        formats the data (a dictionary) from the machine readin into RockPyData objects
+        :return:
+        """
+        # get header, units and data from machine
+        header = self.machine_data.header
+        units = self.machine_data.units
+        data = self.machine_data.data
+        # store data in RockPyData instances in the _data dictionary
+        # todo convert A/m to Am^2 by checking for volume
+        for dtype in data.keys():
+            rp_data = RockPyData(column_names=header, units=units, data=data[dtype])
+            rp_data = rp_data.eliminate_duplicate_variable_rows(substfunc='last')
+            rp_data.define_alias('m', ( 'x', 'y', 'z'))
+            rp_data = rp_data.sort('temp')
+            rp_data.define_alias('variable', 'temp')
+            self._data.setdefault(dtype, rp_data)
+        self.reset__data()
 
     def _ptrm(self, recalc_m=True):
         idx = self._get_idx_equal_val('pt', 'th')
@@ -220,7 +286,7 @@ class Thellier(base.Measurement):
         th = self._data['th'].filter_idx(idx[:, 1])
 
         ptrm = pt - th
-        row_labels = ['ptrm[%i]'%i for i in pt['temp'].v]
+        row_labels = ['ptrm[%i]' % i for i in pt['temp'].v]
         ptrm['time'] = pt['time'].v  # copy old pt times into ptrm
         if recalc_m:
             ptrm.define_alias('m', ( 'x', 'y', 'z'))
@@ -301,7 +367,7 @@ class Thellier(base.Measurement):
         idx = self._get_idx_step_var_val(step=step, var=var, val=val)
 
         correction = self.th.filter_idx(idx)  # correction step
-        for dtype in ['nrm','th','pt','ac','ck','tr']:
+        for dtype in ['nrm', 'th', 'pt', 'ac', 'ck', 'tr']:
             # store variables so calculation does not affect
             # vars = self.data[dtype]['temp'].v
             # calculate correction
@@ -320,23 +386,24 @@ class Thellier(base.Measurement):
 
     # ## plotting functions
     def plt_dunlop(self):
-        plt.plot(self.th['temp'], self.th['mag'], '.-', zorder=1)
+        plt.plot(self.data['th']['temp'].v, self.data['th']['mag'].v, '.-', zorder=1)
         # plt.plot(self.ptrm['temp'], self.ptrm['moment'], '.-', zorder=1)
-        plt.plot(self.ptrm['temp'], self.ptrm['mag'], '.-', zorder=1)
-        plt.plot(self.sum['temp'], self.sum['mag'], '.--', zorder=1)
-        plt.plot(self.tr['temp'], self.tr['mag'], 's')
+        plt.plot(self.data['ptrm']['temp'].v, self.data['ptrm']['mag'].v, '.-', zorder=1)
+        plt.plot(self.data['sum']['temp'].v, self.data['sum']['mag'].v, '.--', zorder=1)
+        plt.plot(self.data['tr']['temp'].v, self.data['tr']['mag'].v, 's')
         plt.grid()
         plt.title('Dunlop Plot %s' % (self.sample_obj.name))
         plt.xlabel('Temperature [%s]' % ('C'))
         plt.ylabel('Moment [%s]' % ('Am2'))
-        plt.xlim([min(self.th['temp']), max(self.th['temp'])])
+        # plt.xlim([min(self.th['temp'].v), max(self.th['temp']).v])
         plt.show()
 
     def plt_arai(self, **options):
         equal = set(self.th['temp'].v) & set(self.ptrm['temp'].v)
+        max_mag = max(set(self.th['mag'].v) | set(self.ptrm['mag'].v))
         idx = [i for i, v in enumerate(self.th['temp'].v) if v in equal]
         th = self.th.filter_idx(idx)
-        plt.plot(self.ptrm['mag'].v, th['mag'].v, '.-', zorder=1)
+        plt.plot(self.ptrm['mag'].v, th['mag'].v, 'o', zorder=1, markersize = 5)
         plt.plot([min(self.ptrm['mag'].v), max(self.ptrm['mag'].v)],
                  self.result_slope().v * np.array(
                      [min(self.ptrm['mag'].v), max(self.ptrm['mag'].v)]) + self.result_y_int().v, '--')
@@ -344,8 +411,36 @@ class Thellier(base.Measurement):
         plt.title('Arai Diagram %s' % (self.sample_obj.name))
         plt.xlabel('NRM remaining [%s]' % ('C'))
         plt.ylabel('pTRM gained [%s]' % ('Am2'))
+        plt.ylim([0, max_mag*1.1])
         plt.show()
 
+    def plt_thellier(self):
+        fig = RockPy.Visualize.core.generate_plots(2)
+        for i, feature in enumerate(['arai', 'dunlop']):
+            ax = RockPy.Visualize.core.get_subplot(fig, i)
+            if feature == 'arai':
+                arai_feature.arai_points(ax, self)
+                arai_feature.arai_fit(ax, self)
+                arai_feature.add_ck_check(ax, self)
+                ax.grid()
+                ax.set_title('Arai Diagram %s' % (self.sample_obj.name))
+                ax.set_xlabel('NRM remaining [%s]' % ('Am2'))
+                ax.set_ylabel('pTRM gained [%s]' % ('Am2'))
+                ax.set_ylim([0, max(self.th['mag'].v)*1.1])
+                ax.set_xlim([0, max(self.ptrm['mag'].v)*1.1])
+
+            if feature == 'dunlop':
+                max_mag = max(set(self.th['mag'].v) | set(self.ptrm['mag'].v))
+                dunlop_feature.dunlop_data(ax, self)
+                ax.set_title('Dunlop Plot %s' % (self.sample_obj.name))
+                ax.set_xlabel('Temperature [%s]' % ('C'))
+                ax.set_ylabel('magnetic moment [%s]' % ('Am2'))
+                ax.grid()
+                ax.legend(loc='best', )
+                ax.set_ylim([0, max_mag*1.1])
+
+        plt.tight_layout()
+        plt.show()
     def delete_temp(self, temp):
         for step in self.steps:
             o_len = len(getattr(self, step)['temp'].v)
@@ -389,26 +484,26 @@ class Thellier(base.Measurement):
     
     """
 
-    def result_slope(self, t_min=None, t_max=None, component=None, recalc=False):
+    def result_slope(self, t_min=None, t_max=None, component=None, recalc=False, **options):
         """
         Gives result for calculate_slope(t_min, t_max), returns slope value if not calculated already
         """
         parameter = {'t_min': t_min,
                      't_max': t_max,
                      'component': component,
-        }
+                     }
 
         self.calc_result(parameter, recalc)
         return self.results['slope']
 
-    def result_n(self, t_min=None, t_max=None, component=None, recalc=False):
+    def result_n(self, t_min=None, t_max=None, component=None, recalc=False, **options):
         """
         Gives result for calculate_slope(t_min, t_max), returns slope value if not calculated already
         """
         parameter = {'t_min': t_min,
                      't_max': t_max,
                      'component': component,
-        }
+                     }
 
         self.calc_result(parameter, recalc, force_method='slope')
         return self.results['n']
@@ -417,7 +512,7 @@ class Thellier(base.Measurement):
         parameter = {'t_min': t_min,
                      't_max': t_max,
                      'component': component,
-        }
+                     }
 
         self.calc_result(parameter, recalc, force_method='slope')
         return self.results['sigma']
@@ -426,7 +521,7 @@ class Thellier(base.Measurement):
         parameter = {'t_min': t_min,
                      't_max': t_max,
                      'component': component,
-        }
+                     }
 
         self.calc_result(parameter, recalc, force_method='slope')
         return self.results['x_int']
@@ -435,7 +530,7 @@ class Thellier(base.Measurement):
         parameter = {'t_min': t_min,
                      't_max': t_max,
                      'component': component,
-        }
+                     }
 
         self.calc_result(parameter, recalc, force_method='slope')
         return self.results['y_int']
@@ -444,7 +539,7 @@ class Thellier(base.Measurement):
         parameter_a = {'t_min': t_min,
                        't_max': t_max,
                        'component': component,
-        }
+                       }
         parameter_b = {'b_lab': b_lab}
 
         self.calc_result(parameter_a, recalc,
@@ -456,7 +551,7 @@ class Thellier(base.Measurement):
         parameter_a = {'t_min': t_min,
                        't_max': t_max,
                        'component': component,
-        }
+                       }
 
         parameter_b = {'b_lab': b_lab}
         self.calc_result(parameter_a, recalc, force_method='slope')
@@ -466,63 +561,63 @@ class Thellier(base.Measurement):
     def result_vds(self, t_min=None, t_max=None, recalc=False, **options):
         parameter = {'t_min': t_min,
                      't_max': t_max,
-        }
+                     }
         self.calc_result(parameter, recalc)
         return self.results['vds']
 
     def result_f(self, t_min=None, t_max=None, recalc=False, **options):
         parameter = {'t_min': t_min,
                      't_max': t_max,
-        }
+                     }
         self.calc_result(parameter, recalc)
         return self.results['f']
 
     def result_f_vds(self, t_min=None, t_max=None, recalc=False, **options):
         parameter = {'t_min': t_min,
                      't_max': t_max,
-        }
+                     }
         self.calc_result(parameter, recalc)
         return self.results['f_vds']
 
     def result_frac(self, t_min=None, t_max=None, recalc=False, **options):
         parameter = {'t_min': t_min,
                      't_max': t_max,
-        }
+                     }
         self.calc_result(parameter, recalc)
         return self.results['frac']
 
     def result_beta(self, t_min=None, t_max=None, recalc=False, **options):
         parameter = {'t_min': t_min,
                      't_max': t_max,
-        }
+                     }
         self.calc_result(parameter, recalc)
         return self.results['beta']
 
     def result_g(self, t_min=None, t_max=None, recalc=False, **options):
         parameter = {'t_min': t_min,
                      't_max': t_max,
-        }
+                     }
         self.calc_result(parameter, recalc)
         return self.results['g']
 
     def result_gap_max(self, t_min=None, t_max=None, recalc=False, **options):
         parameter = {'t_min': t_min,
                      't_max': t_max,
-        }
+                     }
         self.calc_result(parameter, recalc)
         return self.results['gap_max']
 
     def result_q(self, t_min=None, t_max=None, recalc=False, **options):
         parameter = {'t_min': t_min,
                      't_max': t_max,
-        }
+                     }
         self.calc_result(parameter, recalc)
         return self.results['q']
 
     def result_w(self, t_min=None, t_max=None, recalc=False, **options):
         parameter = {'t_min': t_min,
                      't_max': t_max,
-        }
+                     }
         self.calc_result(parameter, recalc)
         return self.results['w']
 
@@ -541,7 +636,8 @@ class Thellier(base.Measurement):
 
         equal_steps = list(set(self.th['temp'].v) & set(self.ptrm['temp'].v))
         th_steps = (t_min <= self.th['temp'].v) & (self.th['temp'].v <= t_max)  # True if step between t_min, t_max
-        ptrm_steps = (t_min <= self.ptrm['temp'].v) & (self.ptrm['temp'].v <= t_max)  # True if step between t_min, t_max
+        ptrm_steps = (t_min <= self.ptrm['temp'].v) & (
+        self.ptrm['temp'].v <= t_max)  # True if step between t_min, t_max
 
         th_data = self.th.filter(th_steps)  # filtered data for t_min t_max
         ptrm_data = self.ptrm.filter(ptrm_steps)  # filtered data for t_min t_max
@@ -691,10 +787,10 @@ class Thellier(base.Measurement):
         t_max = parameter.get('t_max', self.standard_parameter['y_dash']['t_max'])
         component = parameter.get('component', self.standard_parameter['y_dash']['component'])
 
-
-        equal_steps = list(set(self.th['temp'].v) & set(self.ptrm['temp'].v)) #steps that are in th and also in ptrm
+        equal_steps = list(set(self.th['temp'].v) & set(self.ptrm['temp'].v))  # steps that are in th and also in ptrm
         th_steps = (t_min <= self.th['temp'].v) & (self.th['temp'].v <= t_max)  # True if step between t_min, t_max
-        ptrm_steps = (t_min <= self.ptrm['temp'].v) & (self.ptrm['temp'].v <= t_max)  # True if step between t_min, t_max
+        ptrm_steps = (t_min <= self.ptrm['temp'].v) & (
+        self.ptrm['temp'].v <= t_max)  # True if step between t_min, t_max
 
         th_data = self.th.filter(th_steps)  # filtered data for t_min t_max
         ptrm_data = self.ptrm.filter(ptrm_steps)  # filtered data for t_min t_max
@@ -927,14 +1023,13 @@ class Thellier(base.Measurement):
         temps = self.ck['temp'].v
         ptrm_temps = self.ptrm['temp'].v
 
-        #get th_prior_2_ck
+        # get th_prior_2_ck
         out = np.array([(v, i, i2) for i, v in enumerate(temps) for i2, v2 in enumerate(ptrm_temps)
                         if v == v2
                         if v >= t_min
                         if v <= t_max])
-
-        ck_data = self.ck.filter_idx(out[:, 1]) #ck data in temperatre range
-        ptrm_ij = self.get_pTRM_ij(ck_data) # calculate the
+        ck_data = self.ck.filter_idx(out[:, 1])  #ck data in temperatre range
+        ptrm_ij = self.get_pTRM_ij(ck_data)  # calculate the
 
         ptrm_data = self.ptrm.filter_idx(out[:, 2])
         out = deepcopy(ptrm_ij)
@@ -948,7 +1043,6 @@ class Thellier(base.Measurement):
         searches for the th_i step before each CK-step
         :return: rpdata
         """
-
 
         ck_times = ck_data['time'].v  # times of CK step
         th_times = self.th['time'].v  # times of TH steps
@@ -969,7 +1063,7 @@ class Thellier(base.Measurement):
     def result_n_ptrm(self, t_min=None, t_max=None, recalc=False, **options):
         parameter = {'t_min': t_min,
                      't_max': t_max,
-        }
+                     }
         self.calc_result(parameter, recalc)
         return self.results['n_ptrm']
 
@@ -978,7 +1072,7 @@ class Thellier(base.Measurement):
                      't_max': t_max,
                      'component': component,
 
-        }
+                     }
         self.calc_result(parameter, recalc)
         return self.results['ck_check_percent']
 
@@ -987,7 +1081,7 @@ class Thellier(base.Measurement):
         parameter = {'t_min': t_min,
                      't_max': t_max,
                      'component': component,
-        }
+                     }
         self.calc_result(parameter, recalc)
         return self.results['delta_ck']
 
@@ -996,7 +1090,7 @@ class Thellier(base.Measurement):
         parameter = {'t_min': t_min,
                      't_max': t_max,
                      'component': component,
-        }
+                     }
         self.calc_result(parameter, recalc)
         return self.results['drat']
 
@@ -1005,7 +1099,7 @@ class Thellier(base.Measurement):
         parameter = {'t_min': t_min,
                      't_max': t_max,
                      'component': component,
-        }
+                     }
         self.calc_result(parameter, recalc)
         return self.results['ck_max_dev']
 
@@ -1057,7 +1151,7 @@ class Thellier(base.Measurement):
         Maximum absolute difference produced by a pTRM check, normalized by the total TRM (obtained from the
         intersection of the best-fit line and the x-axis on an Arai plot; Leonhardt et al., 2004a).
 
-        :math:
+        .. math::
 
            \delta{CK}=\\frac`{\max{ \left\{ \left| \delta{pTRM_{i,j}} \right| \right\} }_{i \leq end \textbf{ and } j \leq end}}{\left|X_{Int.}\right|}\times{100}
 
@@ -1078,13 +1172,13 @@ class Thellier(base.Measurement):
         Maximum absolute difference produced by a pTRM check, normalized by the length of the best-fit line
         (Selkin and Tauxe, 2000).
 
-        :math:
+        .. math::
 
            DRAT=\\frac`{\max{\left\{\left|\delta{pTRM_{i,j}} \right| \right\}}_{i \leq end \textbf{ and } j \leq end}}{L}\times{100},
 
         where `L` is the length of the best-fit line on the Arai plot. `L` is given by:
 
-        :math:
+        .. math::
 
            L=\sqrt{ (\Delta{x'})^2 + (\Delta{y'})^2 }
 
@@ -1104,9 +1198,10 @@ class Thellier(base.Measurement):
         Maximum absolute difference produced by a pTRM check, normalized by the length of the TRM segment of the
         best-fit line on the Arai plot (Blanco et al., 2012).
 
-        math::
+        .. math::
 
-           maxDEV=\\frac`{\max{\left\{\left|\delta{pTRM_{i,j}} \right| \right\}}_{i \leq end \textbf{ and } j \leq end}}{\Delta{x'}}\times{100}
+           maxDEV=\\frac{ \max \\left\{ \\left| \delta pTRM_{i,j} \\right| \\right\}_{i \\leq end \\; \\textbf{and} \\; j \\leq end}  }{\Delta{x'}} \\times 100
+
 
         """
         component = parameter.get('component', self.standard_parameter['slope']['component'])
@@ -1115,8 +1210,6 @@ class Thellier(base.Measurement):
         max_idx = np.argmax(abs(dptrm[component].v))
         out = ( dptrm.filter_idx(max_idx)[component].v / self.calculate_delta_x_dash(**parameter) ) * 100
         self.results['ck_max_dev'] = abs(out)
-
-
 
 
     """
@@ -1136,7 +1229,7 @@ class Thellier(base.Measurement):
         parameter = {'t_min': t_min,
                      't_max': t_max,
                      'component': component,
-        }
+                     }
         self.calc_result(parameter, recalc)
         return self.results['cdrat']
 
@@ -1145,7 +1238,7 @@ class Thellier(base.Measurement):
         parameter = {'t_min': t_min,
                      't_max': t_max,
                      'component': component,
-        }
+                     }
         self.calc_result(parameter, recalc)
         return self.results['drats']
 
@@ -1154,7 +1247,7 @@ class Thellier(base.Measurement):
         parameter = {'t_min': t_min,
                      't_max': t_max,
                      'component': component,
-        }
+                     }
         self.calc_result(parameter, recalc)
         return self.results['mean_drat']
 
@@ -1163,7 +1256,7 @@ class Thellier(base.Measurement):
         parameter = {'t_min': t_min,
                      't_max': t_max,
                      'component': component,
-        }
+                     }
         self.calc_result(parameter, recalc)
         return self.results['mean_dev']
 
@@ -1172,7 +1265,7 @@ class Thellier(base.Measurement):
         parameter = {'t_min': t_min,
                      't_max': t_max,
                      'component': component,
-        }
+                     }
         self.calc_result(parameter, recalc)
         return self.results['delta_pal']
 
@@ -1311,7 +1404,7 @@ class Thellier(base.Measurement):
 
         """
         component = parameter.get('component', self.standard_parameter['slope']['component'])
-        # todo
+        # todo implement calculate_delta_pal
         #
         # dptrm = self.get_d_ptrm(**parameter)
         #
@@ -1325,7 +1418,6 @@ class Thellier(base.Measurement):
     def get_d_tail(self, **parameter):
         """
         pTRM tails check statistics (TR)
-        ================================
 
         A pTRM tail check is a repeat demagnetization step to test for changes in a specimen's magnetization carried in the
         blocking temperature range above the temperature of the check. The difference between the first NRM measurement and
@@ -1371,7 +1463,7 @@ class Thellier(base.Measurement):
     def result_n_tail(self, t_min=None, t_max=None, recalc=False, **options):
         parameter = {'t_min': t_min,
                      't_max': t_max,
-        }
+                     }
         self.calc_result(parameter, recalc)
         return self.results['n_tail']
 
@@ -1380,7 +1472,7 @@ class Thellier(base.Measurement):
         parameter = {'t_min': t_min,
                      't_max': t_max,
                      'component': component,
-        }
+                     }
         self.calc_result(parameter, recalc)
         return self.results['drat_tail']
 
@@ -1389,7 +1481,7 @@ class Thellier(base.Measurement):
         parameter = {'t_min': t_min,
                      't_max': t_max,
                      'component': component,
-        }
+                     }
         self.calc_result(parameter, recalc)
         return self.results['delta_tr']
 
@@ -1398,7 +1490,7 @@ class Thellier(base.Measurement):
         parameter = {'t_min': t_min,
                      't_max': t_max,
                      'component': component,
-        }
+                     }
         self.calc_result(parameter, recalc)
         return self.results['md_vds']
 
@@ -1407,7 +1499,7 @@ class Thellier(base.Measurement):
         parameter = {'t_min': t_min,
                      't_max': t_max,
                      'component': component,
-        }
+                     }
         self.calc_result(parameter, recalc)
         return self.results['d_t']
 
@@ -1470,11 +1562,12 @@ class Thellier(base.Measurement):
 
         .. math::
 
-           MD_{VDS}=\\frac`{\max{\{\left| \delta{tail_i} \right|\}}_{i=1, \ldots, end}}{VDS}\times{100}
+           MD_{VDS}=\\frac`{\max{\{\\left| \delta{tail_i} \\right|\}}_{i=1, \ldots, end}}{VDS}\times{100}
 
-        .. note::
-        Some versions of PmagPy and ThellierGUI use a pTRM tail check statistic called $$MD(\%)$$. This is identical
-        to $$MD_{VDS}$$, but the change in name emphasizes its calculation method.
+        Note
+        ----
+           Some versions of PmagPy and ThellierGUI use a pTRM tail check statistic called :math:`MD(\%)`. This is identical
+           to :math:`MD_{VDS}`, but the change in name emphasizes its calculation method.
         """
         component = parameter.get('component', self.standard_parameter['slope']['component'])
 
@@ -1486,80 +1579,6 @@ class Thellier(base.Measurement):
     def calculate_d_t(self, **parameter):
         """
         The extent of a pTRM tail after correction for angular dependence (Leonhardt et al., 2004a; 2004b).
-
-        The applied laboratory field vector (:math:`\mathbf{B}_{Lab}`) is typically applied along a principle axis in the
-        sample coordinate system (i.e., :math:`\pm x`, :math:`\pm y`, or :math:`\pm z`). Therefore,
-        for simplicity, :math:`\delta{t^*}` should be calculated in the sample coordinate system only.
-        Figure 7 is a schematic illustration of aspects of the calculation of :math:`\delta{t^*}`.
-
-        Figure 7.Schematic illustration of an NRM vector (:math:`\mathbf{NRM}_i`) and a pTRM tail
-        check vector (:math:`\mathbf{tail\_check}_i`) for a sample that exhibits a pTRM tail.
-        Modified after Leonhardt et al. (2004b).
-
-        Let :math:`N_{x,i}`, :math:`N_{y,i}`, and :math:`N_{z,i}` denote the Cartesian coordinates of the NRM
-        vector at step :math:`i` (i.e., :math:`\mathbf{NRM}_i = [N_{x,i}, N_{y,i}, N_{z,i}]`).
-        Similarly, let :math:`T_{x,i}`, :math:`T_{y,i}`, and :math:`T_{z,i}` denote the Cartesian
-        coordinates of the repeat demagnetization vector at step
-        :math:`i` (i.e., :math:`\mathbf{tail\_check}_i = ` [:math:`T_{x,i}`, :math:`T_{y,i}`, :math:`T_{z,i}`]).
-
-        Assuming that :math:`\mathbf{B}_{Lab}` is applied along the z-axis, the difference
-        in the horizontal (:math:`\delta{H_i}`) and vertical components (:math:`\delta{Z_i}`)
-        between :math:`\mathbf{NRM}_i` and :math:`\mathbf{tail\_check}_i` (Figure 7) are given by:
-        
-        .. math::
-        
-           \\delta{H_i}=\\sqrt{N_{x,i}^2 + N_{y,i}^2} - \\sqrt{T_{x,i}^2 + T_{y,i}^2} \\] and \\[ \\delta{Z_i}=N_{z,i} - T_{z,i}. \\]
-
-        pTRM tails have an angular dependence and the calculation of $$\delta{t^*}$$
-        requires two angular differences. Let $$\Delta{\theta}_i$$ denote the angle between
-        $$\mathbf{B}_{Lab}$$ and $$\mathbf{NRM}_i$$ (see Section 4 for advice on calculating the
-        angle between two vectors). Let $$\delta{Inc}_i$$ denote the difference in inclinations
-        between the $$\mathbf{B}_{Lab}$$ and $$\mathbf{NRM}_i$$:
-
-        .. math::
-        
-           \\delta{Inc_i}=Inc(\\mathbf{B}_{Lab}) - Inc(\\mathbf{NRM}_i)=\\arctan{\\left(\\\\frac`{B_{Lab,z}}{\\sqrt{B_{Lab,x}^2 + B_{Lab,y}^2}}\\right)} - \\arctan{\\left(\\\\frac`{N_{z,i}}{\\sqrt{N_{x,i}^2 + N_{x,i}^2}}\\right)}.
-
-        In the ThellierTool software (v4.22 and previous) :math:$$\mathbf{B}_{Lab}$$ is determined from
-        each :math:$$\mathbf{TRM}_i$$. Given that :math:$$\mathbf{B}_{Lab}$$ is almost always known, the convention of
-        SPD is to use the known :math:$$\mathbf{B}_{Lab}$$ and not as estimated from :math:$$\mathbf{TRM}_i$$,
-        which may suffer from the effects of experimental noise.
-
-        As will be seen below, the calculation of :math:$$\delta{t^*}$$ requires :math:$$\\frac`{1}{\tan{(\Delta{\theta}_i)}}$$.
-        As :math:$$\Delta{\theta}_i$$ approaches zero or 180 this fraction tends to infinity. To tackle this,
-        :math:$$\delta{t^*}$$ is calculated in a piecewise fashion that depends on upper and lower angular limits
-        (:math:$$Lim_{upper}$$ and :math:$$Lim_{lower}$$, respectively). Below is pseudo-code that describes the logic
-        of the calculation procedure.
-
-        In v4.22 of the ThellierTool :math:$$Lim_{lower} = 0.175$$ (:math:$$\approx10$$) radi
-
-
-        :math:$$\delta{t^*}$$ is then calculated as:
-
-        .. math::
-        
-           \\delta{t^*}=\\left\\{ \\begin{array}{lc}	\\max{ \\left\\{ t^*_i\\right\\} }_{i=1, \\ldots, end}	&	\\mbox{ if } (\\max{ \\left\\{ t^*_i\\right\\} }_{i=1, \\ldots, end} > 0)\\\\ 0	&	\\mbox{ if } (\\max{ \\left\\{ t^*_i\\right\\} }_{i=1, \\ldots, end} < 0)\\end{array}\\right.
-
-        Only positive values of :math:$$t^*$$ and :math:$$\delta{t^*}$$ can be attributed to the effects of pTRM
-        tails, hence :math:$$\delta{t^*}$$ is calculated as the maximum of :math:$$t^*$$ and not the maximum of :math:$$\left|t^*\right|$$.
-
-        It should be noted that an implicit assumption in the above calculations is that :math:$$\mathbf{B}_{Lab}$$
-        is applied along the :math:$$z$$-axis. In situations where :math:$$\mathbf{B}_{Lab}$$ is applied along the
-        :math:$$x$$- or :math:$$y$$-axes, the definition of ``horizontal'' and ``vertical'' can be redefined such that
-        :math:$$\mathbf{B}_{Lab}$$ is applied in the ``vertical'' direction. For example, if :math:$$\mathbf{B}_{Lab}$$
-        is along the :math:$$x$$-axis, :math:$$\delta{H_i}$$ and :math:$$\delta{Z_i}$$ can be defined as:
-
-        .. math::
-        
-           \\delta{H_i}=\\sqrt{N_{y,i}^2 + N_{z,i}^2} - \\sqrt{T_{y,i}^2 + T_{z,i}^2} \\] and \\[ \\delta{Z_i}=N_{x,i} - T_{x,i},
-
-        and
-        
-        .. math::
-        
-           \\delta{Inc_i}=\\arctan{\\left(\\frac{B_{Lab,x}}{\\sqrt{B_{Lab,y}^2 + B_{Lab,z}^2}}\\right)} - \\arctan{\\left(\\\\frac`{N_{x,i}}{\\sqrt{N_{y,i}^2 + N_{z,i}^2}}\\right)}.
-
-        The remaining calculations can proceed as described above.
         """
         self.results['delta_tr'] = np.nan
 
@@ -1595,8 +1614,7 @@ class Thellier(base.Measurement):
 
     def get_d_ac(self, **parameter):
         """
-        Additivity check statistics
-        ===========================
+        **Additivity check statistics**
 
         An additivity check is a repeat demagnetization step to test the validity of Thellier's law of additivity
         (Krasa et al., 2003). In the course of a paleointensity experiment, a pTRM at temperature :math:`T_j` is imparted,
@@ -1661,7 +1679,7 @@ class Thellier(base.Measurement):
 
         ptrm_ij = deepcopy(ac_i)
 
-        for key in ['x','y','z', 'mag']:
+        for key in ['x', 'y', 'z', 'mag']:
             ptrm_ij[key] = ptrm_ij[key].v - th_j[key].v
 
         # ptrm_ij['mag'] = ptrm_ij.magnitude(('x', 'y', 'z'))
@@ -1683,7 +1701,7 @@ class Thellier(base.Measurement):
         ptrm_ij = self.get_ptrm_ij()
         ptrm_i0 = deepcopy(self.get_ptrm_ij())
 
-        for key in ['x','y','z']:
+        for key in ['x', 'y', 'z']:
             ptrm_i0[key] = ptrm_j[key].v - ptrm_i0[key].v
         ptrm_i0['mag'] = ptrm_i0.magnitude(('x', 'y', 'z', 'mag'))
         return ptrm_i0
@@ -1691,14 +1709,14 @@ class Thellier(base.Measurement):
     def result_n_ac(self, t_min=None, t_max=None, recalc=False, **options):
         parameter = {'t_min': t_min,
                      't_max': t_max,
-        }
+                     }
         self.calc_result(parameter, recalc)
         return self.results['n_ac']
 
     def result_delta_ac(self, t_min=None, t_max=None, recalc=False, **options):
         parameter = {'t_min': t_min,
                      't_max': t_max,
-        }
+                     }
         self.calc_result(parameter, recalc)
         return self.results['delta_ac']
 
@@ -1771,18 +1789,18 @@ class Thellier(base.Measurement):
             d_ck = np.array([ck[0], d_ck[0], d_ck[1], d_ck[2], ck[4] + th_j[4], ck[-2], d_ck_m])
 
             out.append([d_ck, th_i, ptrm_j, th_j])
-        for i in out:
-            from pprint import pprint
-
-            print i[0][0], i[1][0], i[2][0], i[3][0]
-            print 'ck_ij'
-            pprint(i[0])
-            print 'th_i'
-            pprint(i[1])
-            print 'ptrm_j'
-            pprint(i[2])
-            print 'th_j'
-            pprint(i[3])
+        # for i in out:
+        #     from pprint import pprint
+        #
+        #     print i[0][0], i[1][0], i[2][0], i[3][0]
+        #     print 'ck_ij'
+        #     pprint(i[0])
+        #     print 'th_i'
+        #     pprint(i[1])
+        #     print 'ptrm_j'
+        #     pprint(i[2])
+        #     print 'th_j'
+        #     pprint(i[3])
         return out
 
     def _get_ac_data(self):
@@ -1824,7 +1842,8 @@ class Thellier(base.Measurement):
 
     def export_tdt(self, folder=None, filename=None):
         import os
-        i = ['%s_%.2f_%s'%(t.ttype, t.value, t.unit) for t in self.treatments]
+
+        i = ['%s_%.2f_%s' % (t.ttype, t.value, t.unit) for t in self.treatments]
         if not folder:
             folder = os.path.join(os.path.expanduser('~'), 'Desktop')
         if not filename:
@@ -1858,7 +1877,7 @@ class Thellier(base.Measurement):
                 out = out.append_rows(i)
         out = out.sort('time')
 
-        lines = ['Thellier-tdt\r\n','35.0\t0\t0\t0\t0\r\n']
+        lines = ['Thellier-tdt\r\n', '35.0\t0\t0\t0\t0\r\n']
         for i, v in enumerate(out['m']):
             DIL = general.XYZ2DIL(v[:, 0])
             lines.append(
@@ -1870,10 +1889,11 @@ class Thellier(base.Measurement):
 
 
 if __name__ == '__main__':
-    s = RockPy.Sample(name='ThellierTest')
-    m = s.add_simulation(mtype='thellier', sim_params={'max_moment':10})
-    # for dtype in m.data:
-    #     print dtype
-    #     print m.data[dtype]
-    print s.calc_all()
-    m.export_tdt()
+    import os.path
+
+    thellier_file = os.path.join(RockPy.test_data_path, 'cryomag', 'NLCRY_Thellier_test.TT')
+    s = RockPy.Sample(name='test_sample')
+    # m = s.add_measurement(mtype='thellier', machine='cryomag', mfile=thellier_file)
+    m = s.add_simulation(mtype='thellier', sim_params={'max_moment': 10})
+    m.plt_thellier()
+

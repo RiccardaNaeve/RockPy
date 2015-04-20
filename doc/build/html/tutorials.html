@@ -1,0 +1,314 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Tutorials &mdash; RockPy pyrite documentation</title>
+  
+
+  
+  
+
+  
+  <link href='https://fonts.googleapis.com/css?family=Lato:400,700,400italic,700italic|Roboto+Slab:400,700|Inconsolata:400,700&subset=latin,cyrillic' rel='stylesheet' type='text/css'>
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="RockPy pyrite documentation" href="index.html"/>
+        <link rel="next" title="Measurements" href="measurements.html"/>
+        <link rel="prev" title="Visualize Package" href="RockPy.Visualize.html"/> 
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.6.2/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-nav-search">
+        
+          <a href="index.html" class="fa fa-home"> RockPy</a>
+        
+        
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+        
+          
+          
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="RockPy.html">RockPy package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.html#subpackages">Subpackages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.html#module-RockPy">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="current reference internal" href="">Tutorials</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#importing-rockpy">Importing RockPy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#the-sample">The Sample</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="measurements.html">Measurements</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="measurements.html#hysteresis">Hysteresis</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="guidlines.html">Programming Guidlines:</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="guidlines.html#adding-a-measurement">Adding a measurement</a></li>
+<li class="toctree-l2"><a class="reference internal" href="guidlines.html#adding-a-machine">Adding a machine</a></li>
+<li class="toctree-l2"><a class="reference internal" href="guidlines.html#adding-a-visualization">Adding a Visualization</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="zreferences.html">References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="RockPy.Functions.html">Functions Package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Functions.html#id1"><code class="docutils literal"><span class="pre">Functions</span></code> Package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Functions.html#module-RockPy.Functions.convert"><code class="docutils literal"><span class="pre">convert</span></code> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Functions.html#module-RockPy.Functions.general"><code class="docutils literal"><span class="pre">general</span></code> Module</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="RockPy.Measurements.html">Measurements Package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Measurements.html#module-RockPy.Measurements">Measurement Base-Class</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Measurements.html#module-RockPy.Measurements.af_demag">AF-demag</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Measurements.html#module-RockPy.Measurements.backfield">Backfield</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Measurements.html#module-RockPy.Measurements.hysteresis">Hysteresis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Measurements.html#module-RockPy.Measurements.single_moment">IRM - single moment</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Measurements.html#module-RockPy.Measurements.nrm">NRM - single moment</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Measurements.html#module-RockPy.Measurements.parameters">Parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Measurements.html#module-RockPy.Measurements.thellier">Thellier-Thellier</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Measurements.html#module-RockPy.Measurements.thermocurve">Thermocurve</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Measurements.html#module-RockPy.Measurements.trm">TRM - single moment</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="RockPy.Readin.html">Readin Package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Readin.html#id1"><code class="docutils literal"><span class="pre">Readin</span></code> Package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Readin.html#module-RockPy.Readin.base"><code class="docutils literal"><span class="pre">base</span></code> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Readin.html#module-RockPy.Readin.cryomag"><code class="docutils literal"><span class="pre">cryomag</span></code> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Readin.html#module-RockPy.Readin.generic"><code class="docutils literal"><span class="pre">generic</span></code> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Readin.html#machines-module"><code class="docutils literal"><span class="pre">machines</span></code> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Readin.html#module-RockPy.Readin.microsense"><code class="docutils literal"><span class="pre">microsense</span></code> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Readin.html#module-RockPy.Readin.spinner"><code class="docutils literal"><span class="pre">spinner</span></code> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Readin.html#module-RockPy.Readin.vftb"><code class="docutils literal"><span class="pre">vftb</span></code> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Readin.html#module-RockPy.Readin.vsm"><code class="docutils literal"><span class="pre">vsm</span></code> Module</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="RockPy.Structure.html">Structure Package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Structure.html#id1"><code class="docutils literal"><span class="pre">Structure</span></code> Package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Structure.html#module-RockPy.Structure.data"><code class="docutils literal"><span class="pre">data</span></code> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Structure.html#project-module"><code class="docutils literal"><span class="pre">project</span></code> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Structure.html#module-RockPy.Structure.samplegroup"><code class="docutils literal"><span class="pre">samplegroup</span></code> Module</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="RockPy.Treatments.html">Treatments Package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Treatments.html#id1"><code class="docutils literal"><span class="pre">Treatments</span></code> Package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Treatments.html#module-RockPy.Treatments.base"><code class="docutils literal"><span class="pre">base</span></code> Module</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="RockPy.Visualize.html">Visualize Package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Visualize.html#id1"><code class="docutils literal"><span class="pre">Visualize</span></code> Package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Visualize.html#arai-module"><code class="docutils literal"><span class="pre">arai</span></code> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Visualize.html#backfield-module"><code class="docutils literal"><span class="pre">backfield</span></code> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Visualize.html#module-RockPy.Visualize.base"><code class="docutils literal"><span class="pre">base</span></code> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Visualize.html#module-RockPy.Visualize.demag"><code class="docutils literal"><span class="pre">demag</span></code> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Visualize.html#thellier-module"><code class="docutils literal"><span class="pre">thellier</span></code> Module</a></li>
+</ul>
+</li>
+</ul>
+
+          
+        
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">RockPy</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+    <li>Tutorials</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          <a href="_sources/tutorials.txt" rel="nofollow"> View page source</a>
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document">
+            
+  <div class="section" id="tutorials">
+<h1>Tutorials<a class="headerlink" href="#tutorials" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="importing-rockpy">
+<h2>Importing RockPy<a class="headerlink" href="#importing-rockpy" title="Permalink to this headline">¶</a></h2>
+<p>Before we can use anything in RockPy we have to make sure that it is properly installed on the system and can be imported.
+Try importing it in a python console:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">RockPy</span>
+</pre></div>
+</div>
+<p>if you get an error message it means that either you do not have RockPy installed or it is not properly set in you
+PYTHONPATH variable. To permanently fix this you will have to ask Google, for a temporary fix, locate the folder at
+which RockPy is stored. In this test case it is stored at <code class="docutils literal"><span class="pre">~/PycharmsProjects/RockPy</span></code>.</p>
+<p>What we have to do is manually append it to the PYTHONPATH. You can copy/paste the following.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">os.path</span>
+<span class="kn">from</span> <span class="nn">os.path</span> <span class="kn">import</span> <span class="n">join</span>
+<span class="n">home</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expanduser</span><span class="p">(</span><span class="s">&#39;~&#39;</span><span class="p">)</span>
+<span class="n">RockPy_folder</span> <span class="o">=</span> <span class="s">&#39;PycharmProjects&#39;</span> <span class="c"># here you can change it to the path you have stored RockPy in</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">join</span><span class="p">(</span><span class="n">home</span><span class="p">,</span> <span class="n">RockPy_path</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>try importing it again, it should work now.</p>
+<p><strong>Welcome to RockPy</strong></p>
+</div>
+<div class="section" id="the-sample">
+<h2>The Sample<a class="headerlink" href="#the-sample" title="Permalink to this headline">¶</a></h2>
+<p>This tutorial is about how to create a sample and what we can do with a sample.</p>
+<div class="section" id="creating-a-sample">
+<h3>Creating a sample<a class="headerlink" href="#creating-a-sample" title="Permalink to this headline">¶</a></h3>
+<p>The sample is the most basic structure in rockpy. It contains all measurements and treatments. It also contains some
+functionality that I will show you a little later. Lets start making a sample. We will be using the test data that is
+included in RockPy but of course you can use whatever sample you want.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">Sample</span> <span class="o">=</span> <span class="n">RockPy</span><span class="o">.</span><span class="n">Sample</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;pyrrhotite&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This is the most basic way of defining a sample - just a name. We can also become a little more sophisticated.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">Sample</span> <span class="o">=</span> <span class="n">RockPy</span><span class="o">.</span><span class="n">Sample</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;pyrrhotite&#39;</span><span class="p">,</span> <span class="n">mass</span><span class="o">=</span><span class="mf">54.2</span><span class="p">,</span> <span class="n">mass_unit</span><span class="o">=</span><span class="s">&#39;mg&#39;</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mf">3.21</span><span class="p">,</span> <span class="n">diamter</span> <span class="o">=</span> <span class="mf">5.43</span><span class="p">,</span> <span class="n">length_unit</span> <span class="o">=</span> <span class="s">&#39;mm&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>You can see there are lost of options you can give to a sample. In this case we are telling RockPy that we are dealing with
+a sample that is named <em>pyrrhotite</em> and weighs 54.2 mg etc.</p>
+<p>We succesfully created a sample. We can now start adding measurements.</p>
+</div>
+<div class="section" id="adding-a-measurement">
+<h3>Adding a measurement<a class="headerlink" href="#adding-a-measurement" title="Permalink to this headline">¶</a></h3>
+<p>You can add as man measurements to a sample as you like. We will start with a simple hysteresis measurement. For this,
+we have measured a hysteresis at room temperature with a Princeton Instruments VSM. The data file is located in RockPys
+testdata folder and can be accessed with <code class="docutils literal"><span class="pre">RockPy.test_data_path</span></code>.</p>
+<p>A measurement is always added using the <code class="docutils literal"><span class="pre">yoursample.add_measurement</span></code> method. There are several things you have to tell
+RockPy in order to get it to work.</p>
+<p><strong>mandatory</strong>
+# <em>machine:</em> the file format or machine, in this case <code class="docutils literal"><span class="pre">machine</span> <span class="pre">=</span> <span class="pre">'vsm'</span></code>
+# <em>mfile:</em> the location of the file, here the file is located in the <code class="docutils literal"><span class="pre">RockPy.test_data_path</span></code> under <code class="docutils literal"><span class="pre">vsm</span></code>.
+Therefore <code class="docutils literal"><span class="pre">mfile=os.path.join(RockPy.test_data_path,</span> <span class="pre">'vsm',</span> <span class="pre">'LTPY_527,1a_HYS_VSM#XX[mg]___#TEMP_300_K#STD000.000')``[#f1]_</span>
+<span class="pre">#</span> <span class="pre">*mtype:*</span> <span class="pre">the</span> <span class="pre">type</span> <span class="pre">of</span> <span class="pre">measurement.</span> <span class="pre">In</span> <span class="pre">this</span> <span class="pre">case</span> <span class="pre">``mtype='hys'</span></code></p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">Sample</span><span class="o">.</span><span class="n">add_measurement</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>There are a few extra arguments you can add to give RockPy a little more information on your measuremnt.
+#todo link to advanced tutorial where these things will be explained</p>
+<p class="rubric">Footnotes</p>
+<table class="docutils footnote" frame="void" id="f1" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label">[1]</td><td>os.path.join is a builtin python function. It combines folders depending on your operating system. You have</td></tr>
+</tbody>
+</table>
+<p>to import it first in order to use it. This doen by typeing: <code class="docutils literal"><span class="pre">import</span> <span class="pre">os.path</span></code>. Now you can use <code class="docutils literal"><span class="pre">os.path.join()</span></code></p>
+</div>
+</div>
+</div>
+
+
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="measurements.html" class="btn btn-neutral float-right" title="Measurements">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="RockPy.Visualize.html" class="btn btn-neutral" title="Visualize Package"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2014, Michael Volk, Michael Wack.
+    </p>
+  </div>
+
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+  
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'pyrite',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

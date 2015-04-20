@@ -9,12 +9,12 @@ from os.path import join
 
 class TestHysteresis(TestCase):
     def setUp(self):
-        vsm_file = '../Tutorials/test_data/MUCVSM_test.hys'
+        vsm_file = '../tutorials.rst/test_data/MUCVSM_test.hys'
         # vsm_file = join(RockPy.test_data_path, 'vsm', 'LTPY_527,1a_HYS_VSM#XX[mg]___#TEMP_300_K#STD000.000')
         self.sample = RockPy.Sample('test')
         self.VSM_test = RockPy.Sample('test')
         self.VSM_hys = self.VSM_test.add_measurement(mtype='hysteresis', mfile=vsm_file, machine='vsm')
-        self.simulation = self.sample.add_simulation(mtype='hysteresis', mrs_ms=0.5, ms=5., b_sat=0.8, hf_sus=1)
+        self.simulation = self.sample.add_simulation(mtype='hysteresis', mrs_ms=0.5, ms=5., b_sat=0.8, hf_sus=0)
 
     def test_simulate(self):
         hys = self.sample.add_simulation(mtype='hysteresis', mrs_ms=0.2, ms=5., b_sat=0.5, hf_sus=0.)
@@ -39,4 +39,5 @@ class TestHysteresis(TestCase):
     def test_calculate_bc(self):
         self.simulation.calculate_bc()
         res = self.simulation.results['bc'].v[0]
-        self.assertAlmostEquals(res, 0.1672, delta=0.1672 * 0.01)
+        self.simulation.plt_hys()
+        self.assertAlmostEquals(res, 0.165798, delta=0.165798 * 0.01)

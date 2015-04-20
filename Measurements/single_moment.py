@@ -19,7 +19,7 @@ class generic_moment(base.Measurement):
         data = RockPyData(column_names=header, data=data)
         data.define_alias('m', ( 'x', 'y', 'z'))
         # data = data.append_columns('mag', data.magnitude('m'))
-        self._data = {'data': data.append_columns('mag', data.magnitude('m'))}
+        self._raw_data  = {'data': data.append_columns('mag', data.magnitude('m'))}
 
     def format_sushibar(self):
         data = RockPyData(column_names=['temp', 'x', 'y', 'z', 'sm'],
@@ -28,7 +28,7 @@ class generic_moment(base.Measurement):
                           )
         data.define_alias('m', ( 'x', 'y', 'z'))
         # data = data.append_columns('mag', data.magnitude('m'))
-        self._data = {'data': data.append_columns('mag', data.magnitude('m'))}
+        self._raw_data  = {'data': data.append_columns('mag', data.magnitude('m'))}
 
     def format_jr6(self):
         data =  self.machine_data.get_data()
@@ -36,7 +36,7 @@ class generic_moment(base.Measurement):
                                 data=data,
                                 units=['A m^2', 'A m^2', 'A m^2'])
         data.define_alias('m', ( 'x', 'y', 'z'))
-        self._data = {'data': data.append_columns('mag', data.magnitude('m'))}
+        self._raw_data  = {'data': data.append_columns('mag', data.magnitude('m'))}
 
 class Irm(generic_moment):
     def __init__(self, sample_obj,

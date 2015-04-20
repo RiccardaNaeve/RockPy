@@ -36,7 +36,7 @@ Hysteresis
 IRM - single moment
 -------------------
 
-.. automodule:: RockPy.Measurements.irm
+.. automodule:: RockPy.Measurements.single_moment
     :members:
     :undoc-members:
     :show-inheritance:
@@ -81,3 +81,10 @@ TRM - single moment
     :undoc-members:
     :show-inheritance:
 
+Viscosity
+---------
+
+.. automodule:: RockPy.Measurements.viscosity
+    :members:
+    :undoc-members:
+    :show-inheritance:

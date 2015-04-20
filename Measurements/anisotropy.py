@@ -4,9 +4,11 @@ import base
 import logging
 from math import cos, sin, atan, radians, log, exp, sqrt, degrees
 import numpy as np
-from RockPy.Functions.general import XYZ2DIL, DIL2XYZ, MirrorDirectionToPositiveInclination
+from RockPy.Functions.general import XYZ2DIL, DIL2XYZ, DI2XYZ, MirrorDirectionToPositiveInclination, Proj_A_on_B_scalar
 from RockPy.Structure.data import RockPyData
 from random import random
+from scipy.stats import distributions
+
 
 class Anisotropy(base.Measurement):
     """
@@ -99,7 +101,6 @@ class Anisotropy(base.Measurement):
         else:
             # make design matrix for directional measurement (same direction as applied field)
             A = np.zeros((len(mdirs), 6), 'f')
-
 
             for i in range(len(XYZ)):
                 A[i] = XYZ[i][0]*B[i*3+0] + XYZ[i][1]*B[i*3+1] + XYZ[i][2]*B[i*3+2]
@@ -283,23 +284,43 @@ class Anisotropy(base.Measurement):
         #    print "%.4f   \t %.4f \t %.4f" % (K[c], Kf[c], d[c])
 
         #calculate sum of errors^2
-        S0 = np.dot(d[0], d[0])
+        S0 = np.dot(d, d)
         aniso_dict['S0'] = S0
 
+        # degrees of freedom
+        nf = len(d)-6
+
         #calculate variance
-        var = S0 / (len(d)/3)
+        var = S0 / nf
         # len(d) == 18 for 6 directions (12 measured)
         #calc standard deviation
-        stddev = sqrt( var)
+        stddev = sqrt(var)
         aniso_dict['stddev'] = stddev
 
         # calculate quality factor
         QF = (P-1) / (stddev / M)
         aniso_dict['QF'] = QF
 
+
+        # claculate errors of principal values (Hext 63)
+        # A = design matrix
+        #AA = (A^T*A)^(-1)
+        AA = np.linalg.inv(np.dot(np.transpose(A), A))
+        eigval_errs = []
+        # t_alpha for 95% and n_f = 6: 2.45
+        t_alpha = distributions.t.ppf(0.975, nf)
+
+        for ev in eigvecs:
+            # av = (X^2 Y^2 Z^2 2XY 2YZ 2XZ)
+            av = np.array((ev[0]**2, ev[1]**2, ev[2]**2, 2*ev[0]*ev[1], 2*ev[1]*ev[2], 2*ev[0]*ev[2]))
+            eigval_errs.append(t_alpha*stddev*np.sqrt(np.dot(np.transpose(av), np.dot(AA, av))))
+
+        aniso_dict['eval_err'] = eigval_errs
+
+
         # calculate confidence ellipses
         #F = 3.89 --> looked up from tauxe lecture 2005; F-table
-        f = sqrt(2 * 3.89)
+        f = sqrt(2 * distributions.f.ppf(0.95, 2, nf))
         E12 = abs(degrees(atan(f * stddev / (2 * (eigvals[1]-eigvals[0])))))
         E23 = abs(degrees(atan(f * stddev / (2 * (eigvals[1]-eigvals[2])))))
         E13 = abs(degrees(atan(f * stddev / (2 * (eigvals[2]-eigvals[0])))))
@@ -370,6 +391,14 @@ class Anisotropy(base.Measurement):
         self.calc_result(parameter={}, recalc=recalc, force_method='tensor')
     def result_eval3(self, recalc=False):
         self.calc_result(parameter={}, recalc=recalc, force_method='tensor')
+    def result_eval1_err(self, recalc=False):
+        self.calc_result(parameter={}, recalc=recalc, force_method='tensor')
+    def result_eval2_err(self, recalc=False):
+        self.calc_result(parameter={}, recalc=recalc, force_method='tensor')
+    def result_eval3_err(self, recalc=False):
+        self.calc_result(parameter={}, recalc=recalc, force_method='tensor')
+    def result_M(self, recalc=False):
+        self.calc_result(parameter={}, recalc=recalc, force_method='tensor')
     def result_I1(self, recalc=False):
         self.calc_result(parameter={}, recalc=recalc, force_method='tensor')
     def result_D1(self, recalc=False):
@@ -418,12 +447,35 @@ class Anisotropy(base.Measurement):
 
     ''' CALCULATION SECTION '''
 
-    def calculate_tensor(self):
+    def calculate_tensor(self, method='full'):
+        """
+        calculates the anisotropy tensor and derived statistical results for given data and reference directions
+        :param method: determines which method is used to calculate the tensor
+                    'full': use all measurement values, i.e. 3 components of AARM and calculate best fit
+                    'proj': in case of vectorial measurement -> use projection of vector on reference direction and
+                            find least squares solution for those (basically: AARM -> AMS method)
+        :return: nothing, results are stored in self.results dictionary
+        """
         # calculate design matrix
         mdirs = self._data['data']['D', 'I'].v.tolist()
-        dm = Anisotropy.makeDesignMatrix(mdirs, self._data['data'].column_exists('Z'))
+        if method == 'full':
+            xyz = self._data['data'].column_exists('Z')
+        elif method == 'proj':
+            xyz = False  # calculate design matrix for one component per measurement
+        else:
+            raise RuntimeError('calcualte_tensor: unknown method %s', str(method))
+
+        dm = Anisotropy.makeDesignMatrix(mdirs, xyz)
+
+        # get measurements
+        raw_meas = self._data['data']['dep_var'].v.flatten().tolist()
+        if method == 'full':
+            measurements = raw_meas
+        elif method == 'proj':
+            # calculate projections on reference direction
+            measurements = [Proj_A_on_B_scalar(raw_meas[i*3:i*3+3], DI2XYZ(mdirs[i])) for i in range(len(mdirs))]
+
         # calculate tensor and all other results
-        measurements = self._data['data']['dep_var'].v.flatten().tolist()
         self.aniso_dict = Anisotropy.CalcAnisoTensor(dm, measurements)
         self.results['t11'] = self.aniso_dict['R'][0][0]
         self.results['t12_21'] = self.aniso_dict['R'][0][1]
@@ -436,6 +488,10 @@ class Anisotropy(base.Measurement):
         self.results['eval2'] = self.aniso_dict['eigvals'][1]
         self.results['eval3'] = self.aniso_dict['eigvals'][2]
 
+        self.results['eval1_err'] = self.aniso_dict['eval_err'][0]
+        self.results['eval2_err'] = self.aniso_dict['eval_err'][1]
+        self.results['eval3_err'] = self.aniso_dict['eval_err'][2]
 
-        for k in ('I1', 'D1', 'I2', 'D2', 'I3', 'D3', 'P', 'P1', 'F', 'L', 'T', 'E12', 'E13', 'E23', 'E', 'Q', 'U', 'F0', 'F12', 'F23', 'stddev', 'QF'):
+
+        for k in ('I1', 'D1', 'I2', 'D2', 'I3', 'D3', 'P', 'P1', 'F', 'L', 'T', 'E12', 'E13', 'E23', 'E', 'Q', 'U', 'F0', 'F12', 'F23', 'stddev', 'QF', 'M'):
             self.results[k] = self.aniso_dict[k]

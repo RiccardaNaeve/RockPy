@@ -1,10 +1,12 @@
 __author__ = 'volk'
-from Structure.sample import Sample
+import RockPy
+import os.path
+
 
 def test():
-    dfile = 'test_data/MUCVFTB_test.rmp'
+    dfile = os.path.join(RockPy.test_data_path, 'vftb', 'MUCVFTB_test.rmp')
 
-    sample = Sample(name='vftb_test')
+    sample = RockPy.Sample(name='vftb_test')
 
     M = sample.add_measurement(mtype='thermocurve', mfile=dfile, machine='vftb')
 
@@ -13,6 +15,7 @@ def test():
     # plt.plot(field, rev/max(rev))
     # plt.show()
     # print M.up_field['field']
+
 
 if __name__ == '__main__':
     test()

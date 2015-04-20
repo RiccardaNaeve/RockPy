@@ -14,6 +14,17 @@ class Machine(object):
         self.raw_data = None
         self.data = None
 
+    def simple_import(self):
+        """
+        simple wrapper that opens file and uses file.readlines to import and removes newline marks
+        :return:
+        """
+        with open(self.file_name) as f:
+            out = f.readlines()
+
+        out = map(str.rstrip, out)
+        return out
+
     @property
     def file_header(self):
         header = []

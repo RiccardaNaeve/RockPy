@@ -68,7 +68,7 @@ class Arai(base.Generic):
 
 def test():
     sample = RP.Sample(name='test_sample')
-    sample.add_measurement(mtype='thellier', mfile='../Tutorials/test_data/NLCRY_Thellier_test.TT', machine='cryomag')
+    sample.add_measurement(mtype='thellier', mfile='../tutorials.rst/test_data/NLCRY_Thellier_test.TT', machine='cryomag')
     Plot = Arai(plot_samples=sample)
     Plot.show()
     # print 'test', Plot.ls_source

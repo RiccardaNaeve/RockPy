@@ -8,13 +8,12 @@ import numpy as np
 import RockPy
 import RockPy.Functions.general
 import RockPy.Readin.base
-from RockPy.Structure.data import RockPyData
+from RockPy.Structure.data import RockPyData, _to_tuple
 from RockPy import Treatments
 from RockPy.Readin import *
 from copy import deepcopy
 import inspect
 
-#todo initial states are not pickled
 class Measurement(object):
     """
 
@@ -107,6 +106,7 @@ class Measurement(object):
         self.color = color
         self.has_data = True
         self._data = {}
+        self._raw_data = {}
         self.is_initial_state = False
         self.is_mean = False # flag for mean measurements
 
@@ -206,7 +206,7 @@ class Measurement(object):
         # dynamically generating the calculation and standard parameters for each calculation method.
         # This just sets the values to non, the values have to be specified in the class itself
         self.calculation_methods = [i for i in dir(self) if i.startswith('calculate_') if not i.endswith('generic')]
-        self.calculation_parameter = {i[10:]: None for i in self.calculation_methods}
+        self.calculation_parameter = {i: dict() for i in self.result_methods}
         self._standard_parameter = {i[10:]: None for i in dir(self) if i.startswith('calculate_') if
                                     not i.endswith('generic')}
 
@@ -227,7 +227,7 @@ class Measurement(object):
                      (
                          'mtype', 'machine', 'mfile',
                          'has_data', 'machine_data',
-                         '_data',
+                         '_raw_data', '_data',
                          'initial_state', 'is_initial_state',
                          'sample_obj',
                          '_treatment_opt',
@@ -250,8 +250,8 @@ class Measurement(object):
 
     def __getattr__(self, attr):
         # print attr, self.__dict__.keys()
-        if attr in self.__getattribute__('data').keys():
-            return self.data[attr]
+        if attr in self.__getattribute__('_data').keys():
+            return self._data[attr]
         if attr in self.__getattribute__('result_methods'):
             return getattr(self, 'result_' + attr)().v[0]
         raise AttributeError('Attribute does not exist:', attr)
@@ -359,18 +359,12 @@ class Measurement(object):
 
     @property
     def data(self):
+        if not self._data:
+            self._data = deepcopy(self._raw_data)
         return self._data
-
 
     # ## DATA RELATED
     ### Calculation and parameters
-    @property
-    def generic(self):
-        '''
-        helper function that returns the value for a given statistical method. If result not available will calculate
-        it with standard parameters
-        '''
-        return self.result_generic()
 
     def result_generic(self, recalc=False):
         '''
@@ -404,7 +398,7 @@ class Measurement(object):
 
         self.results['generic'] = 0
 
-    def calc_result(self, parameter={}, recalc=False, force_method=None):
+    def calc_result(self, parameter=None, recalc=False, force_method=None):
         '''
         Helper function:
         Calls any calculate_* function, but checks first:
@@ -427,17 +421,19 @@ class Measurement(object):
 
         :return:
         '''
+        if not parameter: parameter = dict()
+        caller = '_'.join(inspect.stack()[1][3].split('_')[1:])  # get calling function
 
         if force_method is not None:
-            method = force_method
+            method = force_method # method for calculation if any: result_CALLER_method
         else:
-            method = '_'.join(inspect.stack()[1][3].split('_')[1:])  # get clling function
+            method = caller # if CALLER = METHOD
 
         if callable(getattr(self, 'calculate_' + method)):  # check if calculation function exists
-            parameter = self.compare_parameters(method, parameter,
-                                                recalc)  # checks for None and replaces it with standard
-            if self.results[method] is None or self.results[
-                method] == np.nan or recalc:  # if results dont exist or force recalc
+            # check for None and replaces it with standard
+            parameter = self.compare_parameters(method, parameter, recalc)
+            if self.results[caller] is None or self.results[
+                caller] == np.nan or recalc:  # if results dont exist or force recalc
                 if recalc:
                     Measurement.logger.debug('FORCED recalculation of << %s >>' % (method))
                 else:
@@ -445,7 +441,7 @@ class Measurement(object):
                 getattr(self, 'calculate_' + method)(**parameter)  # calling calculation method
             else:
                 Measurement.logger.debug('FOUND previous << %s >> parameters' % (method))
-                if self.check_parameters(method, parameter):  # are parameters equal to previous parameters
+                if self.check_parameters(caller, parameter):  # are parameters equal to previous parameters
                     Measurement.logger.debug('RESULT parameters different from previous calculation -> recalculating')
                     getattr(self, 'calculate_' + method)(**parameter)  # recalculating if parameters different
                 else:
@@ -479,12 +475,12 @@ class Measurement(object):
         """
         # caller = inspect.stack()[1][3].split('_')[-1]
 
-        for i, v in parameter.iteritems():
-            if v is None:
+        for key, value in parameter.iteritems():
+            if value is None:
                 if self.calculation_parameter[caller] and not recalc:
-                    parameter[i] = self.calculation_parameter[caller][i]
+                    parameter[key] = self.calculation_parameter[caller][key]
                 else:
-                    parameter[i] = self.standard_parameter[caller][i]
+                    parameter[key] = self.standard_parameter[caller][key]
         return parameter
 
     def delete_dtype_var_val(self, dtype, var, val):
@@ -586,7 +582,7 @@ class Measurement(object):
                 try:
                     i[1] = float(i[1])
                 except:
-                    raise TypeError('%s can not be converted to float')
+                    raise TypeError('%s can not be converted to float' %i)
         else:
             treatments = None
         return treatments
@@ -622,22 +618,32 @@ class Measurement(object):
 
     def _add_tval_to_data(self, tobj):
         """
-        adds ttype ad tvals to data
-        :param tobj:
-        :return:
+        Adds ttype as a column and adds tvals to data. Only if ttype != none.
+
+        Parameter
+        ---------
+           tobj: treatment instance
         """
-        for dtype in self._data:
-            data = np.ones(len(self.data[dtype]['variable'].v)) * tobj.value
-            if not 'ttype ' + tobj.ttype in self.data[dtype].column_names:
-                self.data[dtype] = self.data[dtype].append_columns(column_names='ttype ' + tobj.ttype,
-                                                               data=data)  # , unit=tobj.unit) #todo add units
+        if tobj.ttype != 'none':
+            for dtype in self._raw_data:
+                data = np.ones(len(self.data[dtype]['variable'].v)) * tobj.value
+                if not 'ttype ' + tobj.ttype in self.data[dtype].column_names:
+                    self.data[dtype] = self.data[dtype].append_columns(column_names='ttype ' + tobj.ttype,
+                                                                   data=data)  # , unit=tobj.unit) #todo add units
 
     def _add_tval_to_results(self, tobj):
+        """
+        Adds the ttype as a column and the value as value to the results. Only if ttype != none.
 
-        # data = np.ones(len(self.results['variable'].v)) * tobj.value
-        if not 'ttype ' + tobj.ttype in self.results.column_names:
-            self.results = self.results.append_columns(column_names='ttype ' + tobj.ttype,
-                                                       data=[tobj.value])  # , unit=tobj.unit) #todo add units
+        Parameter
+        ---------
+           tobj: treatment instance
+        """
+        if tobj.ttype != 'none':
+            # data = np.ones(len(self.results['variable'].v)) * tobj.value
+            if not 'ttype ' + tobj.ttype in self.results.column_names:
+                self.results = self.results.append_columns(column_names='ttype ' + tobj.ttype,
+                                                           data=[tobj.value])  # , unit=tobj.unit) #todo add units
 
 
     def __sort_list_set(self, values):
@@ -664,14 +670,65 @@ class Measurement(object):
     +++++++++++++++++++
     """
 
-    def normalize(self, reference, rtype='mag', vval=None, norm_method='max'):
+    def normalizeNEW(self, reference='data', rtype='mag', ntypes='all', vval=None, norm_method='max'):
         """
         normalizes all available data to reference value, using norm_method
 
-        :reference: reference state, to which to normalize to e.g. 'NRM'
-        :rtype: component, if applicable. standard - 'mag'
-        :vval: variable value, if reference == value then it will search for the point closest to the vval
-        :norm_method: how the norm_factor is generated, could be min
+        Parameter
+        ---------
+           reference: str
+              reference state, to which to normalize to e.g. 'NRM'
+              also possible to normalize to mass
+            rtype: str
+               component of the reference, if applicable. standard - 'mag'
+            ntypes: list
+               dtype to be normalized, if dtype = 'all' all variables will be normalized
+            vval: float
+               variable value, if reference == value then it will search for the point closest to the vval
+            norm_method: str
+               how the norm_factor is generated, could be min
+        """
+        #todo normalize by results
+        #getting normalization factor
+        norm_factor = self._get_norm_factor(reference, rtype, vval, norm_method)
+        ntypes = _to_tuple(ntypes) # make sure its a list/tuple
+
+        for dtype, dtype_data in self.data.iteritems(): #cycling through all dtypes in data
+            if 'all' in ntypes: # if all, all non ttype data will be normalized
+                ntypes = [i for i in dtype_data.column_names if not 'ttype' in i]
+            for ntype in ntypes: #else use ntypes specified
+                dtype_data[ntype] = dtype_data[ntype].v / norm_factor
+
+            if 'mag' in dtype_data.column_names:
+                try:
+                    self.data[dtype]['mag'] = self.data[dtype].magnitude(('x', 'y', 'z'))
+                except:
+                    self.logger.debug('no (x,y,z) data found keeping << mag >>')
+
+        if self.initial_state:
+            for dtype, dtype_rpd in self.initial_state.data.iteritems():
+                self.initial_state.data[dtype] = dtype_rpd / norm_factor
+                if 'mag' in self.initial_state.data[dtype].column_names:
+                    self.initial_state.data[dtype]['mag'] = self.initial_state.data[dtype].magnitude(('x', 'y', 'z'))
+        return self
+
+    def normalize(self, reference='data', rtype='mag', dtype='mag', vval=None, norm_method='max'):
+        """
+        normalizes all available data to reference value, using norm_method
+
+        Parameter
+        ---------
+           reference: str
+              reference state, to which to normalize to e.g. 'NRM'
+              also possible to normalize to mass
+            rtype: str
+               component of the reference, if applicable. standard - 'mag'
+            dtype: str
+               dtype to be normalized, if dtype = 'all' all variables will be normalized
+            vval: float
+               variable value, if reference == value then it will search for the point closest to the vval
+            norm_method: str
+               how the norm_factor is generated, could be min
         """
 
         norm_factor = self._get_norm_factor(reference, rtype, vval, norm_method)
@@ -698,6 +755,22 @@ class Measurement(object):
         return self
 
     def _get_norm_factor(self, reference, rtype, vval, norm_method):
+        """
+        Calculates the normalization factor from the data according to specified input
+
+        Parameter
+        ---------
+           reference: str
+              the type of data to be referenced. e.g. 'NRM' -> norm_factor will be calculated from self.data['NRM']
+              if not given, will return 1
+           rtype:
+           vval:
+           norm_method:
+
+        Returns
+        -------
+           normalization factor: float
+        """
         norm_factor = 1  # inititalize
 
         if reference:
@@ -718,7 +791,6 @@ class Measurement(object):
                 norm_factor = m.data['data']['mass'].v[0]
             if isinstance(reference, float) or isinstance(reference, int):
                 norm_factor = float(reference)
-
         return norm_factor
 
     def _norm_method(self, norm_method, vval, rtype, data):
@@ -726,7 +798,6 @@ class Measurement(object):
                    'min': min,
                    # 'val': self.get_val_from_data,
         }
-
         if not vval:
             if not norm_method in methods:
                 raise NotImplemented('NORMALIZATION METHOD << %s >>' % norm_method)
@@ -835,3 +906,13 @@ class Measurement(object):
     def show_plots(self):
         for visual in self.plottable:
             self.plottable[visual](self, show=True)
+
+    def set_get_attr(self, attr, value = None):
+        """
+        checks if attribute exists, if not, creates attribute with value None
+        :param attr:
+        :return:
+        """
+        if not hasattr(self, attr):
+            setattr(self, attr, value)
+        return getattr(self, attr)

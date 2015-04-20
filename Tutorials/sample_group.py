@@ -20,7 +20,8 @@ def get_thellier_samplegroup():
 
 def get_hys_coe_irm_rmp_sample_group(load=False):
     if load:
-        SG = RockPy.load(file_name='hys_coe_irm_rmp.rpy')
+        study = RockPy.load(file_name='hys_coe_irm_rmp.rpy')
+        SG = study[0]
     else:
         S = sample.get_hys_coe_irm_rmp_sample()
         SG = RockPy.SampleGroup(name='hys/coe/irm/rmp', sample_list=S)

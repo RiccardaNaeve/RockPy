@@ -38,8 +38,8 @@ class Stereo(base.Generic):
     def feature_stereogridlabels(self, **plt_opt):
         # draw declination labels
         for D in np.arange(0, 360, self.grid_D_spacing):
-            x = (0.45*np.sin(np.deg2rad(D)))+0.5
-            y = (0.45*np.cos(np.deg2rad(D)))+0.5
+            x = (0.55*np.sin(np.deg2rad(D)))+0.5
+            y = (0.55*np.cos(np.deg2rad(D)))+0.5
             self.ax.text(x, y, "%i" % D, transform=self.ax.transAxes,
                          horizontalalignment='center', verticalalignment='center')
 

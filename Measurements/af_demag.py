@@ -28,13 +28,13 @@ class AfDemag(base.Measurement):
     def format_jr6(self):
         data = RockPyData(column_names=['field', 'x', 'y', 'z'], data=self.machine_data.out_afdemag())
         data.define_alias('m', ('x', 'y', 'z'))
-        self._data['data'] = data.append_columns('mag', data.magnitude('m'))
+        self._raw_data['data'] = data.append_columns('mag', data.magnitude('m'))
 
     def format_sushibar(self):
         data = RockPyData(column_names=['field', 'x', 'y', 'z'],
                                data=self.machine_data.out_afdemag())  # , units=['mT', 'Am2', 'Am2', 'Am2'])
         data.define_alias('m', ('x', 'y', 'z'))
-        self._data['data'] = data.append_columns('mag', data.magnitude('m'))
+        self._raw_data['data'] = data.append_columns('mag', data.magnitude('m'))
 
     def format_cryomag(self):
         data = RockPyData(column_names=self.machine_data.float_header,
@@ -43,17 +43,18 @@ class AfDemag(base.Measurement):
             idx = [i for i, v in enumerate(self.machine_data.steps) if v == self.demag_type]
             data = data.filter_idx(idx)
         data.define_alias('m', ('x', 'y', 'z'))
-        self._data['data'] = data.append_columns('mag', data.magnitude('m'))
-        self._data['data'].rename_column('step', 'field')
+        self._raw_data['data'] = data.append_columns('mag', data.magnitude('m'))
+        self._raw_data['data'].rename_column('step', 'field')
 
     def format_pmd(self):
         data = RockPyData(column_names=['field', 'x', 'y', 'z'], data=self.machine_data.out_afdemag())
         data.define_alias('m', ('x', 'y', 'z'))
-        self._data['data'] = data.append_columns('mag', data.magnitude('m'))
+        self._raw_data['data'] = data.append_columns('mag', data.magnitude('m'))
 
     def result_mdf(self, component='mag', interpolation='linear', recalc=False):
         """
         Calculates the MDF (median destructive field from data using linear interpolation between closest points
+
         :param parameter: interpolation:
            interpolation methods:
 

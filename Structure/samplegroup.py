@@ -7,7 +7,9 @@ from RockPy import Sample
 import RockPy.Functions.general
 import numpy as np
 import copy
-
+import itertools
+from pprint import pprint
+from profilehooks import profile
 
 RockPy.Functions.general.create_logger(__name__)
 
@@ -28,17 +30,23 @@ class SampleGroup(object):
         # ## initialize
         if name is None:
             name = 'SampleGroup %04i' % (self.count)
+
         self.name = name
         self.samples = {}
         self.results = None
 
         self.color = None
 
+
         if sample_file:
             self.import_multiple_samples(sample_file, **options)
 
+        self._info_dict = self.__create_info_dict()
+
         if sample_list:
             self.add_samples(sample_list)
+
+
 
     def __repr__(self):
         # return super(SampleGroup, self).__repr__()
@@ -95,7 +103,44 @@ class SampleGroup(object):
         return sorted(self.samples.keys())
 
     def add_samples(self, s_list):
+        """
+        Adds a sample to the sample dictionary and adds the sample_group to sample.sample_groups
+
+        Parameters
+        ----------
+           s_list: single item or list
+              single items get transformed to list
+
+        Note
+        ----
+           Uses _item_to_list for list conversion
+        """
+
+        s_list = _to_list(s_list)
         self.samples.update(self._sdict_from_slist(s_list=s_list))
+
+        for s in s_list:
+            s.sgroups.append(self)
+            self.add_s2_info_dict(s)
+
+    def remove_samples(self, s_list):
+        """
+        Removes a sample from the sgroup.samples dictionary and removes the sgroup from sample.sgroups
+
+        Parameters
+        ----------
+           s_list: single item or list
+              single items get transformed to list
+
+        Note
+        ----
+           Uses _item_to_list for list conversion
+        """
+
+        s_list = _to_list(s_list)
+        for s in s_list:
+            self.sdict[s].sgroups.remove(self)
+            self.samples.pop(s)
 
     # ## components of container
     # lists
@@ -206,7 +251,22 @@ class SampleGroup(object):
         return out
 
     def _sdict_from_slist(self, s_list):
-        s_list = RockPy.Functions.general._to_list(s_list)
+        """
+        creates a dictionary with s.name:s for each sample in a list of samples
+
+        Parameters
+        ----------
+           s_list: sample or list
+        Returns
+        -------
+           dict
+              dictionary with {sample.name : sample} for each sample in s_list
+
+        Note
+        ----
+           uses _to_list for item -> list conversion
+        """
+        s_list = _to_list(s_list)
 
         out = {s.name: s for s in s_list}
         return out
@@ -258,9 +318,6 @@ class SampleGroup(object):
         """
         ttypes = sorted(list(set([m.ttypes for m in mlist])))
         return {ttype: [m for m in mlist if ttype in m.ttypes] for ttype in ttypes}
-
-    def export_cryomag(self):
-        raise NotImplemented()
 
     def get_measurements(self, sname=None, mtype=None, ttype=None, tval=None, tval_range=None):
         """
@@ -359,60 +416,93 @@ class SampleGroup(object):
         return out
 
 
-    def mean_sample(self, reference=None,
-                    rtype='mag', vval=None,
+    def mean_sample(self,
+                    reference=None,
+                    rtype='mag', dtye='mag', vval=None,
                     norm_method='max',
-                    interpolate=True):
+                    interpolate=True,
+                    substfunc='mean'):
 
-        #create new sample_obj
+        # create new sample_obj
         mean_sample = Sample(name='mean ' + self.name)
 
-        for mtype in self.mtypes:
-            for ttype in self.mtype_ttype_dict[mtype]:
-                for tval in self.ttype_tval_dict[ttype]:
-                    measurements = self.get_measurements(mtype=mtype, ttype=ttype, tval=tval)
-                    if reference or vval:
-                        measurements = [m.normalize(reference=reference, rtype=rtype,
-                                                    vval=vval, norm_method=norm_method)
-                                        for m in measurements
-                                        if m.mtype not in ['diameter', 'height', 'mass']]
-                    mean_sample.measurements.extend(measurements)
+        for mtype in self.info_dict['mtype_ttype_tval']:
+            if not mtype in ['mass', 'diameter', 'height', 'volume', 'x_len', 'y_len', 'z_len']:
+                for ttype in self.info_dict['mtype_ttype_tval'][mtype]:
+                    for tval in self.info_dict['mtype_ttype_tval'][mtype][ttype]:
+                        samples = self.info_dict['mtype_ttype_tval'][mtype][ttype][tval]
+                        measurements = []
+                        for s in samples:
+                            measurements.extend(s.get_measurements(mtype=mtype, ttype=ttype, tval=tval))
+                        # print measurements
+                    # if reference or vval:
+                    #     measurements = [m.normalizeNEW(reference=reference, rtype=rtype,
+                    #                                 vval=vval, norm_method=norm_method)
+                    #                     for m in measurements
+                    #                     if m.mtype not in ['diameter', 'height', 'mass']]
+                    #
+                    # mean_sample.measurements.extend(measurements)
+                    #
+                    # if mtype not in ['diameter', 'height', 'mass']:
+                    #     # calculating the mean of all measurements
+                    #     M = mean_sample.mean_measurement(mtype=mtype, ttype=ttype, tval=tval, substfunc=substfunc)
+                    #     if reference or vval:
+                    #         M.is_normalized = True
+                    #         M.norm = [reference, rtype, vval, norm_method, np.nan]
+                    #
+                    #     mean_sample.mean_measurements.append(M)
 
-                    if mtype not in ['diameter', 'height', 'mass']:
-                        M = mean_sample.mean_measurement(mtype=mtype, ttype=ttype, tval=tval)
-                        if reference or vval:
-                            M.is_normalized= True
-                            M.norm = [reference, rtype, vval, norm_method, np.nan]
-
-                        mean_sample.mean_measurements.append(M)
-
-        mean_sample.is_mean = True #set is_mean flag after all measuerements are created
+        mean_sample.is_mean = True  #set is_mean flag after all measuerements are created
         return mean_sample
 
-    def average_sample(self, reference='nrm', name='mean_sample_group',
-                       rtype='mag', vval=None, norm_method='max', interpolate=True):
+    def average_sample(self, name=None,
+                       reference='data',
+                       rtype='mag', dtype = 'mag',
+                       vval=None, norm_method='max',
+                       interpolate=True):
+        """
+        Averages all samples and returns a sample with an average measurement for all measurements in all samples.
+        
+        Parameters
+        ----------
+           name: str
+              Name of the samplegroup. *default:* mean_*sample_group_name*
+           reference: str
+              used for normalize
+           rtype:
+           vval: 
+           norm_method: 
+           interpolate: bool
+              it True all measurements are interpolated to equal variables and then normalized
+        :return:
+        """
 
-        average_sample = Sample(name='mean ' + self.name)
+        if not name:
+            name = 'mean ' + self.name
+
+        average_sample = Sample(name=name)
         average_sample.is_mean = True
 
-        for mtype in ['diameter', 'height', 'mass']:
-            for ttype in self.mtype_ttype_dict[mtype]:
-                for tval in self.ttype_tval_dict[ttype]:
-                    measurements = self.get_measurements(mtype=mtype, ttype=ttype, tval=tval)
-                    M = average_sample.mean_measurement_from_list(measurements)
-                    average_sample.measurements.append(M)
-
-        for mtype in self.mtypes:
-            if mtype not in ['diameter', 'height', 'mass']:
+        for mtype in ['diameter', 'height', 'mass', 'volume']:
+            try:
                 for ttype in self.mtype_ttype_dict[mtype]:
                     for tval in self.ttype_tval_dict[ttype]:
                         measurements = self.get_measurements(mtype=mtype, ttype=ttype, tval=tval)
-                        measurements = [m.normalize(reference=reference, rtype=rtype,
+                        M = average_sample.mean_measurement_from_list(measurements)
+                        average_sample.measurements.append(M)
+            except:
+                self.log.info('NO %s found' %(mtype))
+                
+        for mtype in self.mtypes:
+            if mtype not in ['diameter', 'height', 'mass', 'volume']:
+                for ttype in self.mtype_ttype_dict[mtype]:
+                    for tval in self.ttype_tval_dict[ttype]:
+                        measurements = self.get_measurements(mtype=mtype, ttype=ttype, tval=tval)
+                        measurements = [m.normalize(reference=reference, rtype=rtype, dtype=dtype,
                                                     vval=vval, norm_method=norm_method)
                                         for m in measurements]
                         M = average_sample.mean_measurement_from_list(measurements, interpolate=interpolate)
-                        #print average_sample.get_mean_results(mlist=measurements)
-
+                        # print average_sample.get_mean_results(mlist=measurements)
                         average_sample.measurements.append(M)
 
         return average_sample
@@ -432,6 +522,101 @@ class SampleGroup(object):
         """
         return sorted(list(set(values)))
 
+    ''' INFODICT '''
+
+    def __create_info_dict(self):
+        """
+        creates all info dictionaries
+
+        Returns
+        -------
+           dict
+              Dictionary with a permutation of sample ,type, ttype and tval.
+        """
+        d = ['sample', 'mtype', 'ttype', 'tval']
+        keys = ['_'.join(i) for n in range(5) for i in itertools.permutations(d, n) if not len(i) == 0]
+        out = {i: {} for i in keys}
+        return out
+
+    # @profile()
+    def add_s2_info_dict(self, s):
+        """
+        Adds a sample to the infodict.
+
+        Parameters
+        ----------
+           s: RockPySample
+              The sample that should be added to the dictionary
+        """
+
+        keys = self._info_dict.keys()
+
+        s_info = {'tval': s.tvals,
+                  'ttype': s.ttypes,
+                  'mtype': s.mtypes,
+                  'sample': [s.name]}
+
+        aux = self.info_dict
+
+        levels = [key.split('_') for key in keys if len(key.split('_'))]
+
+        for level in levels:
+            key = '_'.join(level)
+            for i, v in enumerate(level):
+                name = '_'.join(level[:i+1])
+                if not 'sample' in level:
+                    for k1 in s.info_dict[name]:
+                        if isinstance(k1, str):
+                            print key, name, '1:', k1
+                            self._info_dict[key].setdefault(k1, {})
+                        # else:
+                        #     self._info_dict[key].setdefault(key, [])
+                        #
+                        #     if not s in self._info_dict[key]:
+                        #         self._info_dict[key].append(s)
+                        try:
+                            for k2 in s.info_dict[name][k1]:
+                                if isinstance(k2, str):
+                                    self._info_dict[key][k1].setdefault(k2, {})
+                                else:
+                                    self._info_dict[key].setdefault(k1, [])
+                                    if not s in self._info_dict[key][k1]:
+                                        self._info_dict[key][k1].append(s)
+                                try:
+                                    for k3 in s.info_dict[name][k1][k2]:
+                                        if isinstance(k3, str):
+                                            self._info_dict[key][k1][k2].setdefault(k3, {})
+                                        else:
+                                            self._info_dict[key][k1].setdefault(k2, [])
+                                            if not s in self._info_dict[key][k1][k2]:
+                                                self._info_dict[key][k1][k2].append(s)
+                                            # self._info_dict[key][k1][k2].setdefault(k3, [])
+                                        try:
+                                            for k4 in s.info_dict[name][k1][k2][k3]:
+                                                if isinstance(k4, str):
+                                                    self._info_dict[key][k1][k2][k3].setdefault(k4, {})
+                                                else:
+                                                    self._info_dict[key][k1][k2].setdefault(k3, [])
+                                                    if not s in self._info_dict[key][k1][k2][k3]:
+                                                        self._info_dict[key][k1][k2][k3].append(s)
+                                        except:
+                                            pass
+                                except:
+                                    pass
+                        except:
+                            pass
+        pprint(self._info_dict)
+    @property
+    def info_dict(self):
+        """
+        Property for easy access of info_dict. If '_info_dict' has not been created, it will create one.
+        """
+        if not hasattr(self, '_info_dict'):
+            self._info_dict = self.__create_info_dict()
+            for s in self.sample_list:
+                self.add_s2_info_dict(s)
+        return self._info_dict
+
 
 def _to_list(oneormoreitems):
     """
@@ -440,3 +625,16 @@ def _to_list(oneormoreitems):
     :return: tuple of elements
     """
     return oneormoreitems if hasattr(oneormoreitems, '__iter__') else [oneormoreitems]
+
+
+def test():
+    import RockPy.Tutorials.sample_group
+
+    sg = RockPy.Tutorials.sample_group.get_hys_coe_irm_rmp_sample_group(load=True)
+    # print sg.info_dict['sample_mtype_ttype']
+    # print sg.info_dict.keys()
+    # pprint(sg.info_dict)
+
+
+if __name__ == '__main__':
+    test()

@@ -6,7 +6,7 @@ __author__ = 'mike'
 
 class TestBackfield(TestCase):
     def setUp(self):
-        self.vsm_file = '../Tutorials/test_data/MUCVSM_test01.coe'
+        self.vsm_file = '../tutorials.rst/test_data/MUCVSM_test01.coe'
         self.VSM_test = rp.Sample('test')
 
     def test_format_vsm(self):

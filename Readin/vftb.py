@@ -2,7 +2,7 @@ __author__ = 'mike'
 import numpy as np
 
 import base
-
+from profilehooks import profile
 
 class Vftb(base.Machine):
     def __init__(self, dfile, sample_name):
@@ -29,15 +29,28 @@ class Vftb(base.Machine):
         return units
 
     def get_data(self):
-        data = np.array([np.array(self.raw_data[i[0] + 2:i[1] - 1]) for i in self.set_idx])
-        data = [self.replace_na(i) for i in data]
+        """
+        Formats data into usable format. Using set indices for multiple measurements
+        :return:
+        """
+        # get a list of data for each index
+        data = np.array([np.array(self.raw_data[i[0] + 2:i[1]]) for i in self.set_idx])
+        data = np.array([np.array([j for j in i if len(j) >1]) for i in data ])
+        # print data[0]
+        data = map(self.replace_na, data)
         data = np.array([i.astype(float) for i in data])
         data = self.convert_to_T(data)
+
+        # convert to A m instead of A m^2
+        convert = [self.mass*1e-6 if 'g' in v else 1 for i,v in enumerate(self.units)]
+        data = np.array([i * convert for i in data])
+
+        # some vftb files have a prefix of E-3
+        # -> data is corrected
+        convert = [1e-3 if 'E-3' in v else 1 for i,v in enumerate(self.units)]
+        data = np.array([i * convert for i in data])
         return data
 
-    def out_hysteresis(self):
-        data = self.get_data()
-        return data
 
     def out_backfield(self):
         data = self.get_data()

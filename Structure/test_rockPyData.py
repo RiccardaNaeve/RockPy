@@ -1,4 +1,4 @@
-from unittest import TestCase  # Unit Tutorials framework
+from unittest import TestCase  # Unit tutorials.rst framework
 import numpy as np  # numerical array functions
 from RockPy.Structure.data import RockPyData
 import copy
@@ -52,7 +52,7 @@ class TestRockPyData(TestCase):
         rpd.rename_column('Mx', 'M_x')
         self.RPD = self.RPD.append_rows(rpd)
         # TODO: add assert
-        print self.RPD
+        #print self.RPD
 
     def test_delete_rows(self):
         self.RPD = self.RPD.delete_rows((0, 2))
@@ -99,27 +99,45 @@ class TestRockPyData(TestCase):
     def test_sort(self):
         self.assertTrue(np.array_equal(self.RPD.sort('Mx')['Mx'].v, np.array((2, 2, 6, 6))))
 
-    def test_interpolate(self):
-        self.RPD.define_alias('variable', 'My')
-        iv = (1, 11, 33, 55, 100)
-        self.assertTrue(np.array_equal((self.RPD.interpolate(iv))['My'].v, np.array(iv)))
-        self.assertTrue(np.array_equal((self.RPD.interpolate(iv))['Mx'].v[1:-1], np.array([2., 4., 6.])))
+    #def test_interpolate(self):
+    #    self.RPD.define_alias('variable', 'My')
+    #    iv = (1, 11, 33, 55, 100)
+    #    self.assertTrue(np.array_equal((self.RPD.interpolate(iv))['My'].v, np.array(iv)))
+    #    self.assertTrue(np.array_equal((self.RPD.interpolate(iv))['Mx'].v[1:-1], np.array([2., 4., 6.])))
 
 
     def test_magnitude(self):
         self.RPD.define_alias('m', ('Mx', 'My', 'Mz'))
         self.RPD = self.RPD.append_columns('mag', self.RPD.magnitude('m'))
-        MX = max(self.RPD['mag'].v)
-        self.assertAlmostEqual(self.RPD.magnitude(MX)['F'].v, [1.0, 1.0, 1.0, 1.0], 7)
-        self.assertAlmostEqual(self.RPD.magnitude(MX)['Mx'].v, [0.02322287, 0.0696686, 0.02322287, 0.0696686], 7)
-        self.assertAlmostEqual(self.RPD.magnitude(MX)['My'].v, [0.0348343, 0.08128004, 0.12772577, 0.63862887], 7)
-        self.assertAlmostEqual(self.RPD.magnitude(MX, exception=['Mz'])['Mz'].v, [4.0, 8.0, 12.0, 66.0], 7)  # ????
-        self.assertAlmostEqual(self.RPD.magnitude(MX)['mag'].v, [0.06252949, 0.14173562, 0.19044168, 1.], 7)
+        np.testing.assert_allclose(self.RPD['mag'].v, np.array([5.38516481, 12.20655562, 16.40121947, 86.12200648]), atol=1e-5)
 
 
     def test_column_names_to_indices(self):
         self.assertEqual( self.RPD.column_names_to_indices(('Mx', 'Mz')), [1,3])
 
     def test_interation(self):
+        # TODO: add proper assertion
         for l in self.RPD:
-            print l
+            #print l
+            pass
+
+    def test_add_errors(self):
+        d = RockPyData(column_names=['A', 'B'])
+        #d['A'].v = 1  # Attribute Error NoneType has no attribute, maybe initialize to np.nan?
+        #d['B'] = 2
+        #d['A'].e = 4
+        #d['B'].e = 5
+        d = d.append_rows([1, 2])
+        #print d
+        d.e = [[4, 5]]
+
+        self.assertEqual(5., d['B'].e)
+
+    def test_data_assignment(self):
+        print self.RPD
+        # set only values
+        self.RPD['Mx'] = [1.1, 1.2, 1.3, 1.4]
+        print self.RPD
+        # set values and errors
+        self.RPD['Mx'] = [[[1.1, 0.11]], [[1.2, 0.12]], [[1.3, 0.13]], [[1.4, 0.14]]]
+        print self.RPD

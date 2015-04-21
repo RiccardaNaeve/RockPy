@@ -434,23 +434,23 @@ class SampleGroup(object):
                         measurements = []
                         for s in samples:
                             measurements.extend(s.get_measurements(mtype=mtype, ttype=ttype, tval=tval))
-                        # print measurements
-                    # if reference or vval:
-                    #     measurements = [m.normalizeNEW(reference=reference, rtype=rtype,
-                    #                                 vval=vval, norm_method=norm_method)
-                    #                     for m in measurements
-                    #                     if m.mtype not in ['diameter', 'height', 'mass']]
-                    #
-                    # mean_sample.measurements.extend(measurements)
-                    #
-                    # if mtype not in ['diameter', 'height', 'mass']:
-                    #     # calculating the mean of all measurements
-                    #     M = mean_sample.mean_measurement(mtype=mtype, ttype=ttype, tval=tval, substfunc=substfunc)
-                    #     if reference or vval:
-                    #         M.is_normalized = True
-                    #         M.norm = [reference, rtype, vval, norm_method, np.nan]
-                    #
-                    #     mean_sample.mean_measurements.append(M)
+
+                    if reference or vval:
+                        measurements = [m.normalizeNEW(reference=reference, rtype=rtype,
+                                                    vval=vval, norm_method=norm_method)
+                                        for m in measurements
+                                        if m.mtype not in ['diameter', 'height', 'mass']]
+
+                    mean_sample.measurements.extend(measurements)
+
+                    if mtype not in ['diameter', 'height', 'mass']:
+                        # calculating the mean of all measurements
+                        M = mean_sample.mean_measurement(mtype=mtype, ttype=ttype, tval=tval, substfunc=substfunc)
+                        if reference or vval:
+                            M.is_normalized = True
+                            M.norm = [reference, rtype, vval, norm_method, np.nan]
+
+                        mean_sample.mean_measurements.append(M)
 
         mean_sample.is_mean = True  #set is_mean flag after all measuerements are created
         return mean_sample
@@ -533,7 +533,7 @@ class SampleGroup(object):
            dict
               Dictionary with a permutation of sample ,type, ttype and tval.
         """
-        d = ['sample', 'mtype', 'ttype', 'tval']
+        d = ['mtype', 'ttype', 'tval']
         keys = ['_'.join(i) for n in range(5) for i in itertools.permutations(d, n) if not len(i) == 0]
         out = {i: {} for i in keys}
         return out
@@ -549,63 +549,57 @@ class SampleGroup(object):
               The sample that should be added to the dictionary
         """
 
-        keys = self._info_dict.keys()
+        keys = self.info_dict.keys() # all possible keys
 
-        s_info = {'tval': s.tvals,
-                  'ttype': s.ttypes,
-                  'mtype': s.mtypes,
-                  'sample': [s.name]}
+        for key in keys:
+            # split keys into levels
+            split_keys = key.split('_')
+            for i, level in enumerate(split_keys):
+                # i == level number, n == maximal level
+                # if i == n _> last level -> list instead of dict
+                n = len(split_keys) - 1
 
-        aux = self.info_dict
+                #level 0
+                for e0 in s.info_dict[key]:
+                    # if only 1 level
+                    if i == n == 0:
+                        # create key with empty list
+                        self._info_dict[key].setdefault(e0, list())
+                        # add sample if not already in list
+                        if not s in self._info_dict[key][e0]:
+                            self._info_dict[key][e0].append(s)
+                        continue
+                    else:
+                        # if not last entry generate key: dict() pair
+                        self._info_dict[key].setdefault(e0, dict())
 
-        levels = [key.split('_') for key in keys if len(key.split('_'))]
+                    # level 1
+                    for e1 in s.info_dict[key][e0]:
+                        if i == n == 1:
+                            self._info_dict[key][e0].setdefault(e1, list())
+                            if not s in self._info_dict[key][e0][e1]:
+                                self._info_dict[key][e0][e1].append(s)
+                            continue
+                        elif i > 0:
+                            self._info_dict[key][e0].setdefault(e1, dict())
 
-        for level in levels:
-            key = '_'.join(level)
-            for i, v in enumerate(level):
-                name = '_'.join(level[:i+1])
-                if not 'sample' in level:
-                    for k1 in s.info_dict[name]:
-                        if isinstance(k1, str):
-                            print key, name, '1:', k1
-                            self._info_dict[key].setdefault(k1, {})
-                        # else:
-                        #     self._info_dict[key].setdefault(key, [])
-                        #
-                        #     if not s in self._info_dict[key]:
-                        #         self._info_dict[key].append(s)
-                        try:
-                            for k2 in s.info_dict[name][k1]:
-                                if isinstance(k2, str):
-                                    self._info_dict[key][k1].setdefault(k2, {})
-                                else:
-                                    self._info_dict[key].setdefault(k1, [])
-                                    if not s in self._info_dict[key][k1]:
-                                        self._info_dict[key][k1].append(s)
-                                try:
-                                    for k3 in s.info_dict[name][k1][k2]:
-                                        if isinstance(k3, str):
-                                            self._info_dict[key][k1][k2].setdefault(k3, {})
-                                        else:
-                                            self._info_dict[key][k1].setdefault(k2, [])
-                                            if not s in self._info_dict[key][k1][k2]:
-                                                self._info_dict[key][k1][k2].append(s)
-                                            # self._info_dict[key][k1][k2].setdefault(k3, [])
-                                        try:
-                                            for k4 in s.info_dict[name][k1][k2][k3]:
-                                                if isinstance(k4, str):
-                                                    self._info_dict[key][k1][k2][k3].setdefault(k4, {})
-                                                else:
-                                                    self._info_dict[key][k1][k2].setdefault(k3, [])
-                                                    if not s in self._info_dict[key][k1][k2][k3]:
-                                                        self._info_dict[key][k1][k2][k3].append(s)
-                                        except:
-                                            pass
-                                except:
-                                    pass
-                        except:
-                            pass
-        pprint(self._info_dict)
+                            #level 2
+                            for e2 in s.info_dict[key][e0][e1]:
+                                if i == n == 2:
+                                    self._info_dict[key][e0][e1].setdefault(e2, list())
+                                    if not s in self._info_dict[key][e0][e1][e2]:
+                                        self._info_dict[key][e0][e1][e2].append(s)
+                                    continue
+                                elif i > 1:
+                                    self._info_dict[key][e0][e1].setdefault(e2, dict())
+
+    def recalc_info_dict(self):
+        """
+        Recalculates the info_dictionary with information of all samples and their corresponding measurements
+
+        """
+        map(self.add_s2_info_dict, self.samples)
+
     @property
     def info_dict(self):
         """
@@ -613,8 +607,7 @@ class SampleGroup(object):
         """
         if not hasattr(self, '_info_dict'):
             self._info_dict = self.__create_info_dict()
-            for s in self.sample_list:
-                self.add_s2_info_dict(s)
+            self.recalc_info_dict()
         return self._info_dict
 
 

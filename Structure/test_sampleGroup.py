@@ -29,12 +29,11 @@ class TestSampleGroup(TestCase):
     #     self.assertTrue(self.group not in self.s1.sgroups)
 
 
-    # def test_average_sample(self):
-    #     s = RockPy.Tutorials.sample.get_sample_with_multiple_hys()
-    #     sg = RockPy.SampleGroup(sample_list=[s, s])
-    #
-    #     mean = sg.mean_sample(interpolate=False)
-    #     print mean.mean_measurements
+    def test_average_sample(self):
+        s = RockPy.Tutorials.sample.get_sample_with_multiple_hys()
+        sg = RockPy.SampleGroup(sample_list=[s, s])
+        mean = sg.mean_sample(interpolate=False)
+        print mean.mean_measurements
 
 
     def test_info_dict(self):
@@ -53,4 +52,4 @@ class TestSampleGroup(TestCase):
                 for tval in sg.info_dict['mtype_ttype_tval'][mtype][ttype].keys():
                     sg_keys.append('_'.join([mtype, ttype, str(tval)]))
 
-        # self.assertEqual(sorted(s_keys), sorted(sg_keys))
+        self.assertEqual(sorted(s_keys), sorted(sg_keys))

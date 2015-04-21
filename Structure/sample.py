@@ -55,6 +55,7 @@ class Sample(object):
         self.name = name
         Sample.logger.info('CREATING\t new sample << %s >>' % self.name)
 
+        self.unfiltered_measurements = []
         self.measurements = []
         self.results = None
 
@@ -245,6 +246,7 @@ class Sample(object):
                                              **options)
             if measurement.has_data:
                 self.measurements.append(measurement)
+                self.unfiltered_measurements.append(measurement)
                 self.add_m2_info_dict(measurement)
                 return measurement
             else:

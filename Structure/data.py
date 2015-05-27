@@ -1088,7 +1088,6 @@ class RockPyData(object):
         rd1e = self.data[mridx[:, 0], :][:, mcidx[:, 0]][:, :, 1]  # errors
         rd2e = other.data[mridx[:, 1], :][:, mcidx[:, 1]][:, :, 1] # errors
 
-        # todo: care about errors
         if op == '+':
             result_values = rd1v + rd2v
             result_errors = rd1e + rd2e  # add absolute errors
@@ -1170,7 +1169,19 @@ class RockPyData(object):
 
     """ METHODS returning OBJECTS """
 
-    def running_ave(self):
+    def running_average(self, key='data', width=3):
+        """
+        colidxs = self._keyseq2colseq(key)
+
+        rpd = RockPyData(column_names=self.column_indices_to_names(colidxs),
+                          row_names=self.row_names,
+                          units=None,
+                          data=self.data[:, colidxs])
+
+        # rpd.showfmt = self.showfmt
+
+        return rpd
+        """
         raise NotImplemented
 
     def differentiate(self):

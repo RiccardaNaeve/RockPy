@@ -4,7 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from math import degrees, radians
 from math import sin, cos, tan, asin, atan2
-
+import RockPy
 
 def create_logger(name):
     log = logging.getLogger(name=name)
@@ -21,6 +21,12 @@ def create_logger(name):
 
     return ch#, fh
 
+def create_dummy_measurement(mtype, mfile=None, machine=None, idx=0, mdata=None):
+    s = RockPy.Sample(name='dummy_sample')
+    m = s.add_measurement(mtype=mtype, mfile=mfile, machine=machine,  # general
+                        idx=idx, mdata=mdata,
+                        )
+    return m
 
 def differentiate(data_list, diff=1, smoothing=1, norm=False, check=False):
     """

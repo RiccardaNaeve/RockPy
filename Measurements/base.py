@@ -507,7 +507,6 @@ class Measurement(object):
         :param parameter:
         :return:
         '''
-
         if self.calculation_parameter[caller]:
             a = [parameter[i] for i in self.calculation_parameter[caller]]
             b = [self.calculation_parameter[caller][i] for i in self.calculation_parameter[caller]]
@@ -626,10 +625,11 @@ class Measurement(object):
         """
         if tobj.ttype != 'none':
             for dtype in self._raw_data:
-                data = np.ones(len(self.data[dtype]['variable'].v)) * tobj.value
-                if not 'ttype ' + tobj.ttype in self.data[dtype].column_names:
-                    self.data[dtype] = self.data[dtype].append_columns(column_names='ttype ' + tobj.ttype,
-                                                                   data=data)  # , unit=tobj.unit) #todo add units
+                if self._raw_data[dtype]:
+                    data = np.ones(len(self.data[dtype]['variable'].v)) * tobj.value
+                    if not 'ttype ' + tobj.ttype in self.data[dtype].column_names:
+                        self.data[dtype] = self.data[dtype].append_columns(column_names='ttype ' + tobj.ttype,
+                                                                       data=data)  # , unit=tobj.unit) #todo add units
 
     def _add_tval_to_results(self, tobj):
         """
@@ -670,7 +670,7 @@ class Measurement(object):
     +++++++++++++++++++
     """
 
-    def normalizeNEW(self, reference='data', rtype='mag', ntypes='all', vval=None, norm_method='max'):
+    def normalize(self, reference='data', rtype='mag', ntypes='all', vval=None, norm_method='max'):
         """
         normalizes all available data to reference value, using norm_method
 
@@ -679,14 +679,14 @@ class Measurement(object):
            reference: str
               reference state, to which to normalize to e.g. 'NRM'
               also possible to normalize to mass
-            rtype: str
-               component of the reference, if applicable. standard - 'mag'
-            ntypes: list
-               dtype to be normalized, if dtype = 'all' all variables will be normalized
-            vval: float
-               variable value, if reference == value then it will search for the point closest to the vval
-            norm_method: str
-               how the norm_factor is generated, could be min
+           rtype: str
+              component of the reference, if applicable. standard - 'mag'
+           ntypes: list
+              dtype to be normalized, if dtype = 'all' all variables will be normalized
+           vval: float
+              variable value, if reference == value then it will search for the point closest to the vval
+           norm_method: str
+              how the norm_factor is generated, could be min
         """
         #todo normalize by results
         #getting normalization factor
@@ -694,16 +694,18 @@ class Measurement(object):
         ntypes = _to_tuple(ntypes) # make sure its a list/tuple
 
         for dtype, dtype_data in self.data.iteritems(): #cycling through all dtypes in data
-            if 'all' in ntypes: # if all, all non ttype data will be normalized
-                ntypes = [i for i in dtype_data.column_names if not 'ttype' in i]
-            for ntype in ntypes: #else use ntypes specified
-                dtype_data[ntype] = dtype_data[ntype].v / norm_factor
+            if dtype_data:
+                if 'all' in ntypes: # if all, all non ttype data will be normalized
+                    ntypes = [i for i in dtype_data.column_names if not 'ttype' in i]
 
-            if 'mag' in dtype_data.column_names:
-                try:
-                    self.data[dtype]['mag'] = self.data[dtype].magnitude(('x', 'y', 'z'))
-                except:
-                    self.logger.debug('no (x,y,z) data found keeping << mag >>')
+                for ntype in ntypes: #else use ntypes specified
+                        dtype_data[ntype] = dtype_data[ntype].v / norm_factor
+
+                if 'mag' in dtype_data.column_names:
+                    try:
+                        self.data[dtype]['mag'] = self.data[dtype].magnitude(('x', 'y', 'z'))
+                    except:
+                        self.logger.debug('no (x,y,z) data found keeping << mag >>')
 
         if self.initial_state:
             for dtype, dtype_rpd in self.initial_state.data.iteritems():
@@ -712,7 +714,7 @@ class Measurement(object):
                     self.initial_state.data[dtype]['mag'] = self.initial_state.data[dtype].magnitude(('x', 'y', 'z'))
         return self
 
-    def normalize(self, reference='data', rtype='mag', dtype='mag', vval=None, norm_method='max'):
+    def normalizeOLD(self, reference='data', rtype='mag', dtype='mag', vval=None, norm_method='max'):
         """
         normalizes all available data to reference value, using norm_method
 

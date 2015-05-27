@@ -86,6 +86,10 @@ def generate_file_name(sample_group='', sample_name='',
 
 
 def extract_info_from_filename(fname, data_dir):
+    """
+    extracts the file information out of the filename
+
+    """
     index = fname.split('.')[-1]
 
     rest = fname[:-4]

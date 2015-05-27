@@ -19,10 +19,10 @@ class TestSample(TestCase):
         self.cryomag_thellier_is_file = join(RockPy.test_data_path, 'NLCRY_Thellier_is_test.TT')
 
         # vftb
-        self.vftb_coe_file = join(RockPy.test_data_path, 'MUCVFTB_test.coe')
-        self.vftb_hys_file = join(RockPy.test_data_path, 'MUCVFTB_test.hys')
-        self.vftb_irm_file = join(RockPy.test_data_path, 'MUCVFTB_test.irm')
-        self.vftb_rmp_file = join(RockPy.test_data_path, 'MUCVFTB_test.rmp')
+        self.vftb_coe_file = join(RockPy.test_data_path, 'VFTB', 'MUCVFTB_test.coe')
+        self.vftb_hys_file = join(RockPy.test_data_path, 'VFTB', 'MUCVFTB_test.hys')
+        self.vftb_irm_file = join(RockPy.test_data_path, 'VFTB', 'MUCVFTB_test.irm')
+        self.vftb_rmp_file = join(RockPy.test_data_path, 'VFTB', 'MUCVFTB_test.rmp')
 
         # vsm
         self.vsm_hys_file = ''
@@ -34,19 +34,20 @@ class TestSample(TestCase):
         self.vsm_rmp_file = ''
 
     def add_hys_measurements_with_conditions(self):
-        self.sample.add_measurement(mtype='hysteresis', machine='vftb', mfile=self.vftb_hys_file,
+        print 'adding measurements'
+        self.sample.add_measurement(mtype='hys', machine='vftb', mfile=self.vftb_hys_file,
                                     treatments='pressure_0.0_GPa; temperature_100.0_C')
 
-        self.sample.add_measurement(mtype='hysteresis', machine='vftb', mfile=self.vftb_hys_file,
+        self.sample.add_measurement(mtype='hys', machine='vftb', mfile=self.vftb_hys_file,
                                     treatments='pressure_1.0_GPa; temperature_200.0_C')
 
-        self.sample.add_measurement(mtype='hysteresis', machine='vftb', mfile=self.vftb_hys_file,
+        self.sample.add_measurement(mtype='hys', machine='vftb', mfile=self.vftb_hys_file,
                                     treatments='pressure_2.0_GPa; temperature_300.0_C')
 
-        self.sample.add_measurement(mtype='hysteresis', machine='vftb', mfile=self.vftb_hys_file,
+        self.sample.add_measurement(mtype='hys', machine='vftb', mfile=self.vftb_hys_file,
                                     treatments='pressure_3.0_GPa; temperature_400.0_C')
 
-        self.sample.add_measurement(mtype='hysteresis', machine='vftb', mfile=self.vftb_hys_file,
+        self.sample.add_measurement(mtype='hys', machine='vftb', mfile=self.vftb_hys_file,
                                     treatments='pressure_4.0_GPa; temperature_500.0_C')
 
     def add_vftb_measurements(self):
@@ -170,10 +171,11 @@ class TestSample(TestCase):
         self.sample.all_results()
         print self.sample.results
 
-    # def test_calc_all_mean_results(self):
-    #     print self.sample
-    #     self.add_hys_measurements_with_conditions()
-    #     self.add_vftb_measurements()
-    #     print self.sample.info()
-    #     # print self.sample.calc_all_mean_results()
-    #     print self.sample.all_results()
+        # def test_calc_all_mean_results(self):
+        # print self.sample
+        #     self.add_hys_measurements_with_conditions()
+        #     self.add_vftb_measurements()
+        #     print self.sample.info()
+        #     # print self.sample.calc_all_mean_results()
+        #     print self.sample.all_results()
+

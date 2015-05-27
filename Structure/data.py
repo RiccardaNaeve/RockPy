@@ -13,6 +13,7 @@ from numbers import Number
 from tabulate import tabulate
 from RockPy.Structure import ureg
 from RockPy.Functions import general
+import RockPy.Functions.general
 from scipy import stats
 general.create_logger(__name__)
 log = logging.getLogger(__name__)
@@ -171,7 +172,7 @@ class RockPyData(object):
 
         self.data = RockPyData._convert_to_data3D(data)
 
-        self.showfmt = {'show_rowlabels': True, 'floatfmt': '.3e'}
+        self.showfmt = {'show_rowlabels': True, 'floatfmt': '.2e'}
 
         if row_names is None:
             self._row_names = None  # don't use row names
@@ -1143,7 +1144,7 @@ class RockPyData(object):
             header = self.column_names
         tab = []
         for i in range(self.row_count):
-            linestrs = tuple(['%s +- %s' % (str(v), str(u)) if not np.isnan(u) else str(v) for (v, u) in self.data[i]])
+            linestrs = tuple(['%.3e +- %.3e' % (v, u) if not np.isnan(u) else str(v) for (v, u) in self.data[i]])
             if self.showfmt['show_rowlabels']:
                 if self.row_names is None:
                     l = (i,) + linestrs  # if there are no row labels, put numeric index in first column

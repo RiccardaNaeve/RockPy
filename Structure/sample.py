@@ -8,7 +8,7 @@ from RockPy.Measurements.base import Measurement
 from RockPy.Structure.data import RockPyData, condense
 import RockPy.Visualize.base
 import tabulate
-
+from profilehooks import profile
 # RockPy.Functions.general.create_logger(__name__)
 
 class Sample(object):
@@ -68,7 +68,7 @@ class Sample(object):
 
         if mass is not None:
             mass = self.add_measurement(mtype='mass', mfile=None, machine=mass_machine,
-                                 value=float(mass), unit=mass_unit)
+                                        value=float(mass), unit=mass_unit)
         if diameter is not None:
             diameter = self.add_measurement(mtype='diameter', mfile=None, machine=length_machine,
                                             value=float(diameter), unit=length_unit)
@@ -89,7 +89,7 @@ class Sample(object):
         if height and diameter:
             self.add_measurement(mtype='volume', sample_shape=sample_shape, height=height, diameter=diameter)
         if x_len and y_len and z_len:
-            self.add_measurement(mtype='volume', sample_shape= sample_shape, x_len=x_len, y_len=y_len, z_len=z_len)
+            self.add_measurement(mtype='volume', sample_shape=sample_shape, x_len=x_len, y_len=y_len, z_len=z_len)
 
         self.index = Sample.snum
         self.sgroups = []
@@ -97,6 +97,7 @@ class Sample(object):
         Sample.snum += 1
 
     """ Parameter """
+
     @property
     def mass(self):
         """
@@ -167,6 +168,7 @@ class Sample(object):
         :return:
 
         """
+        self._info_dict = self.__create_info_dict()
         map(self.add_m2_info_dict, self.measurements)
 
     """ PICKL """
@@ -383,7 +385,7 @@ class Sample(object):
         # out = {mt:
         # {tt: {tv: self.get_measurements(mtype=mt, ttype=tt, tval=tv)
         # for tv in self.ttype_tval_dict[tt]}
-        #             for tt in self.mtype_ttype_dict[mt]}
+        # for tt in self.mtype_ttype_dict[mt]}
         #        for mt in self.mtypes}
         return self._info_dict['mtype_ttype_tval']
 
@@ -542,9 +544,56 @@ class Sample(object):
         measurement.sample_obj = self
         return measurement
 
+    def average_measurements(self,
+                             mtype=None, ttype=None, tval=None, tval_range=None, mlist=None,
+                             interpolate=True, recalc_mag=False,
+                             substfunc='mean'):
+        """
+        Averages a list of measurements and returns a measurement with 'is_mean' flag
+        :param mtype:
+        :param ttype:
+        :param tval:
+        :param tval_range:
+        :param mlist:
+        :param interpolate:
+        :param recalc_mag:
+        :param substfunc:
+        :return:
+        """
+
+        # make sure a mtype is given
+        if not mtype:
+            self.logger.error('NO mtype specified. Please specify mtype')
+            return
+
+        # get measurement list from criteria
+        mlist = self.get_measurements(mtype=mtype, ttype=ttype, tval=tval, tval_range=tval_range, filtered=True)
+
+        if len(mlist) == 1:
+            self.logger.warning('Only one measurement found returning measurement')
+            return mlist[0]
+
+        # use first measurement as base
+        dtypes = get_common_dtypes_from_list(mlist=mlist)
+
+        base_measurement = deepcopy(mlist[0])
+        # delete uncommon dtype from base_measurement
+        for key in base_measurement.data:
+            if key not in dtypes:
+                base_measurement.data.pop(key)
+
+
+        for dtype in dtypes:  # cycle through all dtypes e.g. 'down_field', 'up_field' for hysteresis
+            dtype_list = [m.data[dtype] for m in mlist]   # get all data for dtype in one list
+            if interpolate:
+                varlist = self.__get_variable_list(dtype_list)
+                if len(varlist) > 1:
+                    dtype_list = [m.interpolate(varlist) for m in dtype_list]
+            print dtype_list
+
     def mean_measurement(self,
                          mtype=None, ttype=None, tval=None, tval_range=None, mlist=None,
-                         interpolate=False, recalc_mag=False,
+                         interpolate=True, recalc_mag=False,
                          substfunc='mean'):
         """
         takes a list of measurements and creates a mean measurement out of all measurements data
@@ -560,38 +609,48 @@ class Sample(object):
             raise ValueError('No mtype specified')
 
         mlist = self.get_measurements(mtype=mtype, ttype=ttype, tval=tval, tval_range=tval_range, filtered=True)
-
         if not mlist:
             return None
 
-        measurement = deepcopy(mlist[0])
+        # use first measurement as base
+        dtypes = get_common_dtypes_from_list(mlist=mlist)
 
-        for dtype in measurement.data:
+        # create a base measurement
+        base_measurement = RockPy.Functions.general.create_dummy_measurement(mtype=mlist[0].mtype,
+                                                                             machine=mlist[0].machine,
+                                                                             mdata=deepcopy(mlist[0].data))
+
+        # delete uncommon dtype from base_measurement
+        for key in base_measurement.data:
+            if key not in dtypes:
+                base_measurement.data.pop(key)
+
+        for dtype in dtypes:  # cycle through all dtypes e.g. 'down_field', 'up_field' for hysteresis
             dtype_list = [m.data[dtype] for m in mlist]
             if interpolate:
-                varlist = self.__get_variable_list(dtype_list)
+                varlist = self.__get_variable_list(dtype_list, var='temp')
                 if len(varlist) > 1:
                     dtype_list = [m.interpolate(varlist) for m in dtype_list]
 
             if len(dtype_list) > 1:  # for single measurements
-                measurement.data[dtype] = condense(dtype_list)
-                measurement.data[dtype] = measurement.data[dtype].sort('variable')
+                base_measurement.data[dtype] = condense(dtype_list)
+                base_measurement.data[dtype] = base_measurement.data[dtype].sort('variable')
 
             if recalc_mag:
-                measurement.data[dtype].define_alias('m', ( 'x', 'y', 'z'))
-                measurement.data[dtype]['mag'].v = measurement.data[dtype].magnitude('m')
+                base_measurement.data[dtype].define_alias('m', ( 'x', 'y', 'z'))
+                base_measurement.data[dtype]['mag'].v = base_measurement.data[dtype].magnitude('m')
 
-        if measurement.initial_state:
-            for dtype in measurement.initial_state.data:
+        if base_measurement.initial_state:
+            for dtype in base_measurement.initial_state.data:
                 dtype_list = [m.initial_state.data[dtype] for m in mlist if m.initial_state]
-                measurement.initial_state.data[dtype] = condense(dtype_list, substfunc=substfunc)
-                measurement.initial_state.data[dtype] = measurement.initial_state.data[dtype].sort('variable')
+                base_measurement.initial_state.data[dtype] = condense(dtype_list, substfunc=substfunc)
+                base_measurement.initial_state.data[dtype] = base_measurement.initial_state.data[dtype].sort('variable')
                 if recalc_mag:
-                    measurement.initial_state.data[dtype].define_alias('m', ( 'x', 'y', 'z'))
-                    measurement.initial_state.data[dtype]['mag'].v = measurement.initial_state.data[dtype].magnitude(
+                    base_measurement.initial_state.data[dtype].define_alias('m', ( 'x', 'y', 'z'))
+                    base_measurement.initial_state.data[dtype]['mag'].v = base_measurement.initial_state.data[dtype].magnitude(
                         'm')
-        measurement.sample_obj = self
-        return measurement
+        base_measurement.sample_obj = self
+        return base_measurement
 
 
     def all_results(self, mtype=None,
@@ -633,7 +692,7 @@ class Sample(object):
                 # all_results = all_results.append_columns(column_add_all_results)
                 #
                 # aux = RockPyData(column_names=all_results.column_names,
-                #                  data=[np.nan for i in range(len(all_results.column_names))])
+                # data=[np.nan for i in range(len(all_results.column_names))])
                 # todo remove workaround
                 # column_add_results = list(set(all_results.column_names) -
                 # set(results.column_names))  # columns in all_results but not in results
@@ -723,10 +782,10 @@ class Sample(object):
         mean_results.e = errors.reshape((1, len(errors)))
         return mean_results
 
-    def __get_variable_list(self, rpdata_list):
+    def __get_variable_list(self, rpdata_list,  var='variable'):
         out = []
         for rp in rpdata_list:
-            out.extend(rp['variable'].v)
+            out.extend(rp[var].v)
         return self.__sort_list_set(out)
 
     def __sort_list_set(self, values):
@@ -740,7 +799,7 @@ class Sample(object):
     # def _sort_ttype_tval(self, mlist):
     # """
     # sorts a list of measurements according to their tvals and ttypes
-    #        mlist:
+    # mlist:
     #     :return:
     #     """
     ''' FOR PLOTTING FUNCTIONS '''
@@ -816,3 +875,32 @@ class Sample(object):
         out.append(['-----' for i in header])
         out = tabulate.tabulate(out, headers=header, tablefmt="simple")
         return out
+
+
+def get_common_dtypes_from_list(mlist):
+    """
+    Takes a list of measurements and returns a list of common dtypes.
+
+    Example
+    -------
+       mlist = [hys(down_field, up_field), hys(down_field, up_field, virgin)]
+       returns ['down_field', 'up_field']
+
+    Parameter
+    ---------
+       mlist: list
+          list of measurements
+
+    Returns
+    -------
+       dtypes
+          sorted list of commen dtypes
+    """
+    # get intersection of all measurements with certain dtype
+    dtypes = None
+    for m in mlist:
+        if not dtypes:
+            dtypes = set(m.data.keys())
+        else:
+            dtypes = dtypes & set(m.data.keys())
+    return sorted(list(dtypes))

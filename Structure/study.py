@@ -132,6 +132,11 @@ class Study(object):
                 samplegroup = [RockPy.SampleGroup(sample_list=samplegroup)]
             if all(isinstance(item, RockPy.SampleGroup) for item in samplegroup):
                 samplegroup = samplegroup
+            if all(isinstance(item, RockPy.Study) for item in samplegroup):
+                sgs = []
+                for study in samplegroup:
+                    sgs.extend(study.samplegroups)
+                samplegroup = sgs
             else:
                 log.error('MIXED lists not allowed or no Sample/SampleGroup instance found')
                 return None
@@ -139,6 +144,8 @@ class Study(object):
             samplegroup = [RockPy.SampleGroup(sample_list=samplegroup)]
         if isinstance(samplegroup, RockPy.SampleGroup):
             samplegroup = [samplegroup]
+        if isinstance(samplegroup, RockPy.Study):
+            samplegroup = [samplegroup.all_samplegroup]
         return samplegroup
 
     def __add__(self, other):

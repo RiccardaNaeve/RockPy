@@ -37,7 +37,6 @@ class SampleGroup(object):
 
         self.color = None
 
-
         if sample_file:
             self.import_multiple_samples(sample_file, **options)
 
@@ -46,14 +45,30 @@ class SampleGroup(object):
         if sample_list:
             self.add_samples(sample_list)
 
+    def __getstate__(self):
+        '''
+        returned dict will be pickled
+        :return:
+        '''
+        state = {k: v for k, v in self.__dict__.iteritems() if k in
+                 (
+                     'name',
+                     'samples'
+                 )
+        }
 
+        return state
+
+    def __setstate__(self, state):
+        self.__dict__.update(state)
+        self.recalc_info_dict()
 
     def __repr__(self):
         # return super(SampleGroup, self).__repr__()
         return "<RockPy.SampleGroup - << %s - %i samples >> >" % (self.name, len(self.sample_names))
 
     def __getitem__(self, item):
-        if item in self.samples:
+        if item in self.sdict:
             return self.samples[item]
         try:
             return self.sample_list[item]
@@ -415,6 +430,55 @@ class SampleGroup(object):
 
         return out
 
+    def create_mean_sample(self,
+                           reference=None,
+                           rtype='mag', dtye='mag', vval=None,
+                           ntypes='all',
+                           norm_method='max',
+                           interpolate=True,
+                           substfunc='mean'):
+        """
+        Creates a mean sample out of all samples
+
+        :param reference:
+        :param rtype:
+        :param dtye:
+        :param vval:
+        :param norm_method:
+        :param interpolate:
+        :param substfunc:
+        :return:
+        """
+
+        # create new sample_obj
+        mean_sample = Sample(name='mean ' + self.name)
+        # get all measurements from all samples in sample group and add to mean sample
+        mean_sample.measurements = [m for s in self.sample_list for m in s.measurements]
+        mean_sample.recalc_info_dict()
+
+        for mtype in mean_sample.info_dict['mtype_ttype_tval']:
+            if not mtype in ['mass', 'diameter', 'height', 'volume', 'x_len', 'y_len', 'z_len']:
+                for ttype in mean_sample.info_dict['mtype_ttype_tval'][mtype]:
+                    for tval in mean_sample.info_dict['mtype_ttype_tval'][mtype][ttype]:
+                        if reference or vval:
+                            for i, m in enumerate(mean_sample.info_dict['mtype_ttype_tval'][mtype][ttype][tval]):
+                                mean_sample.info_dict['mtype_ttype_tval'][mtype][ttype][tval][i] = m.normalize(
+                                    reference=reference, rtype=rtype,
+                                    ntypes=ntypes,
+                                    vval=vval, norm_method=norm_method)
+
+                        # calculating the mean of all measurements
+                        M = mean_sample.mean_measurement(mtype=mtype, ttype=ttype, tval=tval,
+                                                         substfunc=substfunc,
+                                                         interpolate=interpolate)
+                        if reference or vval:
+                            M.is_normalized = True
+                            M.norm = [reference, rtype, vval, norm_method, np.nan]
+
+                        mean_sample.mean_measurements.append(M)
+
+        mean_sample.is_mean = True  # set is_mean flag after all measuerements are created
+        return mean_sample
 
     def mean_sample(self,
                     reference=None,
@@ -425,7 +489,6 @@ class SampleGroup(object):
 
         # create new sample_obj
         mean_sample = Sample(name='mean ' + self.name)
-
         for mtype in self.info_dict['mtype_ttype_tval']:
             if not mtype in ['mass', 'diameter', 'height', 'volume', 'x_len', 'y_len', 'z_len']:
                 for ttype in self.info_dict['mtype_ttype_tval'][mtype]:
@@ -434,9 +497,8 @@ class SampleGroup(object):
                         measurements = []
                         for s in samples:
                             measurements.extend(s.get_measurements(mtype=mtype, ttype=ttype, tval=tval))
-
                     if reference or vval:
-                        measurements = [m.normalizeNEW(reference=reference, rtype=rtype,
+                        measurements = [m.normalize(reference=reference, rtype=rtype,
                                                     vval=vval, norm_method=norm_method)
                                         for m in measurements
                                         if m.mtype not in ['diameter', 'height', 'mass']]
@@ -452,12 +514,12 @@ class SampleGroup(object):
 
                         mean_sample.mean_measurements.append(M)
 
-        mean_sample.is_mean = True  #set is_mean flag after all measuerements are created
+        mean_sample.is_mean = True  # set is_mean flag after all measuerements are created
         return mean_sample
 
     def average_sample(self, name=None,
                        reference='data',
-                       rtype='mag', dtype = 'mag',
+                       rtype='mag', dtype='mag',
                        vval=None, norm_method='max',
                        interpolate=True):
         """
@@ -491,15 +553,15 @@ class SampleGroup(object):
                         M = average_sample.mean_measurement_from_list(measurements)
                         average_sample.measurements.append(M)
             except:
-                self.log.info('NO %s found' %(mtype))
-                
+                self.log.info('NO %s found' % (mtype))
+
         for mtype in self.mtypes:
             if mtype not in ['diameter', 'height', 'mass', 'volume']:
                 for ttype in self.mtype_ttype_dict[mtype]:
                     for tval in self.ttype_tval_dict[ttype]:
                         measurements = self.get_measurements(mtype=mtype, ttype=ttype, tval=tval)
-                        measurements = [m.normalize(reference=reference, rtype=rtype, dtype=dtype,
-                                                    vval=vval, norm_method=norm_method)
+                        measurements = [m.normalizeOLD(reference=reference, rtype=rtype, dtype=dtype,
+                                                       vval=vval, norm_method=norm_method)
                                         for m in measurements]
                         M = average_sample.mean_measurement_from_list(measurements, interpolate=interpolate)
                         # print average_sample.get_mean_results(mlist=measurements)
@@ -549,7 +611,7 @@ class SampleGroup(object):
               The sample that should be added to the dictionary
         """
 
-        keys = self.info_dict.keys() # all possible keys
+        keys = self.info_dict.keys()  # all possible keys
 
         for key in keys:
             # split keys into levels
@@ -559,7 +621,7 @@ class SampleGroup(object):
                 # if i == n _> last level -> list instead of dict
                 n = len(split_keys) - 1
 
-                #level 0
+                # level 0
                 for e0 in s.info_dict[key]:
                     # if only 1 level
                     if i == n == 0:
@@ -598,7 +660,8 @@ class SampleGroup(object):
         Recalculates the info_dictionary with information of all samples and their corresponding measurements
 
         """
-        map(self.add_s2_info_dict, self.samples)
+        self._info_dict = self.__create_info_dict()
+        map(self.add_s2_info_dict, self.slist)
 
     @property
     def info_dict(self):

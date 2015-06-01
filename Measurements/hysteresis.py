@@ -291,6 +291,7 @@ class Hys(base.Measurement):
         header = self.machine_data.header
         segments = self.machine_data.segment_info
         data = self.machine_data.out_hysteresis()
+        # print header
         if 'adjusted field' in header:
             header[header.index('adjusted field')] = 'field'
             header[header.index('field')] = 'uncorrected field'
@@ -300,17 +301,23 @@ class Hys(base.Measurement):
             header[header.index('adjusted moment')] = 'moment'
 
         if len(segments['segment number'].v) == 3:
-            self._raw_data['virgin'] = RockPyData(column_names=header, data=data[0], units=self.machine_data.units).sort('field')
-            self._raw_data['down_field'] = RockPyData(column_names=header, data=data[1], units=self.machine_data.units).sort('field')
-            self._raw_data['up_field'] = RockPyData(column_names=header, data=data[2], units=self.machine_data.units).sort('field')
+            self._raw_data['virgin'] = RockPyData(column_names=header, data=data[0],
+                                                  units=self.machine_data.units).sort('field')
+            self._raw_data['down_field'] = RockPyData(column_names=header, data=data[1],
+                                                      units=self.machine_data.units).sort('field')
+            self._raw_data['up_field'] = RockPyData(column_names=header, data=data[2],
+                                                    units=self.machine_data.units).sort('field')
 
         if len(segments['segment number'].v) == 2:
             self._raw_data['virgin'] = None
-            self._raw_data['down_field'] = RockPyData(column_names=header, data=data[0], units=self.machine_data.units).sort('field')
-            self._raw_data['up_field'] = RockPyData(column_names=header, data=data[1], units=self.machine_data.units).sort('field')
+            self._raw_data['down_field'] = RockPyData(column_names=header, data=data[0],
+                                                      units=self.machine_data.units).sort('field')
+            self._raw_data['up_field'] = RockPyData(column_names=header, data=data[1],
+                                                    units=self.machine_data.units).sort('field')
 
         if len(segments['segment number'].v) == 1:
-            self._raw_data['virgin'] = RockPyData(column_names=header, data=data[0], units=self.machine_data.units).sort('field')
+            self._raw_data['virgin'] = RockPyData(column_names=header, data=data[0],
+                                                  units=self.machine_data.units).sort('field')
             self._raw_data['down_field'] = None
             self._raw_data['up_field'] = None
 
@@ -452,6 +459,7 @@ class Hys(base.Measurement):
         """
 
         calc_method = '_'.join(['ms', method])
+        parameter.update(dict(method=method))
         self.calc_result(parameter, recalc, force_method=calc_method)
         return self.results['ms']
 
@@ -505,10 +513,10 @@ class Hys(base.Measurement):
 
         """
         ms_all, slope_all = self.fit_hf_slope(saturation_percent=saturation_percent)
-
         self.results['ms'] = [[[np.mean(ms_all), np.std(ms_all)]]]
         parameter.update(dict(method='simple'))
         self.calculation_parameter['ms'].update(parameter)
+        return np.mean(ms_all)
 
     def calculate_mrs(self, **parameter):
 
@@ -536,8 +544,8 @@ class Hys(base.Measurement):
 
         df = calc('down_field')
         uf = calc('up_field')
-        self.results['mrs'] = [[[np.mean([df, uf]), np.std([df, uf])]]]
-        return np.mean([df, uf]), np.std([df, uf])
+        self.results['mrs'] = np.mean([df, uf])#, np.std([df, uf])]]]
+        return (df+ uf)/2, np.std([df, uf])
 
     def calculate_bc(self, **parameter):
         '''
@@ -686,8 +694,8 @@ class Hys(base.Measurement):
         M_ih['mag'] = (df['mag'].v + uf['mag'].v) / 2
 
         if correct_symmetry:
-            M_ih_pos = M_ih.filter(M_ih['field'].v >= 0)
-            M_ih_neg = M_ih.filter(M_ih['field'].v <= 0)
+            M_ih_pos = M_ih.filter(M_ih['field'].v >= 0).interpolate(np.fabs(field_data))
+            M_ih_neg = M_ih.filter(M_ih['field'].v <= 0).interpolate(np.fabs(field_data))
 
             mean_data = np.mean(np.c_[M_ih_pos['mag'].v, -M_ih_neg['mag'].v], axis=1)
             M_ih['mag'] = list(-mean_data).extend(list(mean_data))
@@ -875,7 +883,6 @@ class Hys(base.Measurement):
             self.check_plot(uncorrected_data=uncorrected_data)
 
 
-
     def correct_slope(self):  # todo redundant
         """
         The magnetization curve in this region can be expressed as
@@ -1052,7 +1059,7 @@ class Hys(base.Measurement):
             if abs(self.data['virgin']['mag'].v[0]) >= 0.7 * ms:
                 return True
 
-    def data_gridding(self, method='second', grid_points=30, tuning=1.5, **parameter):
+    def data_gridding(self, method='second', grid_points=20, tuning=1, **parameter):
         """
         Data griding after :cite:`Dobeneck1996a`. Generates an interpolated hysteresis loop with
         :math:`M^{\pm}_{sam}(B^{\pm}_{exp})` at mathematically defined (grid) field values, identical for upper
@@ -1066,7 +1073,7 @@ class Hys(base.Measurement):
         ----------
 
            method: str
-              method with wich the data is fitted between grid points.
+              method with which the data is fitted between grid points.
 
               first:
                   data is fitted using a first order polinomial :math:`M(B) = a_1 + a2*B`
@@ -1108,6 +1115,9 @@ class Hys(base.Measurement):
             return a + b * x + c * x ** 2
 
         for dtype in ['down_field', 'up_field', 'virgin']:
+            if dtype == 'virging':
+                dtype = [i for i in dtype if i >= 0]
+
             interp_data = RockPyData(column_names=['field', 'mag'])
             d = self.data[dtype]
             for i in range(1, len(grid) - 1):  # cycle through gridpoints
@@ -1128,6 +1138,13 @@ class Hys(base.Measurement):
                         self.logger.error('Length of data for interpolation < 2')
                         self.logger.error(
                             'consider reducing number of points for interpolation or lower tuning parameter')
+
+            if 'temperature' in self.data[dtype].column_names:
+                temp = np.mean(self.data[dtype]['temperature'].v)
+                std_temp = np.std(self.data[dtype]['temperature'].v)
+                temp = np.ones(len(interp_data['mag'].v)) * temp
+                interp_data = interp_data.append_columns(column_names='temperature', data=temp)
+
             self.data.update({dtype: interp_data})
 
     def rotate_branch(self, branch, data='data'):
@@ -1174,6 +1191,18 @@ class Hys(base.Measurement):
         popt_neg, pcov_neg = curve_fit(self.approach2sat_func, df_neg['field'].v,
                                        df_neg['mag'].v, p0=[max(df_pos['mag'].v), 1e-3, 0])
         return popt_pos, popt_neg
+
+    def set_field_limit(self, field_limit):
+        """
+        Cuts fields with higer or lower values
+
+        Parameter
+        ---------
+           field_limit: float
+        """
+
+        for dtype in self._data:
+            self._data[dtype] = self._data[dtype].filter(abs(self._data[dtype]['field'].v) <= field_limit)
 
     # ## plotting functions
     def plt_hys(self, noshow=False):

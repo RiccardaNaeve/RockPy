@@ -63,26 +63,32 @@ class Thellier(base.Measurement):
     # todo format_sushibar
     # todo format_jr6
     _standard_parameter = {'slope': {'t_min': 20, 't_max': 700, 'component': 'mag'}}
-
+    _standard_simulation = dict(b_lab = 35.0, b_anc = 50.0)
     @classmethod
-    def simulate(cls, sample_obj, **parameter):
+    def simulate(cls, sample_obj, m_idx=None, **parameter):
         """
         return simulated instance of measurement depending on parameters
         """
+        Thellier._standard_simulation.update(parameter)
+        parameter = Thellier._standard_simulation
+
+
         b_lab = parameter.get('b_lab', 35.0)
         b_anc = parameter.get('b_anc', 35.0)
 
         aniso = parameter.get('aniso', [[1, 0, 0], [0, 1, 0], [0, 0, 1]])
         check_freq = parameter.get('check_freq', 2)
         # temps = parameter.get('temps', [20, 300, 450, 490, 500, 510, 515, 520, 525, 530, 535, 540, 545, 550, 560])
-        temps = parameter.get('temps', [20] + range(100, 650, 25))
-        max_moment = parameter.get('max_moment', len(temps) / np.sqrt(3))
+        temps = parameter.get('temps', [20] + np.arange(100, 650, 25.))
+        max_moment = parameter.get('max_moment', 1.0)
+
         th_steps = []
         pt_steps = []
 
         ac_steps = []
         ck_steps = []
         tr_steps = []
+
         # checks
         n = 0
         for i, v in enumerate(temps):
@@ -112,7 +118,6 @@ class Thellier(base.Measurement):
 
         th_data = np.linspace(max_moment, 0, len(temps)).T
 
-        t = [time.clock() for i in range(len(th_data))]
         mdata['th'] = RockPyData(column_names=['temp', 'x', 'y', 'z', 'sm', 'time'])
         mdata['pt'] = RockPyData(column_names=['temp', 'x', 'y', 'z', 'sm', 'time'])
         mdata['ac'] = RockPyData(column_names=['temp', 'x', 'y', 'z', 'sm', 'time'])
@@ -167,8 +172,8 @@ class Thellier(base.Measurement):
 
         for dtype in mdata:
             for d in ['x', 'y', 'z']:
-                mdata[dtype][d] = mdata[dtype][d].v + np.random.normal(0.0, 0.1, len(mdata[dtype][d].v))
-                mdata[dtype][d] = np.round(mdata[dtype][d].v)
+                mdata[dtype][d] = mdata[dtype][d].v + np.random.normal(0.0, 1e-4, len(mdata[dtype][d].v))
+                # mdata[dtype][d] = np.round(mdata[dtype][d].v)
             mdata[dtype].define_alias('m', ( 'x', 'y', 'z'))
             mdata[dtype] = mdata[dtype].append_columns('mag', mdata[dtype].magnitude('m'))
 

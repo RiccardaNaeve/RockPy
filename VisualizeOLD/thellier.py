@@ -486,7 +486,7 @@ class Arai(base.Generic):
             thellier_objects = measurement_dict[sample]
             for thellier in thellier_objects:
                 if self.norm:
-                    tt = thellier.normalize(reference=self.norm, rtype=self.rtype,
+                    tt = thellier.normalizeOLD(reference=self.norm, rtype=self.rtype,
                                             vval=self.vval, norm_method=self.norm_method)
                 else:
                     tt = thellier

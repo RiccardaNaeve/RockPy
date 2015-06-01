@@ -26,7 +26,7 @@ class AfDemag(base.Generic):
         plt.legend(loc='best')
 
     def feature_data(self, m_obj, **plt_opt):
-        m_obj = m_obj.normalize(**self.norm)
+        m_obj = m_obj.normalizeOLD(**self.norm)
         line = Features.af_demag.field_mom(self.ax, m_obj)
         # self._add_line_text_dict(m_obj.sample_obj, m_obj.ttypes, m_obj.tvals, line)
 
@@ -50,7 +50,7 @@ class ThermoCurve(base.Generic):
                     feat(m, **plt_opt)
 
     def feature_data(self, rmp_obj):
-        rmp_obj = rmp_obj.normalize(**self.norm)
+        rmp_obj = rmp_obj.normalizeOLD(**self.norm)
         line = Features.rmp.mom_temp(self.ax, rmp_obj)
         self._add_line_text_dict(line)
 

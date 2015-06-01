@@ -53,7 +53,8 @@ class SampleGroup(object):
         state = {k: v for k, v in self.__dict__.iteritems() if k in
                  (
                      'name',
-                     'samples'
+                     'samples',
+                     'results'
                  )
         }
 

@@ -311,15 +311,14 @@ class Hys(base.Measurement):
         if len(segments['segment number'].v) == 2:
             self._raw_data['virgin'] = None
             self._raw_data['down_field'] = RockPyData(column_names=header, data=data[0],
-                                                      # units=self.machine_data.units
-                                                      ).sort('field')
+                                                      units=self.machine_data.units).sort('field')
             self._raw_data['up_field'] = RockPyData(column_names=header, data=data[1],
-                                                    # units=self.machine_data.units
-                                                    ).sort('field')
+                                                    units=self.machine_data.units).sort('field')
 
         if len(segments['segment number'].v) == 1:
             self._raw_data['virgin'] = RockPyData(column_names=header, data=data[0],
-                                                  units=self.machine_data.units).sort('field')
+                                                  #units=self.machine_data.units
+                                                  ).sort('field')
             self._raw_data['down_field'] = None
             self._raw_data['up_field'] = None
 

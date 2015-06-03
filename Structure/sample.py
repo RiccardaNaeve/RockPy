@@ -175,6 +175,7 @@ class Sample(object):
 
     def __setstate__(self, d):
         self.__dict__.update(d)
+        self.recalc_info_dict()
 
     def __getstate__(self):
         '''
@@ -308,6 +309,8 @@ class Sample(object):
 
     @property
     def info_dict(self):
+        if not hasattr(self, '_info_dict'):
+            self.recalc_info_dict()
         return self._info_dict
 
     @property

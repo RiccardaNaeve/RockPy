@@ -11,9 +11,6 @@ import itertools
 from pprint import pprint
 from profilehooks import profile
 
-RockPy.Functions.general.create_logger(__name__)
-
-
 class SampleGroup(object):
     """
     Container for Samples, has special calculation methods
@@ -134,7 +131,7 @@ class SampleGroup(object):
 
         s_list = _to_list(s_list)
         self.samples.update(self._sdict_from_slist(s_list=s_list))
-
+        self.log.info('ADDING sample(s) %s' % s_list)
         for s in s_list:
             s.sgroups.append(self)
             self.add_s2_info_dict(s)

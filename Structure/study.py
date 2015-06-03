@@ -4,7 +4,7 @@ import logging
 import RockPy
 from copy import deepcopy
 
-RockPy.Functions.general.create_logger(__name__)
+# RockPy.Functions.general.create_logger(__name__)
 log = logging.getLogger(__name__)
 
 
@@ -37,7 +37,7 @@ class Study(object):
                      'name',
                      '_samplegroups'
                  )
-        }
+                 }
 
         return state
 
@@ -54,8 +54,10 @@ class Study(object):
         """
         if item in self.gdict:
             return self.gdict[item]
+        if item == 'all':
+            return self.all_samplegroup
         try:
-            return self.samplegroups[item]
+            return self._samplegroups[item]
         except KeyError:
             raise KeyError('Study has no SampleGroup << %s >>' % item)
 
@@ -128,11 +130,11 @@ class Study(object):
         # check for list
         if isinstance(samplegroup, list):
             # check for sample_group
-            if all(isinstance(item, RockPy.Sample) for item in samplegroup):
+            if all(isinstance(item, RockPy.Sample) for item in samplegroup):  # all input == samples
                 samplegroup = [RockPy.SampleGroup(sample_list=samplegroup)]
-            if all(isinstance(item, RockPy.SampleGroup) for item in samplegroup):
+            elif all(isinstance(item, RockPy.SampleGroup) for item in samplegroup):  # all input == sample_groups
                 samplegroup = samplegroup
-            if all(isinstance(item, RockPy.Study) for item in samplegroup):
+            elif all(isinstance(item, RockPy.Study) for item in samplegroup):  # all input == samples
                 sgs = []
                 for study in samplegroup:
                     sgs.extend(study.samplegroups)

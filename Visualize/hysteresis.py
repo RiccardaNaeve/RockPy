@@ -2,7 +2,6 @@ __author__ = 'mike'
 import base
 import Features.hysteresis
 
-
 class Hysteresis(base.Generic):
     _required = ['hys']
 

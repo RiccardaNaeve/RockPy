@@ -311,9 +311,11 @@ class Hys(base.Measurement):
         if len(segments['segment number'].v) == 2:
             self._raw_data['virgin'] = None
             self._raw_data['down_field'] = RockPyData(column_names=header, data=data[0],
-                                                      units=self.machine_data.units).sort('field')
+                                                      # units=self.machine_data.units
+                                                      ).sort('field')
             self._raw_data['up_field'] = RockPyData(column_names=header, data=data[1],
-                                                    units=self.machine_data.units).sort('field')
+                                                    # units=self.machine_data.units
+                                                    ).sort('field')
 
         if len(segments['segment number'].v) == 1:
             self._raw_data['virgin'] = RockPyData(column_names=header, data=data[0],
@@ -599,7 +601,7 @@ class Hys(base.Measurement):
 
         """
         if not self.msi_exists:
-            self.logger.error('Msi branch does not exist or not properly saturated. Please check datafile')
+            self.logger.error('%s\tMsi branch does not exist or not properly saturated. Please check datafile'%self.sample_obj.name)
             self.results['e_delta_t'] = np.nan
             return np.nan
 
@@ -611,8 +613,9 @@ class Hys(base.Measurement):
         msi_area = abs(sp.integrate.simps(y=self.data['virgin']['mag'].v,
                                           x=self.data['virgin']['field'].v))  # calulate area under virgin
 
-        self.results['e_delta_t'] = 2 * (df_pos_area - msi_area)
+        self.results['e_delta_t'] = abs(2 * (df_pos_area - msi_area))
         self.calculation_parameter['e_delta_t'].update(parameter)
+        return self.results['e_delta_t'].v[0]
 
     def calculate_e_hys(self, **parameter):
         '''
@@ -635,6 +638,7 @@ class Hys(base.Measurement):
 
         self.results['e_hys'] = abs(df_area - uf_area)
         self.calculation_parameter['e_hys'].update(parameter)
+        return self.results['e_hys'].v[0]
 
     def calculate_hf_sus_simple(self, **parameter):
         """
@@ -1055,8 +1059,8 @@ class Hys(base.Measurement):
            bool
         """
         if self.data['virgin']:
-            ms = self.result_mrs().v
-            if abs(self.data['virgin']['mag'].v[0]) >= 0.7 * ms:
+            mrs = self.result_mrs().v
+            if abs(self.data['virgin']['mag'].v[0]) >= 0.7 * mrs:
                 return True
 
     def data_gridding(self, method='second', grid_points=20, tuning=1, **parameter):

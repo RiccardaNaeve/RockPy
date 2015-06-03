@@ -10,18 +10,18 @@ if __name__  == '__main__':
 
     ''' SG 1 '''
     sg1 = RockPy.SampleGroup(name='SG1')
-    s1a =RockPy.Sample(name='1a')
-    s1b =RockPy.Sample(name='1b')
+    s1a =RockPy.Sample(name='1a', mass=62.7, mass_unit='mg')
+    s1b =RockPy.Sample(name='1b', mass=51.5, mass_unit='mg')
     sg1.add_samples([s1a, s1b])
-    s1a.add_measurement(mtype='hys', mfile=join(folder, 'FeNi_FeNi20-Jd001\'-G01_HYS_VSM#62,7[mg]_[]_[]##STD014.001'), machine='vsm')
-    s1a.add_measurement(mtype='hys', mfile=join(folder, 'FeNi_FeNi20-Jd001\'-G02_HYS_VSM#51,5[mg]_[]_[]##STD014.001'), machine='vsm')
+    h1a1 = s1a.add_measurement(mtype='hys', mfile=join(folder, 'FeNi_FeNi20-Jd001\'-G01_HYS_VSM#62,7[mg]_[]_[]##STD014.001'), machine='vsm')
+    h1a2 = s1a.add_measurement(mtype='hys', mfile=join(folder, 'FeNi_FeNi20-Jd001\'-G02_HYS_VSM#51,5[mg]_[]_[]##STD014.001'), machine='vsm')
     s1b.add_measurement(mtype='hys', mfile=join(folder, 'FeNi_FeNi20-Jd120-G02_HYS_VSM#60,0[mg]_[]_[]##STD015.001'), machine='vsm')
     s1b.add_measurement(mtype='hys', mfile=join(folder, 'FeNi_FeNi20-Jd120-G03_HYS_VSM#50,8[mg]_[]_[]##STD015.001'), machine='vsm')
 
     ''' SG 2 '''
     sg2 = RockPy.SampleGroup(name='SG2')
-    s2a =RockPy.Sample(name='2a')
-    s2b =RockPy.Sample(name='2b')
+    s2a =RockPy.Sample(name='2a', mass=1000, mass_unit='mg')
+    s2b =RockPy.Sample(name='2b', mass=1000, mass_unit='mg')
     sg2.add_samples([s2a, s2b])
     s2a.add_measurement(mtype='hys', mfile=join(folder, 'LTPY_512,2a_HYS_VSM#[]_[]_[]#TEMP_300_K##STD000#.000'), machine='vsm')
     s2a.add_measurement(mtype='hys', mfile=join(folder, 'LTPY_512,2a_HYS_VSM#[]_[]_[]#TEMP_300_K##STD000#.001'), machine='vsm')
@@ -30,11 +30,11 @@ if __name__  == '__main__':
 
     study.add_samplegroup([sg1, sg2])
 
-    print study.info()
+    # print study.info()
     #
     plot = VisualizeV3.NewPlot()
-    plot.add_visual(visual='hysteresis', name='hys', plt_input=study)
-    # plot.add_visual(visual='backfield')
-    # plot.add_visual(visual='hysteresis', name='hys2')
-
+    h1 = plot.add_visual(visual='hysteresis', name='hys', plt_input=study)
+    plot.add_visual(visual='hysteresis', name='hys2', plt_input=study)
+    # plot.add_visual(visual='hysteresis', name='hys2', plt_input=[h1a1, h1a2])
+    h1.normalize_all(reference='mass', ntypes=['mag'])
     plot.show()

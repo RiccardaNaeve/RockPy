@@ -186,7 +186,7 @@ class Sample(object):
                      (
                          'name',
                          'measurements',
-                         '_filtered_data', '_info_dict', 'sgroups',
+                         '_filtered_data', 'sgroups',
                          'is_mean', 'mean_measurements', '_mean_results',
                          'results',
                      )}
@@ -309,8 +309,8 @@ class Sample(object):
 
     @property
     def info_dict(self):
-        if not hasattr(self, '_info_dict'):
-            self.recalc_info_dict()
+        # if not hasattr(self, '_info_dict'):
+        #     self.recalc_info_dict()
         return self._info_dict
 
     @property

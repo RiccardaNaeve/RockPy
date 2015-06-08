@@ -23,7 +23,7 @@ from RockPy.Functions.general import _to_list
 from copy import deepcopy
 
 
-class NewPlot(object):
+class NewFigure(object):
     def __init__(self):
         """
         Container for visuals.
@@ -154,7 +154,7 @@ class Generic(object):
         self.logger = logging.getLogger(self.get_subclass_name())
 
         self._plt_index = plt_index
-        self._plt_input = plt_input
+        self._plt_input = deepcopy(plt_input)
         self._plt_obj = plot
 
         self.title = self.get_subclass_name()

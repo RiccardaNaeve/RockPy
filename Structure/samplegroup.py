@@ -59,7 +59,7 @@ class SampleGroup(object):
 
     def __setstate__(self, state):
         self.__dict__.update(state)
-        self.recalc_info_dict()
+        # self.recalc_info_dict()
 
     def __repr__(self):
         # return super(SampleGroup, self).__repr__()

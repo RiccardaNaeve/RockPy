@@ -20,21 +20,22 @@ if __name__  == '__main__':
 
     ''' SG 2 '''
     sg2 = RockPy.SampleGroup(name='SG2')
-    s2a =RockPy.Sample(name='2a', mass=1000, mass_unit='mg')
-    s2b =RockPy.Sample(name='2b', mass=1000, mass_unit='mg')
+    s2a = RockPy.Sample(name='2a', mass=1, mass_unit='mg')
+    s2b = RockPy.Sample(name='2b', mass=1, mass_unit='mg')
     sg2.add_samples([s2a, s2b])
     s2a.add_measurement(mtype='hys', mfile=join(folder, 'LTPY_512,2a_HYS_VSM#[]_[]_[]#TEMP_300_K##STD000#.000'), machine='vsm')
-    s2a.add_measurement(mtype='hys', mfile=join(folder, 'LTPY_512,2a_HYS_VSM#[]_[]_[]#TEMP_300_K##STD000#.001'), machine='vsm')
-    s2b.add_measurement(mtype='hys', mfile=join(folder, 'LTPY_527,1a_HYS_VSM#[]_[]_[]#TEMP_300_K##STD000#.000'), machine='vsm')
+    s2a.add_measurement(mtype='hys', mfile=join(folder, 'LTPY_527,1a_HYS_VSM#[]_[]_[]#TEMP_300_K##STD000#.000'), machine='vsm')
     s2b.add_measurement(mtype='hys', mfile=join(folder, 'LTPY_527,1a_HYS_VSM#[]_[]_[]#TEMP_300_K##STD000#.001'), machine='vsm')
+    s2b.add_measurement(mtype='hys', mfile=join(folder, 'LTPY_512,2a_HYS_VSM#[]_[]_[]#TEMP_300_K##STD000#.001'), machine='vsm')
 
     study.add_samplegroup([sg1, sg2])
 
     # print study.info()
     #
-    plot = VisualizeV3.NewPlot()
-    h1 = plot.add_visual(visual='hysteresis', name='hys', plt_input=study)
-    plot.add_visual(visual='hysteresis', name='hys2', plt_input=study)
+    fig = VisualizeV3.NewFigure()
+    h1 = fig.add_visual(visual='hysteresis', name='hys', plt_input=study)
+    h2 = fig.add_visual(visual='hysteresis', name='hys2', plt_input=study)
     # plot.add_visual(visual='hysteresis', name='hys2', plt_input=[h1a1, h1a2])
     h1.normalize_all(reference='mass', ntypes=['mag'])
-    plot.show()
+    h2.normalize_all(reference='down_field', vval=1, ntypes=['mag'])
+    fig.show()

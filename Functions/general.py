@@ -1,10 +1,13 @@
 __author__ = 'Mike'
 import logging
-import numpy as np
-import matplotlib.pyplot as plt
 from math import degrees, radians
 from math import sin, cos, tan, asin, atan2
+
+import numpy as np
+import matplotlib.pyplot as plt
+
 import RockPy
+
 
 def create_logger(name):
     log = logging.getLogger(name=name)
@@ -117,13 +120,6 @@ def abs_min_max(list):
     max_idx = np.argmax(np.fabs(list))
     return list[min_idx], list[max_idx]
 
-def _to_list(oneormoreitems):
-    """
-    convert argument to tuple of elements
-    :param oneormoreitems: single number or string or list of numbers or strings
-    :return: tuple of elements
-    """
-    return oneormoreitems if hasattr(oneormoreitems, '__iter__') else [oneormoreitems]
 
 def XYZ2DIL( XYZ):
     """

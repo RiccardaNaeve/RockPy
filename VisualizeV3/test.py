@@ -1,3 +1,5 @@
+from RockPy.VisualizeV3 import NewFigure
+
 __author__ = 'mike'
 import RockPy
 from os.path import join
@@ -32,10 +34,12 @@ if __name__  == '__main__':
 
     # print study.info()
     #
-    fig = VisualizeV3.NewFigure()
+    fig = NewFigure()
     h1 = fig.add_visual(visual='hysteresis', name='hys', plt_input=study)
-    h2 = fig.add_visual(visual='hysteresis', name='hys2', plt_input=study)
-    # plot.add_visual(visual='hysteresis', name='hys2', plt_input=[h1a1, h1a2])
-    h1.normalize_all(reference='mass', ntypes=['mag'])
-    h2.normalize_all(reference='down_field', vval=1, ntypes=['mag'])
+    # h1.add_feature(features=['zero_lines'])
+    h1.add_single_feature(features=['zero_lines', 'grid'])
+    # h2 = fig.add_visual(visual='hysteresis', name='hys2', plt_input=study)
+    # # plot.add_visual(visual='hysteresis', name='hys2', plt_input=[h1a1, h1a2])
+    # h1.normalize_all(reference='mass', ntypes=['mag'])
+    # h2.normalize_all(reference='down_field', vval=1, ntypes=['mag'])
     fig.show()

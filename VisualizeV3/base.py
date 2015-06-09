@@ -3,17 +3,23 @@ import logging
 from copy import deepcopy
 
 import RockPy
+import RockPy.core
 import RockPy.Functions
 import RockPy.Measurements.base
 import RockPy.VisualizeV3.core
 
 
-class Generic(object):
+class Visual(object):
     """
+    OPEN QUESTIONS:
+       - what if I want to add a non-required feature to the visual e.g. backfield to hysteresis
+       - what if I want to have a different visual on a second y axis?
     """
+    logger = logging.getLogger('RockPy.MEASUREMENT')
     _required = []
     linestyles = ['-', '--', ':', '-.']
-    marker = ['+', '*', ',', '.', '1', '3', '2', '4', '8', '<', '>', 'D', 'H', '_', '^', 'd', 'h', 'o', 'p', 's', 'v', '|']
+    marker = ['+', '*', ',', '.', '1', '3', '2', '4', '8', '<', '>', 'D', 'H', '_', '^', 'd', 'h', 'o', 'p', 's', 'v',
+              '|']
     colors = ('b', 'g', 'r', 'c', 'm', 'y', 'k')
 
     @classmethod
@@ -32,8 +38,17 @@ class Generic(object):
     def get_subclass_name(cls):
         return cls.__name__
 
+    @property
+    def implemented_features(self):
+        out = {i[8:]: getattr(self, i) for i in dir(self) if i.startswith('feature_') if not i.endswith('names')}
+        return out
+
+    @property
+    def feature_names(self):
+        return [i.__name__[8:] for i in self.features]
+
     def __init__(self, plt_input=None, plt_index=None, plot=None, name=None):
-        self.logger = logging.getLogger(self.get_subclass_name())
+        self.logger = logging.getLogger('RockPy.VISUALIZE.' + self.get_subclass_name())
 
         self._plt_index = plt_index
         self._plt_input = deepcopy(plt_input)
@@ -45,8 +60,53 @@ class Generic(object):
     def init_visual(self):
         ''' this part is needed by every plot, because it is executed automatically '''
 
-        self.standard_features = []  # list containing all features that have to be plotted for each measurement
+        self.features = []  # list containing all features that have to be plotted for each measurement
         self.single_features = []  # list of features that only have to be plotted one e.g. zero lines
+
+    def add_feature(self, features = None):
+        self.add_feature_to_list(features=features, feature_list='features')
+    def add_single_feature(self, features = None):
+        self.add_feature_to_list(features=features, feature_list='single_features')
+
+    def add_feature_to_list(self, feature_list, features=None):
+        """
+        Adds a feature to the list of pfeature that will be plotted (self.features)
+
+        """
+        list1add = getattr(self, feature_list)
+
+        features = RockPy.core._to_list(features) #convert to list if necessary
+        # check if feature has been provided, if not show list of implemented features
+        if not features:
+            self.logger.warning('NO feature selcted chose one of the following:')
+            self.logger.warning('%s' % sorted(self.implemented_features))
+
+        # check if any of the features is not implemented
+        if any(feature not in self.implemented_features for feature in features):
+            for feature in features:
+                if feature not in self.implemented_features:
+                    self.logger.warning('FEATURE << %s >> not implemented chose one of the following:' %feature)
+
+                    #remove feature that is not implemented
+                    features.remove(feature)
+            self.logger.warning('%s' % sorted(self.implemented_features.keys()))
+
+        # check for duplicates and dont add them
+        for feature in features:
+            if feature not in self.feature_names:
+                # add features to self.features
+                list1add.append(self.implemented_features[feature])
+            else:
+                self.logger.info('FEATURE << %s >> already used in %s' %(feature, feature_list))
+
+    def remove_feature(self, features=None):
+        """
+        Removes a feature, will result in feature is not plotted
+
+        :param features:
+        :return:
+        """
+        features = RockPy.core._to_list(features) #convert to list if necessary
 
     def add_standard(self):
         """
@@ -62,12 +122,12 @@ class Generic(object):
 
         # because iterating over a study, samplegrou is like iterating over a list, I substitute them with lists if not
         # applicable so the plotting is simpler
-        if isinstance(self._plt_input, RockPy.Study): # input is Study
-            study = self._plt_input # no change
-        if isinstance(self._plt_input, RockPy.SampleGroup): # input is samplegroup
+        if isinstance(self._plt_input, RockPy.Study):  # input is Study
+            study = self._plt_input  # no change
+        if isinstance(self._plt_input, RockPy.SampleGroup):  # input is samplegroup
             study = [self._plt_input]  # list = virtual study
-        if isinstance(self._plt_input, RockPy.Sample): # input is sample
-            study = [[self._plt_input]] # list(list) = virtual study with a virtual samplegroup
+        if isinstance(self._plt_input, RockPy.Sample):  # input is sample
+            study = [[self._plt_input]]  # list(list) = virtual study with a virtual samplegroup
         if isinstance(self._plt_input, list):
             if all(isinstance(item, RockPy.SampleGroup) for item in self._plt_input):  # all input == samples
                 study = self._plt_input
@@ -91,8 +151,8 @@ class Generic(object):
                 if len(measurements) > 0:
                     for m_idx, m in enumerate(measurements):
                         ls, marker, color = self.get_ls_marker_color([sg_idx, sample_idx, m_idx])
-                        for feature in self.standard_features:
-                            plt_opt = dict(color = color, marker = marker, ls = ls)
+                        for feature in self.features:
+                            plt_opt = dict(color=color, marker=marker, ls=ls)
                             feature(m, **plt_opt)
         for feature in self.single_features:
             feature()
@@ -117,10 +177,21 @@ class Generic(object):
         :return:
         """
         if len(indices) == 3:
-            return Generic.linestyles[indices[0]], Generic.marker[indices[1]], Generic.colors[indices[2]]
+            return Visual.linestyles[indices[0]], Visual.marker[indices[1]], Visual.colors[indices[2]]
         if len(indices) == 2:
-            return Generic.linestyles[indices[0]], Generic.marker[indices[1]], Generic.colors[indices[2]]
+            return Visual.linestyles[indices[0]], Visual.marker[indices[1]], Visual.colors[indices[2]]
 
+    def feature_grid(self, m_obj=None, **plt_opt):
+        self.ax.grid()
+
+    def feature_zero_lines(self, m_obj=None, **plt_opt):
+        color = plt_opt.pop('color', 'k')
+        zorder = plt_opt.pop('zorder', 0)
+
+        self.ax.axhline(0, color=color, zorder=zorder,
+                   **plt_opt)
+        self.ax.axvline(0, color=color, zorder=zorder,
+                   **plt_opt)
 
     @property
     def ax(self):

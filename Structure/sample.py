@@ -1,5 +1,5 @@
 # coding=utf-8
-from RockPy.Functions.general import _to_list
+from RockPy.core import _to_list
 from copy import deepcopy
 import numpy as np
 import logging

@@ -1,8 +1,8 @@
 import logging
 from matplotlib import pyplot as plt
 import RockPy
-from RockPy.Functions.general import _to_list
-from RockPy.VisualizeV3.base import Generic
+from RockPy.core import _to_list
+from RockPy.VisualizeV3.base import Visual
 
 __author__ = 'mike'
 
@@ -66,12 +66,12 @@ class NewFigure(object):
         visuals = _to_list(visual)
         for visual in visuals:
             # check if visual exists otherwise don't create it
-            if visual in Generic.inheritors():
+            if visual in Visual.inheritors():
                 if not name:
                     name = visual
                 n = self._n_visuals
                 # create instance of visual by dynamically calling from inheritors dictionary
-                visual_obj = Generic.inheritors()[visual](plt_input=plt_input, plt_index=n, plot=self, name = name)
+                visual_obj = Visual.inheritors()[visual](plt_input=plt_input, plt_index=n, plot=self, name = name)
                 self._visuals.append([name, visual, visual_obj])
                 self._n_visuals += 1
             else:

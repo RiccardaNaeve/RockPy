@@ -1,3 +1,5 @@
+from RockPy.core import _to_list
+
 __author__ = 'volk'
 import logging
 import inspect
@@ -90,6 +92,10 @@ class Measurement(object):
                                   for cl in Measurement.inheritors()}
         return measurement_formatters
 
+    @classmethod
+    def get_subclass_name(cls):
+        return cls.__name__
+
     def __init__(self, sample_obj,
                  mtype, mfile, machine, mdata=None, color=None,
                  **options):
@@ -103,6 +109,9 @@ class Measurement(object):
         :param options:
         :return:
         """
+        
+        self.logger = logging.getLogger(self.get_subclass_name())
+
         self.color = color
         self.has_data = True
         self._data = {}
@@ -131,34 +140,34 @@ class Measurement(object):
         self.__initialize()
 
         if mtype in Measurement.measurement_formatters():
-            Measurement.logger.debug('MTYPE << %s >> implemented' % mtype)
+            self.logger.debug('MTYPE << %s >> implemented' % mtype)
             self.mtype = mtype  # set mtype
 
             if mdata is not None:  # we have mdata -> ignore mfile and just use that data directly
-                Measurement.logger.debug('mdata passed -> using as measurement data without formatting')
+                self.logger.debug('mdata passed -> using as measurement data without formatting')
                 self.sample_obj = sample_obj
                 self._data = mdata
                 return  # done
             if machine in Measurement.measurement_formatters()[mtype] or machine == 'combined':
-                Measurement.logger.debug('MACHINE << %s >> implemented' % machine)
+                self.logger.debug('MACHINE << %s >> implemented' % machine)
                 self.machine = machine  # set machine
                 self.sample_obj = sample_obj  # set sample_obj
                 if not mfile:
-                    Measurement.logger.debug('NO machine or mfile passed -> no raw_data will be generated')
+                    self.logger.debug('NO machine or mfile passed -> no raw_data will be generated')
                     return
                 else:
                     self.mfile = mfile
                     self.import_data()
                     self.has_data = self.machine_data.has_data
                     if not self.machine_data.has_data:
-                        Measurement.logger.error('NO DATA passed: check sample name << %s >>' % sample_obj.name)
+                        self.logger.error('NO DATA passed: check sample name << %s >>' % sample_obj.name)
             else:
-                Measurement.logger.error('UNKNOWN MACHINE: << %s >>' % machine)
-                Measurement.logger.error(
+                self.logger.error('UNKNOWN MACHINE: << %s >>' % machine)
+                self.logger.error(
                     'most likely cause is the \"format_%s\" method is missing in the measurement << %s >>' % (
                         machine, mtype))
         else:
-            Measurement.logger.error('UNKNOWN\t MTYPE: << %s >>' % mtype)
+            self.logger.error('UNKNOWN\t MTYPE: << %s >>' % mtype)
 
 
         # dynamic data formatting
@@ -167,12 +176,12 @@ class Measurement(object):
             pass
         elif callable(getattr(self, 'format_' + machine)):
             if self.has_data:
-                Measurement.logger.debug('FORMATTING raw data from << %s >>' % machine)
+                self.logger.debug('FORMATTING raw data from << %s >>' % machine)
                 getattr(self, 'format_' + machine)()
             else:
-                Measurement.logger.debug('NO raw data transfered << %s >>' % machine)
+                self.logger.debug('NO raw data transfered << %s >>' % machine)
         else:
-            Measurement.logger.error(
+            self.logger.error(
                 'FORMATTING raw data from << %s >> not possible, probably not implemented, yet.' % machine)
 
         if self._treatment_opt:
@@ -264,18 +273,18 @@ class Measurement(object):
         :return:
         '''
 
-        Measurement.logger.info('IMPORTING << %s , %s >> data' % (self.machine, self.mtype))
+        self.logger.info('IMPORTING << %s , %s >> data' % (self.machine, self.mtype))
 
         machine = options.get('machine', self.machine)
         mtype = options.get('mtype', self.mtype)
         mfile = options.get('mfile', self.mfile)
         raw_data = self.measurement_formatters()[mtype][machine](mfile, self.sample_obj.name)
         if raw_data is None:
-            Measurement.logger.error('IMPORTING\t did not transfer data - CHECK sample name and data file')
+            self.logger.error('IMPORTING\t did not transfer data - CHECK sample name and data file')
             return
         else:
             if rtn_raw_data:
-                Measurement.logger.info('RETURNING raw_data for << %s , %s >> data' % (machine, mtype))
+                self.logger.info('RETURNING raw_data for << %s , %s >> data' % (machine, mtype))
                 return raw_data
             else:
                 self.machine_data = raw_data
@@ -296,7 +305,7 @@ class Measurement(object):
         mtype = mtype.lower()
         machnine = machine.lower()
 
-        Measurement.logger.info('CREATING << %s >> initial state measurement << %s >> data' % (mtype, self.mtype))
+        self.logger.info('CREATING << %s >> initial state measurement << %s >> data' % (mtype, self.mtype))
         implemented = {i.__name__.lower(): i for i in Measurement.inheritors()}
 
         if mtype in implemented:
@@ -304,15 +313,15 @@ class Measurement(object):
             self.initial_state.is_initial_state = True
             # self.initial_state = self.initial_state_obj.data
         else:
-            Measurement.logger.error('UNABLE to find measurement << %s >>' % (mtype))
+            self.logger.error('UNABLE to find measurement << %s >>' % (mtype))
 
     def get_treatments(self, ttypes=None, tvals=None):
         out = self.treatments
         if ttypes:
-            ttypes = RockPy.Functions.general._to_list(ttypes)
+            ttypes = _to_list(ttypes)
             out = [i for i in out if i.ttype in ttypes]
         if tvals:
-            tvals = RockPy.Functions.general._to_list(map(float,tvals))
+            tvals = _to_list(map(float,tvals))
             out = [i for i in out if i.value in tvals]
         return out
 
@@ -435,19 +444,19 @@ class Measurement(object):
             if self.results[caller] is None or self.results[
                 caller] == np.nan or recalc:  # if results dont exist or force recalc
                 if recalc:
-                    Measurement.logger.debug('FORCED recalculation of << %s >>' % (method))
+                    self.logger.debug('FORCED recalculation of << %s >>' % (method))
                 else:
-                    Measurement.logger.debug('CANNOT find result << %s >> -> calculating' % (method))
+                    self.logger.debug('CANNOT find result << %s >> -> calculating' % (method))
                 getattr(self, 'calculate_' + method)(**parameter)  # calling calculation method
             else:
-                Measurement.logger.debug('FOUND previous << %s >> parameters' % (method))
+                self.logger.debug('FOUND previous << %s >> parameters' % (method))
                 if self.check_parameters(caller, parameter):  # are parameters equal to previous parameters
-                    Measurement.logger.debug('RESULT parameters different from previous calculation -> recalculating')
+                    self.logger.debug('RESULT parameters different from previous calculation -> recalculating')
                     getattr(self, 'calculate_' + method)(**parameter)  # recalculating if parameters different
                 else:
-                    Measurement.logger.debug('RESULT parameters equal to previous calculation')
+                    self.logger.debug('RESULT parameters equal to previous calculation')
         else:
-            Measurement.logger.error(
+            self.logger.error(
                 'CALCULATION of << %s >> not possible, probably not implemented, yet.' % method)
 
     def calc_all(self, **parameter):

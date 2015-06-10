@@ -33,13 +33,15 @@ if __name__  == '__main__':
     study.add_samplegroup([sg1, sg2])
 
     # print study.info()
-    #
+
     fig = NewFigure()
-    h1 = fig.add_visual(visual='hysteresis', name='hys', plt_input=study)
-    # h1.add_feature(features=['zero_lines'])
-    h1.add_single_feature(features=['zero_lines', 'grid'])
+    h1 = fig.add_visual(visual='hysteresis', name='hys', plt_input=s1a)
+
     # h2 = fig.add_visual(visual='hysteresis', name='hys2', plt_input=study)
-    # # plot.add_visual(visual='hysteresis', name='hys2', plt_input=[h1a1, h1a2])
+    h1.remove_single_feature(features=['grid'])
+    # h1.remove_single_feature(features=['zero_lines'])
+    # h1.add_single_feature(features=['zero_lines'])
+    # h1.add_single_feature(features=['zero_lines', 'grid', 'nothing'])
     # h1.normalize_all(reference='mass', ntypes=['mag'])
     # h2.normalize_all(reference='down_field', vval=1, ntypes=['mag'])
     fig.show()

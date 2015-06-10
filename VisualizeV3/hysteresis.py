@@ -15,7 +15,7 @@ class Hysteresis(base.Visual):
 
     def init_visual(self):
         self.features = [self.feature_hys]
-        self.single_features = []
+        self.single_features = [self.feature_grid, self.feature_zero_lines]
 
         self.xlabel = 'Field'
         self.ylabel = 'Moment'
@@ -24,7 +24,9 @@ class Hysteresis(base.Visual):
     def feature_hys(self, m_obj, **plt_opt):
         plt_opt.pop('marker')
         hysteresis.hysteresis(self.ax, m_obj, **plt_opt)
+        return 'multiple'
 
     def feature_virgin(self, m_obj, **plt_opt):
         pass
+        return 'multiple'
 

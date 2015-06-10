@@ -62,6 +62,7 @@ class NewFigure(object):
 
         """
         input_exchange = []
+
         # convert visual to list
         visuals = _to_list(visual)
         for visual in visuals:
@@ -76,7 +77,6 @@ class NewFigure(object):
                 self._n_visuals += 1
             else:
                 self.logger.warning('VISUAL << %s >> not implemented yet' % visual)
-
         self.fig = self._create_fig()
         return visual_obj
 

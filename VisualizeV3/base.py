@@ -63,9 +63,10 @@ class Visual(object):
         self.features = []  # list containing all features that have to be plotted for each measurement
         self.single_features = []  # list of features that only have to be plotted one e.g. zero lines
 
-    def add_feature(self, features = None):
+    def add_feature(self, features=None):
         self.add_feature_to_list(features=features, feature_list='features')
-    def add_single_feature(self, features = None):
+
+    def add_single_feature(self, features=None):
         self.add_feature_to_list(features=features, feature_list='single_features')
 
     def add_feature_to_list(self, feature_list, features=None):
@@ -73,9 +74,9 @@ class Visual(object):
         Adds a feature to the list of pfeature that will be plotted (self.features)
 
         """
-        list1add = getattr(self, feature_list)
+        list2add = getattr(self, feature_list)
 
-        features = RockPy.core._to_list(features) #convert to list if necessary
+        features = RockPy.core._to_list(features)  # convert to list if necessary
         # check if feature has been provided, if not show list of implemented features
         if not features:
             self.logger.warning('NO feature selcted chose one of the following:')
@@ -85,9 +86,9 @@ class Visual(object):
         if any(feature not in self.implemented_features for feature in features):
             for feature in features:
                 if feature not in self.implemented_features:
-                    self.logger.warning('FEATURE << %s >> not implemented chose one of the following:' %feature)
+                    self.logger.warning('FEATURE << %s >> not implemented chose one of the following:' % feature)
 
-                    #remove feature that is not implemented
+                    # remove feature that is not implemented
                     features.remove(feature)
             self.logger.warning('%s' % sorted(self.implemented_features.keys()))
 
@@ -95,18 +96,43 @@ class Visual(object):
         for feature in features:
             if feature not in self.feature_names:
                 # add features to self.features
-                list1add.append(self.implemented_features[feature])
+                list2add.append(self.implemented_features[feature])
             else:
-                self.logger.info('FEATURE << %s >> already used in %s' %(feature, feature_list))
+                self.logger.info('FEATURE << %s >> already used in %s' % (feature, feature_list))
 
     def remove_feature(self, features=None):
+        self.remove_feature_from_list(feature_list='features', features=features)
+
+    def remove_single_feature(self, features=None):
+        self.remove_feature_from_list(feature_list='single_features', features=features)
+
+    def remove_feature_from_list(self, feature_list, features=None):
         """
         Removes a feature, will result in feature is not plotted
 
         :param features:
         :return:
         """
-        features = RockPy.core._to_list(features) #convert to list if necessary
+        list2remove = getattr(self, feature_list)
+        list_names = [i.__name__[8:] for i in list2remove]
+
+        features = RockPy.core._to_list(features)  # convert to list if necessary
+
+        # check if feature has been provided, if not show list of implemented features
+        if not features:
+            self.logger.warning('NO FEATURE SELECTED')
+            self.logger.warning('%s' % sorted(self.features))
+
+        print list2remove
+        # check if any of the features is in used features
+        for feature in features:
+            if feature in list_names:
+                # remove feature that is not implemented
+                self.logger.warning('REMOVING feature << %s >>' % feature)
+                idx = list_names.index(feature)
+                list2remove.remove(list2remove[idx])
+            else:
+                self.logger.warning('FEATURE << %s >> not used' % feature)
 
     def add_standard(self):
         """
@@ -177,21 +203,23 @@ class Visual(object):
         :return:
         """
         if len(indices) == 3:
-            return Visual.linestyles[indices[0]], Visual.marker[indices[1]], Visual.colors[indices[2]]
+            return Visual.linestyles[indices[2]], Visual.marker[indices[1]], Visual.colors[indices[1]]
         if len(indices) == 2:
             return Visual.linestyles[indices[0]], Visual.marker[indices[1]], Visual.colors[indices[2]]
 
     def feature_grid(self, m_obj=None, **plt_opt):
         self.ax.grid()
+        return 'single'
 
     def feature_zero_lines(self, m_obj=None, **plt_opt):
         color = plt_opt.pop('color', 'k')
         zorder = plt_opt.pop('zorder', 0)
 
         self.ax.axhline(0, color=color, zorder=zorder,
-                   **plt_opt)
+                        **plt_opt)
         self.ax.axvline(0, color=color, zorder=zorder,
-                   **plt_opt)
+                        **plt_opt)
+        return 'single'
 
     @property
     def ax(self):

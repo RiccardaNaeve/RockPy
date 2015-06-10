@@ -203,7 +203,7 @@ class Visual(object):
         :return:
         """
         if len(indices) == 3:
-            return Visual.linestyles[indices[2]], Visual.marker[indices[1]], Visual.colors[indices[1]]
+            return Visual.linestyles[indices[0]], Visual.marker[indices[1]], Visual.colors[indices[2]]
         if len(indices) == 2:
             return Visual.linestyles[indices[0]], Visual.marker[indices[1]], Visual.colors[indices[2]]
 

@@ -800,6 +800,7 @@ class Measurement(object):
             if reference == 'mass':
                 m = self.get_mtype_prior_to(mtype='mass')
                 norm_factor = m.data['data']['mass'].v[0]
+
             if isinstance(reference, float) or isinstance(reference, int):
                 norm_factor = float(reference)
         return norm_factor
@@ -824,13 +825,19 @@ class Measurement(object):
     def get_mtype_prior_to(self, mtype):
         """
         search for last mtype prior to self
-        :param mtype:
-        :return:
+
+        Parameters
+        ----------
+           mtype: str
+              the type of measurement that is supposed to be returned
+
+        Returns
+        -------
+           RockPy.Measurement
         """
         measurements = self.sample_obj.get_measurements(mtype)
         if measurements:
-            out = np.array([[i, i.m_idx] for i in measurements if i.m_idx < self.m_idx])
-            out = np.max(out, axis=0)[0]
+            out = [i for i in measurements if i.m_idx < self.m_idx][-1]
             return out
         else:
             return None

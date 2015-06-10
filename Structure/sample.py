@@ -24,7 +24,7 @@ class Sample(object):
                  x_len=None, y_len=None, z_len=None,  # for cubic samples
                  length_unit='mm', length_machine='generic',
                  sample_shape='cylinder',
-                 color=None, comment = '',
+                 color=None, comment='',
                  **options):
         """
         Parameters
@@ -177,7 +177,7 @@ class Sample(object):
 
     def __setstate__(self, d):
         self.__dict__.update(d)
-        self.recalc_info_dict()
+        # self.recalc_info_dict()
 
     def __getstate__(self):
         '''
@@ -213,6 +213,15 @@ class Sample(object):
     def __repr__(self):
         return '<< %s - RockPy.Sample >>' % self.name
 
+    def __add__(self, other):
+        first = deepcopy(self)
+
+        # for m in other.measurements:
+        # m.sample_obj = first
+
+        first.measurements.extend(other.measurements)
+        first.recalc_info_dict()
+        return first
 
     ''' ADD FUNCTIONS '''
 
@@ -312,7 +321,7 @@ class Sample(object):
     @property
     def info_dict(self):
         # if not hasattr(self, '_info_dict'):
-        #     self.recalc_info_dict()
+        # self.recalc_info_dict()
         return self._info_dict
 
     @property
@@ -391,7 +400,7 @@ class Sample(object):
         # {tt: {tv: self.get_measurements(mtype=mt, ttype=tt, tval=tv)
         # for tv in self.ttype_tval_dict[tt]}
         # for tt in self.mtype_ttype_dict[mt]}
-        #        for mt in self.mtypes}
+        # for mt in self.mtypes}
         return self._info_dict['mtype_ttype_tval']
 
     ''' FILTER FUNCTIONS '''
@@ -587,9 +596,8 @@ class Sample(object):
             if key not in dtypes:
                 base_measurement.data.pop(key)
 
-
         for dtype in dtypes:  # cycle through all dtypes e.g. 'down_field', 'up_field' for hysteresis
-            dtype_list = [m.data[dtype] for m in mlist]   # get all data for dtype in one list
+            dtype_list = [m.data[dtype] for m in mlist]  # get all data for dtype in one list
             if interpolate:
                 varlist = self.__get_variable_list(dtype_list)
                 if len(varlist) > 1:
@@ -652,7 +660,8 @@ class Sample(object):
                 base_measurement.initial_state.data[dtype] = base_measurement.initial_state.data[dtype].sort('variable')
                 if recalc_mag:
                     base_measurement.initial_state.data[dtype].define_alias('m', ( 'x', 'y', 'z'))
-                    base_measurement.initial_state.data[dtype]['mag'].v = base_measurement.initial_state.data[dtype].magnitude(
+                    base_measurement.initial_state.data[dtype]['mag'].v = base_measurement.initial_state.data[
+                        dtype].magnitude(
                         'm')
         base_measurement.sample_obj = self
         return base_measurement
@@ -703,7 +712,7 @@ class Sample(object):
                 # set(results.column_names))  # columns in all_results but not in results
                 # results = results.append_columns(column_add_results)
                 # for k in aux.column_names:
-                #     if k in results.column_names:
+                # if k in results.column_names:
                 #         aux[k] = results[k].v
                 # store new results in mean_measults
                 all_results = all_results.append_rows(results)
@@ -787,7 +796,7 @@ class Sample(object):
         mean_results.e = errors.reshape((1, len(errors)))
         return mean_results
 
-    def __get_variable_list(self, rpdata_list,  var='variable'):
+    def __get_variable_list(self, rpdata_list, var='variable'):
         out = []
         for rp in rpdata_list:
             out.extend(rp[var].v)
@@ -805,7 +814,7 @@ class Sample(object):
     # """
     # sorts a list of measurements according to their tvals and ttypes
     # mlist:
-    #     :return:
+    # :return:
     #     """
     ''' FOR PLOTTING FUNCTIONS '''
 

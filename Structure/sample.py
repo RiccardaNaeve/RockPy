@@ -216,8 +216,8 @@ class Sample(object):
     def __add__(self, other):
         first = deepcopy(self)
 
-        # for m in other.measurements:
-        # m.sample_obj = first
+        for m in other.measurements:
+            m.sample_obj = first
 
         first.measurements.extend(other.measurements)
         first.recalc_info_dict()

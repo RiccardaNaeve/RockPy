@@ -24,7 +24,7 @@ class Sample(object):
                  x_len=None, y_len=None, z_len=None,  # for cubic samples
                  length_unit='mm', length_machine='generic',
                  sample_shape='cylinder',
-                 color=None,
+                 color=None, comment = '',
                  **options):
         """
         Parameters
@@ -53,6 +53,8 @@ class Sample(object):
         """
         self.color = color
         self.name = name
+        self.comment = comment
+
         Sample.logger.info('CREATING\t new sample << %s >>' % self.name)
 
         self.unfiltered_measurements = []

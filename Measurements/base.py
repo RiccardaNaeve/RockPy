@@ -546,14 +546,14 @@ class Measurement(object):
 
 
     ### TREATMENT RELATED
-    def has_treatment(self, ttype=None):
+    def has_treatment(self, ttype=None, tval=None):
         """
         checks if a measurement actually has a treatment
         :return:
         """
         if self._treatments and not ttype:
             return True
-        if self._treatments and ttype in self.ttypes:
+        if self._treatments and self._get_treatment(ttype=ttype, tval=tval):
             return True
         else:
             return False
@@ -615,19 +615,13 @@ class Measurement(object):
             treatments = None
         return treatments
 
-    def _get_treatment(self, ttype=None, tval=None):  # todo delete?
+    def _get_treatment(self, ttype=None, tval=None):
         out = [t for t in self.treatments]
         if ttype:
             out = [t for t in out if t.ttype == ttype]
         if tval:
             out = [t for t in out if t.value == tval]
         return out
-
-    def _get_treatment_value(self, ttype):  # todo delete?
-        if ttype in self.ttype_dict:
-            out = self.ttype_dict[ttype].value
-            return out
-
 
     def add_treatment(self, ttype, tval, unit=None, comment=''):
         """
@@ -673,7 +667,6 @@ class Measurement(object):
             if not 'ttype ' + tobj.ttype in self.results.column_names:
                 self.results = self.results.append_columns(column_names='ttype ' + tobj.ttype,
                                                            data=[tobj.value])  # , unit=tobj.unit) #todo add units
-
 
     def __sort_list_set(self, values):
         """

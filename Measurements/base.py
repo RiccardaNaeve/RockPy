@@ -526,6 +526,25 @@ class Measurement(object):
         else:
             return True
 
+    def has_result(self, result):
+        """
+        Checks if the measurement contains a certain result
+
+        Parameters
+        ----------
+           result: str
+              the result that should be found e.g. result='ms' would give True for 'hys' and 'backfield'
+        Returns
+        -------
+           out: bool
+              True if it has result, False if not
+        """
+        if result in self.result_methods:
+            return True
+        else:
+            return False
+
+
     ### TREATMENT RELATED
     @property
     def has_treatment(self):

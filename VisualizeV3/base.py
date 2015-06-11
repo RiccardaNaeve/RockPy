@@ -144,9 +144,19 @@ class Visual(object):
         self.ax.set_ylabel(self.ylabel)
 
     def get_virtual_study(self):
-        all_measurements = False
+        """
+        creates a virtual study so you can iterate over samplegroups, samples, measurements
 
-        # because iterating over a study, samplegrou is like iterating over a list, I substitute them with lists if not
+        Returns
+        -------
+           all_measurements: Bool
+              True if only measurements are to be plotted
+        """
+        # initialize
+        all_measurements = False
+        study = None
+
+        # because iterating over a study, samplegroup is like iterating over a list, I substitute them with lists if not
         # applicable so the plotting is simpler
         if isinstance(self._plt_input, RockPy.Study):  # input is Study
             study = self._plt_input  # no change
@@ -159,6 +169,8 @@ class Visual(object):
                 study = self._plt_input
             if all(isinstance(item, RockPy.Sample) for item in self._plt_input):  # all input == samples
                 study = [self._plt_input]
+
+            # all items in _plt_input are measurements
             if all(type(item) in RockPy.Measurements.base.Measurement.inheritors() for item in self._plt_input):
                 all_measurements = True
                 study = [[self._plt_input]]
@@ -180,6 +192,7 @@ class Visual(object):
                         for feature in self.features:
                             plt_opt = dict(color=color, marker=marker, ls=ls)
                             feature(m, **plt_opt)
+
         for feature in self.single_features:
             feature()
 

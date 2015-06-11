@@ -1,20 +1,20 @@
-from RockPy.core import _to_list
-
 __author__ = 'volk'
+
 import logging
 import inspect
-from pprint import pprint
-
 import numpy as np
+
+from copy import deepcopy
+from pprint import pprint
 
 import RockPy
 import RockPy.Functions.general
 import RockPy.Readin.base
-from RockPy.Structure.data import RockPyData, _to_tuple
+
 from RockPy import Treatments
 from RockPy.Readin import *
-from copy import deepcopy
-import inspect
+from RockPy.core import _to_list
+from RockPy.Structure.data import RockPyData, _to_tuple
 
 class Measurement(object):
     """
@@ -546,20 +546,21 @@ class Measurement(object):
 
 
     ### TREATMENT RELATED
-    @property
-    def has_treatment(self):
+    def has_treatment(self, ttype=None):
         """
         checks if a measurement actually has a treatment
         :return:
         """
-        if self._treatments:
+        if self._treatments and not ttype:
+            return True
+        if self._treatments and ttype in self.ttypes:
             return True
         else:
             return False
 
     @property
     def treatments(self):
-        if self.has_treatment:
+        if self.has_treatment():
             return self._treatments
         else:
             treatment = Treatments.base.Generic(ttype='none', value=np.nan, unit='')
@@ -877,7 +878,7 @@ class Measurement(object):
 
     def get_treatment_labels(self):
         out = ''
-        if self.has_treatment:
+        if self.has_treatment():
             for treat in self.treatments:
                 if not str(treat.value) + ' ' + treat.unit in out:
                     out += str(treat.value) + ' ' + treat.unit

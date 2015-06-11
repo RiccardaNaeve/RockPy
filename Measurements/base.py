@@ -315,16 +315,6 @@ class Measurement(object):
         else:
             self.logger.error('UNABLE to find measurement << %s >>' % (mtype))
 
-    def get_treatments(self, ttypes=None, tvals=None):
-        out = self.treatments
-        if ttypes:
-            ttypes = _to_list(ttypes)
-            out = [i for i in out if i.ttype in ttypes]
-        if tvals:
-            tvals = _to_list(map(float,tvals))
-            out = [i for i in out if i.value in tvals]
-        return out
-
     @property
     def ttypes(self):
         """
@@ -544,6 +534,8 @@ class Measurement(object):
         else:
             return False
 
+    def do_calculation(self, result, **parameters):
+
 
     ### TREATMENT RELATED
     def has_treatment(self, ttype=None, tval=None):
@@ -553,7 +545,7 @@ class Measurement(object):
         """
         if self._treatments and not ttype:
             return True
-        if self._treatments and self._get_treatment(ttype=ttype, tval=tval):
+        if self._treatments and self.get_treatments(ttype=ttype, tval=tval):
             return True
         else:
             return False
@@ -615,12 +607,20 @@ class Measurement(object):
             treatments = None
         return treatments
 
-    def _get_treatment(self, ttype=None, tval=None):
-        out = [t for t in self.treatments]
-        if ttype:
-            out = [t for t in out if t.ttype == ttype]
-        if tval:
-            out = [t for t in out if t.value == tval]
+    def get_treatments(self, ttypes=None, tvals=None):
+        """
+
+        :param ttypes:
+        :param tvals:
+        :return:
+        """
+        out = self.treatments
+        if ttypes:
+            ttypes = _to_list(ttypes)
+            out = [i for i in out if i.ttype in ttypes]
+        if tvals:
+            tvals = _to_list(map(float,tvals))
+            out = [i for i in out if i.value in tvals]
         return out
 
     def add_treatment(self, ttype, tval, unit=None, comment=''):

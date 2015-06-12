@@ -2,6 +2,7 @@ __author__ = 'volk'
 
 import logging
 import inspect
+import itertools
 from copy import deepcopy
 
 import numpy as np
@@ -96,6 +97,7 @@ class Measurement(object):
 
     def __init__(self, sample_obj,
                  mtype, mfile, machine, mdata=None, color=None,
+                 series = None,
                  **options):
         """
         :param sample_obj:
@@ -107,7 +109,7 @@ class Measurement(object):
         :param options:
         :return:
         """
-        
+
         self.logger = logging.getLogger(self.get_subclass_name())
 
         self.color = color
@@ -115,7 +117,7 @@ class Measurement(object):
         self._data = {}
         self._raw_data = {}
         self.is_initial_state = False
-        self.is_mean = False # flag for mean measurements
+        self.is_mean = False  # flag for mean measurements
 
         if machine is not None:
             machine = machine.lower()  # for consistency in code
@@ -127,15 +129,21 @@ class Measurement(object):
         self.machine_data = None  # returned data from Readin.machines()
         self.suffix = options.get('suffix', '')
 
-        ''' series '''
-        self._series = []
-        self._series_opt = options.get('series', None)
-
         ''' initial state '''
         self.is_machine_data = None  # returned data from Readin.machines()
         self.initial_state = None
 
+        ''' series '''
+        self._series = []
+        self._series_opt = series
+
         self.__initialize()
+
+        # add series if provied
+        # has to come past __initialize()
+        if self._series_opt:
+            self._add_series_from_opt()
+
 
         if mtype in Measurement.measurement_formatters():
             self.logger.debug('MTYPE << %s >> implemented' % mtype)
@@ -182,14 +190,19 @@ class Measurement(object):
             self.logger.error(
                 'FORMATTING raw data from << %s >> not possible, probably not implemented, yet.' % machine)
 
-        if self._series_opt:
-            self._add_series_from_opt()
-
     @property
     def m_idx(self):
         return self.sample_obj.measurements.index(self)
 
     def __initialize(self):
+        """
+        Initialize function is called inside the __init__ function, it is also called when the object is reconstructed
+        with pickle.
+
+        :return:
+        """
+
+
         # dynamical creation of entries in results data. One column for each results_* method.
         # calculation_* methods are not creating columns -> if a result is calculated a result_* method
         # has to be written
@@ -221,10 +234,12 @@ class Measurement(object):
         if self._series:
             for t in self._series:
                 self._add_sval_to_results(t)
-        #         self._add_sval_to_data(t)
+        # self._add_sval_to_data(t)
 
-        self.is_normalized = False # normalized flag for visuals, so its not normalized twize
-        self.norm = None # the actual parameters
+        self.is_normalized = False  # normalized flag for visuals, so its not normalized twize
+        self.norm = None  # the actual parameters
+
+        self._info_dict = self.__create_info_dict()
 
     def __getstate__(self):
         '''
@@ -238,10 +253,10 @@ class Measurement(object):
                          '_raw_data', '_data',
                          'initial_state', 'is_initial_state',
                          'sample_obj',
-                         '_series_opt',
-                         '_series', 'suffix',
+                         '_series_opt', '_series',
+                         'suffix',
                      )
-        }
+                     }
         return pickle_me
 
     def __setstate__(self, d):
@@ -258,10 +273,12 @@ class Measurement(object):
 
     def __getattr__(self, attr):
         # print attr, self.__dict__.keys()
-        if attr in self.__getattribute__('_data').keys():
-            return self._data[attr]
-        if attr in self.__getattribute__('result_methods'):
-            return getattr(self, 'result_' + attr)().v[0]
+        if attr in hasattr(self, '_data'):
+            if attr in self.__getattribute__('_data').keys():
+                return self._data[attr]
+        if attr in hasattr(self, 'result_methods'):
+            if attr in self.__getattribute__('result_methods'):
+                return getattr(self, 'result_' + attr)().v[0]
         raise AttributeError
 
     def import_data(self, rtn_raw_data=None, **options):
@@ -313,6 +330,59 @@ class Measurement(object):
             # self.initial_state = self.initial_state_obj.data
         else:
             self.logger.error('UNABLE to find measurement << %s >>' % (mtype))
+
+    ### INFO DICTIONARY
+
+    @property
+    def info_dict(self):
+        if not hasattr(self,'_info_dict'):
+            self._info_dict = self.__create_info_dict()
+        if not all( i in self._info_dict['series'] for i in self.series):
+            self._recalc_info_dict()
+        return self._info_dict
+
+    def __create_info_dict(self):
+        """
+        creates all info dictionaries
+
+        Returns
+        -------
+           dict
+              Dictionary with a permutation of ,type, stype and sval.
+        """
+        d = ['stype', 'sval']
+        keys = ['_'.join(i) for n in range(3) for i in itertools.permutations(d, n) if not len(i) == 0]
+        out = {i: {} for i in keys}
+        out.update({'series': []})
+        return out
+
+    def _recalc_info_dict(self):
+        """
+        Re-calculates the info_dictionary for the measurement
+        """
+        self._info_dict = self.__create_info_dict()
+        map(self.add_s2_info_dict, self.series)
+
+    def add_s2_info_dict(self, series):
+        """
+        adds a measurement to the info dictionary.
+
+        Parameters
+        ----------
+           series: RockPy.Series
+              Series to be added to the info_dictionary
+        """
+
+        if not series in self._info_dict['series']:
+            self._info_dict['stype'].setdefault(series.stype, []).append(self)
+            self._info_dict['sval'].setdefault(series.value, []).append(self)
+
+            self._info_dict['sval_stype'].setdefault(series.value, {})
+            self._info_dict['sval_stype'][series.value].setdefault(series.stype, []).append(self)
+            self._info_dict['stype_sval'].setdefault(series.stype, {})
+            self._info_dict['stype_sval'][series.stype].setdefault(series.value, []).append(self)
+
+            self._info_dict['series'].append(series)
 
     @property
     def stypes(self):
@@ -397,7 +467,7 @@ class Measurement(object):
         """
 
         if not self.has_result(result):
-            self.logger.warning('%s doe not have result << %s >>' %self.mtype, result)
+            self.logger.warning('%s doe not have result << %s >>' % self.mtype, result)
             return
         print result
 
@@ -439,9 +509,9 @@ class Measurement(object):
         caller = '_'.join(inspect.stack()[1][3].split('_')[1:])  # get calling function
 
         if force_method is not None:
-            method = force_method # method for calculation if any: result_CALLER_method
+            method = force_method  # method for calculation if any: result_CALLER_method
         else:
-            method = caller # if CALLER = METHOD
+            method = caller  # if CALLER = METHOD
 
         if callable(getattr(self, 'calculate_' + method)):  # check if calculation function exists
             # check for None and replaces it with standard
@@ -614,7 +684,7 @@ class Measurement(object):
                 try:
                     i[1] = float(i[1])
                 except:
-                    raise TypeError('%s can not be converted to float' %i)
+                    raise TypeError('%s can not be converted to float' % i)
         else:
             series = None
         return series
@@ -637,7 +707,7 @@ class Measurement(object):
             stypes = _to_list(stypes)
             out = [i for i in out if i.stype in stypes]
         if svals:
-            svals = _to_list(map(float,svals))
+            svals = _to_list(map(float, svals))
             out = [i for i in out if i.value in svals]
         return out
 
@@ -670,7 +740,7 @@ class Measurement(object):
                     data = np.ones(len(self.data[dtype]['variable'].v)) * sobj.value
                     if not 'stype ' + sobj.stype in self.data[dtype].column_names:
                         self.data[dtype] = self.data[dtype].append_columns(column_names='stype ' + sobj.stype,
-                                                                       data=data)  # , unit=sobj.unit) #todo add units
+                                                                           data=data)  # , unit=sobj.unit) #todo add units
 
     def _add_sval_to_results(self, sobj):
         """
@@ -728,18 +798,18 @@ class Measurement(object):
            norm_method: str
               how the norm_factor is generated, could be min
         """
-        #todo normalize by results
+        # todo normalize by results
         #getting normalization factor
         norm_factor = self._get_norm_factor(reference, rtype, vval, norm_method)
-        ntypes = _to_tuple(ntypes) # make sure its a list/tuple
+        ntypes = _to_tuple(ntypes)  # make sure its a list/tuple
 
-        for dtype, dtype_data in self.data.iteritems(): #cycling through all dtypes in data
+        for dtype, dtype_data in self.data.iteritems():  #cycling through all dtypes in data
             if dtype_data:
-                if 'all' in ntypes: # if all, all non stype data will be normalized
+                if 'all' in ntypes:  # if all, all non stype data will be normalized
                     ntypes = [i for i in dtype_data.column_names if not 'stype' in i]
 
-                for ntype in ntypes: #else use ntypes specified
-                        dtype_data[ntype] = dtype_data[ntype].v / norm_factor
+                for ntype in ntypes:  #else use ntypes specified
+                    dtype_data[ntype] = dtype_data[ntype].v / norm_factor
 
                 if 'mag' in dtype_data.column_names:
                     try:
@@ -840,7 +910,7 @@ class Measurement(object):
         methods = {'max': max,
                    'min': min,
                    # 'val': self.get_val_from_data,
-        }
+                   }
         if not vval:
             if not norm_method in methods:
                 raise NotImplemented('NORMALIZATION METHOD << %s >>' % norm_method)
@@ -885,7 +955,7 @@ class Measurement(object):
                         self.results.append_columns(column_names='stype ' + t.stype,
                                                     data=t.value,
                                                     # unit = t.unit      # todo add units
-                        )
+                                                    )
 
     def get_series_labels(self):
         out = ''
@@ -956,7 +1026,7 @@ class Measurement(object):
         for visual in self.plottable:
             self.plottable[visual](self, show=True)
 
-    def set_get_attr(self, attr, value = None):
+    def set_get_attr(self, attr, value=None):
         """
         checks if attribute exists, if not, creates attribute with value None
         :param attr:

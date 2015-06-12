@@ -15,7 +15,7 @@ class Sample(object):
     """
     Sample in a way a container for measurements
     """
-    logger = logging.getLogger(__name__)
+    logger = logging.getLogger('RockPy.Sample')
     snum = 0
 
     def __init__(self, name,
@@ -56,6 +56,7 @@ class Sample(object):
         self.comment = comment
 
         Sample.logger.info('CREATING\t new sample << %s >>' % self.name)
+        self.logger = logging.getLogger('RockPy.Sample[%s]'%name)
 
         self.raw_measurements = []
         self.measurements = []
@@ -253,20 +254,20 @@ class Sample(object):
         if idx is None:
             idx = len(self.measurements)  # if there is no measurement index
         if mtype in implemented:
-            Sample.logger.info(' ADDING\t << measurement >> %s' % mtype)
+            self.logger.info(' ADDING\t << measurement >> %s' % mtype)
             measurement = implemented[mtype](self,
                                              mtype=mtype, mfile=mfile, machine=machine,
                                              m_idx=idx, mdata=mdata,
                                              **options)
             if measurement.has_data:
                 self.measurements.append(measurement)
-                self.raw_measurements.append(measurement)
+                self.raw_measurements.append(measurement) #todo is it better to store a deepcopy, so you could have a reset_measurement to get rid of possible mistakes?
                 self.add_m2_info_dict(measurement)
                 return measurement
             else:
                 return None
         else:
-            Sample.logger.error(' << %s >> not implemented, yet' % mtype)
+            self.logger.error(' << %s >> not implemented, yet' % mtype)
 
     def add_simulation(self, mtype, sim_param=None, idx=None, **options):
         """
@@ -287,7 +288,7 @@ class Sample(object):
             idx = len(self.measurements)  # if there is no measurement index
 
         if mtype in implemented:
-            Sample.logger.info(' ADDING\t << simulated measurement >> %s' % mtype)
+            self.logger.info(' ADDING\t << simulated measurement >> %s' % mtype)
             measurement = implemented[mtype].simulate(self, m_idx=idx, **options)
             if measurement.has_data:
                 self.measurements.append(measurement)
@@ -295,7 +296,7 @@ class Sample(object):
             else:
                 return None
         else:
-            Sample.logger.error(' << %s >> not implemented, yet' % mtype)
+            self.logger.error(' << %s >> not implemented, yet' % mtype)
 
     def calc_all(self, **parameter):
         """
@@ -468,14 +469,14 @@ class Sample(object):
             svalue = str(sval)
 
         if is_mean:
-            # Sample.logger.debug('SEARCHING\t measurements(mean_list) with  << %s, %s, %s >>' % (mtype, stype, svalue))
+            # self.logger.debug('SEARCHING\t measurements(mean_list) with  << %s, %s, %s >>' % (mtype, stype, svalue))
             out = self.mean_measurements
         else:
             if filtered:
-                # Sample.logger.debug('SEARCHING\t measurements with  << %s, %s, %s >> in filtered data' % (mtype, stype, svalue))
+                # self.logger.debug('SEARCHING\t measurements with  << %s, %s, %s >> in filtered data' % (mtype, stype, svalue))
                 out = self.filtered_data
             else:
-                # Sample.logger.debug('SEARCHING\t measurements with  << %s, %s, %s >>' % (mtype, stype, svalue))
+                # self.logger.debug('SEARCHING\t measurements with  << %s, %s, %s >>' % (mtype, stype, svalue))
                 out = self.measurements
 
         if mtype:  # filter mtypes, if given
@@ -500,7 +501,7 @@ class Sample(object):
                    if val >= min(sval_range)]
 
         if len(out) == 0:
-            Sample.logger.error(
+            self.logger.error(
                 'UNKNOWN\t << %s, %s, %s >> or no measurement found for sample << %s >>' % (
                     mtype, stype, svalue, self.name))
             return []
@@ -602,7 +603,7 @@ class Sample(object):
                 varlist = self.__get_variable_list(dtype_list)
                 if len(varlist) > 1:
                     dtype_list = [m.interpolate(varlist) for m in dtype_list]
-            print dtype_list
+            # print dtype_list
 
     def mean_measurement(self,
                          mtype=None, stype=None, sval=None, sval_range=None, mlist=None,
@@ -870,7 +871,7 @@ class Sample(object):
 
     def info(self):
         """
-        Prints a tabel of the samples infos
+        Prints a table of the samples infos
         :return:
         """
         out = []

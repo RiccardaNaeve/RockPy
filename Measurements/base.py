@@ -2,19 +2,18 @@ __author__ = 'volk'
 
 import logging
 import inspect
-import numpy as np
-
 from copy import deepcopy
-from pprint import pprint
+
+import numpy as np
 
 import RockPy
 import RockPy.Functions.general
 import RockPy.Readin.base
-
 from RockPy import Treatments
 from RockPy.Readin import *
 from RockPy.core import _to_list
 from RockPy.Structure.data import RockPyData, _to_tuple
+
 
 class Measurement(object):
     """
@@ -569,7 +568,7 @@ class Measurement(object):
         if self.has_treatment():
             return self._treatments
         else:
-            treatment = Treatments.base.Generic(ttype='none', value=np.nan, unit='')
+            treatment = RockPy.Structure.base.Generic(ttype='none', value=np.nan, unit='')
             return [treatment]
 
     def _get_treatment_from_suffix(self):

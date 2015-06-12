@@ -27,3 +27,11 @@ class Generic(object):
 
     def __repr__(self):
         return '<RockPy.Treatments> %s, %.2f, [%s]' %(self.ttype, self.value, self.unit)
+
+    @property
+    def v(self):
+        return self.value
+
+    @property
+    def u(self):
+        return self.unit

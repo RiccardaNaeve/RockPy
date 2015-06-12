@@ -57,7 +57,7 @@ class Sample(object):
 
         Sample.logger.info('CREATING\t new sample << %s >>' % self.name)
 
-        self.unfiltered_measurements = []
+        self.raw_measurements = []
         self.measurements = []
         self.results = None
 
@@ -177,7 +177,7 @@ class Sample(object):
 
     def __setstate__(self, d):
         self.__dict__.update(d)
-        # self.recalc_info_dict()
+        self.recalc_info_dict()
 
     def __getstate__(self):
         '''
@@ -260,7 +260,7 @@ class Sample(object):
                                              **options)
             if measurement.has_data:
                 self.measurements.append(measurement)
-                self.unfiltered_measurements.append(measurement)
+                self.raw_measurements.append(measurement)
                 self.add_m2_info_dict(measurement)
                 return measurement
             else:
@@ -811,11 +811,6 @@ class Sample(object):
         return sorted(list(set(values)))
 
     # def _sort_stype_sval(self, mlist):
-    # """
-    # sorts a list of measurements according to their svals and stypes
-    # mlist:
-    # :return:
-    #     """
     ''' FOR PLOTTING FUNCTIONS '''
 
     @property

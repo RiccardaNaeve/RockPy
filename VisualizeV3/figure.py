@@ -1,5 +1,8 @@
 import logging
+
+from profilehooks import profile
 from matplotlib import pyplot as plt
+
 import RockPy
 from RockPy.core import _to_list
 from RockPy.VisualizeV3.base import Visual
@@ -50,6 +53,7 @@ class NewFigure(object):
         else:
             raise KeyError('%s can not be found' % item)
 
+    # @profile
     def add_visual(self, visual, name=None, plt_input=None, **visual_opt):
         """
         adds a visual to the plot. This creates a new subplot.

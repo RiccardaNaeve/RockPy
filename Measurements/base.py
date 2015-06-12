@@ -9,7 +9,6 @@ import numpy as np
 import RockPy
 import RockPy.Functions.general
 import RockPy.Readin.base
-from RockPy import series
 from RockPy.Readin import *
 from RockPy.core import _to_list
 from RockPy.Structure.data import RockPyData, _to_tuple
@@ -31,7 +30,7 @@ class Measurement(object):
            >>> ['pressure']
         as dictionary with corresponding series as value: measurement.tdict
            print measurement.tdict
-           >>> {'pressure': <RockPy.series> pressure, 0.60, [GPa]}
+           >>> {'pressure': <RockPy.Series> pressure, 0.60, [GPa]}
         as dictionary with itself as value: measurement._self_tdict
            >>> {'pressure': {0.6: <RockPy.Measurements.thellier.Thellier object at 0x10e2ef890>}}
 

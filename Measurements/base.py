@@ -196,7 +196,8 @@ class Measurement(object):
         # calculation_* methods are not creating columns -> if a result is calculated a result_* method
         # has to be written
         self.result_methods = [i[7:] for i in dir(self) if i.startswith('result_') if
-                               not i.endswith('generic')]  # search for implemented results methods
+                               not i.endswith('generic') if
+                               not i.endswith('result')]  # search for implemented results methods
 
         self.results = RockPyData(
             column_names=self.result_methods,
@@ -387,6 +388,22 @@ class Measurement(object):
 
         self.results['generic'] = 0
 
+    def calculate_result(self, result, **parameter):
+        """
+        Helper function to dynamically call a result. Used in VisualizeV3
+
+        Parameters
+        ----------
+           result:
+           parameter:
+        """
+
+        if not self.has_result(result):
+            self.logger.warning('%s doe not have result << %s >>' %self.mtype, result)
+            return
+        print result
+
+
     def calc_generic(self, **parameter):
         '''
         helper function
@@ -534,9 +551,6 @@ class Measurement(object):
         else:
             return False
 
-    def do_calculation(self, result, **parameters):
-
-
     ### TREATMENT RELATED
     def has_treatment(self, ttype=None, tval=None):
         """
@@ -545,7 +559,7 @@ class Measurement(object):
         """
         if self._treatments and not ttype:
             return True
-        if self._treatments and self.get_treatments(ttype=ttype, tval=tval):
+        if self._treatments and self.get_treatments(ttypes=ttype, tvals=tval):
             return True
         else:
             return False
@@ -609,10 +623,16 @@ class Measurement(object):
 
     def get_treatments(self, ttypes=None, tvals=None):
         """
+        searches for given ttypes and tvals in self.treatments and returns them
 
-        :param ttypes:
-        :param tvals:
-        :return:
+        Parameters
+        ----------
+           ttypes: list, str
+              ttype or ttypes to be looked up
+           tvals: float
+              tval or tvals to be looked up
+
+        Returns
         """
         out = self.treatments
         if ttypes:

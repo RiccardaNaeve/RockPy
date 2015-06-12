@@ -17,14 +17,14 @@ class Hysteresis(base.Generic):
     def feature_hys(self, m_obj, **plt_opt):
         # hys_obj = hys_obj.normalize(**self.norm)
         lines, texts = Features.hysteresis.df_branch(self.ax, m_obj, **plt_opt)
-        self._add_line_text_dict(m_obj.sample_obj.name, '_'.join(m_obj.ttypes), '_'.join(map(str, m_obj.tvals)), lines)
+        self._add_line_text_dict(m_obj.sample_obj.name, '_'.join(m_obj.stypes), '_'.join(map(str, m_obj.svals)), lines)
         lines, texts = Features.hysteresis.uf_branch(self.ax, m_obj, **plt_opt)
-        self._add_line_text_dict(m_obj.sample_obj.name, '_'.join(m_obj.ttypes), '_'.join(map(str, m_obj.tvals)), lines)
+        self._add_line_text_dict(m_obj.sample_obj.name, '_'.join(m_obj.stypes), '_'.join(map(str, m_obj.svals)), lines)
 
     def feature_virgin(self, m_obj, **plt_opt):
         if m_obj.virgin:
             lines, texts = Features.hysteresis.virgin_branch(self.ax, m_obj, **plt_opt)
-            self._add_line_text_dict(m_obj.sample_obj.name, '_'.join(m_obj.ttypes), '_'.join(map(str, m_obj.tvals)), lines)
+            self._add_line_text_dict(m_obj.sample_obj.name, '_'.join(m_obj.stypes), '_'.join(map(str, m_obj.svals)), lines)
 
     def feature_zero_lines(self):
         pass

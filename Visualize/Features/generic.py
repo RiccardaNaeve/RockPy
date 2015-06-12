@@ -23,6 +23,6 @@ def var_mom(ax, measurement_obj, component='mag', **plt_opt):
     lines = ax.plot(measurement_obj.data['data']['variable'].v,
                     measurement_obj.data['data'][component].v,
                     linestyle=linestyle, marker=marker,
-                    label=' '.join([measurement_obj.sample_obj.name, measurement_obj.mag_method, measurement_obj.get_treatment_labels(), measurement_obj.suffix]),
+                    label=' '.join([measurement_obj.sample_obj.name, measurement_obj.mag_method, measurement_obj.get_series_labels(), measurement_obj.suffix]),
                     **plt_opt)
     return lines

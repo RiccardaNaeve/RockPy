@@ -6,14 +6,14 @@ from RockPy.Structure.data import RockPyData
 
 
 class Generic(object):
-    create_logger('RockPy.TREATMENT')
+    create_logger('RockPy.series')
 
-    def __init__(self, ttype, value, unit, comment=None):
-        #self.log = logging.getLogger('RockPy.TREATMENT.' + type(self).__name__)
-        #self.log.info('CREATING treatment << %s >>' % ttype)
-        self.ttype = ttype.lower()
+    def __init__(self, stype, value, unit, comment=None):
+        #self.log = logging.getLogger('RockPy.series.' + type(self).__name__)
+        #self.log.info('CREATING series << %s >>' % stype)
+        self.stype = stype.lower()
         self.value = float(value)
-        self.data = RockPyData(column_names=ttype, data=value)
+        self.data = RockPyData(column_names=stype, data=value)
         self.unit = unit
         self.comment = comment
 
@@ -26,7 +26,7 @@ class Generic(object):
         self.data[type] = value
 
     def __repr__(self):
-        return '<RockPy.Treatments> %s, %.2f, [%s]' %(self.ttype, self.value, self.unit)
+        return '<RockPy.series> %s, %.2f, [%s]' %(self.stype, self.value, self.unit)
 
     @property
     def v(self):

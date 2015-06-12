@@ -27,11 +27,11 @@ S'machine'
 p13
 S'cryomag'
 p14
-sS'_treatments'
+sS'_series'
 p15
 (lp16
 g1
-(cRockPy.Treatments.base
+(cRockPy.series.base
 Generic
 p17
 g3
@@ -40,7 +40,7 @@ NtRp18
 S'comment'
 p20
 S''
-sS'ttype'
+sS'stype'
 p21
 S'pressure'
 p22
@@ -17138,7 +17138,7 @@ I00
 sS'mfile'
 p8357
 g60
-sS'_treatment_opt'
+sS'_series_opt'
 p8358
 S'Pressure_0.0_GPa'
 p8359
@@ -17176,7 +17176,7 @@ I5
 I6
 I7
 tp8366
-sS'ttype pressure'
+sS'stype pressure'
 p8367
 (I7
 tp8368
@@ -17275,7 +17275,7 @@ I5
 I6
 I7
 tp8394
-sS'ttype pressure'
+sS'stype pressure'
 p8395
 (I7
 tp8396
@@ -17365,7 +17365,7 @@ I5
 I6
 I7
 tp8412
-sS'ttype pressure'
+sS'stype pressure'
 p8413
 (I7
 tp8414
@@ -17477,7 +17477,7 @@ I5
 I6
 I7
 tp8445
-sS'ttype pressure'
+sS'stype pressure'
 p8446
 (I7
 tp8447
@@ -17560,7 +17560,7 @@ I5
 I6
 I7
 tp8460
-sS'ttype pressure'
+sS'stype pressure'
 p8461
 (I7
 tp8462
@@ -17945,7 +17945,7 @@ I5
 I6
 I7
 tp8549
-sS'ttype pressure'
+sS'stype pressure'
 p8550
 (I7
 tp8551
@@ -35125,7 +35125,7 @@ I5
 I6
 I7
 tp16874
-sS'ttype pressure'
+sS'stype pressure'
 p16875
 (I7
 tp16876
@@ -35220,7 +35220,7 @@ I5
 I6
 I7
 tp16898
-sS'ttype pressure'
+sS'stype pressure'
 p16899
 (I7
 tp16900
@@ -35309,7 +35309,7 @@ I5
 I6
 I7
 tp16915
-sS'ttype pressure'
+sS'stype pressure'
 p16916
 (I7
 tp16917
@@ -35424,7 +35424,7 @@ I5
 I6
 I7
 tp16949
-sS'ttype pressure'
+sS'stype pressure'
 p16950
 (I7
 tp16951
@@ -35506,7 +35506,7 @@ I5
 I6
 I7
 tp16963
-sS'ttype pressure'
+sS'stype pressure'
 p16964
 (I7
 tp16965
@@ -35891,7 +35891,7 @@ I5
 I6
 I7
 tp17050
-sS'ttype pressure'
+sS'stype pressure'
 p17051
 (I7
 tp17052
@@ -52281,7 +52281,7 @@ I5
 I6
 I7
 tp24987
-sS'ttype pressure'
+sS'stype pressure'
 p24988
 (I7
 tp24989
@@ -52376,7 +52376,7 @@ I5
 I6
 I7
 tp25011
-sS'ttype pressure'
+sS'stype pressure'
 p25012
 (I7
 tp25013
@@ -52465,7 +52465,7 @@ I5
 I6
 I7
 tp25028
-sS'ttype pressure'
+sS'stype pressure'
 p25029
 (I7
 tp25030
@@ -52580,7 +52580,7 @@ I5
 I6
 I7
 tp25062
-sS'ttype pressure'
+sS'stype pressure'
 p25063
 (I7
 tp25064
@@ -52662,7 +52662,7 @@ I5
 I6
 I7
 tp25076
-sS'ttype pressure'
+sS'stype pressure'
 p25077
 (I7
 tp25078
@@ -53047,7 +53047,7 @@ I5
 I6
 I7
 tp25163
-sS'ttype pressure'
+sS'stype pressure'
 p25164
 (I7
 tp25165
@@ -53119,7 +53119,7 @@ p25179
 NsS'_info_dict'
 p25180
 (dp25181
-S'tval_ttype_mtype'
+S'sval_stype_mtype'
 p25182
 (dp25183
 F0
@@ -53137,7 +53137,7 @@ g8570
 g16867
 (lp25189
 g8564
-assssS'tval_ttype'
+assssS'sval_stype'
 p25190
 (dp25191
 F0
@@ -53151,7 +53151,7 @@ assF1
 g8570
 (lp25195
 g8564
-asssS'ttype_tval_mtype'
+asssS'stype_sval_mtype'
 p25196
 (dp25197
 g22
@@ -53167,7 +53167,7 @@ assF1
 g16867
 (lp25202
 g8564
-assssS'ttype_tval'
+assssS'stype_sval'
 p25203
 (dp25204
 g22
@@ -53179,7 +53179,7 @@ ag17062
 asF1
 (lp25207
 g8564
-asssS'ttype_mtype_tval'
+asssS'stype_mtype_sval'
 p25208
 (dp25209
 g22
@@ -53193,7 +53193,7 @@ ag17062
 asF1
 (lp25213
 g8564
-assssS'tval_mtype'
+assssS'sval_mtype'
 p25214
 (dp25215
 F0
@@ -53207,7 +53207,7 @@ assF1
 g16867
 (lp25219
 g8564
-asssS'ttype_mtype'
+asssS'stype_mtype'
 p25220
 (dp25221
 g22
@@ -53224,7 +53224,7 @@ g8355
 g11
 ag8564
 ag17062
-assS'tval_mtype_ttype'
+assS'sval_mtype_stype'
 p25226
 (dp25227
 F0
@@ -53242,7 +53242,7 @@ g16867
 g8570
 (lp25233
 g8564
-assssS'mtype_ttype_tval'
+assssS'mtype_stype_sval'
 p25234
 (dp25235
 g8355
@@ -53256,7 +53256,7 @@ ag17062
 asF1
 (lp25239
 g8564
-assssS'tval'
+assssS'sval'
 p25240
 (dp25241
 F0
@@ -53266,7 +53266,7 @@ ag17062
 asF1
 (lp25243
 g8564
-assS'mtype_ttype'
+assS'mtype_stype'
 p25244
 (dp25245
 g8355
@@ -53276,7 +53276,7 @@ g22
 g11
 ag8564
 ag17062
-asssS'mtype_tval_ttype'
+asssS'mtype_sval_stype'
 p25248
 (dp25249
 g8355
@@ -53299,7 +53299,7 @@ g22
 g11
 ag8564
 ag17062
-assS'mtype_tval'
+assS'mtype_sval'
 p25257
 (dp25258
 g8355

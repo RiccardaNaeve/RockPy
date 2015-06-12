@@ -27,8 +27,8 @@ def get_hys_coe_irm_rmp_sample():
     coe = join(folder, 'vftb', 'MUCVFTB_test.coe')
     irm = join(folder, 'vftb', 'MUCVFTB_test.irm')
     rmp = join(folder, 'vftb', 'MUCVFTB_test.rmp')
-    S.add_measurement(mtype='hys', mfile=hys, machine='vftb', treatments='temp_20_C; pressure_1_GPa')
-    S.add_measurement(mtype='hys', mfile=hys, machine='vftb', treatments='temp_20_C')
+    S.add_measurement(mtype='hys', mfile=hys, machine='vftb', series='temp_20_C; pressure_1_GPa')
+    S.add_measurement(mtype='hys', mfile=hys, machine='vftb', series='temp_20_C')
     S.add_measurement(mtype='backfield', mfile=coe, machine='vftb')
     S.add_measurement(mtype='irm_acquisition', mfile=irm, machine='vftb')
     S.add_measurement(mtype='thermocurve', mfile=rmp, machine='vftb')
@@ -53,10 +53,10 @@ def get_sample_with_multiple_hys():
     sample = RockPy.Sample(name='test_sample',
                            mass=34.5, mass_unit='mg',
                            diameter=5.4, height=4.3, length_unit='mm',
-                           treatments='pressure_0.0_GPa; temperature_300.0_C')
+                           series='pressure_0.0_GPa; temperature_300.0_C')
     vftb_hys_file = join(RockPy.test_data_path, 'vftb', 'MUCVFTB_test.hys')
     m1 = sample.add_measurement(mtype='hys', machine='vftb', mfile=vftb_hys_file,
-                           treatments='pressure_0.0_GPa; temperature_100.0_C')
+                           series='pressure_0.0_GPa; temperature_100.0_C')
 
     m2 = deepcopy(m1)
     m3 = deepcopy(m2)
@@ -74,32 +74,32 @@ def get_hys_with_multiple_cond():
     sample = RockPy.Sample(name='test_sample',
                            mass=34.5, mass_unit='mg',
                            diameter=5.4, height=4.3, length_unit='mm',
-                           treatments='pressure_0.0_GPa; temperature_300.0_C')
+                           series='pressure_0.0_GPa; temperature_300.0_C')
 
     # vftb
     vftb_hys_file = join(RockPy.test_data_path, 'vftb', 'MUCVFTB_test.hys')
 
     sample.add_measurement(mtype='hys', machine='vftb', mfile=vftb_hys_file,
-                           treatments='pressure_0.0_GPa; temperature_100.0_C')
+                           series='pressure_0.0_GPa; temperature_100.0_C')
 
     sample.add_measurement(mtype='hys', machine='vftb', mfile=vftb_hys_file,
-                           treatments='pressure_1.0_GPa; temperature_200.0_C')
+                           series='pressure_1.0_GPa; temperature_200.0_C')
 
     sample.add_measurement(mtype='hys', machine='vftb', mfile=vftb_hys_file,
-                           treatments='pressure_2.0_GPa; temperature_300.0_C')
+                           series='pressure_2.0_GPa; temperature_300.0_C')
 
     sample.add_measurement(mtype='hys', machine='vftb', mfile=vftb_hys_file,
-                           treatments='pressure_3.0_GPa; temperature_400.0_C')
+                           series='pressure_3.0_GPa; temperature_400.0_C')
 
     sample.add_measurement(mtype='hys', machine='vftb', mfile=vftb_hys_file,
-                           treatments='pressure_4.0_GPa; temperature_500.0_C')
+                           series='pressure_4.0_GPa; temperature_500.0_C')
     return sample
 
 
 def test():
     sample = get_hys_with_multiple_cond()
     measurements = sample.measurements
-    # sample.filter(ttype='temperature', tval=300.)
+    # sample.filter(stype='temperature', sval=300.)
     # sample.recalc_info_dict()
 
 if __name__ == '__main__':

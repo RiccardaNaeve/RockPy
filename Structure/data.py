@@ -54,7 +54,7 @@ def condense(listofRPD, substfunc='mean'):
 
 class RockPyData(object):
     # todo units
-    # todo fill column, so you can do append column -> fill column with single value e.g. for treatments
+    # todo fill column, so you can do append column -> fill column with single value e.g. for series
     """
     class to manage specific numeric data based on a numpy array
     e.g. d = rockpydata( column_names=( 'F','Mx', 'My', 'Mz'))
@@ -78,7 +78,7 @@ class RockPyData(object):
         """
         convert given input to 2D numpy array
            input: array data consisting of values or errors
-           column: if FALSE -> 1D data is treated as a single row, otherwise as single column
+           column: if FALSE -> 1D data is seriesed as a single row, otherwise as single column
         :return: 2D numpy array, representing matrix of values or errors as used by RockPyData.data
         """
         # convert input data to a numpy array
@@ -103,7 +103,7 @@ class RockPyData(object):
         """
         convert given data to 3D numpy array
            input: array data consisting of values (and errors)
-           column: if FALSE -> 1D data is treated as a single row, otherwise as single column
+           column: if FALSE -> 1D data is seriesed as a single row, otherwise as single column
         :return: 3D numpy array, representing matrix of values and errors as used by RockPyData.data
         """
         if input is None:
@@ -849,7 +849,7 @@ class RockPyData(object):
         if key not in self._column_dict:
             raise KeyError('key %s is not a valid column name or alias' % key)
 
-        data = RockPyData._convert_to_data3D(data, column=True)  # since we are indexing columns, a 1D array should be treated as a column
+        data = RockPyData._convert_to_data3D(data, column=True)  # since we are indexing columns, a 1D array should be seriesed as a column
 
         # if we have no data, initialize everything to np.NAN with number of lines matching the new data
         if self._data is None:

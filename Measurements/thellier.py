@@ -1848,7 +1848,7 @@ class Thellier(base.Measurement):
     def export_tdt(self, folder=None, filename=None):
         import os
 
-        i = ['%s_%.2f_%s' % (t.ttype, t.value, t.unit) for t in self.treatments]
+        i = ['%s_%.2f_%s' % (t.stype, t.value, t.unit) for t in self.series]
         if not folder:
             folder = os.path.join(os.path.expanduser('~'), 'Desktop')
         if not filename:

@@ -9,7 +9,7 @@ def field_mom(ax, afdemag_obj, component='mag', **plt_opt):
                     afdemag_obj.data['data'][component].v,
                     linestyle=linestyle, marker=marker,
                     # label=' '.join([afdemag_obj.sample_obj.name, afdemag_obj.mag_method,
-                                    # afdemag_obj.get_treatment_labels(),
+                                    # afdemag_obj.get_series_labels(),
                                     # afdemag_obj.suffix]),
                     **plt_opt)
     return lines

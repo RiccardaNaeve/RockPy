@@ -13,7 +13,7 @@ class TestSample(TestCase):
         self.sample = RockPy.Sample(name='test_sample',
                                     mass=34.5, mass_unit='mg',
                                     diameter=5.4, height=4.3, length_unit='mm',
-                                    treatments='pressure_0.0_GPa; temperature_300.0_C')
+                                    series='pressure_0.0_GPa; temperature_300.0_C')
 
         self.cryomag_thellier_file = join(RockPy.test_data_path, 'NLCRY_Thellier_test.TT')
         self.cryomag_thellier_is_file = join(RockPy.test_data_path, 'NLCRY_Thellier_is_test.TT')
@@ -36,19 +36,19 @@ class TestSample(TestCase):
     def add_hys_measurements_with_conditions(self):
         print 'adding measurements'
         self.sample.add_measurement(mtype='hys', machine='vftb', mfile=self.vftb_hys_file,
-                                    treatments='pressure_0.0_GPa; temperature_100.0_C')
+                                    series='pressure_0.0_GPa; temperature_100.0_C')
 
         self.sample.add_measurement(mtype='hys', machine='vftb', mfile=self.vftb_hys_file,
-                                    treatments='pressure_1.0_GPa; temperature_200.0_C')
+                                    series='pressure_1.0_GPa; temperature_200.0_C')
 
         self.sample.add_measurement(mtype='hys', machine='vftb', mfile=self.vftb_hys_file,
-                                    treatments='pressure_2.0_GPa; temperature_300.0_C')
+                                    series='pressure_2.0_GPa; temperature_300.0_C')
 
         self.sample.add_measurement(mtype='hys', machine='vftb', mfile=self.vftb_hys_file,
-                                    treatments='pressure_3.0_GPa; temperature_400.0_C')
+                                    series='pressure_3.0_GPa; temperature_400.0_C')
 
         self.sample.add_measurement(mtype='hys', machine='vftb', mfile=self.vftb_hys_file,
-                                    treatments='pressure_4.0_GPa; temperature_500.0_C')
+                                    series='pressure_4.0_GPa; temperature_500.0_C')
 
     def add_vftb_measurements(self):
         self.sample.add_measurement(mtype='backfiled', mfile=self.vftb_coe_file, machine='vftb')
@@ -81,87 +81,87 @@ class TestSample(TestCase):
         self.assertEquals(test, self.sample.mtypes)
 
 
-    def test_ttypes(self):
-        test = [t.ttype for m in self.sample.measurements for t in m.treatments]
+    def test_stypes(self):
+        test = [t.stype for m in self.sample.measurements for t in m.series]
         test = sorted(list(set(test)))
-        self.assertEquals(test, self.sample.ttypes)
+        self.assertEquals(test, self.sample.stypes)
 
-    def test_tvals(self):
-        test = [t.value for m in self.sample.measurements for t in m.treatments]
+    def test_svals(self):
+        test = [t.value for m in self.sample.measurements for t in m.series]
         test = sorted(list(set(test)))
-        self.assertEquals(test, self.sample.tvals)
+        self.assertEquals(test, self.sample.svals)
 
     def test_mtype_tdict(self):
         self.assertEqual(self.sample.mtype_tdict.keys(), ['diameter', 'mass', 'height'])
 
-    def test_ttype_dict(self):
+    def test_stype_dict(self):
         self.add_hys_measurements_with_conditions()
         start = time.clock()
-        out = {ttype: self.sample.get_measurements(ttype=ttype) for ttype in self.sample.ttypes}
+        out = {stype: self.sample.get_measurements(stype=stype) for stype in self.sample.stypes}
         old_time = time.clock() - start
         start = time.clock()
-        new = self.sample.ttype_dict
+        new = self.sample.stype_dict
         new_time = time.clock() - start
         self.assertEquals(out, new)
         print '%s - %.2f times faster' % (sys._getframe().f_code.co_name, (old_time / new_time))
 
 
-    def test_mtype_ttype_dict(self):
+    def test_mtype_stype_dict(self):
         self.add_hys_measurements_with_conditions()
         start = time.clock()
 
-        old = {mtype: sorted(list(set([ttype for m in self.sample.get_measurements(mtype=mtype)
-                                       for ttype in m.ttypes])))
+        old = {mtype: sorted(list(set([stype for m in self.sample.get_measurements(mtype=mtype)
+                                       for stype in m.stypes])))
                for mtype in self.sample.mtypes}
         old_time = time.clock() - start
         start = time.clock()
-        new = self.sample.mtype_ttype_dict
+        new = self.sample.mtype_stype_dict
         new_time = time.clock() - start
         self.assertEquals(old, new)
         print '%s - %.2f times faster' % (sys._getframe().f_code.co_name, (old_time / new_time))
 
 
-    def test_mtype_ttype_mdict(self):
+    def test_mtype_stype_mdict(self):
         self.add_hys_measurements_with_conditions()
         start = time.clock()
-        old = {mtype: {ttype: self.sample.get_measurements(mtype=mtype, ttype=ttype)
-                       for ttype in self.sample.mtype_ttype_dict[mtype]}
+        old = {mtype: {stype: self.sample.get_measurements(mtype=mtype, stype=stype)
+                       for stype in self.sample.mtype_stype_dict[mtype]}
                for mtype in self.sample.mtypes}
         old_time = time.clock() - start
         start = time.clock()
-        new = self.sample.mtype_ttype_mdict
+        new = self.sample.mtype_stype_mdict
         new_time = time.clock() - start
         self.assertEquals(old, new)
         print '%s - %.2f times faster' % (sys._getframe().f_code.co_name, (old_time / new_time))
 
 
-    def test_ttype_tval_dict(self):
+    def test_stype_sval_dict(self):
         self.add_hys_measurements_with_conditions()
         start = time.clock()
-        old = {ttype: sorted(list(set([m.ttype_dict[ttype].value for m in self.sample.ttype_dict[ttype]])))
-               for ttype in self.sample.ttypes}
+        old = {stype: sorted(list(set([m.stype_dict[stype].value for m in self.sample.stype_dict[stype]])))
+               for stype in self.sample.stypes}
         old_time = time.clock() - start
         start = time.clock()
-        new = self.sample.ttype_tval_dict
+        new = self.sample.stype_sval_dict
         new_time = time.clock() - start
         self.assertEqual(old.keys(), new.keys())
         # self.assertEqual(old.items(), new.items())
         print '%s - %.2f times faster' % (sys._getframe().f_code.co_name, (old_time / new_time))
 
 
-    def test_mtype_ttype_tval_mdict(self):
+    def test_mtype_stype_sval_mdict(self):
         self.add_hys_measurements_with_conditions()
 
         start = time.clock()
         old = {mt:
-                   {tt: {tv: self.sample.get_measurements(mtype=mt, ttype=tt, tval=tv)
-                         for tv in self.sample.ttype_tval_dict[tt]}
-                    for tt in self.sample.mtype_ttype_dict[mt]}
+                   {tt: {tv: self.sample.get_measurements(mtype=mt, stype=tt, sval=tv)
+                         for tv in self.sample.stype_sval_dict[tt]}
+                    for tt in self.sample.mtype_stype_dict[mt]}
                for mt in self.sample.mtypes}
         old_time = time.clock() - start
 
         start = time.clock()
-        new = self.sample.mtype_ttype_tval_mdict
+        new = self.sample.mtype_stype_sval_mdict
         new_time = time.clock() - start
         print '%s - %.2f times faster' % (sys._getframe().f_code.co_name, (old_time / new_time))
         self.assertEquals(old, new)

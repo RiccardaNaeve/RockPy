@@ -127,17 +127,17 @@ class Sample(object):
         Returns
         -------
            dict
-              Dictionary with a permutation of ,type, ttype and tval.
+              Dictionary with a permutation of ,type, stype and sval.
         """
-        d = ['mtype', 'ttype', 'tval']
+        d = ['mtype', 'stype', 'sval']
         keys = ['_'.join(i) for n in range(4) for i in itertools.permutations(d, n) if not len(i) == 0]
         out = {i: {} for i in keys}
         return out
 
     def add_m2_info_dict(self, m):
         keys = self._info_dict.keys()
-        for t in m.treatments:
-            test = {'mtype': m.mtype, 'ttype': t.ttype, 'tval': t.value}
+        for t in m.series:
+            test = {'mtype': m.mtype, 'stype': t.stype, 'sval': t.value}
             for key in keys:
                 levels = key.split('_')
                 for i, level in enumerate(levels):
@@ -332,19 +332,19 @@ class Sample(object):
         return sorted(self._info_dict['mtype'].keys())
 
     @property
-    def ttypes(self):
+    def stypes(self):
         """
-        returns a list of all ttypes
+        returns a list of all stypes
         """
-        return sorted(self._info_dict['ttype'].keys())
+        return sorted(self._info_dict['stype'].keys())
 
     @property
-    def tvals(self):
+    def svals(self):
         """
-        returns a list of all ttypes
+        returns a list of all stypes
         """
 
-        return sorted(self._info_dict['tval'].keys())
+        return sorted(self._info_dict['sval'].keys())
 
     @property
     def mtype_tdict(self):  # todo: delete?
@@ -355,57 +355,57 @@ class Sample(object):
         for mtype in self.mtypes:
             aux = []
             for m in self.get_measurements(mtype=mtype):
-                aux.extend(m.treatments)
+                aux.extend(m.series)
             out.update({mtype: aux})
         return out
 
     @property
-    def ttype_dict(self):
+    def stype_dict(self):
         """
-        dictionary with all treatment_types {ttype:[list of measurements]}
+        dictionary with all series_types {stype:[list of measurements]}
 
         example:
         >>> {'pressure': [<RockPy.Measurements.parameters.Mass object at 0x10e196150>, <RockPy.Measurements.parameters.Diameter object at 0x10e1962d0>]}
         """
-        return self._info_dict['ttype']
+        return self._info_dict['stype']
 
     @property
-    def mtype_ttype_dict(self):
+    def mtype_stype_dict(self):
         """
-        returns a dictionary of mtypes, with all ttypes in that mtype
+        returns a dictionary of mtypes, with all stypes in that mtype
         """
-        # out = {mtype: self.__sort_list_set([ttype for m in self.get_measurements(mtype=mtype) for ttype in m.ttypes])
+        # out = {mtype: self.__sort_list_set([stype for m in self.get_measurements(mtype=mtype) for stype in m.stypes])
         # for mtype in self.mtypes}
-        return {k: v.keys() for k, v in self._info_dict['mtype_ttype'].iteritems()}
+        return {k: v.keys() for k, v in self._info_dict['mtype_stype'].iteritems()}
 
     @property
-    def mtype_ttype_mdict(self):
+    def mtype_stype_mdict(self):
         """
-        returns a dictionary of mtypes, with all ttypes in that mtype
+        returns a dictionary of mtypes, with all stypes in that mtype
         """
-        # out = {mtype: {ttype: self.get_measurements(mtype=mtype, ttype=ttype)
-        # for ttype in self.mtype_ttype_dict[mtype]}
+        # out = {mtype: {stype: self.get_measurements(mtype=mtype, stype=stype)
+        # for stype in self.mtype_stype_dict[mtype]}
         # for mtype in self.mtypes}
-        return self._info_dict['mtype_ttype']
+        return self._info_dict['mtype_stype']
 
     @property
-    def ttype_tval_dict(self):
-        # out = {ttype: self.__sort_list_set([m.ttype_dict[ttype].value for m in self.ttype_dict[ttype]]) for ttype in
-        # self.ttypes}
-        return {k: v.keys() for k, v in self._info_dict['ttype_tval'].iteritems()}
+    def stype_sval_dict(self):
+        # out = {stype: self.__sort_list_set([m.stype_dict[stype].value for m in self.stype_dict[stype]]) for stype in
+        # self.stypes}
+        return {k: v.keys() for k, v in self._info_dict['stype_sval'].iteritems()}
 
     @property
-    def mtype_ttype_tval_mdict(self):
+    def mtype_stype_sval_mdict(self):
         # out = {mt:
-        # {tt: {tv: self.get_measurements(mtype=mt, ttype=tt, tval=tv)
-        # for tv in self.ttype_tval_dict[tt]}
-        # for tt in self.mtype_ttype_dict[mt]}
+        # {tt: {tv: self.get_measurements(mtype=mt, stype=tt, sval=tv)
+        # for tv in self.stype_sval_dict[tt]}
+        # for tt in self.mtype_stype_dict[mt]}
         # for mt in self.mtypes}
-        return self._info_dict['mtype_ttype_tval']
+        return self._info_dict['mtype_stype_sval']
 
     ''' FILTER FUNCTIONS '''
 
-    def filter(self, mtype=None, ttype=None, tval=None, tval_range=None,
+    def filter(self, mtype=None, stype=None, sval=None, sval_range=None,
                **kwargs):
         """
         used to filter measurement data.
@@ -413,13 +413,13 @@ class Sample(object):
         Parameters
         ----------
            mtype: mtype to be filtered for, if not specified all mtypes are returned
-           ttype: ttype to be filtered for, if not specified all ttypes are returned
-           tval: tval to be filtered for, can only be used in conjuction with ttype
-           tval_range: tval_range to be filtered for, can only be used in conjuction with ttype
+           stype: stype to be filtered for, if not specified all stypes are returned
+           sval: sval to be filtered for, can only be used in conjuction with stype
+           sval_range: sval_range to be filtered for, can only be used in conjuction with stype
            kwargs:
         """
         self._filtered_data = self.get_measurements(mtype=mtype,
-                                                    ttype=ttype, tval=tval, tval_range=tval_range, filtered=False)
+                                                    stype=stype, sval=sval, sval_range=sval_range, filtered=False)
         return self._filtered_data
 
     def reset_filter(self):
@@ -434,7 +434,7 @@ class Sample(object):
 
     def get_measurements(self,
                          mtype=None,
-                         ttype=None, tval=None, tval_range=None,
+                         stype=None, sval=None, sval_range=None,
                          is_mean=False,
                          filtered=True,
                          reversed=False,
@@ -444,73 +444,73 @@ class Sample(object):
 
         Parameters
         ----------
-           ttype: str
-              treatment type
-           tval: float
-              treatment value
-           tval_range: list
-              treatment range e.g. tval_range = [0,2] will give all from 0 to 2
+           stype: str
+              series type
+           sval: float
+              series value
+           sval_range: list
+              series range e.g. sval_range = [0,2] will give all from 0 to 2
            is_mean:
            filtered:
            revesed:
               if reversed true it returns only measurements that do not meet criteria
-           tval_range:
+           sval_range:
               can be used to look up measurements within a certain range. if only one value is given,
-                     it is assumed to be an upper limit and the range is set to [0, tval_range]
+                     it is assumed to be an upper limit and the range is set to [0, sval_range]
 
            filtered:
               if true measurements will only be searched in filtered data
            mtype:
         """
-        if tval is None:
-            tvalue = np.nan
+        if sval is None:
+            svalue = np.nan
         else:
-            tvalue = str(tval)
+            svalue = str(sval)
 
         if is_mean:
-            # Sample.logger.debug('SEARCHING\t measurements(mean_list) with  << %s, %s, %s >>' % (mtype, ttype, tvalue))
+            # Sample.logger.debug('SEARCHING\t measurements(mean_list) with  << %s, %s, %s >>' % (mtype, stype, svalue))
             out = self.mean_measurements
         else:
             if filtered:
-                # Sample.logger.debug('SEARCHING\t measurements with  << %s, %s, %s >> in filtered data' % (mtype, ttype, tvalue))
+                # Sample.logger.debug('SEARCHING\t measurements with  << %s, %s, %s >> in filtered data' % (mtype, stype, svalue))
                 out = self.filtered_data
             else:
-                # Sample.logger.debug('SEARCHING\t measurements with  << %s, %s, %s >>' % (mtype, ttype, tvalue))
+                # Sample.logger.debug('SEARCHING\t measurements with  << %s, %s, %s >>' % (mtype, stype, svalue))
                 out = self.measurements
 
         if mtype:  # filter mtypes, if given
             mtype = _to_list(mtype)
             out = [m for m in out if m.mtype in mtype]
-        if ttype:
-            ttype = _to_list(ttype)
-            out = [m for m in out for t in ttype if t in m.ttypes]
+        if stype:
+            stype = _to_list(stype)
+            out = [m for m in out for t in stype if t in m.stypes]
 
-        if tval is not None:
-            tval = _to_list(tval)
-            out = [m for m in out for val in tval if val in m.tvals]
+        if sval is not None:
+            sval = _to_list(sval)
+            out = [m for m in out for val in sval if val in m.svals]
 
-        if not tval_range is None:
-            if not isinstance(tval_range, list):
-                tval_range = [0, tval_range]
+        if not sval_range is None:
+            if not isinstance(sval_range, list):
+                sval_range = [0, sval_range]
             else:
-                if len(tval_range) == 1:
-                    tval_range = [0] + tval_range
-            out = [m for m in out for val in m.tvals
-                   if val <= max(tval_range)
-                   if val >= min(tval_range)]
+                if len(sval_range) == 1:
+                    sval_range = [0] + sval_range
+            out = [m for m in out for val in m.svals
+                   if val <= max(sval_range)
+                   if val >= min(sval_range)]
 
         if len(out) == 0:
             Sample.logger.error(
                 'UNKNOWN\t << %s, %s, %s >> or no measurement found for sample << %s >>' % (
-                    mtype, ttype, tvalue, self.name))
+                    mtype, stype, svalue, self.name))
             return []
 
         if reversed:
             out = [i for i in self.filtered_data if not i in out]
         return out
 
-    def delete_measurements(self, mtype=None, ttype=None, tval=None, tval_range=None, **options):
-        measurements_for_del = self.get_measurements(mtype=mtype, ttype=ttype, tval=tval, tval_range=tval_range)
+    def delete_measurements(self, mtype=None, stype=None, sval=None, sval_range=None, **options):
+        measurements_for_del = self.get_measurements(mtype=mtype, stype=stype, sval=sval, sval_range=sval_range)
         if measurements_for_del:
             self.measurements = [m for m in self.measurements if not m in measurements_for_del]
 
@@ -559,15 +559,15 @@ class Sample(object):
         return measurement
 
     def average_measurements(self,
-                             mtype=None, ttype=None, tval=None, tval_range=None, mlist=None,
+                             mtype=None, stype=None, sval=None, sval_range=None, mlist=None,
                              interpolate=True, recalc_mag=False,
                              substfunc='mean'):
         """
         Averages a list of measurements and returns a measurement with 'is_mean' flag
         :param mtype:
-        :param ttype:
-        :param tval:
-        :param tval_range:
+        :param stype:
+        :param sval:
+        :param sval_range:
         :param mlist:
         :param interpolate:
         :param recalc_mag:
@@ -581,7 +581,7 @@ class Sample(object):
             return
 
         # get measurement list from criteria
-        mlist = self.get_measurements(mtype=mtype, ttype=ttype, tval=tval, tval_range=tval_range, filtered=True)
+        mlist = self.get_measurements(mtype=mtype, stype=stype, sval=sval, sval_range=sval_range, filtered=True)
 
         if len(mlist) == 1:
             self.logger.warning('Only one measurement found returning measurement')
@@ -605,7 +605,7 @@ class Sample(object):
             print dtype_list
 
     def mean_measurement(self,
-                         mtype=None, ttype=None, tval=None, tval_range=None, mlist=None,
+                         mtype=None, stype=None, sval=None, sval_range=None, mlist=None,
                          interpolate=True, recalc_mag=False,
                          substfunc='mean'):
         """
@@ -621,7 +621,7 @@ class Sample(object):
         if not mtype:
             raise ValueError('No mtype specified')
 
-        mlist = self.get_measurements(mtype=mtype, ttype=ttype, tval=tval, tval_range=tval_range, filtered=True)
+        mlist = self.get_measurements(mtype=mtype, stype=stype, sval=sval, sval_range=sval_range, filtered=True)
         if not mlist:
             return None
 
@@ -668,7 +668,7 @@ class Sample(object):
 
 
     def all_results(self, mtype=None,
-                    ttype=None, tval=None, tval_range=None,
+                    stype=None, sval=None, sval_range=None,
                     mlist=None, filtered=True,
                     **parameter):
         """
@@ -682,7 +682,7 @@ class Sample(object):
         """
 
         if not mlist:
-            mlist = self.get_measurements(mtype=mtype, ttype=ttype, tval=tval, tval_range=tval_range, filtered=filtered)
+            mlist = self.get_measurements(mtype=mtype, stype=stype, sval=sval, sval_range=sval_range, filtered=filtered)
 
         mlist = [m for m in mlist if m.mtype not in ['mass', 'diameter', 'height']]  # get rid of parameter measurements
 
@@ -730,13 +730,13 @@ class Sample(object):
         """
         out = None
         for mtype in self.mtypes:
-            for ttype in self.mtype_ttype_dict[mtype]:
-                for tval in self.ttype_tval_dict[ttype]:
-                    results = self.all_results(mtype=mtype, ttype=ttype, tval=tval,
+            for stype in self.mtype_stype_dict[mtype]:
+                for sval in self.stype_sval_dict[stype]:
+                    results = self.all_results(mtype=mtype, stype=stype, sval=sval,
                                                filtered=filtered,
                                                **parameter)
 
-                    results.define_alias('variable', ['ttype ' + ttype])
+                    results.define_alias('variable', ['stype ' + stype])
 
                     data = np.mean(results.v, axis=0)
                     err = np.std(results.v, axis=0)
@@ -752,7 +752,7 @@ class Sample(object):
 
     def get_mean_results(self,
                          mtype=None,
-                         ttype=None, tval=None, tval_range=None,
+                         stype=None, sval=None, sval_range=None,
                          mlist=None,
                          filtered=False,
                          **parameter):
@@ -762,9 +762,9 @@ class Sample(object):
         Parameters
         ----------
            mtype: str
-           ttype: str
-           tval: float
-           tval_range: list
+           stype: str
+           sval: float
+           sval_range: list
            mlist: list
               *optional*
            filtered: bool
@@ -777,13 +777,13 @@ class Sample(object):
 
         if not mlist:
             mlist = self.get_measurements(mtype=mtype,
-                                          ttype=ttype, tval=tval, tval_range=tval_range,
+                                          stype=stype, sval=sval, sval_range=sval_range,
                                           filtered=filtered)
 
         all_results = self.all_results(mlist=mlist, **parameter)
 
-        if 'ttype' in ''.join(all_results.column_names):  # check for ttype
-            self.logger.warning('TREATMENT/S found check if measurement list correct'
+        if 'stype' in ''.join(all_results.column_names):  # check for stype
+            self.logger.warning('series/S found check if measurement list correct'
                                 )
 
         v = np.nanmean(all_results.v, axis=0)
@@ -810,9 +810,9 @@ class Sample(object):
         """
         return sorted(list(set(values)))
 
-    # def _sort_ttype_tval(self, mlist):
+    # def _sort_stype_sval(self, mlist):
     # """
-    # sorts a list of measurements according to their tvals and ttypes
+    # sorts a list of measurements according to their svals and stypes
     # mlist:
     # :return:
     #     """
@@ -858,17 +858,17 @@ class Sample(object):
         else:
             return False
 
-    def sort_mlist_in_ttype_dict(self, mlist):
-        """ sorts a list of measurements according to their ttype and tvals"""
+    def sort_mlist_in_stype_dict(self, mlist):
+        """ sorts a list of measurements according to their stype and svals"""
         mlist = _to_list(mlist)
         out = {}
         for m in mlist:
-            for t in m.treatments:
-                if not t.ttype in out:
-                    out[t.ttype] = {}
+            for t in m.series:
+                if not t.stype in out:
+                    out[t.stype] = {}
                 if not t.value in out:
-                    out[t.ttype][t.value] = []
-                out[t.ttype][t.value].append(m)
+                    out[t.stype][t.value] = []
+                out[t.stype][t.value].append(m)
         return out
 
     """ INFO """
@@ -879,13 +879,13 @@ class Sample(object):
         :return:
         """
         out = []
-        header = ['Sample Name', 'Measurements', 'Treatments', 'Treatment values', 'Initial State']
+        header = ['Sample Name', 'Measurements', 'series', 'series values', 'Initial State']
         for m in self.measurements:
             if m.initial_state:
                 initial = m.initial_state.mtype
             else:
                 initial = 'None'
-            out.append([self.name, m.mtype, m.ttypes, m.tvals, initial])
+            out.append([self.name, m.mtype, m.stypes, m.svals, initial])
         out.append(['-----' for i in header])
         out = tabulate.tabulate(out, headers=header, tablefmt="simple")
         return out

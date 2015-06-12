@@ -161,7 +161,7 @@ def extract_info_from_filename(fname, data_dir):
         'mtype': abbrev[sample[2]],
         'machine': abbrev[sample[3]],
         'mfile': join(data_dir, fname),
-        'treatments': parameter,
+        'series': parameter,
         'STD': STD,
         'idx': index
     }

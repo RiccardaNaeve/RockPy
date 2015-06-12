@@ -28,7 +28,7 @@ class AfDemag(base.Generic):
     def feature_data(self, m_obj, **plt_opt):
         m_obj = m_obj.normalizeOLD(**self.norm)
         line = Features.af_demag.field_mom(self.ax, m_obj)
-        # self._add_line_text_dict(m_obj.sample_obj, m_obj.ttypes, m_obj.tvals, line)
+        # self._add_line_text_dict(m_obj.sample_obj, m_obj.stypes, m_obj.svals, line)
 
 class ThermoCurve(base.Generic):
     _required = ['thermocurve']

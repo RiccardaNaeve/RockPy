@@ -111,12 +111,12 @@ class Study(object):
             self.all_group()
             return samplegroup
 
-    def get_samples(self, snames=None, mtypes=None, ttypes=None, tvals=None, tval_range=None):
+    def get_samples(self, snames=None, mtypes=None, stypes=None, svals=None, sval_range=None):
         """
         Primary search function for all parameters
         """
-        out = self._all_samplegroup.get_samples(snames=snames, mtypes=mtypes, ttypes=ttypes, tvals=tvals,
-                                                tval_range=tval_range)
+        out = self._all_samplegroup.get_samples(snames=snames, mtypes=mtypes, stypes=stypes, svals=svals,
+                                                sval_range=sval_range)
         return out
 
     def _check_samplegroup_list(self, samplegroup):
@@ -181,18 +181,18 @@ class Study(object):
         for sg in self._samplegroups:
             print sg
             print ''.join(['-' for i in range(20)])
-            out = PrettyTable(['Sample Name', 'Measurements', 'Treatments', 'Initial State'])
+            out = PrettyTable(['Sample Name', 'Measurements', 'series', 'Initial State'])
             out.align['Measurements'] = 'l'
-            out.align['Treatments'] = 'l'
+            out.align['series'] = 'l'
             out.align['Initial State'] = 'l'
             for s in sg:
                 measurements = '|'.join(
                     [m.mtype for m in s.filtered_data if m.mtype not in ['mass', 'diameter', 'height']])
-                ttypes = '|'.join(
-                    [' '.join([t.ttype, str(t.value), t.unit]) for m in s.filtered_data for t in m.treatments
+                stypes = '|'.join(
+                    [' '.join([t.stype, str(t.value), t.unit]) for m in s.filtered_data for t in m.series
                      if m.mtype not in ['mass', 'diameter', 'height']])
                 initial = '|'.join(
                     [m.initial_state.mtype if m.initial_state is not None else '-' for m in s.filtered_data
                      if m.mtype not in ['mass', 'diameter', 'height']])
-                out.add_row([s.name, measurements, ttypes, initial])
+                out.add_row([s.name, measurements, stypes, initial])
             print out

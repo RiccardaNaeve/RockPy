@@ -9,7 +9,7 @@ import numpy as np
 import RockPy
 import RockPy.Functions.general
 import RockPy.Readin.base
-from RockPy import Treatments
+from RockPy import series
 from RockPy.Readin import *
 from RockPy.core import _to_list
 from RockPy.Structure.data import RockPyData, _to_tuple
@@ -22,25 +22,25 @@ class Measurement(object):
     ===================
     HowTo:
     ======
-       TTYPES
+       stypeS
        ++++++
-        want all treatment types (e.g. pressure, temperature...):
+        want all series types (e.g. pressure, temperature...):
 
-        as list: measurement.ttypes
-           print measurement.ttypes
+        as list: measurement.stypes
+           print measurement.stypes
            >>> ['pressure']
-        as dictionary with corresponding treatment as value: measurement.tdict
+        as dictionary with corresponding series as value: measurement.tdict
            print measurement.tdict
-           >>> {'pressure': <RockPy.Treatments> pressure, 0.60, [GPa]}
+           >>> {'pressure': <RockPy.series> pressure, 0.60, [GPa]}
         as dictionary with itself as value: measurement._self_tdict
            >>> {'pressure': {0.6: <RockPy.Measurements.thellier.Thellier object at 0x10e2ef890>}}
 
-       TVALUES
+       svalUES
        +++++++
-       want all values for any treatment in a measurement
+       want all values for any series in a measurement
 
-        as list: measurement.tvals
-        print measuremtn.tvals
+        as list: measurement.svals
+        print measuremtn.svals
         >>> [0.6]
 
 
@@ -128,9 +128,9 @@ class Measurement(object):
         self.machine_data = None  # returned data from Readin.machines()
         self.suffix = options.get('suffix', '')
 
-        ''' treatments '''
+        ''' series '''
         self._series = []
-        self._series_opt = options.get('treatments', None)
+        self._series_opt = options.get('series', None)
 
         ''' initial state '''
         self.is_machine_data = None  # returned data from Readin.machines()
@@ -184,7 +184,7 @@ class Measurement(object):
                 'FORMATTING raw data from << %s >> not possible, probably not implemented, yet.' % machine)
 
         if self._series_opt:
-            self._add_treatment_from_opt()
+            self._add_series_from_opt()
 
     @property
     def m_idx(self):
@@ -219,10 +219,10 @@ class Measurement(object):
         self._standard_parameter = {i[10:]: None for i in dir(self) if i.startswith('calculate_') if
                                     not i.endswith('generic')}
 
-        if self.treatments:
-            for t in self.treatments:
-                self._add_tval_to_results(t)
-        #         self._add_tval_to_data(t)
+        if self.series:
+            for t in self.series:
+                self._add_sval_to_results(t)
+        #         self._add_sval_to_data(t)
 
         self.is_normalized = False # normalized flag for visuals, so its not normalized twize
         self.norm = None # the actual parameters
@@ -316,43 +316,43 @@ class Measurement(object):
             self.logger.error('UNABLE to find measurement << %s >>' % (mtype))
 
     @property
-    def ttypes(self):
+    def stypes(self):
         """
-        list of all ttypes
+        list of all stypes
         """
-        out = [t.ttype for t in self.treatments]
+        out = [t.stype for t in self.series]
         return self.__sort_list_set(out)
 
     @property
-    def tvals(self):
+    def svals(self):
         """
-        list of all ttypes
+        list of all stypes
         """
-        out = [t.value for t in self.treatments]
+        out = [t.value for t in self.series]
         return self.__sort_list_set(out)
 
     @property
-    def ttype_dict(self):
+    def stype_dict(self):
         """
-        dictionary of ttype: treatment}
+        dictionary of stype: series}
         """
-        out = {t.ttype: t for t in self.treatments}
+        out = {t.stype: t for t in self.series}
         return out
 
     @property
     def tdict(self):
         """
-        dictionary of ttype: treatment}
+        dictionary of stype: series}
         """
-        out = {t.ttype: t.value for t in self.treatments}
+        out = {t.stype: t.value for t in self.series}
         return out
 
     @property
     def _self_tdict(self):
         """
-        dictionary of ttype: {tvalue: self}
+        dictionary of stype: {svalue: self}
         """
-        out = {i.ttype: {i.value: self} for i in self.treatments}
+        out = {i.stype: {i.value: self} for i in self.series}
         return out
 
 
@@ -550,34 +550,34 @@ class Measurement(object):
         else:
             return False
 
-    ### TREATMENT RELATED
-    def has_treatment(self, ttype=None, tval=None):
+    ### series RELATED
+    def has_series(self, stype=None, sval=None):
         """
-        checks if a measurement actually has a treatment
+        checks if a measurement actually has a series
         :return:
         """
-        if self._series and not ttype:
+        if self._series and not stype:
             return True
-        if self._series and self.get_treatments(ttypes=ttype, tvals=tval):
+        if self._series and self.get_series(stypes=stype, svals=sval):
             return True
         else:
             return False
 
     @property
-    def treatments(self):
-        if self.has_treatment():
+    def series(self):
+        if self.has_series():
             return self._series
         else:
-            treatment = RockPy.Structure.base.Generic(ttype='none', value=np.nan, unit='')
-            return [treatment]
+            series = RockPy.Structure.base.Generic(stype='none', value=np.nan, unit='')
+            return [series]
 
-    def _get_treatment_from_suffix(self):
+    def _get_series_from_suffix(self):
         """
-        takes a given suffix and extracts treatment data-for quick assessment. For more treatment control
-        use add_treatment method.
+        takes a given suffix and extracts series data-for quick assessment. For more series control
+        use add_series method.
 
         suffix must be given in the form of
-            stype: s_value [s_unit] | next treatment...
+            stype: s_value [s_unit] | next series...
         :return:
         """
         if self.suffix:
@@ -592,100 +592,100 @@ class Measurement(object):
         else:
             return None
 
-    def _add_treatment_from_opt(self):
+    def _add_series_from_opt(self):
         """
-        Takes treatements specified in options and adds them to self.treatments
+        Takes series specified in options and adds them to self.series
         :return:
         """
-        treatments = self._get_treatments_from_opt()
-        for t in treatments:
-            t = self.add_treatment(ttype=t[0], tval=t[1], unit=t[2])
+        series = self._get_series_from_opt()
+        for t in series:
+            self.add_series(stype=t[0], sval=t[1], unit=t[2])
 
-    def _get_treatments_from_opt(self):
+    def _get_series_from_opt(self):
         """
-        creates a list of treatments from the treatment option
+        creates a list of series from the series option
 
         e.g. Pressure_1_GPa;Temp_200_C
         :return:
         """
         if self._series_opt:
-            treatments = self._series_opt.replace(' ', '').split(';')  # split ; for multiple treatments
-            treatments = [i.split('_') for i in treatments]  # split , for type, value, unit
-            for i in treatments:
+            series = self._series_opt.replace(' ', '').split(';')  # split ; for multiple series
+            series = [i.split('_') for i in series]  # split , for type, value, unit
+            for i in series:
                 try:
                     i[1] = float(i[1])
                 except:
                     raise TypeError('%s can not be converted to float' %i)
         else:
-            treatments = None
-        return treatments
+            series = None
+        return series
 
-    def get_treatments(self, ttypes=None, tvals=None):
+    def get_series(self, stypes=None, svals=None):
         """
-        searches for given ttypes and tvals in self.treatments and returns them
+        searches for given stypes and svals in self.series and returns them
 
         Parameters
         ----------
-           ttypes: list, str
-              ttype or ttypes to be looked up
-           tvals: float
-              tval or tvals to be looked up
+           stypes: list, str
+              stype or stypes to be looked up
+           svals: float
+              sval or svals to be looked up
 
         Returns
         """
-        out = self.treatments
-        if ttypes:
-            ttypes = _to_list(ttypes)
-            out = [i for i in out if i.ttype in ttypes]
-        if tvals:
-            tvals = _to_list(map(float,tvals))
-            out = [i for i in out if i.value in tvals]
+        out = self.series
+        if stypes:
+            stypes = _to_list(stypes)
+            out = [i for i in out if i.stype in stypes]
+        if svals:
+            svals = _to_list(map(float,svals))
+            out = [i for i in out if i.value in svals]
         return out
 
-    def add_treatment(self, ttype, tval, unit=None, comment=''):
+    def add_series(self, stype, sval, unit=None, comment=''):
         """
-        adds a treatments to measurement.treatments, then adds is to the data and results datastructure
-        :param ttype:
-        :param tval:
+        adds a series to measurement.series, then adds is to the data and results datastructure
+        :param stype:
+        :param sval:
         :param unit:
         :param comment:
         :return:
         """
-        treatment = Treatments.Generic(ttype=ttype, value=tval, unit=unit, comment=comment)
-        self._series.append(treatment)
-        self._add_tval_to_data(treatment)
-        self._add_tval_to_results(treatment)
-        return treatment
+        series = series.Generic(stype=stype, value=sval, unit=unit, comment=comment)
+        self._series.append(series)
+        self._add_sval_to_data(series)
+        self._add_sval_to_results(series)
+        return series
 
-    def _add_tval_to_data(self, tobj):
+    def _add_sval_to_data(self, sobj):
         """
-        Adds ttype as a column and adds tvals to data. Only if ttype != none.
+        Adds stype as a column and adds svals to data. Only if stype != none.
 
         Parameter
         ---------
-           tobj: treatment instance
+           sobj: series instance
         """
-        if tobj.ttype != 'none':
+        if sobj.stype != 'none':
             for dtype in self._raw_data:
                 if self._raw_data[dtype]:
-                    data = np.ones(len(self.data[dtype]['variable'].v)) * tobj.value
-                    if not 'ttype ' + tobj.ttype in self.data[dtype].column_names:
-                        self.data[dtype] = self.data[dtype].append_columns(column_names='ttype ' + tobj.ttype,
-                                                                       data=data)  # , unit=tobj.unit) #todo add units
+                    data = np.ones(len(self.data[dtype]['variable'].v)) * sobj.value
+                    if not 'stype ' + sobj.stype in self.data[dtype].column_names:
+                        self.data[dtype] = self.data[dtype].append_columns(column_names='stype ' + sobj.stype,
+                                                                       data=data)  # , unit=sobj.unit) #todo add units
 
-    def _add_tval_to_results(self, tobj):
+    def _add_sval_to_results(self, sobj):
         """
-        Adds the ttype as a column and the value as value to the results. Only if ttype != none.
+        Adds the stype as a column and the value as value to the results. Only if stype != none.
 
         Parameter
         ---------
-           tobj: treatment instance
+           sobj: series instance
         """
-        if tobj.ttype != 'none':
-            # data = np.ones(len(self.results['variable'].v)) * tobj.value
-            if not 'ttype ' + tobj.ttype in self.results.column_names:
-                self.results = self.results.append_columns(column_names='ttype ' + tobj.ttype,
-                                                           data=[tobj.value])  # , unit=tobj.unit) #todo add units
+        if sobj.stype != 'none':
+            # data = np.ones(len(self.results['variable'].v)) * sobj.value
+            if not 'stype ' + sobj.stype in self.results.column_names:
+                self.results = self.results.append_columns(column_names='stype ' + sobj.stype,
+                                                           data=[sobj.value])  # , unit=sobj.unit) #todo add units
 
     def __sort_list_set(self, values):
         """
@@ -736,8 +736,8 @@ class Measurement(object):
 
         for dtype, dtype_data in self.data.iteritems(): #cycling through all dtypes in data
             if dtype_data:
-                if 'all' in ntypes: # if all, all non ttype data will be normalized
-                    ntypes = [i for i in dtype_data.column_names if not 'ttype' in i]
+                if 'all' in ntypes: # if all, all non stype data will be normalized
+                    ntypes = [i for i in dtype_data.column_names if not 'stype' in i]
 
                 for ntype in ntypes: #else use ntypes specified
                         dtype_data[ntype] = dtype_data[ntype].v / norm_factor
@@ -776,11 +776,11 @@ class Measurement(object):
 
         norm_factor = self._get_norm_factor(reference, rtype, vval, norm_method)
         for dtype, dtype_rpd in self.data.iteritems():
-            ttypes = [i for i in dtype_rpd.column_names if 'ttype' in i]
+            stypes = [i for i in dtype_rpd.column_names if 'stype' in i]
             self.data[dtype] = dtype_rpd / norm_factor
-            if ttypes:
-                for tt in ttypes:
-                    self.data[dtype][tt] = np.ones(len(dtype_rpd['variable'].v)) * self.ttype_dict[tt[6:]].value
+            if stypes:
+                for tt in stypes:
+                    self.data[dtype][tt] = np.ones(len(dtype_rpd['variable'].v)) * self.stype_dict[tt[6:]].value
             if 'mag' in self.data[dtype].column_names:
                 try:
                     self.data[dtype]['mag'] = self.data[dtype].magnitude(('x', 'y', 'z'))
@@ -874,26 +874,26 @@ class Measurement(object):
         else:
             return None
 
-    def _add_ttype_to_results(self):
+    def _add_stype_to_results(self):
         """
-        adds a column with ttype ttype.name to the results for each ttype in measurement.treatments
+        adds a column with stype stype.name to the results for each stype in measurement.series
         :return:
         """
         if self._series:
-            for t in self.treatments:
-                if t.ttype:
-                    if t.ttype not in self.results.column_names:
-                        self.results.append_columns(column_names='ttype ' + t.ttype,
+            for t in self.series:
+                if t.stype:
+                    if t.stype not in self.results.column_names:
+                        self.results.append_columns(column_names='stype ' + t.stype,
                                                     data=t.value,
                                                     # unit = t.unit      # todo add units
                         )
 
-    def get_treatment_labels(self):
+    def get_series_labels(self):
         out = ''
-        if self.has_treatment():
-            for treat in self.treatments:
-                if not str(treat.value) + ' ' + treat.unit in out:
-                    out += str(treat.value) + ' ' + treat.unit
+        if self.has_series():
+            for series in self.series:
+                if not str(series.value) + ' ' + series.unit in out:
+                    out += str(series.value) + ' ' + series.unit
                     out += ' '
         return out
 

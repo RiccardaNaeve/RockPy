@@ -6,9 +6,9 @@ def arai_points(ax, thellier_obj, parameter, **plt_opt):
     label = plt_opt.pop('label', '')
     markersize = plt_opt.pop('markersize', 2)
 
-    if thellier_obj.has_treatment:
-        label = thellier_obj.get_treatment_labels()
-        markersize += 2 * thellier_obj.treatments[0].value
+    if thellier_obj.has_series:
+        label = thellier_obj.get_series_labels()
+        markersize += 2 * thellier_obj.series[0].value
 
     component = parameter.get('component', 'mag')
     idx = np.array([[i, j]

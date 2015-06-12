@@ -129,8 +129,8 @@ class Measurement(object):
         self.suffix = options.get('suffix', '')
 
         ''' treatments '''
-        self._treatments = []
-        self._treatment_opt = options.get('treatments', None)
+        self._series = []
+        self._series_opt = options.get('treatments', None)
 
         ''' initial state '''
         self.is_machine_data = None  # returned data from Readin.machines()
@@ -183,7 +183,7 @@ class Measurement(object):
             self.logger.error(
                 'FORMATTING raw data from << %s >> not possible, probably not implemented, yet.' % machine)
 
-        if self._treatment_opt:
+        if self._series_opt:
             self._add_treatment_from_opt()
 
     @property
@@ -239,8 +239,8 @@ class Measurement(object):
                          '_raw_data', '_data',
                          'initial_state', 'is_initial_state',
                          'sample_obj',
-                         '_treatment_opt',
-                         '_treatments', 'suffix',
+                         '_series_opt',
+                         '_series', 'suffix',
                      )
         }
         return pickle_me
@@ -556,9 +556,9 @@ class Measurement(object):
         checks if a measurement actually has a treatment
         :return:
         """
-        if self._treatments and not ttype:
+        if self._series and not ttype:
             return True
-        if self._treatments and self.get_treatments(ttypes=ttype, tvals=tval):
+        if self._series and self.get_treatments(ttypes=ttype, tvals=tval):
             return True
         else:
             return False
@@ -566,7 +566,7 @@ class Measurement(object):
     @property
     def treatments(self):
         if self.has_treatment():
-            return self._treatments
+            return self._series
         else:
             treatment = RockPy.Structure.base.Generic(ttype='none', value=np.nan, unit='')
             return [treatment]
@@ -608,8 +608,8 @@ class Measurement(object):
         e.g. Pressure_1_GPa;Temp_200_C
         :return:
         """
-        if self._treatment_opt:
-            treatments = self._treatment_opt.replace(' ', '').split(';')  # split ; for multiple treatments
+        if self._series_opt:
+            treatments = self._series_opt.replace(' ', '').split(';')  # split ; for multiple treatments
             treatments = [i.split('_') for i in treatments]  # split , for type, value, unit
             for i in treatments:
                 try:
@@ -652,7 +652,7 @@ class Measurement(object):
         :return:
         """
         treatment = Treatments.Generic(ttype=ttype, value=tval, unit=unit, comment=comment)
-        self._treatments.append(treatment)
+        self._series.append(treatment)
         self._add_tval_to_data(treatment)
         self._add_tval_to_results(treatment)
         return treatment
@@ -879,7 +879,7 @@ class Measurement(object):
         adds a column with ttype ttype.name to the results for each ttype in measurement.treatments
         :return:
         """
-        if self._treatments:
+        if self._series:
             for t in self.treatments:
                 if t.ttype:
                     if t.ttype not in self.results.column_names:

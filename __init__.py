@@ -6,6 +6,7 @@ from RockPy.Structure.samplegroup import SampleGroup
 from RockPy.Structure.study import Study
 from RockPy.Structure.data import RockPyData, condense
 from RockPy.Measurements.base import Measurement
+from RockPy.Structure.series import Generic as Series
 from file_operations import save, load
 from file_operations import generate_file_name, extract_info_from_filename, import_folder
 

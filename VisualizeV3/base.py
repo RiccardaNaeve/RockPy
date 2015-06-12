@@ -103,7 +103,7 @@ class Visual(object):
     def remove_feature(self, features=None):
         self.remove_feature_from_list(feature_list='features', features=features)
 
-    def remove_single_feature(self, features=None):
+    def remove_single_feature(self, features=None): #todo automatic determination if single figure
         self.remove_feature_from_list(feature_list='single_features', features=features)
 
     def remove_feature_from_list(self, feature_list, features=None):
@@ -149,11 +149,11 @@ class Visual(object):
 
         Returns
         -------
-           all_measurements: Bool
+           only_measurements: Bool
               True if only measurements are to be plotted
         """
         # initialize
-        all_measurements = False
+        only_measurements = False
         study = None
 
         # because iterating over a study, samplegroup is like iterating over a list, I substitute them with lists if not
@@ -172,9 +172,9 @@ class Visual(object):
 
             # all items in _plt_input are measurements
             if all(type(item) in RockPy.Measurements.base.Measurement.inheritors() for item in self._plt_input):
-                all_measurements = True
+                only_measurements = True
                 study = [[self._plt_input]]
-        return study, all_measurements
+        return study, only_measurements
 
     def plt_visual(self):
         self.add_standard()

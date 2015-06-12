@@ -21,9 +21,9 @@ class Hysteresis(base.Visual):
         self.ylabel = 'Moment'
 
 
-    def feature_hys(self, m_obj, **plt_opt):
+    def feature_hys(self, mobj, **plt_opt):
         plt_opt.pop('marker')
-        hysteresis.hysteresis(self.ax, m_obj, **plt_opt)
+        hysteresis.hysteresis(self.ax, mobj, **plt_opt)
         return 'multiple'
 
     def feature_virgin(self, m_obj, **plt_opt):

@@ -50,7 +50,7 @@ class NewFigure(object):
         else:
             raise KeyError('%s can not be found' % item)
 
-    def add_visual(self, visual, name=None, plt_input=None):
+    def add_visual(self, visual, name=None, plt_input=None, **visual_opt):
         """
         adds a visual to the plot. This creates a new subplot.
 
@@ -72,11 +72,12 @@ class NewFigure(object):
                     name = visual
                 n = self._n_visuals
                 # create instance of visual by dynamically calling from inheritors dictionary
-                visual_obj = Visual.inheritors()[visual](plt_input=plt_input, plt_index=n, plot=self, name = name)
+                visual_obj = Visual.inheritors()[visual](plt_input=plt_input, plt_index=n, plot=self, name = name, **visual_opt)
                 self._visuals.append([name, visual, visual_obj])
                 self._n_visuals += 1
             else:
                 self.logger.warning('VISUAL << %s >> not implemented yet' % visual)
+                return
         self.fig = self._create_fig()
         return visual_obj
 

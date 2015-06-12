@@ -125,11 +125,6 @@
 <li class="toctree-l2"><a class="reference internal" href="RockPy.Structure.html#module-RockPy.Structure.study"><code class="docutils literal"><span class="pre">study</span></code> Module</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="RockPy.Treatments.html">Treatments Package</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="RockPy.Treatments.html#id1"><code class="docutils literal"><span class="pre">Treatments</span></code> Package</a></li>
-<li class="toctree-l2"><a class="reference internal" href="RockPy.Treatments.html#module-RockPy.Treatments.base"><code class="docutils literal"><span class="pre">base</span></code> Module</a></li>
-</ul>
-</li>
 </ul>
 
           
@@ -282,7 +277,10 @@ calculated bcr value</td>
 <dl class="method">
 <dt id="RockPy.Measurements.backfield.Backfield.calculate_mrs">
 <code class="descname">calculate_mrs</code><span class="sig-paren">(</span><em>**parameter</em><span class="sig-paren">)</span><a class="headerlink" href="#RockPy.Measurements.backfield.Backfield.calculate_mrs" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Magnetic Moment at last measurement point
+:param parameter:
+:return:</p>
+</dd></dl>
 
 <dl class="method">
 <dt id="RockPy.Measurements.backfield.Backfield.calculate_ms">
@@ -371,11 +369,6 @@ self.induced: the induced moment measurement while the field is applied (only VS
 <dl class="method">
 <dt id="RockPy.Measurements.backfield.Backfield.result_s300">
 <code class="descname">result_s300</code><span class="sig-paren">(</span><em>recalc=False</em><span class="sig-paren">)</span><a class="headerlink" href="#RockPy.Measurements.backfield.Backfield.result_s300" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="RockPy.Measurements.backfield.Backfield.result_sigma_mrs">
-<code class="descname">result_sigma_mrs</code><span class="sig-paren">(</span><em>recalc=False</em><span class="sig-paren">)</span><a class="headerlink" href="#RockPy.Measurements.backfield.Backfield.result_sigma_mrs" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
@@ -658,7 +651,7 @@ value at this point.</dd>
 
 <dl class="method">
 <dt id="RockPy.Measurements.hysteresis.Hys.data_gridding">
-<code class="descname">data_gridding</code><span class="sig-paren">(</span><em>method='second'</em>, <em>grid_points=30</em>, <em>tuning=1.5</em>, <em>**parameter</em><span class="sig-paren">)</span><a class="headerlink" href="#RockPy.Measurements.hysteresis.Hys.data_gridding" title="Permalink to this definition">¶</a></dt>
+<code class="descname">data_gridding</code><span class="sig-paren">(</span><em>method='second'</em>, <em>grid_points=20</em>, <em>tuning=1</em>, <em>**parameter</em><span class="sig-paren">)</span><a class="headerlink" href="#RockPy.Measurements.hysteresis.Hys.data_gridding" title="Permalink to this definition">¶</a></dt>
 <dd><p>Data griding after <a class="reference internal" href="zreferences.html#dobeneck1996a" id="id1">[vD96]</a>. Generates an interpolated hysteresis loop with
 <span class="math">\(M^{\pm}_{sam}(B^{\pm}_{exp})\)</span> at mathematically defined (grid) field values, identical for upper
 and lower branch.</p>
@@ -669,7 +662,7 @@ and lower branch.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>method</strong> (<em>str</em>) &#8211; <p>method with wich the data is fitted between grid points.</p>
+<li><strong>method</strong> (<em>str</em>) &#8211; <p>method with which the data is fitted between grid points.</p>
 <dl class="docutils">
 <dt>first:</dt>
 <dd>data is fitted using a first order polinomial <span class="math">\(M(B) = a_1 + a2*B\)</span></dd>
@@ -1028,6 +1021,20 @@ RockPyData: will rotate the data</li>
 </table>
 </dd></dl>
 
+<dl class="method">
+<dt id="RockPy.Measurements.hysteresis.Hys.set_field_limit">
+<code class="descname">set_field_limit</code><span class="sig-paren">(</span><em>field_limit</em><span class="sig-paren">)</span><a class="headerlink" href="#RockPy.Measurements.hysteresis.Hys.set_field_limit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Cuts fields with higer or lower values</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>field_limit</strong> (<em>float</em>) &#8211; cut-off field, after which the data is removed from self.data. It is still in self.raw_data</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
 <dl class="classmethod">
 <dt id="RockPy.Measurements.hysteresis.Hys.simulate">
 <em class="property">classmethod </em><code class="descname">simulate</code><span class="sig-paren">(</span><em>sample_obj</em>, <em>m_idx=0</em>, <em>color=None</em>, <em>ms=250.0</em>, <em>mrs_ms=0.5</em>, <em>bc=0.2</em>, <em>hf_sus=1.0</em>, <em>bmax=1.8</em>, <em>b_sat=1</em>, <em>steps=100</em>, <em>noise=None</em><span class="sig-paren">)</span><a class="headerlink" href="#RockPy.Measurements.hysteresis.Hys.simulate" title="Permalink to this definition">¶</a></dt>
@@ -1131,21 +1138,21 @@ Field at which 99% of the moment is saturated</li>
 <span id="parameters"></span><h2>Parameters<a class="headerlink" href="#module-RockPy.Measurements.parameters" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="RockPy.Measurements.parameters.Diameter">
-<em class="property">class </em><code class="descclassname">RockPy.Measurements.parameters.</code><code class="descname">Diameter</code><span class="sig-paren">(</span><em>sample_obj</em>, <em>mtype</em>, <em>mfile=None</em>, <em>machine='generic'</em>, <em>value=1.0</em>, <em>unit='m'</em>, <em>std=None</em>, <em>time=None</em>, <em>**options</em><span class="sig-paren">)</span><a class="headerlink" href="#RockPy.Measurements.parameters.Diameter" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">RockPy.Measurements.parameters.</code><code class="descname">Diameter</code><span class="sig-paren">(</span><em>sample_obj</em>, <em>mtype</em>, <em>mfile=None</em>, <em>machine='generic'</em>, <em>value=1.0</em>, <em>unit='m'</em>, <em>direction=None</em>, <em>std=None</em>, <em>time=None</em>, <em>**options</em><span class="sig-paren">)</span><a class="headerlink" href="#RockPy.Measurements.parameters.Diameter" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#RockPy.Measurements.parameters.Length" title="RockPy.Measurements.parameters.Length"><code class="xref py py-class docutils literal"><span class="pre">RockPy.Measurements.parameters.Length</span></code></a></p>
 <p>simple 1d measurement for Length</p>
 </dd></dl>
 
 <dl class="class">
 <dt id="RockPy.Measurements.parameters.Height">
-<em class="property">class </em><code class="descclassname">RockPy.Measurements.parameters.</code><code class="descname">Height</code><span class="sig-paren">(</span><em>sample_obj</em>, <em>mtype</em>, <em>mfile=None</em>, <em>machine='generic'</em>, <em>value=1.0</em>, <em>unit='m'</em>, <em>std=None</em>, <em>time=None</em>, <em>**options</em><span class="sig-paren">)</span><a class="headerlink" href="#RockPy.Measurements.parameters.Height" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">RockPy.Measurements.parameters.</code><code class="descname">Height</code><span class="sig-paren">(</span><em>sample_obj</em>, <em>mtype</em>, <em>mfile=None</em>, <em>machine='generic'</em>, <em>value=1.0</em>, <em>unit='m'</em>, <em>direction=None</em>, <em>std=None</em>, <em>time=None</em>, <em>**options</em><span class="sig-paren">)</span><a class="headerlink" href="#RockPy.Measurements.parameters.Height" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#RockPy.Measurements.parameters.Length" title="RockPy.Measurements.parameters.Length"><code class="xref py py-class docutils literal"><span class="pre">RockPy.Measurements.parameters.Length</span></code></a></p>
 <p>simple 1d measurement for Length</p>
 </dd></dl>
 
 <dl class="class">
 <dt id="RockPy.Measurements.parameters.Length">
-<em class="property">class </em><code class="descclassname">RockPy.Measurements.parameters.</code><code class="descname">Length</code><span class="sig-paren">(</span><em>sample_obj</em>, <em>mtype</em>, <em>mfile=None</em>, <em>machine='generic'</em>, <em>value=1.0</em>, <em>unit='m'</em>, <em>std=None</em>, <em>time=None</em>, <em>**options</em><span class="sig-paren">)</span><a class="headerlink" href="#RockPy.Measurements.parameters.Length" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">RockPy.Measurements.parameters.</code><code class="descname">Length</code><span class="sig-paren">(</span><em>sample_obj</em>, <em>mtype</em>, <em>mfile=None</em>, <em>machine='generic'</em>, <em>value=1.0</em>, <em>unit='m'</em>, <em>direction=None</em>, <em>std=None</em>, <em>time=None</em>, <em>**options</em><span class="sig-paren">)</span><a class="headerlink" href="#RockPy.Measurements.parameters.Length" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">RockPy.Measurements.base.Measurement</span></code></p>
 <p>simple 1d measurement for Length</p>
 <dl class="method">
@@ -1166,6 +1173,33 @@ Field at which 99% of the moment is saturated</li>
 <dd></dd></dl>
 
 </dd></dl>
+
+<dl class="class">
+<dt id="RockPy.Measurements.parameters.Volume">
+<em class="property">class </em><code class="descclassname">RockPy.Measurements.parameters.</code><code class="descname">Volume</code><span class="sig-paren">(</span><em>sample_obj</em>, <em>mtype</em>, <em>mfile=None</em>, <em>machine='combined'</em>, <em>height=None</em>, <em>diameter=None</em>, <em>sample_shape='cylinder'</em>, <em>x_len=None</em>, <em>y_len=None</em>, <em>z_len=None</em>, <em>std=None</em>, <em>time=None</em>, <em>**options</em><span class="sig-paren">)</span><a class="headerlink" href="#RockPy.Measurements.parameters.Volume" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">RockPy.Measurements.base.Measurement</span></code></p>
+<p>Combined measurement. It needs a height and a diameter measurement.</p>
+<dl class="staticmethod">
+<dt id="RockPy.Measurements.parameters.Volume.cube">
+<em class="property">static </em><code class="descname">cube</code><span class="sig-paren">(</span><em>x</em>, <em>y</em>, <em>z</em><span class="sig-paren">)</span><a class="headerlink" href="#RockPy.Measurements.parameters.Volume.cube" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="staticmethod">
+<dt id="RockPy.Measurements.parameters.Volume.cylinder">
+<em class="property">static </em><code class="descname">cylinder</code><span class="sig-paren">(</span><em>height</em>, <em>diameter</em><span class="sig-paren">)</span><a class="headerlink" href="#RockPy.Measurements.parameters.Volume.cylinder" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="staticmethod">
+<dt id="RockPy.Measurements.parameters.Volume.sphere">
+<em class="property">static </em><code class="descname">sphere</code><span class="sig-paren">(</span><em>diameter</em><span class="sig-paren">)</span><a class="headerlink" href="#RockPy.Measurements.parameters.Volume.sphere" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="RockPy.Measurements.parameters.test">
+<code class="descclassname">RockPy.Measurements.parameters.</code><code class="descname">test</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#RockPy.Measurements.parameters.test" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 </div>
 <div class="section" id="module-RockPy.Measurements.thellier">
@@ -1284,8 +1318,10 @@ intersection of the best-fit line and the x-axis on an Arai plot; Leonhardt et a
 \[\delta{CK}=\frac`{\max{ \left\{ \left| \delta{pTRM_{i,j}}\]</div>
 </div></blockquote>
 <p>ight|
-ight} }_{i leq end    extbf{ and } j leq end}}{left|X_{Int.}
-ight|}  imes{100}</p>
+ight} }_{i leq end    extbf{ and } j</p>
+<blockquote>
+<div>leq end}}{left|X_{Int.}</div></blockquote>
+<p>ight|}  imes{100}</p>
 </dd></dl>
 
 <dl class="method">
@@ -1733,9 +1769,11 @@ multiple ways of calculating <span class="math">\(x_0\)</span> and <span class="
 </dd></dl>
 
 <dl class="method">
-<dt id="RockPy.Measurements.thellier.Thellier.format_generic">
-<code class="descname">format_generic</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#RockPy.Measurements.thellier.Thellier.format_generic" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dt id="RockPy.Measurements.thellier.Thellier.format_tdt">
+<code class="descname">format_tdt</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#RockPy.Measurements.thellier.Thellier.format_tdt" title="Permalink to this definition">¶</a></dt>
+<dd><p>formats the data (a dictionary) from the machine readin into RockPyData objects
+:return:</p>
+</dd></dl>
 
 <dl class="method">
 <dt id="RockPy.Measurements.thellier.Thellier.get_d_ac">
@@ -1838,8 +1876,13 @@ in the analysis, <span class="math">\(T_i\)</span> must be less than or equal to
 <dd></dd></dl>
 
 <dl class="method">
+<dt id="RockPy.Measurements.thellier.Thellier.plt_thellier">
+<code class="descname">plt_thellier</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#RockPy.Measurements.thellier.Thellier.plt_thellier" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
 <dt id="RockPy.Measurements.thellier.Thellier.reset__data">
-<code class="descname">reset__data</code><span class="sig-paren">(</span><em>recalc_m=True</em><span class="sig-paren">)</span><a class="headerlink" href="#RockPy.Measurements.thellier.Thellier.reset__data" title="Permalink to this definition">¶</a></dt>
+<code class="descname">reset__data</code><span class="sig-paren">(</span><em>recalc_mag=True</em><span class="sig-paren">)</span><a class="headerlink" href="#RockPy.Measurements.thellier.Thellier.reset__data" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -2011,7 +2054,7 @@ in the analysis, <span class="math">\(T_i\)</span> must be less than or equal to
 
 <dl class="classmethod">
 <dt id="RockPy.Measurements.thellier.Thellier.simulate">
-<em class="property">classmethod </em><code class="descname">simulate</code><span class="sig-paren">(</span><em>sample_obj</em>, <em>**parameter</em><span class="sig-paren">)</span><a class="headerlink" href="#RockPy.Measurements.thellier.Thellier.simulate" title="Permalink to this definition">¶</a></dt>
+<em class="property">classmethod </em><code class="descname">simulate</code><span class="sig-paren">(</span><em>sample_obj</em>, <em>m_idx=None</em>, <em>**parameter</em><span class="sig-paren">)</span><a class="headerlink" href="#RockPy.Measurements.thellier.Thellier.simulate" title="Permalink to this definition">¶</a></dt>
 <dd><p>return simulated instance of measurement depending on parameters</p>
 </dd></dl>
 
@@ -2091,7 +2134,9 @@ in the analysis, <span class="math">\(T_i\)</span> must be less than or equal to
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"></td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>ommit_first_n</strong> (<em>int</em>) &#8211; </td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"></td>
 </tr>
 </tbody>
 </table>

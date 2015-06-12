@@ -10,7 +10,7 @@ Subpackages
     RockPy.Measurements
     RockPy.Readin
     RockPy.Structure
-    RockPy.Treatments
+    RockPy.series
 
 Module contents
 ---------------

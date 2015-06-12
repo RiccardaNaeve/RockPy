@@ -39,7 +39,7 @@ This tutorial is about how to create a sample and what we can do with a sample.
 Creating a sample
 +++++++++++++++++
 
-The sample is the most basic structure in rockpy. It contains all measurements and treatments. It also contains some
+The sample is the most basic structure in rockpy. It contains all measurements and series. It also contains some
 functionality that I will show you a little later. Lets start making a sample. We will be using the test data that is
 included in RockPy but of course you can use whatever sample you want.
 

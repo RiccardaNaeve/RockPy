@@ -1166,8 +1166,8 @@ class Thellier(base.Measurement):
 
         .. math::
 
-           \delta{CK}=\\frac`{\max{ \left\{ \left| \delta{pTRM_{i,j}} \right| \right\} }_{i \leq end \textbf{ and } j \leq end}}{\left|X_{Int.}\right|}\times{100}
-
+           \delta{CK}=\\frac`{\max{ \left\{ \left| \delta{pTRM_{i,j}} \right| \right\} }_{i \leq end \textbf{ and } j
+           \leq end}}{\left|X_{Int.}\right|}\times{100}
         """
 
         t_min = parameter.get('t_min', self.standard_parameter['slope']['t_min'])

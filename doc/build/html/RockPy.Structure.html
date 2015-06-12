@@ -31,7 +31,6 @@
 
   
     <link rel="top" title="RockPy pyrite documentation" href="index.html"/>
-        <link rel="next" title="Treatments Package" href="RockPy.Treatments.html"/>
         <link rel="prev" title="Readin Package" href="RockPy.Readin.html"/> 
 
   
@@ -75,7 +74,8 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="measurements.html">Measurements</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="measurements.html#hysteresis">Hysteresis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="thellier.html">Thellier-Thellier</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hysteresis.html">Hysteresis</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="guidlines.html">Programming Guidlines:</a><ul>
@@ -102,6 +102,7 @@
 <li class="toctree-l2"><a class="reference internal" href="RockPy.Measurements.html#module-RockPy.Measurements.thellier">Thellier-Thellier</a></li>
 <li class="toctree-l2"><a class="reference internal" href="RockPy.Measurements.html#module-RockPy.Measurements.thermocurve">Thermocurve</a></li>
 <li class="toctree-l2"><a class="reference internal" href="RockPy.Measurements.html#module-RockPy.Measurements.trm">TRM - single moment</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RockPy.Measurements.html#module-RockPy.Measurements.viscosity">Viscosity</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="RockPy.Readin.html">Readin Package</a><ul>
@@ -121,11 +122,6 @@
 <li class="toctree-l2"><a class="reference internal" href="#module-RockPy.Structure.sample"><code class="docutils literal"><span class="pre">sample</span></code> Module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-RockPy.Structure.samplegroup"><code class="docutils literal"><span class="pre">samplegroup</span></code> Module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-RockPy.Structure.study"><code class="docutils literal"><span class="pre">study</span></code> Module</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="RockPy.Treatments.html">Treatments Package</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="RockPy.Treatments.html#id1"><code class="docutils literal"><span class="pre">Treatments</span></code> Package</a></li>
-<li class="toctree-l2"><a class="reference internal" href="RockPy.Treatments.html#module-RockPy.Treatments.base"><code class="docutils literal"><span class="pre">base</span></code> Module</a></li>
 </ul>
 </li>
 </ul>
@@ -766,9 +762,18 @@ errors are propagated
 <dd></dd></dl>
 
 <dl class="method">
-<dt id="RockPy.Structure.data.RockPyData.running_ave">
-<code class="descname">running_ave</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#RockPy.Structure.data.RockPyData.running_ave" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dt id="RockPy.Structure.data.RockPyData.running_average">
+<code class="descname">running_average</code><span class="sig-paren">(</span><em>key='data'</em>, <em>width=3</em><span class="sig-paren">)</span><a class="headerlink" href="#RockPy.Structure.data.RockPyData.running_average" title="Permalink to this definition">¶</a></dt>
+<dd><p>colidxs = self._keyseq2colseq(key)</p>
+<dl class="docutils">
+<dt>rpd = RockPyData(column_names=self.column_indices_to_names(colidxs),</dt>
+<dd>row_names=self.row_names,
+units=None,
+data=self.data[:, colidxs])</dd>
+</dl>
+<p># rpd.showfmt = self.showfmt</p>
+<p>return rpd</p>
+</dd></dl>
 
 <dl class="method">
 <dt id="RockPy.Structure.data.RockPyData.sort">
@@ -858,7 +863,7 @@ substfunc determines how this is done, default is &#8220;mean&#8221;</p>
 <span id="sample-module"></span><h2><code class="xref py py-mod docutils literal"><span class="pre">sample</span></code> Module<a class="headerlink" href="#module-RockPy.Structure.sample" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="RockPy.Structure.sample.Sample">
-<em class="property">class </em><code class="descclassname">RockPy.Structure.sample.</code><code class="descname">Sample</code><span class="sig-paren">(</span><em>name</em>, <em>mass=None</em>, <em>mass_unit='kg'</em>, <em>mass_machine='generic'</em>, <em>height=None</em>, <em>diameter=None</em>, <em>length_unit='mm'</em>, <em>length_machine='generic'</em>, <em>color=None</em>, <em>**options</em><span class="sig-paren">)</span><a class="headerlink" href="#RockPy.Structure.sample.Sample" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">RockPy.Structure.sample.</code><code class="descname">Sample</code><span class="sig-paren">(</span><em>name</em>, <em>mass=None</em>, <em>mass_unit='kg'</em>, <em>mass_machine='generic'</em>, <em>height=None</em>, <em>diameter=None</em>, <em>x_len=None</em>, <em>y_len=None</em>, <em>z_len=None</em>, <em>length_unit='mm'</em>, <em>length_machine='generic'</em>, <em>sample_shape='cylinder'</em>, <em>color=None</em>, <em>comment=''</em>, <em>**options</em><span class="sig-paren">)</span><a class="headerlink" href="#RockPy.Structure.sample.Sample" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
 <p>Sample in a way a container for measurements</p>
 <dl class="method">
@@ -926,7 +931,7 @@ substfunc determines how this is done, default is &#8220;mean&#8221;</p>
 
 <dl class="method">
 <dt id="RockPy.Structure.sample.Sample.all_results">
-<code class="descname">all_results</code><span class="sig-paren">(</span><em>mtype=None</em>, <em>ttype=None</em>, <em>tval=None</em>, <em>tval_range=None</em>, <em>mlist=None</em>, <em>filtered=True</em>, <em>**parameter</em><span class="sig-paren">)</span><a class="headerlink" href="#RockPy.Structure.sample.Sample.all_results" title="Permalink to this definition">¶</a></dt>
+<code class="descname">all_results</code><span class="sig-paren">(</span><em>mtype=None</em>, <em>stype=None</em>, <em>sval=None</em>, <em>sval_range=None</em>, <em>mlist=None</em>, <em>filtered=True</em>, <em>**parameter</em><span class="sig-paren">)</span><a class="headerlink" href="#RockPy.Structure.sample.Sample.all_results" title="Permalink to this definition">¶</a></dt>
 <dd><p>calculates all results for a list of measurements and stores them in a RockPy data object</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -943,6 +948,21 @@ substfunc determines how this is done, default is &#8220;mean&#8221;</p>
 </tr>
 </tbody>
 </table>
+</dd></dl>
+
+<dl class="method">
+<dt id="RockPy.Structure.sample.Sample.average_measurements">
+<code class="descname">average_measurements</code><span class="sig-paren">(</span><em>mtype=None</em>, <em>stype=None</em>, <em>sval=None</em>, <em>sval_range=None</em>, <em>mlist=None</em>, <em>interpolate=True</em>, <em>recalc_magag=False</em>, <em>substfunc='mean'</em><span class="sig-paren">)</span><a class="headerlink" href="#RockPy.Structure.sample.Sample.average_measurements" title="Permalink to this definition">¶</a></dt>
+<dd><p>Averages a list of measurements and returns a measurement with &#8216;is_mean&#8217; flag
+:param mtype:
+:param stype:
+:param sval:
+:param sval_range:
+:param mlist:
+:param interpolate:
+:param recalc_magag:
+:param substfunc:
+:return:</p>
 </dd></dl>
 
 <dl class="method">
@@ -985,12 +1005,12 @@ substfunc determines how this is done, default is &#8220;mean&#8221;</p>
 
 <dl class="method">
 <dt id="RockPy.Structure.sample.Sample.delete_measurements">
-<code class="descname">delete_measurements</code><span class="sig-paren">(</span><em>mtype=None</em>, <em>ttype=None</em>, <em>tval=None</em>, <em>tval_range=None</em>, <em>**options</em><span class="sig-paren">)</span><a class="headerlink" href="#RockPy.Structure.sample.Sample.delete_measurements" title="Permalink to this definition">¶</a></dt>
+<code class="descname">delete_measurements</code><span class="sig-paren">(</span><em>mtype=None</em>, <em>stype=None</em>, <em>sval=None</em>, <em>sval_range=None</em>, <em>**options</em><span class="sig-paren">)</span><a class="headerlink" href="#RockPy.Structure.sample.Sample.delete_measurements" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="RockPy.Structure.sample.Sample.filter">
-<code class="descname">filter</code><span class="sig-paren">(</span><em>mtype=None</em>, <em>ttype=None</em>, <em>tval=None</em>, <em>tval_range=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#RockPy.Structure.sample.Sample.filter" title="Permalink to this definition">¶</a></dt>
+<code class="descname">filter</code><span class="sig-paren">(</span><em>mtype=None</em>, <em>stype=None</em>, <em>sval=None</em>, <em>sval_range=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#RockPy.Structure.sample.Sample.filter" title="Permalink to this definition">¶</a></dt>
 <dd><p>used to filter measurement data.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -998,9 +1018,9 @@ substfunc determines how this is done, default is &#8220;mean&#8221;</p>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>mtype</strong> (<em>mtype to be filtered for, if not specified all mtypes are returned</em>) &#8211; </li>
-<li><strong>ttype</strong> (<em>ttype to be filtered for, if not specified all ttypes are returned</em>) &#8211; </li>
-<li><strong>tval</strong> (<em>tval to be filtered for, can only be used in conjuction with ttype</em>) &#8211; </li>
-<li><strong>tval_range</strong> (<em>tval_range to be filtered for, can only be used in conjuction with ttype</em>) &#8211; </li>
+<li><strong>stype</strong> (<em>stype to be filtered for, if not specified all stypes are returned</em>) &#8211; </li>
+<li><strong>sval</strong> (<em>sval to be filtered for, can only be used in conjuction with stype</em>) &#8211; </li>
+<li><strong>sval_range</strong> (<em>sval_range to be filtered for, can only be used in conjuction with stype</em>) &#8211; </li>
 <li><strong>kwargs</strong> &#8211; </li>
 </ul>
 </td>
@@ -1016,7 +1036,7 @@ substfunc determines how this is done, default is &#8220;mean&#8221;</p>
 
 <dl class="method">
 <dt id="RockPy.Structure.sample.Sample.get_mean_results">
-<code class="descname">get_mean_results</code><span class="sig-paren">(</span><em>mtype=None</em>, <em>ttype=None</em>, <em>tval=None</em>, <em>tval_range=None</em>, <em>mlist=None</em>, <em>filtered=False</em>, <em>**parameter</em><span class="sig-paren">)</span><a class="headerlink" href="#RockPy.Structure.sample.Sample.get_mean_results" title="Permalink to this definition">¶</a></dt>
+<code class="descname">get_mean_results</code><span class="sig-paren">(</span><em>mtype=None</em>, <em>stype=None</em>, <em>sval=None</em>, <em>sval_range=None</em>, <em>mlist=None</em>, <em>filtered=False</em>, <em>**parameter</em><span class="sig-paren">)</span><a class="headerlink" href="#RockPy.Structure.sample.Sample.get_mean_results" title="Permalink to this definition">¶</a></dt>
 <dd><p>calculates all results and returns the mean</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -1024,9 +1044,9 @@ substfunc determines how this is done, default is &#8220;mean&#8221;</p>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>mtype</strong> (<em>str</em>) &#8211; </li>
-<li><strong>ttype</strong> (<em>str</em>) &#8211; </li>
-<li><strong>tval</strong> (<em>float</em>) &#8211; </li>
-<li><strong>tval_range</strong> (<em>list</em>) &#8211; </li>
+<li><strong>stype</strong> (<em>str</em>) &#8211; </li>
+<li><strong>sval</strong> (<em>float</em>) &#8211; </li>
+<li><strong>sval_range</strong> (<em>list</em>) &#8211; </li>
 <li><strong>mlist</strong> (<em>list</em>) &#8211; <em>optional</em></li>
 <li><strong>filtered</strong> (<em>bool</em>) &#8211; is used to specify if the filtered_data_measurement list is used to get all corresponding
 measurements. In the case of a mean measurements it genreally is not wanted to have the
@@ -1042,21 +1062,21 @@ if <em>False</em> the Mean(Results) wil be returned, filtered data will still be
 
 <dl class="method">
 <dt id="RockPy.Structure.sample.Sample.get_measurements">
-<code class="descname">get_measurements</code><span class="sig-paren">(</span><em>mtype=None</em>, <em>ttype=None</em>, <em>tval=None</em>, <em>tval_range=None</em>, <em>is_mean=False</em>, <em>filtered=True</em>, <em>reversed=False</em>, <em>**options</em><span class="sig-paren">)</span><a class="headerlink" href="#RockPy.Structure.sample.Sample.get_measurements" title="Permalink to this definition">¶</a></dt>
+<code class="descname">get_measurements</code><span class="sig-paren">(</span><em>mtype=None</em>, <em>stype=None</em>, <em>sval=None</em>, <em>sval_range=None</em>, <em>is_mean=False</em>, <em>filtered=True</em>, <em>reversed=False</em>, <em>**options</em><span class="sig-paren">)</span><a class="headerlink" href="#RockPy.Structure.sample.Sample.get_measurements" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns a list of measurements of type = mtype</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>ttype</strong> (<em>str</em>) &#8211; treatment type</li>
-<li><strong>tval</strong> (<em>float</em>) &#8211; treatment value</li>
-<li><strong>tval_range</strong> (<em>list</em>) &#8211; treatment range e.g. tval_range = [0,2] will give all from 0 to 2</li>
+<li><strong>stype</strong> (<em>str</em>) &#8211; series type</li>
+<li><strong>sval</strong> (<em>float</em>) &#8211; series value</li>
+<li><strong>sval_range</strong> (<em>list</em>) &#8211; series range e.g. sval_range = [0,2] will give all from 0 to 2</li>
 <li><strong>is_mean</strong> &#8211; </li>
 <li><strong>filtered</strong> &#8211; </li>
 <li><strong>revesed</strong> &#8211; if reversed true it returns only measurements that do not meet criteria</li>
-<li><strong>tval_range</strong> &#8211; can be used to look up measurements within a certain range. if only one value is given,
-it is assumed to be an upper limit and the range is set to [0, tval_range]</li>
+<li><strong>sval_range</strong> &#8211; can be used to look up measurements within a certain range. if only one value is given,
+it is assumed to be an upper limit and the range is set to [0, sval_range]</li>
 <li><strong>filtered</strong> &#8211; if true measurements will only be searched in filtered data</li>
 <li><strong>mtype</strong> &#8211; </li>
 </ul>
@@ -1074,13 +1094,25 @@ it is assumed to be an upper limit and the range is set to [0, tval_range]</li>
 </dd></dl>
 
 <dl class="attribute">
+<dt id="RockPy.Structure.sample.Sample.info_dict">
+<code class="descname">info_dict</code><a class="headerlink" href="#RockPy.Structure.sample.Sample.info_dict" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
 <dt id="RockPy.Structure.sample.Sample.logger">
 <code class="descname">logger</code><em class="property"> = &lt;logging.Logger object&gt;</em><a class="headerlink" href="#RockPy.Structure.sample.Sample.logger" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
+<dl class="attribute">
+<dt id="RockPy.Structure.sample.Sample.mass">
+<code class="descname">mass</code><a class="headerlink" href="#RockPy.Structure.sample.Sample.mass" title="Permalink to this definition">¶</a></dt>
+<dd><p>Searches for last mass measurement and returns value in kg
+:return:</p>
+</dd></dl>
+
 <dl class="method">
 <dt id="RockPy.Structure.sample.Sample.mean_measurement">
-<code class="descname">mean_measurement</code><span class="sig-paren">(</span><em>mtype=None</em>, <em>ttype=None</em>, <em>tval=None</em>, <em>tval_range=None</em>, <em>mlist=None</em>, <em>interpolate=False</em>, <em>recalc_mag=False</em>, <em>substfunc='mean'</em><span class="sig-paren">)</span><a class="headerlink" href="#RockPy.Structure.sample.Sample.mean_measurement" title="Permalink to this definition">¶</a></dt>
+<code class="descname">mean_measurement</code><span class="sig-paren">(</span><em>mtype=None</em>, <em>stype=None</em>, <em>sval=None</em>, <em>sval_range=None</em>, <em>mlist=None</em>, <em>interpolate=True</em>, <em>recalc_magag=False</em>, <em>substfunc='mean'</em><span class="sig-paren">)</span><a class="headerlink" href="#RockPy.Structure.sample.Sample.mean_measurement" title="Permalink to this definition">¶</a></dt>
 <dd><p>takes a list of measurements and creates a mean measurement out of all measurements data</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -1089,7 +1121,7 @@ it is assumed to be an upper limit and the range is set to [0, tval_range]</li>
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>mlist</strong> &#8211; </li>
 <li><strong>interpolate</strong> &#8211; </li>
-<li><strong>recalc_mag</strong> &#8211; </li>
+<li><strong>recalc_magag</strong> &#8211; </li>
 </ul>
 </td>
 </tr>
@@ -1102,7 +1134,7 @@ it is assumed to be an upper limit and the range is set to [0, tval_range]</li>
 
 <dl class="method">
 <dt id="RockPy.Structure.sample.Sample.mean_measurement_from_list">
-<code class="descname">mean_measurement_from_list</code><span class="sig-paren">(</span><em>mlist</em>, <em>interpolate=False</em>, <em>recalc_mag=False</em><span class="sig-paren">)</span><a class="headerlink" href="#RockPy.Structure.sample.Sample.mean_measurement_from_list" title="Permalink to this definition">¶</a></dt>
+<code class="descname">mean_measurement_from_list</code><span class="sig-paren">(</span><em>mlist</em>, <em>interpolate=False</em>, <em>recalc_magag=False</em><span class="sig-paren">)</span><a class="headerlink" href="#RockPy.Structure.sample.Sample.mean_measurement_from_list" title="Permalink to this definition">¶</a></dt>
 <dd><p>takes a list of measurements and creates a mean measurement out of all measurements data</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -1111,7 +1143,7 @@ it is assumed to be an upper limit and the range is set to [0, tval_range]</li>
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>mlist</strong> &#8211; </li>
 <li><strong>interpolate</strong> &#8211; </li>
-<li><strong>recalc_mag</strong> &#8211; </li>
+<li><strong>recalc_magag</strong> &#8211; </li>
 </ul>
 </td>
 </tr>
@@ -1146,27 +1178,27 @@ it is assumed to be an upper limit and the range is set to [0, tval_range]</li>
 </dd></dl>
 
 <dl class="attribute">
+<dt id="RockPy.Structure.sample.Sample.mtype_stype_dict">
+<code class="descname">mtype_stype_dict</code><a class="headerlink" href="#RockPy.Structure.sample.Sample.mtype_stype_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns a dictionary of mtypes, with all stypes in that mtype</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="RockPy.Structure.sample.Sample.mtype_stype_mdict">
+<code class="descname">mtype_stype_mdict</code><a class="headerlink" href="#RockPy.Structure.sample.Sample.mtype_stype_mdict" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns a dictionary of mtypes, with all stypes in that mtype</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="RockPy.Structure.sample.Sample.mtype_stype_sval_mdict">
+<code class="descname">mtype_stype_sval_mdict</code><a class="headerlink" href="#RockPy.Structure.sample.Sample.mtype_stype_sval_mdict" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
 <dt id="RockPy.Structure.sample.Sample.mtype_tdict">
 <code class="descname">mtype_tdict</code><a class="headerlink" href="#RockPy.Structure.sample.Sample.mtype_tdict" title="Permalink to this definition">¶</a></dt>
 <dd><p>dictionary with all measurement_types {mtype:[tretments to corresponding m]}</p>
 </dd></dl>
-
-<dl class="attribute">
-<dt id="RockPy.Structure.sample.Sample.mtype_ttype_dict">
-<code class="descname">mtype_ttype_dict</code><a class="headerlink" href="#RockPy.Structure.sample.Sample.mtype_ttype_dict" title="Permalink to this definition">¶</a></dt>
-<dd><p>returns a dictionary of mtypes, with all ttypes in that mtype</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="RockPy.Structure.sample.Sample.mtype_ttype_mdict">
-<code class="descname">mtype_ttype_mdict</code><a class="headerlink" href="#RockPy.Structure.sample.Sample.mtype_ttype_mdict" title="Permalink to this definition">¶</a></dt>
-<dd><p>returns a dictionary of mtypes, with all ttypes in that mtype</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="RockPy.Structure.sample.Sample.mtype_ttype_tval_mdict">
-<code class="descname">mtype_ttype_tval_mdict</code><a class="headerlink" href="#RockPy.Structure.sample.Sample.mtype_ttype_tval_mdict" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
 
 <dl class="attribute">
 <dt id="RockPy.Structure.sample.Sample.mtypes">
@@ -1213,36 +1245,68 @@ it is assumed to be an upper limit and the range is set to [0, tval_range]</li>
 <dd></dd></dl>
 
 <dl class="method">
-<dt id="RockPy.Structure.sample.Sample.sort_mlist_in_ttype_dict">
-<code class="descname">sort_mlist_in_ttype_dict</code><span class="sig-paren">(</span><em>mlist</em><span class="sig-paren">)</span><a class="headerlink" href="#RockPy.Structure.sample.Sample.sort_mlist_in_ttype_dict" title="Permalink to this definition">¶</a></dt>
-<dd><p>sorts a list of measurements according to their ttype and tvals</p>
+<dt id="RockPy.Structure.sample.Sample.sort_mlist_in_stype_dict">
+<code class="descname">sort_mlist_in_stype_dict</code><span class="sig-paren">(</span><em>mlist</em><span class="sig-paren">)</span><a class="headerlink" href="#RockPy.Structure.sample.Sample.sort_mlist_in_stype_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>sorts a list of measurements according to their stype and svals</p>
 </dd></dl>
 
 <dl class="attribute">
-<dt id="RockPy.Structure.sample.Sample.ttype_dict">
-<code class="descname">ttype_dict</code><a class="headerlink" href="#RockPy.Structure.sample.Sample.ttype_dict" title="Permalink to this definition">¶</a></dt>
-<dd><p>dictionary with all treatment_types {ttype:[list of measurements]}</p>
+<dt id="RockPy.Structure.sample.Sample.stype_dict">
+<code class="descname">stype_dict</code><a class="headerlink" href="#RockPy.Structure.sample.Sample.stype_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>dictionary with all series_types {stype:[list of measurements]}</p>
 <p>example:
 &gt;&gt;&gt; {&#8216;pressure&#8217;: [&lt;RockPy.Measurements.parameters.Mass object at 0x10e196150&gt;, &lt;RockPy.Measurements.parameters.Diameter object at 0x10e1962d0&gt;]}</p>
 </dd></dl>
 
 <dl class="attribute">
-<dt id="RockPy.Structure.sample.Sample.ttype_tval_dict">
-<code class="descname">ttype_tval_dict</code><a class="headerlink" href="#RockPy.Structure.sample.Sample.ttype_tval_dict" title="Permalink to this definition">¶</a></dt>
+<dt id="RockPy.Structure.sample.Sample.stype_sval_dict">
+<code class="descname">stype_sval_dict</code><a class="headerlink" href="#RockPy.Structure.sample.Sample.stype_sval_dict" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
-<dt id="RockPy.Structure.sample.Sample.ttypes">
-<code class="descname">ttypes</code><a class="headerlink" href="#RockPy.Structure.sample.Sample.ttypes" title="Permalink to this definition">¶</a></dt>
-<dd><p>returns a list of all ttypes</p>
+<dt id="RockPy.Structure.sample.Sample.stypes">
+<code class="descname">stypes</code><a class="headerlink" href="#RockPy.Structure.sample.Sample.stypes" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns a list of all stypes</p>
 </dd></dl>
 
 <dl class="attribute">
-<dt id="RockPy.Structure.sample.Sample.tvals">
-<code class="descname">tvals</code><a class="headerlink" href="#RockPy.Structure.sample.Sample.tvals" title="Permalink to this definition">¶</a></dt>
-<dd><p>returns a list of all ttypes</p>
+<dt id="RockPy.Structure.sample.Sample.svals">
+<code class="descname">svals</code><a class="headerlink" href="#RockPy.Structure.sample.Sample.svals" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns a list of all stypes</p>
 </dd></dl>
 
+<dl class="attribute">
+<dt id="RockPy.Structure.sample.Sample.volume">
+<code class="descname">volume</code><a class="headerlink" href="#RockPy.Structure.sample.Sample.volume" title="Permalink to this definition">¶</a></dt>
+<dd><p>Searches for last volume measurement and returns value in m^3
+:return:</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="RockPy.Structure.sample.get_common_dtypes_from_list">
+<code class="descclassname">RockPy.Structure.sample.</code><code class="descname">get_common_dtypes_from_list</code><span class="sig-paren">(</span><em>mlist</em><span class="sig-paren">)</span><a class="headerlink" href="#RockPy.Structure.sample.get_common_dtypes_from_list" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes a list of measurements and returns a list of common dtypes.</p>
+<p class="rubric">Example</p>
+<p>mlist = [hys(down_field, up_field), hys(down_field, up_field, virgin)]
+returns [&#8216;down_field&#8217;, &#8216;up_field&#8217;]</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>mlist: list</dt>
+<dd>list of measurements</dd>
+</dl>
+</div></blockquote>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">sorted list of commen dtypes</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">dtypes</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 </div>
@@ -1254,21 +1318,75 @@ it is assumed to be an upper limit and the range is set to [0, tval_range]</li>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
 <p>Container for Samples, has special calculation methods</p>
 <dl class="method">
+<dt id="RockPy.Structure.samplegroup.SampleGroup.__getstate__">
+<code class="descname">__getstate__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#RockPy.Structure.samplegroup.SampleGroup.__getstate__" title="Permalink to this definition">¶</a></dt>
+<dd><p>returned dict will be pickled
+:return:</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="RockPy.Structure.samplegroup.SampleGroup.add_s2_info_dict">
+<code class="descname">add_s2_info_dict</code><span class="sig-paren">(</span><em>s</em><span class="sig-paren">)</span><a class="headerlink" href="#RockPy.Structure.samplegroup.SampleGroup.add_s2_info_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds a sample to the infodict.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>s</strong> (<em>RockPySample</em>) &#8211; The sample that should be added to the dictionary</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
 <dt id="RockPy.Structure.samplegroup.SampleGroup.add_samples">
 <code class="descname">add_samples</code><span class="sig-paren">(</span><em>s_list</em><span class="sig-paren">)</span><a class="headerlink" href="#RockPy.Structure.samplegroup.SampleGroup.add_samples" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Adds a sample to the sample dictionary and adds the sample_group to sample.sample_groups</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>s_list</strong> (<em>single item or list</em>) &#8211; single items get transformed to list</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Uses _item_to_list for list conversion</p>
+</div>
+</dd></dl>
 
 <dl class="method">
 <dt id="RockPy.Structure.samplegroup.SampleGroup.average_results">
 <code class="descname">average_results</code><span class="sig-paren">(</span><em>**parameter</em><span class="sig-paren">)</span><a class="headerlink" href="#RockPy.Structure.samplegroup.SampleGroup.average_results" title="Permalink to this definition">¶</a></dt>
-<dd><p>makes averages of all calculations for all samples in group. Only samples with same treatments are averaged</p>
+<dd><p>makes averages of all calculations for all samples in group. Only samples with same series are averaged</p>
 <p>prams: parameter are calculation parameters, has to be a dictionary</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="RockPy.Structure.samplegroup.SampleGroup.average_sample">
-<code class="descname">average_sample</code><span class="sig-paren">(</span><em>reference='nrm'</em>, <em>name='mean_sample_group'</em>, <em>rtype='mag'</em>, <em>vval=None</em>, <em>norm_method='max'</em>, <em>interpolate=True</em><span class="sig-paren">)</span><a class="headerlink" href="#RockPy.Structure.samplegroup.SampleGroup.average_sample" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<code class="descname">average_sample</code><span class="sig-paren">(</span><em>name=None</em>, <em>reference='data'</em>, <em>rtype='mag'</em>, <em>dtype='mag'</em>, <em>vval=None</em>, <em>norm_method='max'</em>, <em>interpolate=True</em><span class="sig-paren">)</span><a class="headerlink" href="#RockPy.Structure.samplegroup.SampleGroup.average_sample" title="Permalink to this definition">¶</a></dt>
+<dd><p>Averages all samples and returns a sample with an average measurement for all measurements in all samples.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>name</strong> (<em>str</em>) &#8211; Name of the samplegroup. <em>default:</em> mean_*sample_group_name*</li>
+<li><strong>reference</strong> (<em>str</em>) &#8211; used for normalize</li>
+<li><strong>rtype</strong> &#8211; </li>
+<li><strong>vval</strong> &#8211; </li>
+<li><strong>norm_method</strong> &#8211; </li>
+<li><strong>interpolate</strong> (<em>bool</em>) &#8211; it True all measurements are interpolated to equal variables and then normalized</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 <dl class="method">
 <dt id="RockPy.Structure.samplegroup.SampleGroup.calc_all">
@@ -1281,25 +1399,46 @@ it is assumed to be an upper limit and the range is set to [0, tval_range]</li>
 <dd></dd></dl>
 
 <dl class="method">
+<dt id="RockPy.Structure.samplegroup.SampleGroup.create_mean_sample">
+<code class="descname">create_mean_sample</code><span class="sig-paren">(</span><em>reference=None</em>, <em>rtype='mag'</em>, <em>dtye='mag'</em>, <em>vval=None</em>, <em>ntypes='all'</em>, <em>norm_method='max'</em>, <em>interpolate=True</em>, <em>substfunc='mean'</em><span class="sig-paren">)</span><a class="headerlink" href="#RockPy.Structure.samplegroup.SampleGroup.create_mean_sample" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a mean sample out of all samples</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>reference</strong> &#8211; </li>
+<li><strong>rtype</strong> &#8211; </li>
+<li><strong>dtye</strong> &#8211; </li>
+<li><strong>vval</strong> &#8211; </li>
+<li><strong>norm_method</strong> &#8211; </li>
+<li><strong>interpolate</strong> &#8211; </li>
+<li><strong>substfunc</strong> &#8211; </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
 <dt id="RockPy.Structure.samplegroup.SampleGroup.delete_measurements">
-<code class="descname">delete_measurements</code><span class="sig-paren">(</span><em>sname=None</em>, <em>mtype=None</em>, <em>ttype=None</em>, <em>tval=None</em>, <em>tval_range=None</em><span class="sig-paren">)</span><a class="headerlink" href="#RockPy.Structure.samplegroup.SampleGroup.delete_measurements" title="Permalink to this definition">¶</a></dt>
+<code class="descname">delete_measurements</code><span class="sig-paren">(</span><em>sname=None</em>, <em>mtype=None</em>, <em>stype=None</em>, <em>sval=None</em>, <em>sval_range=None</em><span class="sig-paren">)</span><a class="headerlink" href="#RockPy.Structure.samplegroup.SampleGroup.delete_measurements" title="Permalink to this definition">¶</a></dt>
 <dd><p>deletes measurements according to criteria</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="RockPy.Structure.samplegroup.SampleGroup.export_cryomag">
-<code class="descname">export_cryomag</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#RockPy.Structure.samplegroup.SampleGroup.export_cryomag" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
 <dt id="RockPy.Structure.samplegroup.SampleGroup.get_measurements">
-<code class="descname">get_measurements</code><span class="sig-paren">(</span><em>sname=None</em>, <em>mtype=None</em>, <em>ttype=None</em>, <em>tval=None</em>, <em>tval_range=None</em><span class="sig-paren">)</span><a class="headerlink" href="#RockPy.Structure.samplegroup.SampleGroup.get_measurements" title="Permalink to this definition">¶</a></dt>
+<code class="descname">get_measurements</code><span class="sig-paren">(</span><em>sname=None</em>, <em>mtype=None</em>, <em>stype=None</em>, <em>sval=None</em>, <em>sval_range=None</em><span class="sig-paren">)</span><a class="headerlink" href="#RockPy.Structure.samplegroup.SampleGroup.get_measurements" title="Permalink to this definition">¶</a></dt>
 <dd><p>Wrapper, for finding measurements, calls get_samples first and sample.get_measurements</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="RockPy.Structure.samplegroup.SampleGroup.get_samples">
-<code class="descname">get_samples</code><span class="sig-paren">(</span><em>snames=None</em>, <em>mtypes=None</em>, <em>ttypes=None</em>, <em>tvals=None</em>, <em>tval_range=None</em><span class="sig-paren">)</span><a class="headerlink" href="#RockPy.Structure.samplegroup.SampleGroup.get_samples" title="Permalink to this definition">¶</a></dt>
+<code class="descname">get_samples</code><span class="sig-paren">(</span><em>snames=None</em>, <em>mtypes=None</em>, <em>stypes=None</em>, <em>svals=None</em>, <em>sval_range=None</em><span class="sig-paren">)</span><a class="headerlink" href="#RockPy.Structure.samplegroup.SampleGroup.get_samples" title="Permalink to this definition">¶</a></dt>
 <dd><p>Primary search function for all parameters</p>
 </dd></dl>
 
@@ -1314,13 +1453,19 @@ it is assumed to be an upper limit and the range is set to [0, tval_range]</li>
 </dd></dl>
 
 <dl class="attribute">
+<dt id="RockPy.Structure.samplegroup.SampleGroup.info_dict">
+<code class="descname">info_dict</code><a class="headerlink" href="#RockPy.Structure.samplegroup.SampleGroup.info_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Property for easy access of info_dict. If &#8216;_info_dict&#8217; has not been created, it will create one.</p>
+</dd></dl>
+
+<dl class="attribute">
 <dt id="RockPy.Structure.samplegroup.SampleGroup.log">
 <code class="descname">log</code><em class="property"> = &lt;logging.Logger object&gt;</em><a class="headerlink" href="#RockPy.Structure.samplegroup.SampleGroup.log" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="RockPy.Structure.samplegroup.SampleGroup.mean_sample">
-<code class="descname">mean_sample</code><span class="sig-paren">(</span><em>reference=None</em>, <em>rtype='mag'</em>, <em>vval=None</em>, <em>norm_method='max'</em>, <em>interpolate=True</em>, <em>substfunc='mean'</em><span class="sig-paren">)</span><a class="headerlink" href="#RockPy.Structure.samplegroup.SampleGroup.mean_sample" title="Permalink to this definition">¶</a></dt>
+<code class="descname">mean_sample</code><span class="sig-paren">(</span><em>reference=None</em>, <em>rtype='mag'</em>, <em>dtye='mag'</em>, <em>vval=None</em>, <em>norm_method='max'</em>, <em>interpolate=True</em>, <em>substfunc='mean'</em><span class="sig-paren">)</span><a class="headerlink" href="#RockPy.Structure.samplegroup.SampleGroup.mean_sample" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
@@ -1334,14 +1479,14 @@ it is assumed to be an upper limit and the range is set to [0, tval_range]</li>
 <dd></dd></dl>
 
 <dl class="attribute">
-<dt id="RockPy.Structure.samplegroup.SampleGroup.mtype_ttype_dict">
-<code class="descname">mtype_ttype_dict</code><a class="headerlink" href="#RockPy.Structure.samplegroup.SampleGroup.mtype_ttype_dict" title="Permalink to this definition">¶</a></dt>
+<dt id="RockPy.Structure.samplegroup.SampleGroup.mtype_stype_dict">
+<code class="descname">mtype_stype_dict</code><a class="headerlink" href="#RockPy.Structure.samplegroup.SampleGroup.mtype_stype_dict" title="Permalink to this definition">¶</a></dt>
 <dd><p>returns a list of tratment types within a certain measurement type</p>
 </dd></dl>
 
 <dl class="attribute">
-<dt id="RockPy.Structure.samplegroup.SampleGroup.mtype_tvals_dict">
-<code class="descname">mtype_tvals_dict</code><a class="headerlink" href="#RockPy.Structure.samplegroup.SampleGroup.mtype_tvals_dict" title="Permalink to this definition">¶</a></dt>
+<dt id="RockPy.Structure.samplegroup.SampleGroup.mtype_svals_dict">
+<code class="descname">mtype_svals_dict</code><a class="headerlink" href="#RockPy.Structure.samplegroup.SampleGroup.mtype_svals_dict" title="Permalink to this definition">¶</a></dt>
 <dd><p>returns a list of tratment types within a certain measurement type</p>
 </dd></dl>
 
@@ -1355,6 +1500,30 @@ it is assumed to be an upper limit and the range is set to [0, tval_range]</li>
 <dt id="RockPy.Structure.samplegroup.SampleGroup.pop_sample">
 <code class="descname">pop_sample</code><span class="sig-paren">(</span><em>sample_name</em><span class="sig-paren">)</span><a class="headerlink" href="#RockPy.Structure.samplegroup.SampleGroup.pop_sample" title="Permalink to this definition">¶</a></dt>
 <dd><p>remove samples from sample_group will take str(sample_name), list(sample_name)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="RockPy.Structure.samplegroup.SampleGroup.recalc_info_dict">
+<code class="descname">recalc_info_dict</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#RockPy.Structure.samplegroup.SampleGroup.recalc_info_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Recalculates the info_dictionary with information of all samples and their corresponding measurements</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="RockPy.Structure.samplegroup.SampleGroup.remove_samples">
+<code class="descname">remove_samples</code><span class="sig-paren">(</span><em>s_list</em><span class="sig-paren">)</span><a class="headerlink" href="#RockPy.Structure.samplegroup.SampleGroup.remove_samples" title="Permalink to this definition">¶</a></dt>
+<dd><p>Removes a sample from the sgroup.samples dictionary and removes the sgroup from sample.sgroups</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>s_list</strong> (<em>single item or list</em>) &#8211; single items get transformed to list</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Uses _item_to_list for list conversion</p>
+</div>
 </dd></dl>
 
 <dl class="attribute">
@@ -1378,27 +1547,32 @@ it is assumed to be an upper limit and the range is set to [0, tval_range]</li>
 <dd></dd></dl>
 
 <dl class="method">
-<dt id="RockPy.Structure.samplegroup.SampleGroup.ttype_results">
-<code class="descname">ttype_results</code><span class="sig-paren">(</span><em>**parameter</em><span class="sig-paren">)</span><a class="headerlink" href="#RockPy.Structure.samplegroup.SampleGroup.ttype_results" title="Permalink to this definition">¶</a></dt>
+<dt id="RockPy.Structure.samplegroup.SampleGroup.stype_results">
+<code class="descname">stype_results</code><span class="sig-paren">(</span><em>**parameter</em><span class="sig-paren">)</span><a class="headerlink" href="#RockPy.Structure.samplegroup.SampleGroup.stype_results" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
-<dt id="RockPy.Structure.samplegroup.SampleGroup.ttype_tval_dict">
-<code class="descname">ttype_tval_dict</code><a class="headerlink" href="#RockPy.Structure.samplegroup.SampleGroup.ttype_tval_dict" title="Permalink to this definition">¶</a></dt>
+<dt id="RockPy.Structure.samplegroup.SampleGroup.stype_sval_dict">
+<code class="descname">stype_sval_dict</code><a class="headerlink" href="#RockPy.Structure.samplegroup.SampleGroup.stype_sval_dict" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
-<dt id="RockPy.Structure.samplegroup.SampleGroup.ttypes">
-<code class="descname">ttypes</code><a class="headerlink" href="#RockPy.Structure.samplegroup.SampleGroup.ttypes" title="Permalink to this definition">¶</a></dt>
+<dt id="RockPy.Structure.samplegroup.SampleGroup.stypes">
+<code class="descname">stypes</code><a class="headerlink" href="#RockPy.Structure.samplegroup.SampleGroup.stypes" title="Permalink to this definition">¶</a></dt>
 <dd><p>looks through all samples and returns measurement types</p>
 </dd></dl>
 
 <dl class="attribute">
-<dt id="RockPy.Structure.samplegroup.SampleGroup.tvals">
-<code class="descname">tvals</code><a class="headerlink" href="#RockPy.Structure.samplegroup.SampleGroup.tvals" title="Permalink to this definition">¶</a></dt>
+<dt id="RockPy.Structure.samplegroup.SampleGroup.svals">
+<code class="descname">svals</code><a class="headerlink" href="#RockPy.Structure.samplegroup.SampleGroup.svals" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
+
+<dl class="function">
+<dt id="RockPy.Structure.samplegroup.test">
+<code class="descclassname">RockPy.Structure.samplegroup.</code><code class="descname">test</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#RockPy.Structure.samplegroup.test" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 </div>
 <div class="section" id="module-RockPy.Structure.study">
@@ -1448,7 +1622,7 @@ i.e. container for samplegroups</p>
 
 <dl class="method">
 <dt id="RockPy.Structure.study.Study.get_samples">
-<code class="descname">get_samples</code><span class="sig-paren">(</span><em>snames=None</em>, <em>mtypes=None</em>, <em>ttypes=None</em>, <em>tvals=None</em>, <em>tval_range=None</em><span class="sig-paren">)</span><a class="headerlink" href="#RockPy.Structure.study.Study.get_samples" title="Permalink to this definition">¶</a></dt>
+<code class="descname">get_samples</code><span class="sig-paren">(</span><em>snames=None</em>, <em>mtypes=None</em>, <em>stypes=None</em>, <em>svals=None</em>, <em>sval_range=None</em><span class="sig-paren">)</span><a class="headerlink" href="#RockPy.Structure.study.Study.get_samples" title="Permalink to this definition">¶</a></dt>
 <dd><p>Primary search function for all parameters</p>
 </dd></dl>
 
@@ -1500,8 +1674,6 @@ i.e. container for samplegroups</p>
           <footer>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-      
-        <a href="RockPy.Treatments.html" class="btn btn-neutral float-right" title="Treatments Package">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="RockPy.Readin.html" class="btn btn-neutral" title="Readin Package"><span class="fa fa-arrow-circle-left"></span> Previous</a>

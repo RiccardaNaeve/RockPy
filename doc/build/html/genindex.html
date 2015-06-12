@@ -124,11 +124,6 @@
 <li class="toctree-l2"><a class="reference internal" href="RockPy.Structure.html#module-RockPy.Structure.study"><code class="docutils literal"><span class="pre">study</span></code> Module</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="RockPy.Treatments.html">Treatments Package</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="RockPy.Treatments.html#id1"><code class="docutils literal"><span class="pre">Treatments</span></code> Package</a></li>
-<li class="toctree-l2"><a class="reference internal" href="RockPy.Treatments.html#module-RockPy.Treatments.base"><code class="docutils literal"><span class="pre">base</span></code> Module</a></li>
-</ul>
-</li>
 </ul>
 
           
@@ -218,6 +213,10 @@
 
       <dd><dl>
         
+  <dt><a href="RockPy.Structure.html#RockPy.Structure.samplegroup.SampleGroup.__getstate__">(RockPy.Structure.samplegroup.SampleGroup method)</a>
+  </dt>
+
+        
   <dt><a href="RockPy.Structure.html#RockPy.Structure.study.Study.__getstate__">(RockPy.Structure.study.Study method)</a>
   </dt>
 
@@ -267,6 +266,10 @@
   </dt>
 
       
+  <dt><a href="RockPy.Structure.html#RockPy.Structure.samplegroup.SampleGroup.add_s2_info_dict">add_s2_info_dict() (RockPy.Structure.samplegroup.SampleGroup method)</a>
+  </dt>
+
+      
   <dt><a href="RockPy.Structure.html#RockPy.Structure.study.Study.add_samplegroup">add_samplegroup() (RockPy.Structure.study.Study method)</a>
   </dt>
 
@@ -276,10 +279,6 @@
 
       
   <dt><a href="RockPy.Structure.html#RockPy.Structure.sample.Sample.add_simulation">add_simulation() (RockPy.Structure.sample.Sample method)</a>
-  </dt>
-
-      
-  <dt><a href="RockPy.Treatments.html#RockPy.Treatments.base.Generic.add_value">add_value() (RockPy.Treatments.base.Generic method)</a>
   </dt>
 
       
@@ -322,6 +321,10 @@
 
       
   <dt><a href="RockPy.Measurements.html#RockPy.Measurements.hysteresis.Hys.auto">auto() (RockPy.Measurements.hysteresis.Hys method)</a>
+  </dt>
+
+      
+  <dt><a href="RockPy.Structure.html#RockPy.Structure.sample.Sample.average_measurements">average_measurements() (RockPy.Structure.sample.Sample method)</a>
   </dt>
 
       
@@ -528,8 +531,6 @@
   <dt><a href="RockPy.Measurements.html#RockPy.Measurements.thellier.Thellier.calculate_n_ptrm">calculate_n_ptrm() (RockPy.Measurements.thellier.Thellier method)</a>
   </dt>
 
-  </dl></td>
-  <td style="width: 33%" valign="top"><dl>
       
   <dt><a href="RockPy.Measurements.html#RockPy.Measurements.thellier.Thellier.calculate_n_tail">calculate_n_tail() (RockPy.Measurements.thellier.Thellier method)</a>
   </dt>
@@ -538,6 +539,8 @@
   <dt><a href="RockPy.Measurements.html#RockPy.Measurements.thellier.Thellier.calculate_q">calculate_q() (RockPy.Measurements.thellier.Thellier method)</a>
   </dt>
 
+  </dl></td>
+  <td style="width: 33%" valign="top"><dl>
       
   <dt><a href="RockPy.Measurements.html#RockPy.Measurements.backfield.Backfield.calculate_s300">calculate_s300() (RockPy.Measurements.backfield.Backfield method)</a>
   </dt>
@@ -679,11 +682,27 @@
   </dt>
 
       
+  <dt><a href="RockPy.Functions.html#RockPy.Functions.general.create_dummy_measurement">create_dummy_measurement() (in module RockPy.Functions.general)</a>
+  </dt>
+
+      
   <dt><a href="RockPy.Functions.html#RockPy.Functions.general.create_logger">create_logger() (in module RockPy.Functions.general)</a>
   </dt>
 
       
+  <dt><a href="RockPy.Structure.html#RockPy.Structure.samplegroup.SampleGroup.create_mean_sample">create_mean_sample() (RockPy.Structure.samplegroup.SampleGroup method)</a>
+  </dt>
+
+      
   <dt><a href="RockPy.Readin.html#RockPy.Readin.cryomag.CryoMag">CryoMag (class in RockPy.Readin.cryomag)</a>
+  </dt>
+
+      
+  <dt><a href="RockPy.Measurements.html#RockPy.Measurements.parameters.Volume.cube">cube() (RockPy.Measurements.parameters.Volume static method)</a>
+  </dt>
+
+      
+  <dt><a href="RockPy.Measurements.html#RockPy.Measurements.parameters.Volume.cylinder">cylinder() (RockPy.Measurements.parameters.Volume static method)</a>
   </dt>
 
   </dl></td>
@@ -790,14 +809,10 @@
   <dt><a href="RockPy.Structure.html#RockPy.Structure.data.RockPyData.eliminate_unique_variable_rows">eliminate_unique_variable_rows() (RockPy.Structure.data.RockPyData method)</a>
   </dt>
 
-      
-  <dt><a href="RockPy.Structure.html#RockPy.Structure.data.RockPyData.errors">errors (RockPy.Structure.data.RockPyData attribute)</a>
-  </dt>
-
   </dl></td>
   <td style="width: 33%" valign="top"><dl>
       
-  <dt><a href="RockPy.Structure.html#RockPy.Structure.samplegroup.SampleGroup.export_cryomag">export_cryomag() (RockPy.Structure.samplegroup.SampleGroup method)</a>
+  <dt><a href="RockPy.Structure.html#RockPy.Structure.data.RockPyData.errors">errors (RockPy.Structure.data.RockPyData attribute)</a>
   </dt>
 
       
@@ -872,12 +887,12 @@
   <dt><a href="RockPy.Measurements.html#RockPy.Measurements.hysteresis.Hys.fit_tanh">fit_tanh() (RockPy.Measurements.hysteresis.Hys static method)</a>
   </dt>
 
-  </dl></td>
-  <td style="width: 33%" valign="top"><dl>
       
   <dt><a href="RockPy.Measurements.html#RockPy.Measurements.viscosity.Viscosity.fit_viscous_relaxation">fit_viscous_relaxation() (RockPy.Measurements.viscosity.Viscosity static method)</a>
   </dt>
 
+  </dl></td>
+  <td style="width: 33%" valign="top"><dl>
       
   <dt><a href="RockPy.Readin.html#RockPy.Readin.cryomag.CryoMag.float_data">float_data (RockPy.Readin.cryomag.CryoMag attribute)</a>
   </dt>
@@ -921,10 +936,6 @@
   <dt><a href="RockPy.Measurements.html#RockPy.Measurements.parameters.Mass.format_generic">(RockPy.Measurements.parameters.Mass method)</a>
   </dt>
 
-        
-  <dt><a href="RockPy.Measurements.html#RockPy.Measurements.thellier.Thellier.format_generic">(RockPy.Measurements.thellier.Thellier method)</a>
-  </dt>
-
       </dl></dd>
       
   <dt><a href="RockPy.Measurements.html#RockPy.Measurements.af_demag.AfDemag.format_jr6">format_jr6() (RockPy.Measurements.af_demag.AfDemag method)</a>
@@ -954,6 +965,10 @@
   </dt>
 
       </dl></dd>
+      
+  <dt><a href="RockPy.Measurements.html#RockPy.Measurements.thellier.Thellier.format_tdt">format_tdt() (RockPy.Measurements.thellier.Thellier method)</a>
+  </dt>
+
       
   <dt><a href="RockPy.Measurements.html#RockPy.Measurements.backfield.Backfield.format_vftb">format_vftb() (RockPy.Measurements.backfield.Backfield method)</a>
   </dt>
@@ -1000,14 +1015,12 @@
   <dt><a href="RockPy.Readin.html#RockPy.Readin.generic.Generic">Generic (class in RockPy.Readin.generic)</a>
   </dt>
 
-      <dd><dl>
-        
-  <dt><a href="RockPy.Treatments.html#RockPy.Treatments.base.Generic">(class in RockPy.Treatments.base)</a>
-  </dt>
-
-      </dl></dd>
       
   <dt><a href="RockPy.Measurements.html#RockPy.Measurements.single_moment.generic_moment">generic_moment (class in RockPy.Measurements.single_moment)</a>
+  </dt>
+
+      
+  <dt><a href="RockPy.Structure.html#RockPy.Structure.sample.get_common_dtypes_from_list">get_common_dtypes_from_list() (in module RockPy.Structure.sample)</a>
   </dt>
 
       
@@ -1058,12 +1071,12 @@
   </dt>
 
       </dl></dd>
+  </dl></td>
+  <td style="width: 33%" valign="top"><dl>
       
   <dt><a href="RockPy.Measurements.html#RockPy.Measurements.hysteresis.Hys.get_interpolated">get_interpolated() (RockPy.Measurements.hysteresis.Hys method)</a>
   </dt>
 
-  </dl></td>
-  <td style="width: 33%" valign="top"><dl>
       
   <dt><a href="RockPy.Measurements.html#RockPy.Measurements.hysteresis.Hys.get_irreversible">get_irreversible() (RockPy.Measurements.hysteresis.Hys method)</a>
   </dt>
@@ -1171,6 +1184,16 @@
 
       </dl></dd>
       
+  <dt><a href="RockPy.Structure.html#RockPy.Structure.sample.Sample.info_dict">info_dict (RockPy.Structure.sample.Sample attribute)</a>
+  </dt>
+
+      <dd><dl>
+        
+  <dt><a href="RockPy.Structure.html#RockPy.Structure.samplegroup.SampleGroup.info_dict">(RockPy.Structure.samplegroup.SampleGroup attribute)</a>
+  </dt>
+
+      </dl></dd>
+      
   <dt><a href="RockPy.Structure.html#RockPy.Structure.data.RockPyData.interpolate">interpolate() (RockPy.Structure.data.RockPyData method)</a>
   </dt>
 
@@ -1215,10 +1238,6 @@
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%" valign="top"><dl>
       
-  <dt><a href="RockPy.Treatments.html#RockPy.Treatments.base.Generic.label">label (RockPy.Treatments.base.Generic attribute)</a>
-  </dt>
-
-      
   <dt><a href="RockPy.Structure.html#RockPy.Structure.data.RockPyData.last">last() (RockPy.Structure.data.RockPyData method)</a>
   </dt>
 
@@ -1226,12 +1245,12 @@
   <dt><a href="RockPy.Measurements.html#RockPy.Measurements.parameters.Length">Length (class in RockPy.Measurements.parameters)</a>
   </dt>
 
-  </dl></td>
-  <td style="width: 33%" valign="top"><dl>
       
   <dt><a href="RockPy.Structure.html#RockPy.Structure.data.RockPyData.lin_regress">lin_regress() (RockPy.Structure.data.RockPyData method)</a>
   </dt>
 
+  </dl></td>
+  <td style="width: 33%" valign="top"><dl>
       
   <dt><a href="RockPy.Readin.html#RockPy.Readin.base.Machine.log">log (RockPy.Readin.base.Machine attribute)</a>
   </dt>
@@ -1268,6 +1287,10 @@
 
       
   <dt><a href="RockPy.Measurements.html#RockPy.Measurements.parameters.Mass">Mass (class in RockPy.Measurements.parameters)</a>
+  </dt>
+
+      
+  <dt><a href="RockPy.Structure.html#RockPy.Structure.sample.Sample.mass">mass (RockPy.Structure.sample.Sample attribute)</a>
   </dt>
 
       
@@ -1341,29 +1364,29 @@
   </dt>
 
       
-  <dt><a href="RockPy.Structure.html#RockPy.Structure.sample.Sample.mtype_tdict">mtype_tdict (RockPy.Structure.sample.Sample attribute)</a>
-  </dt>
-
-      
-  <dt><a href="RockPy.Structure.html#RockPy.Structure.sample.Sample.mtype_ttype_dict">mtype_ttype_dict (RockPy.Structure.sample.Sample attribute)</a>
+  <dt><a href="RockPy.Structure.html#RockPy.Structure.sample.Sample.mtype_stype_dict">mtype_stype_dict (RockPy.Structure.sample.Sample attribute)</a>
   </dt>
 
       <dd><dl>
         
-  <dt><a href="RockPy.Structure.html#RockPy.Structure.samplegroup.SampleGroup.mtype_ttype_dict">(RockPy.Structure.samplegroup.SampleGroup attribute)</a>
+  <dt><a href="RockPy.Structure.html#RockPy.Structure.samplegroup.SampleGroup.mtype_stype_dict">(RockPy.Structure.samplegroup.SampleGroup attribute)</a>
   </dt>
 
       </dl></dd>
       
-  <dt><a href="RockPy.Structure.html#RockPy.Structure.sample.Sample.mtype_ttype_mdict">mtype_ttype_mdict (RockPy.Structure.sample.Sample attribute)</a>
+  <dt><a href="RockPy.Structure.html#RockPy.Structure.sample.Sample.mtype_stype_mdict">mtype_stype_mdict (RockPy.Structure.sample.Sample attribute)</a>
   </dt>
 
       
-  <dt><a href="RockPy.Structure.html#RockPy.Structure.sample.Sample.mtype_ttype_tval_mdict">mtype_ttype_tval_mdict (RockPy.Structure.sample.Sample attribute)</a>
+  <dt><a href="RockPy.Structure.html#RockPy.Structure.sample.Sample.mtype_stype_sval_mdict">mtype_stype_sval_mdict (RockPy.Structure.sample.Sample attribute)</a>
   </dt>
 
       
-  <dt><a href="RockPy.Structure.html#RockPy.Structure.samplegroup.SampleGroup.mtype_tvals_dict">mtype_tvals_dict (RockPy.Structure.samplegroup.SampleGroup attribute)</a>
+  <dt><a href="RockPy.Structure.html#RockPy.Structure.samplegroup.SampleGroup.mtype_svals_dict">mtype_svals_dict (RockPy.Structure.samplegroup.SampleGroup attribute)</a>
+  </dt>
+
+      
+  <dt><a href="RockPy.Structure.html#RockPy.Structure.sample.Sample.mtype_tdict">mtype_tdict (RockPy.Structure.sample.Sample attribute)</a>
   </dt>
 
       
@@ -1474,14 +1497,18 @@
   <dt><a href="RockPy.Measurements.html#RockPy.Measurements.thellier.Thellier.plt_dunlop">plt_dunlop() (RockPy.Measurements.thellier.Thellier method)</a>
   </dt>
 
-  </dl></td>
-  <td style="width: 33%" valign="top"><dl>
       
   <dt><a href="RockPy.Measurements.html#RockPy.Measurements.hysteresis.Hys.plt_hys">plt_hys() (RockPy.Measurements.hysteresis.Hys method)</a>
   </dt>
 
+  </dl></td>
+  <td style="width: 33%" valign="top"><dl>
       
   <dt><a href="RockPy.Measurements.html#RockPy.Measurements.hysteresis.Hys.plt_hysteresis">plt_hysteresis() (RockPy.Measurements.hysteresis.Hys method)</a>
+  </dt>
+
+      
+  <dt><a href="RockPy.Measurements.html#RockPy.Measurements.thellier.Thellier.plt_thellier">plt_thellier() (RockPy.Measurements.thellier.Thellier method)</a>
   </dt>
 
       
@@ -1512,6 +1539,16 @@
 
       
   <dt><a href="RockPy.Structure.html#RockPy.Structure.sample.Sample.recalc_info_dict">recalc_info_dict() (RockPy.Structure.sample.Sample method)</a>
+  </dt>
+
+      <dd><dl>
+        
+  <dt><a href="RockPy.Structure.html#RockPy.Structure.samplegroup.SampleGroup.recalc_info_dict">(RockPy.Structure.samplegroup.SampleGroup method)</a>
+  </dt>
+
+      </dl></dd>
+      
+  <dt><a href="RockPy.Structure.html#RockPy.Structure.samplegroup.SampleGroup.remove_samples">remove_samples() (RockPy.Structure.samplegroup.SampleGroup method)</a>
   </dt>
 
       
@@ -1690,16 +1727,12 @@
   <dt><a href="RockPy.Measurements.html#RockPy.Measurements.thellier.Thellier.result_sigma">result_sigma() (RockPy.Measurements.thellier.Thellier method)</a>
   </dt>
 
+  </dl></td>
+  <td style="width: 33%" valign="top"><dl>
       
   <dt><a href="RockPy.Measurements.html#RockPy.Measurements.thellier.Thellier.result_sigma_b_anc">result_sigma_b_anc() (RockPy.Measurements.thellier.Thellier method)</a>
   </dt>
 
-      
-  <dt><a href="RockPy.Measurements.html#RockPy.Measurements.backfield.Backfield.result_sigma_mrs">result_sigma_mrs() (RockPy.Measurements.backfield.Backfield method)</a>
-  </dt>
-
-  </dl></td>
-  <td style="width: 33%" valign="top"><dl>
       
   <dt><a href="RockPy.Measurements.html#RockPy.Measurements.thellier.Thellier.result_slope">result_slope() (RockPy.Measurements.thellier.Thellier method)</a>
   </dt>
@@ -1845,14 +1878,6 @@
   </dt>
 
       
-  <dt><a href="RockPy.Treatments.html#module-RockPy.Treatments">RockPy.Treatments (module)</a>
-  </dt>
-
-      
-  <dt><a href="RockPy.Treatments.html#module-RockPy.Treatments.base">RockPy.Treatments.base (module)</a>
-  </dt>
-
-      
   <dt><a href="RockPy.Structure.html#RockPy.Structure.data.RockPyData">RockPyData (class in RockPy.Structure.data)</a>
   </dt>
 
@@ -1873,7 +1898,7 @@
   </dt>
 
       
-  <dt><a href="RockPy.Structure.html#RockPy.Structure.data.RockPyData.running_ave">running_ave() (RockPy.Structure.data.RockPyData method)</a>
+  <dt><a href="RockPy.Structure.html#RockPy.Structure.data.RockPyData.running_average">running_average() (RockPy.Structure.data.RockPyData method)</a>
   </dt>
 
   </dl></td>
@@ -1934,10 +1959,16 @@
   <dt><a href="RockPy.Readin.html#RockPy.Readin.vsm.Vsm.segment_info">segment_info (RockPy.Readin.vsm.Vsm attribute)</a>
   </dt>
 
-  </dl></td>
-  <td style="width: 33%" valign="top"><dl>
+      
+  <dt><a href="RockPy.Measurements.html#RockPy.Measurements.hysteresis.Hys.set_field_limit">set_field_limit() (RockPy.Measurements.hysteresis.Hys method)</a>
+  </dt>
+
       
   <dt><a href="RockPy.Measurements.html#RockPy.Measurements.hysteresis.Hys.simple">simple() (RockPy.Measurements.hysteresis.Hys method)</a>
+  </dt>
+
+      
+  <dt><a href="RockPy.Readin.html#RockPy.Readin.base.Machine.simple_import">simple_import() (RockPy.Readin.base.Machine method)</a>
   </dt>
 
       
@@ -1950,6 +1981,8 @@
   </dt>
 
       </dl></dd>
+  </dl></td>
+  <td style="width: 33%" valign="top"><dl>
       
   <dt><a href="RockPy.Structure.html#RockPy.Structure.samplegroup.SampleGroup.slist">slist (RockPy.Structure.samplegroup.SampleGroup attribute)</a>
   </dt>
@@ -1963,7 +1996,11 @@
   </dt>
 
       
-  <dt><a href="RockPy.Structure.html#RockPy.Structure.sample.Sample.sort_mlist_in_ttype_dict">sort_mlist_in_ttype_dict() (RockPy.Structure.sample.Sample method)</a>
+  <dt><a href="RockPy.Structure.html#RockPy.Structure.sample.Sample.sort_mlist_in_stype_dict">sort_mlist_in_stype_dict() (RockPy.Structure.sample.Sample method)</a>
+  </dt>
+
+      
+  <dt><a href="RockPy.Measurements.html#RockPy.Measurements.parameters.Volume.sphere">sphere() (RockPy.Measurements.parameters.Volume static method)</a>
   </dt>
 
       
@@ -1979,6 +2016,44 @@
   </dt>
 
       
+  <dt><a href="RockPy.Structure.html#RockPy.Structure.sample.Sample.stype_dict">stype_dict (RockPy.Structure.sample.Sample attribute)</a>
+  </dt>
+
+      
+  <dt><a href="RockPy.Structure.html#RockPy.Structure.samplegroup.SampleGroup.stype_results">stype_results() (RockPy.Structure.samplegroup.SampleGroup method)</a>
+  </dt>
+
+      
+  <dt><a href="RockPy.Structure.html#RockPy.Structure.sample.Sample.stype_sval_dict">stype_sval_dict (RockPy.Structure.sample.Sample attribute)</a>
+  </dt>
+
+      <dd><dl>
+        
+  <dt><a href="RockPy.Structure.html#RockPy.Structure.samplegroup.SampleGroup.stype_sval_dict">(RockPy.Structure.samplegroup.SampleGroup attribute)</a>
+  </dt>
+
+      </dl></dd>
+      
+  <dt><a href="RockPy.Structure.html#RockPy.Structure.sample.Sample.stypes">stypes (RockPy.Structure.sample.Sample attribute)</a>
+  </dt>
+
+      <dd><dl>
+        
+  <dt><a href="RockPy.Structure.html#RockPy.Structure.samplegroup.SampleGroup.stypes">(RockPy.Structure.samplegroup.SampleGroup attribute)</a>
+  </dt>
+
+      </dl></dd>
+      
+  <dt><a href="RockPy.Structure.html#RockPy.Structure.sample.Sample.svals">svals (RockPy.Structure.sample.Sample attribute)</a>
+  </dt>
+
+      <dd><dl>
+        
+  <dt><a href="RockPy.Structure.html#RockPy.Structure.samplegroup.SampleGroup.svals">(RockPy.Structure.samplegroup.SampleGroup attribute)</a>
+  </dt>
+
+      </dl></dd>
+      
   <dt><a href="RockPy.Readin.html#RockPy.Readin.generic.Synthetic">Synthetic (class in RockPy.Readin.generic)</a>
   </dt>
 
@@ -1989,9 +2064,21 @@
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%" valign="top"><dl>
       
+  <dt><a href="RockPy.Measurements.html#RockPy.Measurements.parameters.test">test() (in module RockPy.Measurements.parameters)</a>
+  </dt>
+
+      <dd><dl>
+        
+  <dt><a href="RockPy.Structure.html#RockPy.Structure.samplegroup.test">(in module RockPy.Structure.samplegroup)</a>
+  </dt>
+
+      </dl></dd>
+      
   <dt><a href="RockPy.Measurements.html#RockPy.Measurements.thellier.Thellier">Thellier (class in RockPy.Measurements.thellier)</a>
   </dt>
 
+  </dl></td>
+  <td style="width: 33%" valign="top"><dl>
       
   <dt><a href="RockPy.Measurements.html#RockPy.Measurements.thermocurve.ThermoCurve">ThermoCurve (class in RockPy.Measurements.thermocurve)</a>
   </dt>
@@ -2000,46 +2087,6 @@
   <dt><a href="RockPy.Measurements.html#RockPy.Measurements.trm.Trm">Trm (class in RockPy.Measurements.trm)</a>
   </dt>
 
-      
-  <dt><a href="RockPy.Structure.html#RockPy.Structure.sample.Sample.ttype_dict">ttype_dict (RockPy.Structure.sample.Sample attribute)</a>
-  </dt>
-
-  </dl></td>
-  <td style="width: 33%" valign="top"><dl>
-      
-  <dt><a href="RockPy.Structure.html#RockPy.Structure.samplegroup.SampleGroup.ttype_results">ttype_results() (RockPy.Structure.samplegroup.SampleGroup method)</a>
-  </dt>
-
-      
-  <dt><a href="RockPy.Structure.html#RockPy.Structure.sample.Sample.ttype_tval_dict">ttype_tval_dict (RockPy.Structure.sample.Sample attribute)</a>
-  </dt>
-
-      <dd><dl>
-        
-  <dt><a href="RockPy.Structure.html#RockPy.Structure.samplegroup.SampleGroup.ttype_tval_dict">(RockPy.Structure.samplegroup.SampleGroup attribute)</a>
-  </dt>
-
-      </dl></dd>
-      
-  <dt><a href="RockPy.Structure.html#RockPy.Structure.sample.Sample.ttypes">ttypes (RockPy.Structure.sample.Sample attribute)</a>
-  </dt>
-
-      <dd><dl>
-        
-  <dt><a href="RockPy.Structure.html#RockPy.Structure.samplegroup.SampleGroup.ttypes">(RockPy.Structure.samplegroup.SampleGroup attribute)</a>
-  </dt>
-
-      </dl></dd>
-      
-  <dt><a href="RockPy.Structure.html#RockPy.Structure.sample.Sample.tvals">tvals (RockPy.Structure.sample.Sample attribute)</a>
-  </dt>
-
-      <dd><dl>
-        
-  <dt><a href="RockPy.Structure.html#RockPy.Structure.samplegroup.SampleGroup.tvals">(RockPy.Structure.samplegroup.SampleGroup attribute)</a>
-  </dt>
-
-      </dl></dd>
   </dl></td>
 </tr></table>
 
@@ -2092,10 +2139,18 @@
   <dt><a href="RockPy.Readin.html#RockPy.Readin.vftb.Vftb">Vftb (class in RockPy.Readin.vftb)</a>
   </dt>
 
+      
+  <dt><a href="RockPy.Measurements.html#RockPy.Measurements.viscosity.Viscosity">Viscosity (class in RockPy.Measurements.viscosity)</a>
+  </dt>
+
   </dl></td>
   <td style="width: 33%" valign="top"><dl>
       
-  <dt><a href="RockPy.Measurements.html#RockPy.Measurements.viscosity.Viscosity">Viscosity (class in RockPy.Measurements.viscosity)</a>
+  <dt><a href="RockPy.Measurements.html#RockPy.Measurements.parameters.Volume">Volume (class in RockPy.Measurements.parameters)</a>
+  </dt>
+
+      
+  <dt><a href="RockPy.Structure.html#RockPy.Structure.sample.Sample.volume">volume (RockPy.Structure.sample.Sample attribute)</a>
   </dt>
 
       

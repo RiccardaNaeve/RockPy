@@ -517,7 +517,7 @@ class Sample(object):
 
     ''' MISC FUNTIONS '''
 
-    def mean_measurement_from_list(self, mlist, interpolate=False, recalc_mag=False):  # todo redundant?
+    def mean_measurement_from_list(self, mlist, interpolate=False, recalc_magag=False):  # todo redundant?
         """
         takes a list of measurements and creates a mean measurement out of all measurements data
 
@@ -525,7 +525,7 @@ class Sample(object):
         ----------
            mlist:
            interpolate:
-           recalc_mag:
+           recalc_magag:
         :return:
         """
         mlist = _to_list(mlist)
@@ -542,7 +542,7 @@ class Sample(object):
                 measurement.data[dtype] = condense(dtype_list)
                 measurement.data[dtype] = measurement.data[dtype].sort('variable')
 
-            if recalc_mag:
+            if recalc_magag:
                 measurement.data[dtype].define_alias('m', ( 'x', 'y', 'z'))
                 measurement.data[dtype]['mag'].v = measurement.data[dtype].magnitude('m')
 
@@ -551,7 +551,7 @@ class Sample(object):
                 dtype_list = [m.initial_state.data[dtype] for m in mlist if m.initial_state]
                 measurement.initial_state.data[dtype] = condense(dtype_list)
                 measurement.initial_state.data[dtype] = measurement.initial_state.data[dtype].sort('variable')
-                if recalc_mag:
+                if recalc_magag:
                     measurement.initial_state.data[dtype].define_alias('m', ( 'x', 'y', 'z'))
                     measurement.initial_state.data[dtype]['mag'].v = measurement.initial_state.data[dtype].magnitude(
                         'm')
@@ -560,7 +560,7 @@ class Sample(object):
 
     def average_measurements(self,
                              mtype=None, stype=None, sval=None, sval_range=None, mlist=None,
-                             interpolate=True, recalc_mag=False,
+                             interpolate=True, recalc_magag=False,
                              substfunc='mean'):
         """
         Averages a list of measurements and returns a measurement with 'is_mean' flag
@@ -570,7 +570,7 @@ class Sample(object):
         :param sval_range:
         :param mlist:
         :param interpolate:
-        :param recalc_mag:
+        :param recalc_magag:
         :param substfunc:
         :return:
         """
@@ -606,7 +606,7 @@ class Sample(object):
 
     def mean_measurement(self,
                          mtype=None, stype=None, sval=None, sval_range=None, mlist=None,
-                         interpolate=True, recalc_mag=False,
+                         interpolate=True, recalc_magag=False,
                          substfunc='mean'):
         """
         takes a list of measurements and creates a mean measurement out of all measurements data
@@ -615,7 +615,7 @@ class Sample(object):
         ----------
            mlist:
            interpolate:
-           recalc_mag:
+           recalc_magag:
         :return:
         """
         if not mtype:
@@ -649,7 +649,7 @@ class Sample(object):
                 base_measurement.data[dtype] = condense(dtype_list)
                 base_measurement.data[dtype] = base_measurement.data[dtype].sort('variable')
 
-            if recalc_mag:
+            if recalc_magag:
                 base_measurement.data[dtype].define_alias('m', ( 'x', 'y', 'z'))
                 base_measurement.data[dtype]['mag'].v = base_measurement.data[dtype].magnitude('m')
 
@@ -658,7 +658,7 @@ class Sample(object):
                 dtype_list = [m.initial_state.data[dtype] for m in mlist if m.initial_state]
                 base_measurement.initial_state.data[dtype] = condense(dtype_list, substfunc=substfunc)
                 base_measurement.initial_state.data[dtype] = base_measurement.initial_state.data[dtype].sort('variable')
-                if recalc_mag:
+                if recalc_magag:
                     base_measurement.initial_state.data[dtype].define_alias('m', ( 'x', 'y', 'z'))
                     base_measurement.initial_state.data[dtype]['mag'].v = base_measurement.initial_state.data[
                         dtype].magnitude(

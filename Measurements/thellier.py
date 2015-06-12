@@ -203,10 +203,10 @@ class Thellier(base.Measurement):
                 out[i].update(self._standard_parameter)
         return out
 
-    def reset__data(self, recalc_m=True):
-        self._data.update({'ptrm': self._ptrm(recalc_m)})
-        self._data.update({'sum': self._sum(recalc_m)})
-        self._data.update({'difference': self._difference(recalc_m)})
+    def reset__data(self, recalc_mag=True):
+        self._data.update({'ptrm': self._ptrm(recalc_mag)})
+        self._data.update({'sum': self._sum(recalc_mag)})
+        self._data.update({'difference': self._difference(recalc_mag)})
         # self._data = {i: getattr(self, i) for i in self.steps}
         # for i in self.data:
         # print i
@@ -284,7 +284,7 @@ class Thellier(base.Measurement):
             self._data.setdefault(dtype, rp_data)
         self.reset__data()
 
-    def _ptrm(self, recalc_m=True):
+    def _ptrm(self, recalc_mag=True):
         idx = self._get_idx_equal_val('pt', 'th')
 
         pt = self._data['pt'].filter_idx(idx[:, 0])
@@ -293,7 +293,7 @@ class Thellier(base.Measurement):
         ptrm = pt - th
         row_labels = ['ptrm[%i]' % i for i in pt['temp'].v]
         ptrm['time'] = pt['time'].v  # copy old pt times into ptrm
-        if recalc_m:
+        if recalc_mag:
             ptrm.define_alias('m', ( 'x', 'y', 'z'))
             if not 'mag' in ptrm.column_names:
                 ptrm = ptrm.append_columns('mag', ptrm.magnitude('m'))
@@ -301,25 +301,33 @@ class Thellier(base.Measurement):
         ptrm._row_names = row_labels
         return ptrm
 
-    def _sum(self, recalc_m=True):
+    def _sum(self, recalc_mag=True):
+        """
+        Calculates the sum of the pt and th steps, for equal temperature steps
+
+        Parameters
+        ----------
+           recalc_mag: Bool
+              if True, 'mag' will be re-calculated. Not always a good idea.
+        """
         idx = self._get_idx_equal_val('pt', 'th')
         pt = self._data['pt'].filter_idx(idx[:, 0])
         th = self._data['th'].filter_idx(idx[:, 1])
         pt_th_sum = th + pt - th
-        if recalc_m:
+        if recalc_mag:
             pt_th_sum.define_alias('m', ( 'x', 'y', 'z'))
             if not 'mag' in pt_th_sum.column_names:
                 pt_th_sum = pt_th_sum.append_columns('mag', pt_th_sum.magnitude('m'))
             pt_th_sum['mag'] = pt_th_sum.magnitude('m')
         return pt_th_sum
 
-    def _difference(self, recalc_m=True):
+    def _difference(self, recalc_mag=True):
         idx = self._get_idx_equal_val('pt', 'th')
         pt = self._data['pt'].filter_idx(idx[:, 0])
         th = self._data['th'].filter_idx(idx[:, 1])
         ptrm = pt - th
         difference = th - ptrm
-        if recalc_m:
+        if recalc_mag:
             difference.define_alias('m', ( 'x', 'y', 'z'))
             if not 'mag' in difference.column_names:
                 difference = ptrm.append_columns('mag', difference.magnitude('m'))

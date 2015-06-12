@@ -218,8 +218,8 @@ class Measurement(object):
         self._standard_parameter = {i[10:]: None for i in dir(self) if i.startswith('calculate_') if
                                     not i.endswith('generic')}
 
-        if self.series:
-            for t in self.series:
+        if self._series:
+            for t in self._series:
                 self._add_sval_to_results(t)
         #         self._add_sval_to_data(t)
 
@@ -567,7 +567,7 @@ class Measurement(object):
         if self.has_series():
             return self._series
         else:
-            series = RockPy.Structure.base.Generic(stype='none', value=np.nan, unit='')
+            series = RockPy.Series(stype='none', value=np.nan, unit='')
             return [series]
 
     def _get_series_from_suffix(self):
@@ -650,7 +650,7 @@ class Measurement(object):
         :param comment:
         :return:
         """
-        series = series.Generic(stype=stype, value=sval, unit=unit, comment=comment)
+        series = RockPy.Series(stype=stype, value=sval, unit=unit, comment=comment)
         self._series.append(series)
         self._add_sval_to_data(series)
         self._add_sval_to_results(series)

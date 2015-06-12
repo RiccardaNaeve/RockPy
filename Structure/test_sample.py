@@ -71,7 +71,7 @@ class TestSample(TestCase):
         self.add_hys_measurements_with_conditions()
         print(self.sample)
 
-    def test_recalc_measurement_dict(self):
+    def test_recalc_mageasurement_dict(self):
         self.add_hys_measurements_with_conditions()
         self.sample.recalc_info_dict()
 

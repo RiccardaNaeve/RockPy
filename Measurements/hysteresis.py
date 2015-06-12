@@ -1199,9 +1199,10 @@ class Hys(base.Measurement):
         """
         Cuts fields with higer or lower values
 
-        Parameter
-        ---------
+        Parameters
+        ----------
            field_limit: float
+              cut-off field, after which the data is removed from self.data. It is still in self.raw_data
         """
 
         for dtype in self._data:

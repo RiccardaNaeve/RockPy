@@ -56,7 +56,7 @@ class Sample(object):
         self.comment = comment
 
         Sample.logger.info('CREATING\t new sample << %s >>' % self.name)
-        self.logger = logging.getLogger('RockPy.Sample[%s]'%name)
+        self.logger = logging.getLogger('RockPy.Sample[%s]' % name)
 
         self.raw_measurements = []
         self.measurements = []
@@ -261,7 +261,8 @@ class Sample(object):
                                              **options)
             if measurement.has_data:
                 self.measurements.append(measurement)
-                self.raw_measurements.append(measurement) #todo is it better to store a deepcopy, so you could have a reset_measurement to get rid of possible mistakes?
+                self.raw_measurements.append(
+                    measurement)  # todo is it better to store a deepcopy, so you could have a reset_measurement to get rid of possible mistakes?
                 self.add_m2_info_dict(measurement)
                 return measurement
             else:
@@ -603,7 +604,7 @@ class Sample(object):
                 varlist = self.__get_variable_list(dtype_list)
                 if len(varlist) > 1:
                     dtype_list = [m.interpolate(varlist) for m in dtype_list]
-            # print dtype_list
+                    # print dtype_list
 
     def mean_measurement(self,
                          mtype=None, stype=None, sval=None, sval_range=None, mlist=None,
@@ -714,7 +715,7 @@ class Sample(object):
                 # results = results.append_columns(column_add_results)
                 # for k in aux.column_names:
                 # if k in results.column_names:
-                #         aux[k] = results[k].v
+                # aux[k] = results[k].v
                 # store new results in mean_measults
                 all_results = all_results.append_rows(results)
         all_results._row_names = rownames
@@ -840,10 +841,10 @@ class Sample(object):
         """
         out = []
 
-        if require_list is None:  #no requirements - standard == False
+        if require_list is None:  # no requirements - standard == False
             return False
 
-        for i in require_list:  #iterate over requirements
+        for i in require_list:  # iterate over requirements
             if i in self.mtypes:
                 out.append(True)  # true if meets requirements
             else:

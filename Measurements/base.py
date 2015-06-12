@@ -3,6 +3,7 @@ __author__ = 'volk'
 import logging
 import inspect
 import itertools
+
 from copy import deepcopy
 
 import numpy as np
@@ -273,12 +274,10 @@ class Measurement(object):
 
     def __getattr__(self, attr):
         # print attr, self.__dict__.keys()
-        if attr in hasattr(self, '_data'):
-            if attr in self.__getattribute__('_data').keys():
-                return self._data[attr]
-        if attr in hasattr(self, 'result_methods'):
-            if attr in self.__getattribute__('result_methods'):
-                return getattr(self, 'result_' + attr)().v[0]
+        if attr in self.__getattribute__('_data').keys():
+            return self._data[attr]
+        if attr in self.__getattribute__('result_methods'):
+            return getattr(self, 'result_' + attr)().v[0]
         raise AttributeError
 
     def import_data(self, rtn_raw_data=None, **options):

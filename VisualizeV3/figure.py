@@ -20,14 +20,13 @@ class NewFigure(object):
 
         """
         self.logger = logging.getLogger(__name__)
-        self.logger.info('CREATING new plot')
+        self.logger.info('CREATING new figure')
 
         # create dictionary for visuals {visual_name:visual_object}
         self._visuals = []
         self._n_visuals = 0
 
         self.fig = plt.figure()  # initialize figure
-
 
     @property
     def visuals(self):
@@ -76,7 +75,8 @@ class NewFigure(object):
                     name = visual
                 n = self._n_visuals
                 # create instance of visual by dynamically calling from inheritors dictionary
-                visual_obj = Visual.inheritors()[visual](plt_input=plt_input, plt_index=n, plot=self, name = name, **visual_opt)
+                visual_obj = Visual.inheritors()[visual](plt_input=plt_input, plt_index=n, plot=self, name=name,
+                                                         **visual_opt)
                 self._visuals.append([name, visual, visual_obj])
                 self._n_visuals += 1
             else:
@@ -99,6 +99,7 @@ class NewFigure(object):
 
     def plt_all(self):
         for name, type, visual in self._visuals:
+            print name, type
             visual.plt_visual()
 
     def _create_fig(self):

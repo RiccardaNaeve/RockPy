@@ -11,6 +11,7 @@ import RockPy.Measurements.base
 import RockPy.VisualizeV3.core
 
 
+
 class Visual(object):
     """
     OPEN QUESTIONS:
@@ -51,6 +52,7 @@ class Visual(object):
 
     def __init__(self, plt_input=None, plt_index=None, plot=None, name=None):
         self.logger = logging.getLogger('RockPy.VISUALIZE.' + self.get_subclass_name())
+        self.logger.info('CREATING new plot')
 
         self._plt_index = plt_index
         self._plt_input = deepcopy(plt_input)
@@ -243,3 +245,13 @@ class Visual(object):
     @property
     def fig(self):
         return self._plt_obj.fig
+
+
+### generic class:
+class Generic(Visual):
+    # _required for searching through samples for plotables
+    _required = []
+
+    def __init__(self, plt_index, plt_input=None, plot=None, name=None):
+        super(Generic, self).__init__(plt_input=plt_input, plt_index=plt_index, plot=plot, name=name)
+        self.logger.info('CREATING new plot')

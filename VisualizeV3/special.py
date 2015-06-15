@@ -9,7 +9,7 @@ import RockPy.core
 
 from Features import hysteresis
 
-class ResultVsseries(base.Visual):
+class ResultVsSeries(base.Visual):
     # _required for searching through samples for plotables
     _required = ['hys']
 
@@ -32,7 +32,7 @@ class ResultVsseries(base.Visual):
 
         self.res_series_data = dict() # dictionary for all series and results
 
-        super(ResultVsseries, self).__init__(plt_input=plt_input, plt_index=plt_index, plot=plot)
+        super(ResultVsSeries, self).__init__(plt_input=plt_input, plt_index=plt_index, plot=plot)
         self.logger.info('CREATING new << %s Vs. %s >> plot' %(result, series))
 
     def plt_visual(self):

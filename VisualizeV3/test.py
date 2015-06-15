@@ -35,10 +35,12 @@ if __name__  == '__main__':
     # print study.info()
 
     fig = NewFigure()
-    h1 = fig.add_visual(visual='hysteresis', name='hys', plt_input=s1a)
+    # h1 = fig.add_visual(visual='hysteresis', name='hys', plt_input=s1a)
+    # c1 = fig.add_visual(visual='backfield', name='coe', plt_input=s1a)
+    s1 = fig.add_visual(visual='resultvsseries', result='ms', series='mtime', name='coe', plt_input=s1a)
 
     # h2 = fig.add_visual(visual='hysteresis', name='hys2', plt_input=study)
-    h1.remove_single_feature(features=['grid'])
+    # h1.remove_single_feature(features=['grid'])
     # h1.remove_single_feature(features=['zero_lines'])
     # h1.add_single_feature(features=['zero_lines'])
     # h1.add_single_feature(features=['zero_lines', 'grid', 'nothing'])

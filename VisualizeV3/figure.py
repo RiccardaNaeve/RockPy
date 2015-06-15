@@ -99,7 +99,6 @@ class NewFigure(object):
 
     def plt_all(self):
         for name, type, visual in self._visuals:
-            print name, type
             visual.plt_visual()
 
     def _create_fig(self):
@@ -113,4 +112,5 @@ class NewFigure(object):
 
     def show(self):
         self.plt_all()
+        plt.tight_layout()
         plt.show()

@@ -187,7 +187,7 @@ class Sample(object):
         '''
         pickle_me = {k: v for k, v in self.__dict__.iteritems() if k in
                      (
-                         'name',
+                         'name', 'index', 'color',
                          'measurements',
                          '_filtered_data', 'sgroups',
                          'is_mean', 'mean_measurements', '_mean_results',

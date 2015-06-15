@@ -127,7 +127,6 @@ class Visual(object):
             self.logger.warning('NO FEATURE SELECTED')
             self.logger.warning('%s' % sorted(self.features))
 
-        print list2remove
         # check if any of the features is in used features
         for feature in features:
             if feature in list_names:

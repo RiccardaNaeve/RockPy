@@ -115,7 +115,7 @@ class Measurement(object):
         :return:
         """
 
-        self.logger = logging.getLogger(self.get_subclass_name())
+        self.logger = logging.getLogger('RockPy.MEASURMENT.' + self.get_subclass_name())
 
         self.color = color
         self.has_data = True
@@ -148,7 +148,6 @@ class Measurement(object):
         # has to come past __initialize()
         if self._series_opt:
             self._add_series_from_opt()
-
 
         if mtype in Measurement.measurement_formatters():
             self.logger.debug('MTYPE << %s >> implemented' % mtype)
@@ -479,9 +478,10 @@ class Measurement(object):
             self.logger.warning('%s does not have result << %s >>' % self.mtype, result)
             return
         else:
+            # todo figuer out why logger wrong when called from VisualizeV3
+            self.logger = logging.getLogger('RockPy.MEASURMENT.' + self.mtype+'[%s]'%self.sample_obj.name)
             self.logger.info('CALCULATING << %s >>' % result)
             out = getattr(self, 'calculate_'+result)(**parameter)
-            print out
         return out
 
 

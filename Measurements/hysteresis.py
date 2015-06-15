@@ -480,7 +480,6 @@ class Hys(base.Measurement):
                 slope, intercept, r_value, p_value, std_err = stats.linregress(abs(dir['field'].v), abs(dir['mag'].v))
                 ms_all.append(intercept)
                 slope_all.append(slope)
-
         return ms_all, slope_all
 
     def calculate_ms(self, method='simple', **parameter):
@@ -497,10 +496,12 @@ class Hys(base.Measurement):
               additional parameters needed for calculation. If nothin is provided standard parameter will be used.
 
         """
+        print 'works'
         method = 'calculate_ms_' + method
         implemented = [i for i in dir(self) if i.startswith('calculate_ms_')]
         if method in implemented:
-            getattr(self, method)(**parameter)
+            out = getattr(self, method)(**parameter)
+        return out
 
     def calculate_ms_simple(self, saturation_percent=75, **parameter):
         """
@@ -546,7 +547,7 @@ class Hys(base.Measurement):
         df = calc('down_field')
         uf = calc('up_field')
         self.results['mrs'] = np.mean([df, uf])#, np.std([df, uf])]]]
-        return (df+ uf)/2, np.std([df, uf])
+        return (df+ uf)/2
 
     def calculate_bc(self, **parameter):
         '''
@@ -582,6 +583,7 @@ class Hys(base.Measurement):
         df = calc('down_field')
         uf = calc('up_field')
         self.results['bc'] = [[[np.mean([df, uf]), np.std([df, uf])]]]
+        return np.mean([df, uf])
 
     def calculate_brh(self, **parameter):
         pass  # todo implement
@@ -653,6 +655,8 @@ class Hys(base.Measurement):
         parameter.update(dict(method='simple'))
         self.calculation_parameter['hf_sus'].update(parameter)
 
+        return self.results['hf_sus'].v[0]
+
     def calculate_hf_sus_app2sat(self, **parameter):
         """
         Calculates the high field susceptibility using approach to saturation
@@ -674,6 +678,7 @@ class Hys(base.Measurement):
 
         parameter.update(dict(method='app2sat'))
         self.calculation_parameter['hf_sus'].update(parameter)
+        return self.results['hf_sus'].v[0]
 
     def get_irreversible(self, correct_symmetry=True):
         """

@@ -78,6 +78,10 @@ class Measurement(object):
         return subclasses
 
     @classmethod
+    def implemented_measurements(self):
+        return {i.__name__.lower(): i for i in Measurement.inheritors()}
+
+    @classmethod
     def measurement_formatters(cls):
         # measurement formatters are important!
         # if they are not inside the measurement class, the measurement has not been implemented for this machine.
@@ -309,13 +313,19 @@ class Measurement(object):
                           mtype, mfile, machine,  # standard
                           **options):
         """
-        creates a new measurement as initial state of measurement
+        creates a new measurement (ISM) as initial state of base measurement (BSM).
+        It dynamically calls the measurement _init_ function and assigns the created measurement to the
+        self.initial_state value. It also sets a flag for the ISM to check if a measurement is a MIS.
 
-        :param mtype: measurement type
-        :param mfile:  measurement data file
-        :param machine: measurement machine
-        :param options:
-        :return:
+        Parameters
+        ----------
+           mtype: str
+              measurement type
+           mfile: str
+              measurement data file
+           machine: str
+              measurement machine
+           options:
         """
         mtype = mtype.lower()
         machnine = machine.lower()
@@ -323,10 +333,10 @@ class Measurement(object):
         self.logger.info('CREATING << %s >> initial state measurement << %s >> data' % (mtype, self.mtype))
         implemented = {i.__name__.lower(): i for i in Measurement.inheritors()}
 
+        # can only be created if the measurement is actually implemented
         if mtype in implemented:
             self.initial_state = implemented[mtype](self.sample_obj, mtype, mfile, machine)
             self.initial_state.is_initial_state = True
-            # self.initial_state = self.initial_state_obj.data
         else:
             self.logger.error('UNABLE to find measurement << %s >>' % (mtype))
 

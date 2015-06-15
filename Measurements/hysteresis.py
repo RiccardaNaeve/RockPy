@@ -496,7 +496,6 @@ class Hys(base.Measurement):
               additional parameters needed for calculation. If nothin is provided standard parameter will be used.
 
         """
-        print 'works'
         method = 'calculate_ms_' + method
         implemented = [i for i in dir(self) if i.startswith('calculate_ms_')]
         if method in implemented:
@@ -1352,6 +1351,11 @@ def plot_app2sat(m, sat_perc=80):
     # plt.ylim([0.000296, 0.000299])
     plt.show()
 
+class Hysteresis(Hys):
+    """
+    Alias for hys measurement
+    """
+    pass
 
 if __name__ == '__main__':
     import RockPy

@@ -466,9 +466,13 @@ class Measurement(object):
         """
 
         if not self.has_result(result):
-            self.logger.warning('%s doe not have result << %s >>' % self.mtype, result)
+            self.logger.warning('%s does not have result << %s >>' % self.mtype, result)
             return
-        print result
+        else:
+            self.logger.info('CALCULATING << %s >>' % result)
+            out = getattr(self, 'calculate_'+result)(**parameter)
+            print out
+        return out
 
 
     def calc_generic(self, **parameter):

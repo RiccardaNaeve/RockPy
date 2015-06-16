@@ -20,10 +20,10 @@ class Visual(object):
     """
     logger = logging.getLogger('RockPy.MEASUREMENT')
     _required = []
-    linestyles = ['-', '--', ':', '-.']
+    linestyles = ['-', '--', ':', '-.']*10
     marker = ['+', '*', ',', '.', '1', '3', '2', '4', '8', '<', '>', 'D', 'H', '_', '^', 'd', 'h', 'o', 'p', 's', 'v',
-              '|']
-    colors = ('b', 'g', 'r', 'c', 'm', 'y', 'k')
+              '|']*10
+    colors = ['b', 'g', 'r', 'c', 'm', 'y', 'k']*10
 
     @classmethod
     def inheritors(cls):
@@ -114,7 +114,7 @@ class Visual(object):
         """
         Removes a feature, will result in feature is not plotted
 
-        :param features:
+           features:
         :return:
         """
         list2remove = getattr(self, feature_list)
@@ -167,6 +167,9 @@ class Visual(object):
             study = [self._plt_input]  # list = virtual study
         if isinstance(self._plt_input, RockPy.Sample):  # input is sample
             study = [[self._plt_input]]  # list(list) = virtual study with a virtual samplegroup
+        if type(self._plt_input) in RockPy.Measurements.base.Measurement.inheritors():
+                only_measurements = True
+                study = [[[self._plt_input]]]
         if isinstance(self._plt_input, list):
             if all(isinstance(item, RockPy.SampleGroup) for item in self._plt_input):  # all input == samples
                 study = self._plt_input
@@ -182,6 +185,7 @@ class Visual(object):
     def plt_visual(self):
         self.add_standard()
         study, all_measurements = self.get_virtual_study()
+        print study
         # plotting over study/ virtual study - > samplegroup / virtual SG ...
         for sg_idx, sg in enumerate(study):
             for sample_idx, sample in enumerate(sg):
@@ -199,7 +203,31 @@ class Visual(object):
         for feature in self.single_features:
             feature()
 
-    def normalize_all(self, reference='data', rtype='mag', ntypes='all', vval=None, norm_method='max'):
+    def normalize_all(self, reference='data', rtype='mag', ntypes='all', vval=None, norm_method='max', norm_parameter=False):
+        """
+        Normalizes all measurements from _required. Ich _required is empty it will normalize all measurement.
+        
+        Parameters
+        ----------
+           reference: str
+              reference to normalize to e.g. 'mass', 'th', 'initial_state' ...
+           rtype: str
+              data type of the reference. e.g. if you want to normalize to the magnetization of the downfield path in a
+              hysteresis loop you pur reference = 'downfield', rtype='mag'
+           ntypes: list, str
+              string or list of strings with the datatypes to be normalized to.
+              default: 'all' -> normalizes all dtypes
+           vval: flot
+              a variable to me normalizes to.
+              example: reference='downfield', rtype='mag', vval='1.0', will normalize the
+                 data to the downfield branch magnetization at +1.0 T in a hysteresis loop
+           norm_method: str
+              the method for normalization.
+              default: max
+           norm_parameter: bool
+              if true, insances of the parameter subclass will also be normalized. Only useful in certain situations
+              default: False
+        """
         study, all_measurements = self.get_virtual_study()
         # cycle through all measurements that will get plotted
         for sg_idx, sg in enumerate(study):
@@ -208,14 +236,16 @@ class Visual(object):
                     measurements = sample.get_measurements(mtype=self.__class__._required)
                 else:
                     measurements = study[0][0]
+                if not norm_parameter:
+                    measurements = [m for m in measurements if not isinstance(m, RockPy.Measurements.parameters.Parameter)]
                 if len(measurements) > 0:
                     for m_idx, m in enumerate(measurements):
-                        m.normalize(reference=reference, rtype=rtype, ntypes=ntypes, vval=vval, norm_method=norm_method)
+                        m.normalize(reference=reference, ref_dtype=rtype, norm_dtypes=ntypes, vval=vval, norm_method=norm_method)
 
     def get_ls_marker_color(self, indices):
         """
         Looks up the appropriate color, marker, ls for given indices
-        :param indices:
+           indices:
         :return:
         """
         if len(indices) == 3:
@@ -245,6 +275,22 @@ class Visual(object):
     def fig(self):
         return self._plt_obj.fig
 
+    ### PLOT PARAMETERS
+    def set_plot_parameter(self):
+        pass
+
+    def set_yscale(self, value):
+        """
+        'linear': LinearScale,
+        'log':    LogScale,
+        'symlog': SymmetricalLogScale
+
+        Parameter
+        ---------
+           scale:
+        """
+        # try:
+        self.ax.set_yscale(value=value)
 
 ### generic class:
 class Generic(Visual):

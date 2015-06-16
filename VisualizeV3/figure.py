@@ -112,5 +112,5 @@ class NewFigure(object):
 
     def show(self):
         self.plt_all()
-        plt.tight_layout()
+        # plt.tight_layout()
         plt.show()

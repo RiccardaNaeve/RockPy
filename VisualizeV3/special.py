@@ -49,6 +49,8 @@ class ResultVsSeries(base.Visual):
             feature()
         for feature in self.single_features:
             feature()
+        xlim = self.ax.get_xlim()
+        self.ax.set_xlim([xlim[0]-xlim[1]*0.05, xlim[1]*1.1])
 
     def calculate_res_series_dict(self):
         study, all_measurements = self.get_virtual_study()

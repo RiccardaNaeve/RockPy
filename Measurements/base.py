@@ -5,8 +5,9 @@ import inspect
 import itertools
 
 from copy import deepcopy
-
 import numpy as np
+
+import os.path
 
 import RockPy
 import RockPy.Functions.general
@@ -14,7 +15,6 @@ import RockPy.Readin.base
 from RockPy.Readin import *
 from RockPy.core import _to_list
 from RockPy.Structure.data import RockPyData, _to_tuple
-
 
 class Measurement(object):
     """
@@ -198,6 +198,17 @@ class Measurement(object):
     def m_idx(self):
         return self.sample_obj.measurements.index(self)
 
+    @property
+    def fname(self):
+        """
+        Returns only filename from self.file
+
+        Returns
+        -------
+           str: filename from full path
+        """
+        return os.path.split(self.mfile.split)[-1]
+
     def __initialize(self):
         """
         Initialize function is called inside the __init__ function, it is also called when the object is reconstructed
@@ -281,7 +292,7 @@ class Measurement(object):
             return self._data[attr]
         if attr in self.__getattribute__('result_methods'):
             return getattr(self, 'result_' + attr)().v[0]
-        raise AttributeError
+        raise AttributeError(attr)
 
     def import_data(self, rtn_raw_data=None, **options):
         '''
@@ -681,7 +692,7 @@ class Measurement(object):
         """
         series = self._get_series_from_opt()
         for t in series:
-            self.add_series(stype=t[0], sval=t[1], unit=t[2])
+            self.add_svalue(stype=t[0], sval=t[1], unit=t[2])
 
     def _get_series_from_opt(self):
         """
@@ -724,7 +735,7 @@ class Measurement(object):
             out = [i for i in out if i.value in svals]
         return out
 
-    def add_series(self, stype, sval, unit=None, comment=''):
+    def add_svalue(self, stype, sval, unit=None, comment=''):
         """
         adds a series to measurement.series, then adds is to the data and results datastructure
         :param stype:
@@ -793,7 +804,7 @@ class Measurement(object):
     +++++++++++++++++++
     """
 
-    def normalize(self, reference='data', rtype='mag', ntypes='all', vval=None, norm_method='max'):
+    def normalize(self, reference='data', ref_dtype='mag', norm_dtypes='all', vval=None, norm_method='max'):
         """
         normalizes all available data to reference value, using norm_method
 
@@ -802,9 +813,9 @@ class Measurement(object):
            reference: str
               reference state, to which to normalize to e.g. 'NRM'
               also possible to normalize to mass
-           rtype: str
+           ref_dtype: str
               component of the reference, if applicable. standard - 'mag'
-           ntypes: list
+           norm_dtypes: list
               dtype to be normalized, if dtype = 'all' all variables will be normalized
            vval: float
               variable value, if reference == value then it will search for the point closest to the vval
@@ -813,16 +824,18 @@ class Measurement(object):
         """
         # todo normalize by results
         #getting normalization factor
-        norm_factor = self._get_norm_factor(reference, rtype, vval, norm_method)
-        ntypes = _to_tuple(ntypes)  # make sure its a list/tuple
-
+        norm_factor = self._get_norm_factor(reference, ref_dtype, vval, norm_method)
+        norm_dtypes = _to_tuple(norm_dtypes)  # make sure its a list/tuple
         for dtype, dtype_data in self.data.iteritems():  #cycling through all dtypes in data
             if dtype_data:
-                if 'all' in ntypes:  # if all, all non stype data will be normalized
-                    ntypes = [i for i in dtype_data.column_names if not 'stype' in i]
+                if 'all' in norm_dtypes:  # if all, all non stype data will be normalized
+                    norm_dtypes = [i for i in dtype_data.column_names if not 'stype' in i]
 
-                for ntype in ntypes:  #else use ntypes specified
-                    dtype_data[ntype] = dtype_data[ntype].v / norm_factor
+                for ntype in norm_dtypes:  #else use norm_dtypes specified
+                    try:
+                        dtype_data[ntype] = dtype_data[ntype].v / norm_factor
+                    except KeyError:
+                        self.logger.warning('CAN\'T normalize << %s, %s >> to %s' %(self.sample_obj.name, self.mtype, ntype))
 
                 if 'mag' in dtype_data.column_names:
                     try:
@@ -936,7 +949,7 @@ class Measurement(object):
             out = data.filter_idx([idx])[rtype].v[0]
             return out
 
-    def get_mtype_prior_to(self, mtype):
+    def get_mtype_prior_to(self, mtype, include_parameter_m = False):
         """
         search for last mtype prior to self
 
@@ -944,6 +957,8 @@ class Measurement(object):
         ----------
            mtype: str
               the type of measurement that is supposed to be returned
+           include_parameter_m: bool
+              if True measurements from the parameter category are also normalized. e.g. mass, volume, length...
 
         Returns
         -------
@@ -951,8 +966,8 @@ class Measurement(object):
         """
         measurements = self.sample_obj.get_measurements(mtype)
         if measurements:
-            out = [i for i in measurements if i.m_idx < self.m_idx][-1]
-            return out
+            out = [i for i in measurements if i.m_idx <= self.m_idx]
+            return out[-1]
         else:
             return None
 

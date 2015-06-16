@@ -834,8 +834,8 @@ class Measurement(object):
                 if 'all' in norm_dtypes:  # if all, all non stype data will be normalized
                     norm_dtypes = [i for i in dtype_data.column_names if not 'stype' in i]
                 if not normalize_variable:
-                    print dtype_data.variable
-                    # norm_dtypes = [i for i in norm_dtypes if not i == ]
+                    variable = dtype_data.column_names[dtype_data.column_dict['variable'][0]]
+                    norm_dtypes = [i for i in norm_dtypes if not i == variable]
                 for ntype in norm_dtypes:  #else use norm_dtypes specified
                     try:
                         dtype_data[ntype] = dtype_data[ntype].v / norm_factor

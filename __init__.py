@@ -8,7 +8,7 @@ from RockPy.Structure.data import RockPyData, condense
 from RockPy.Measurements.base import Measurement
 from RockPy.Structure.series import Generic as Series
 from file_operations import save, load
-from file_operations import get_fname_from_info, extract_info_from_filename, import_folder
+from file_operations import get_fname_from_info, get_info_from_fname, import_folder
 
 RockPy.Functions.general.create_logger('RockPy')
 

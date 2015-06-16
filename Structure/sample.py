@@ -293,7 +293,7 @@ class Sample(object):
             if fname and folder:
                 path = os.path.join(folder, fname)
             if path:
-                file_info = RockPy.extract_info_from_filename(path=path)
+                file_info = RockPy.get_info_from_fname(path=path)
             file_info.update(dict(sample_obj=self))
 
         elif mtype:

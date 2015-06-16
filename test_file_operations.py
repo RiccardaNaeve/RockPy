@@ -8,7 +8,7 @@ __author__ = 'mike'
 class TestExtract_info_from_filename(TestCase):
     def test_extract_info_from_filename(self):
         path = '/Users/mike/Dropbox/experimental_data/FeNiX/FeNi20J/1mT_hys/FeNi_FeNi20-Jd006\'-G03_HYS_VSM#61,8[mg]_[]_[]##STD019.002'
-        compare = RockPy.file_operations.extract_info_from_filename(path=path)
+        compare = RockPy.file_operations.get_info_from_fname(path=path)
         compare.pop('idx')
         dictionary = dict(mtype='hys', mfile=path, machine='VSM',
                           name='FeNi20-Jd006\'-G03',
@@ -26,4 +26,4 @@ class TestGenerate_file_name(TestCase):
 
         gen_fname = RockPy.get_fname_from_info(**info_dict)
         print gen_fname
-        idict = RockPy.extract_info_from_filename(os.path.join(RockPy.test_data_path,gen_fname))
+        idict = RockPy.get_info_from_fname(os.path.join(RockPy.test_data_path,gen_fname))

@@ -95,7 +95,7 @@ def get_fname_from_info(sample_group='', sample_name='',
     return out
 
 
-def extract_info_from_filename(path=None):
+def get_info_from_fname(path=None):
     """
     extracts the file information out of the filename
 
@@ -217,7 +217,7 @@ def import_folderOLD(folder, name='study', study=None):
     files = [i for i in os.listdir(folder) if not i == '.DS_Store' if not i.startswith('#')]
 
     for f in files:
-        d = RockPy.extract_info_from_filename(f, folder)
+        d = RockPy.get_info_from_fname(f, folder)
         if 'IS' in d and d['IS']:
             pass
         if not d['sample_group'] in study.samplegroup_names:
@@ -237,7 +237,7 @@ def import_folderOLD(folder, name='study', study=None):
             if len(idx) >1:
                 print 'more than one initial state found not adding any'
             else:
-                initial = RockPy.extract_info_from_filename(files[idx[0]], folder)
+                initial = RockPy.get_info_from_fname(files[idx[0]], folder)
                 del files[idx[0]]
                 m.set_initial_state(**initial)
 
@@ -258,7 +258,7 @@ def import_folder(folder, name='study', study=None):
     samples = defaultdict(list)
 
     for i in files:
-        d = RockPy.extract_info_from_filename(i, folder)
+        d = RockPy.get_info_from_fname(i, folder)
         samples[d['name']].append(d)
 
     for s in samples:

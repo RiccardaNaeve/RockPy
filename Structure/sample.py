@@ -18,6 +18,10 @@ class Sample(object):
     logger = logging.getLogger('RockPy.Sample')
     snum = 0
 
+    @classmethod
+    def implemented_measurements(cls):
+        return {i.__name__.lower(): i for i in Measurement.inheritors()}
+
     def __init__(self, name,
                  mass=None, mass_unit='kg', mass_machine='generic',
                  height=None, diameter=None,
@@ -178,7 +182,7 @@ class Sample(object):
 
     def __setstate__(self, d):
         self.__dict__.update(d)
-        self.recalc_info_dict()
+        # self.recalc_info_dict()
 
     def __getstate__(self):
         '''
@@ -190,11 +194,11 @@ class Sample(object):
                          'name', 'index', 'color',
                          'measurements',
                          '_filtered_data', 'sgroups',
+                         '_info_dict',
                          'is_mean', 'mean_measurements', '_mean_results',
                          'results',
                      )}
         return pickle_me
-
 
     @property
     def filtered_data(self):
@@ -228,6 +232,7 @@ class Sample(object):
 
     def add_measurement(self,
                         mtype=None, mfile=None, machine='generic',  # general
+                        fname=None, folder=None, path=None, # added for automatic import of pathnames
                         idx=None, mdata=None,
                         **options):
         '''
@@ -247,28 +252,37 @@ class Sample(object):
 
         - mass
         '''
-        mtype = mtype.lower()
 
-        implemented = {i.__name__.lower(): i for i in Measurement.inheritors()}
 
         if idx is None:
             idx = len(self.measurements)  # if there is no measurement index
-        if mtype in implemented:
-            self.logger.info(' ADDING\t << measurement >> %s' % mtype)
-            measurement = implemented[mtype](self,
-                                             mtype=mtype, mfile=mfile, machine=machine,
-                                             m_idx=idx, mdata=mdata,
-                                             **options)
-            if measurement.has_data:
-                self.measurements.append(measurement)
-                self.raw_measurements.append(
-                    measurement)  # todo is it better to store a deepcopy, so you could have a reset_measurement to get rid of possible mistakes?
-                self.add_m2_info_dict(measurement)
-                return measurement
+
+        if mtype:
+            mtype = mtype.lower()
+
+            if mtype in Sample.implemented_measurements():
+                self.logger.info(' ADDING\t << measurement >> %s' % mtype)
+                measurement = implemented[mtype](self,
+                                                 mtype=mtype, mfile=mfile, machine=machine,
+                                                 m_idx=idx, mdata=mdata,
+                                                 **options)
+                if measurement.has_data:
+                    self.measurements.append(measurement)
+                    self.raw_measurements.append(
+                        measurement)  # todo is it better to store a deepcopy, so you could have a reset_measurement to get rid of possible mistakes?
+                    self.add_m2_info_dict(measurement)
+                    return measurement
+                else:
+                    return None
             else:
-                return None
-        else:
-            self.logger.error(' << %s >> not implemented, yet' % mtype)
+                self.logger.error(' << %s >> not implemented, yet' % mtype)
+
+        if fname and folder:
+            name = RockPy.extract_info_from_filename(fname, folder)
+            print name
+        if path:
+            name = RockPy.extract_info_from_filename(fname, folder)
+
 
     def add_simulation(self, mtype, sim_param=None, idx=None, **options):
         """
@@ -431,7 +445,6 @@ class Sample(object):
         """
         self._filtered_data = None
 
-
     ''' FIND FUNCTIONS '''
 
     def get_measurements(self,
@@ -516,7 +529,6 @@ class Sample(object):
         if measurements_for_del:
             self.measurements = [m for m in self.measurements if not m in measurements_for_del]
 
-
     ''' MISC FUNTIONS '''
 
     def mean_measurement_from_list(self, mlist, interpolate=False, recalc_magag=False):  # todo redundant?
@@ -545,7 +557,7 @@ class Sample(object):
                 measurement.data[dtype] = measurement.data[dtype].sort('variable')
 
             if recalc_magag:
-                measurement.data[dtype].define_alias('m', ( 'x', 'y', 'z'))
+                measurement.data[dtype].define_alias('m', ('x', 'y', 'z'))
                 measurement.data[dtype]['mag'].v = measurement.data[dtype].magnitude('m')
 
         if measurement.initial_state:
@@ -554,7 +566,7 @@ class Sample(object):
                 measurement.initial_state.data[dtype] = condense(dtype_list)
                 measurement.initial_state.data[dtype] = measurement.initial_state.data[dtype].sort('variable')
                 if recalc_magag:
-                    measurement.initial_state.data[dtype].define_alias('m', ( 'x', 'y', 'z'))
+                    measurement.initial_state.data[dtype].define_alias('m', ('x', 'y', 'z'))
                     measurement.initial_state.data[dtype]['mag'].v = measurement.initial_state.data[dtype].magnitude(
                         'm')
         measurement.sample_obj = self
@@ -652,7 +664,7 @@ class Sample(object):
                 base_measurement.data[dtype] = base_measurement.data[dtype].sort('variable')
 
             if recalc_magag:
-                base_measurement.data[dtype].define_alias('m', ( 'x', 'y', 'z'))
+                base_measurement.data[dtype].define_alias('m', ('x', 'y', 'z'))
                 base_measurement.data[dtype]['mag'].v = base_measurement.data[dtype].magnitude('m')
 
         if base_measurement.initial_state:
@@ -661,13 +673,12 @@ class Sample(object):
                 base_measurement.initial_state.data[dtype] = condense(dtype_list, substfunc=substfunc)
                 base_measurement.initial_state.data[dtype] = base_measurement.initial_state.data[dtype].sort('variable')
                 if recalc_magag:
-                    base_measurement.initial_state.data[dtype].define_alias('m', ( 'x', 'y', 'z'))
+                    base_measurement.initial_state.data[dtype].define_alias('m', ('x', 'y', 'z'))
                     base_measurement.initial_state.data[dtype]['mag'].v = base_measurement.initial_state.data[
                         dtype].magnitude(
                         'm')
         base_measurement.sample_obj = self
         return base_measurement
-
 
     def all_results(self, mtype=None,
                     stype=None, sval=None, sval_range=None,

@@ -15,8 +15,8 @@ class TestSample(TestCase):
                                     diameter=5.4, height=4.3, length_unit='mm',
                                     series='pressure_0.0_GPa; temperature_300.0_C')
 
-        self.cryomag_thellier_file = join(RockPy.test_data_path, 'NLCRY_Thellier_test.TT')
-        self.cryomag_thellier_is_file = join(RockPy.test_data_path, 'NLCRY_Thellier_is_test.TT')
+        self.cryomag_thellier_file = join(RockPy.test_data_path, 'cryomag', 'NLCRY_Thellier_test.TT')
+        self.cryomag_thellier_is_file = join(RockPy.test_data_path, 'cryomag', 'NLCRY_Thellier_is_test.TT')
 
         # vftb
         self.vftb_coe_file = join(RockPy.test_data_path, 'VFTB', 'MUCVFTB_test.coe')
@@ -65,6 +65,13 @@ class TestSample(TestCase):
         for i in check:
             for j in range(len(check[i])):
                 self.assertAlmostEqual(measurement.data[i].v[0][j], check[i][j], 5)
+
+        path = join(RockPy.test_data_path, 'LF4C-HX_1a_TT_CRY#320[mg]_5.17[mm]_5.84[mm]#pressure_1.2_GPa#.000')
+
+        print RockPy.generate_file_name(sample_group='LF4C-HX', sample_name='1a', mtype='TT', machine='CRY',
+                                  mass=320, mass_unit='mg', height=5.17, height_unit='mm', diameter=5.87,
+                                  series='pressure', svals=1.2, sunits='GPa')
+        m = self.sample.add_measurement(path=path)
 
 
     def test_filter(self):

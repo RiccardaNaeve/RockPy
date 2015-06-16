@@ -237,56 +237,87 @@ class Sample(object):
                         mtype=None, mfile=None, machine='generic',  # general
                         fname=None, folder=None, path=None, # added for automatic import of pathnames
                         idx=None, mdata=None,
+                        create_parameter = False,
                         **options):
         '''
         All measurements have to be added here
 
         Parameters
         ----------
-           mtype: str - the type of measurement
-           mfile: str -  the measurement file
-           machine: str - the machine from which the file is output
-           idx:
+           mtype: str
+              the type of measurement
+              default: None
+           mfile: str
+              the measurement file
+              default: None
+           machine: str
+              the machine from which the file is output
+              default: 'generic
+           idx: index of measurement
+              default: None, will be the index of the measurement in sample_obj.measurements
+           fname: str
+              filename
+              default: None
+           folder: str
+              folder
+              default: None
+           path: str
+              full path. equivalent to os.path.join(folder, fname)
+              default: None
            mdata: any kind of data that must fit the required structure of the data of the measurement
                     will be used instead of data from file
-        :return: RockPy.measurement object
+           create_parameter: bool
+              default: False
+              if true it will create the parameter (lenght, mass) measurements before creating the actual measurement
+
+
+        Returns
+        -------
+            RockPy.measurement object
 
         :mtypes:
 
         - mass
         '''
 
+        file_info = None
 
         if idx is None:
             idx = len(self.measurements)  # if there is no measurement index
 
-        if mtype:
-            mtype = mtype.lower()
+        # if auomatic import through filename is needed:
+        # either fname AND folder are given OR the full path is passed
+        # then the file_info dictionary is created
 
+        if fname and folder or path:
+            if fname and folder:
+                path = os.path.join(folder, fname)
+            if path:
+                file_info = RockPy.extract_info_from_filename(path=path)
+            file_info.update(dict(sample_obj=self))
+
+        elif mtype:
+            mtype = mtype.lower()
+            file_info = dict(sample_obj=self,
+                             mtype=mtype, mfile=mfile, machine=machine,
+                             m_idx=idx, mdata=mdata)
+        if options:
+            file_info.update(options)
+
+        if file_info:
+            mtype = file_info['mtype']
             if mtype in Sample.implemented_measurements():
                 self.logger.info(' ADDING\t << measurement >> %s' % mtype)
-                measurement = Sample.implemented_measurements()[mtype](self,
-                                                 mtype=mtype, mfile=mfile, machine=machine,
-                                                 m_idx=idx, mdata=mdata,
-                                                 **options)
+                measurement = Sample.implemented_measurements()[mtype](**file_info)
                 if measurement.has_data:
                     self.measurements.append(measurement)
-                    self.raw_measurements.append(
-                        measurement)  # todo is it better to store a deepcopy, so you could have a reset_measurement to get rid of possible mistakes?
+                    self.raw_measurements.append(measurement)  # todo is it better to store a deepcopy, so you could have a reset_measurement to get rid of possible mistakes?
                     self.add_m2_info_dict(measurement)
                     return measurement
                 else:
                     return None
             else:
                 self.logger.error(' << %s >> not implemented, yet' % mtype)
-
-        if fname and folder:
-            name = RockPy.extract_info_from_filename(fname, folder)
-            print name
-        if path:
-            folder = os.path.split(path)[0]
-            fname = os.path.split(path)[1]
-            name = RockPy.extract_info_from_filename(fname, folder)
 
 
     def add_simulation(self, mtype, sim_param=None, idx=None, **options):

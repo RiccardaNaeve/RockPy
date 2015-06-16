@@ -8,6 +8,7 @@ import numpy as np
 from pint import UnitRegistry
 import RockPy
 import cPickle
+import RockPy.core
 
 ureg = UnitRegistry()
 default_folder = join(expanduser("~"), 'Desktop', 'RockPy')
@@ -43,7 +44,7 @@ def generate_file_name(sample_group='', sample_name='',
                        mass='', mass_unit='',
                        height='', height_unit='',
                        diameter='', diameter_unit='',
-                       parameter=list(), parameter_values=[], parameter_units=[],
+                       series=list(), svals=[], sunits=[],
                        standard_measurement='',
                        index='',
                        **options
@@ -60,9 +61,9 @@ def generate_file_name(sample_group='', sample_name='',
     :param height_unit:
     :param diameter:
     :param diameter_unit:
-    :param parameter:
-    :param parameter_values:
-    :param parameter_units:
+    :param series:
+    :param svals:
+    :param sunits:
     :param standard_measurement:
     :param index:
     :return:
@@ -70,12 +71,19 @@ def generate_file_name(sample_group='', sample_name='',
     if not index:
         index = '%03i' % (np.random.randint(999, size=1)[0])
 
+    # check that series, svals, sunits are lists
+    series = RockPy.core._to_list(series)
+    svals = RockPy.core._to_list(svals)
+    sunits = RockPy.core._to_list(sunits)
+
     sample = '_'.join([sample_group, sample_name, mtype.upper(), machine.upper()])
     sample_info = '_'.join(
-        [add_unit(mass, mass_unit), add_unit(height, height_unit), add_unit(diameter, diameter_unit)])
-    # print ['_'.join(map(str, [parameter[i],parameter_values[i], parameter_units[i]])) for i in range(len(parameter))]
+        [add_unit(str(mass).replace('.', ','), mass_unit),
+         add_unit(str(height).replace('.', ','), height_unit),
+         add_unit(str(diameter).replace('.', ','), diameter_unit)])
+    # print ['_'.join(map(str, [series[i],svals[i], sunits[i]])) for i in range(len(series))]
     params = ';'.join(
-        ['_'.join(map(str, [parameter[i], parameter_values[i], parameter_units[i]])) for i in range(len(parameter))])
+        ['_'.join(map(str, [series[i], svals[i], sunits[i]])) for i in range(len(series))])
 
     if options:
         opt = ';'.join(['_'.join([k, str(v)]) for k, v in sorted(options.iteritems())])
@@ -87,7 +95,7 @@ def generate_file_name(sample_group='', sample_name='',
     return out
 
 
-def extract_info_from_filename(fname=None, folder=None, path=None):
+def extract_info_from_filename(path=None):
     """
     extracts the file information out of the filename
 
@@ -101,12 +109,8 @@ def extract_info_from_filename(fname=None, folder=None, path=None):
           complete path, with folder/fname. Will be split into the two
     """
 
-    if path:
-        folder = os.path.split(path)[0]
-        fname = os.path.split(path)[1]
-
-    if not folder and not fname:
-        raise ImportError('No filename and/or folder specified')
+    folder = os.path.split(path)[0]
+    fname = os.path.split(path)[1]
 
     mfile = fname
 
@@ -117,6 +121,8 @@ def extract_info_from_filename(fname=None, folder=None, path=None):
 
     sample = rest[0].split('_')
     sample_info = [i.strip(']').split('[') for i in rest[1].split('_')]
+
+    print rest
     parameter = rest[2]
 
     STD = [int(i.lower().strip('std')) for i in rest if 'std' in i.lower()][0]
@@ -172,7 +178,7 @@ def extract_info_from_filename(fname=None, folder=None, path=None):
     try:
         abbrev[sample[2]]
     except KeyError:
-        print '%s not implemented yet' % sample[2]
+        raise KeyError('%s not implemented yet' % sample[2])
         return
 
     out = {

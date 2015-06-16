@@ -87,7 +87,7 @@ def generate_file_name(sample_group='', sample_name='',
     return out
 
 
-def extract_info_from_filename(fname=None, directory=None, path=None):
+def extract_info_from_filename(fname=None, folder=None, path=None):
     """
     extracts the file information out of the filename
 
@@ -95,22 +95,31 @@ def extract_info_from_filename(fname=None, directory=None, path=None):
     ----------
        fname: str
           file name
-       directory: str
+       folder: str
+          only the folder name of the stored data
+       path:
+          complete path, with folder/fname. Will be split into the two
     """
+
     if path:
         folder = os.path.split(path)[0]
         fname = os.path.split(path)[1]
 
-    index = fname.split('.')[-1]
+    if not folder and not fname:
+        raise ImportError('No filename and/or folder specified')
 
-    rest = fname[:-4]
+    mfile = fname
+
+    index = fname.split('.')[-1]
+    fname = fname.split('.')[:-1][0]
+
     rest = fname.split('#')
 
     sample = rest[0].split('_')
     sample_info = [i.strip(']').split('[') for i in rest[1].split('_')]
     parameter = rest[2]
 
-    STD = [i for i in rest if 'std' in i.lower()]
+    STD = [int(i.lower().strip('std')) for i in rest if 'std' in i.lower()][0]
 
     try:
         options = [i.split('_') for i in rest[4].split('.')[0].split(';')]
@@ -171,7 +180,7 @@ def extract_info_from_filename(fname=None, directory=None, path=None):
         'name': sample[1],
         'mtype': abbrev[sample[2]],
         'machine': abbrev[sample[3]],
-        'mfile': join(directory, fname),
+        'mfile': join(folder, mfile),
         'series': parameter,
         'STD': STD,
         'idx': index

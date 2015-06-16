@@ -4,8 +4,10 @@ from RockPy.Functions.convert import convert2
 import RockPy
 import numpy as np
 
+class Parameter(Measurement):
+    pass
 
-class Mass(Measurement):
+class Mass(Parameter):
     """
     simple 1d measurement for mass
     """
@@ -31,7 +33,7 @@ class Mass(Measurement):
         pass
 
 
-class Length(Measurement):
+class Length(Parameter):
     """
     simple 1d measurement for Length
     """
@@ -74,7 +76,7 @@ class Height(Length):
     pass
 
 
-class Volume(Measurement):
+class Volume(Parameter):
     """
     Combined measurement. It needs a height and a diameter measurement.
     """

@@ -6,7 +6,7 @@ __author__ = 'mike'
 
 
 class TestExtract_info_from_filename(TestCase):
-    def test_extract_info_from_filename(self):
+    def test_get_info_from_fname(self):
         path = '/Users/mike/Dropbox/experimental_data/FeNiX/FeNi20J/1mT_hys/FeNi_FeNi20-Jd006\'-G03_HYS_VSM#61,8[mg]_[]_[]##STD019.002'
         compare = RockPy.file_operations.get_info_from_fname(path=path)
         compare.pop('idx')
@@ -19,7 +19,7 @@ class TestExtract_info_from_filename(TestCase):
 
 
 class TestGenerate_file_name(TestCase):
-    def test_generate_file_name(self):
+    def test_get_fname_from_info(self):
         info_dict = dict(sample_group='LF4C-HX', sample_name='1a', mtype='TT', machine='CRY',
                          mass=320, mass_unit='mg', height=5.17, height_unit='mm', diameter=5.87,
                          series='pressure', svals=1.2, sunits='GPa')

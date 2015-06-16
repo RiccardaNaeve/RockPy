@@ -4,7 +4,7 @@ from profilehooks import profile
 from matplotlib import pyplot as plt
 
 import RockPy
-from RockPy.core import _to_list
+from RockPy.core import to_list
 from RockPy.VisualizeV3.base import Visual
 
 __author__ = 'mike'
@@ -67,7 +67,7 @@ class NewFigure(object):
         input_exchange = []
 
         # convert visual to list
-        visuals = _to_list(visual)
+        visuals = to_list(visual)
         for visual in visuals:
             # check if visual exists otherwise don't create it
             if visual in Visual.inheritors():

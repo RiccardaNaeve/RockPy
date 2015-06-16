@@ -13,7 +13,7 @@ import RockPy
 import RockPy.Functions.general
 import RockPy.Readin.base
 from RockPy.Readin import *
-from RockPy.core import _to_list
+from RockPy.core import to_list
 from RockPy.Structure.data import RockPyData, _to_tuple
 
 class Measurement(object):
@@ -728,10 +728,10 @@ class Measurement(object):
         """
         out = self.series
         if stypes:
-            stypes = _to_list(stypes)
+            stypes = to_list(stypes)
             out = [i for i in out if i.stype in stypes]
         if svals:
-            svals = _to_list(map(float, svals))
+            svals = to_list(map(float, svals))
             out = [i for i in out if i.value in svals]
         return out
 

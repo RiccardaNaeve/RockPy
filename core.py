@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.path as mpath
 
-def _to_list(oneormoreitems):
+def to_list(oneormoreitems):
     """
     convert argument to tuple of elements
     :param oneormoreitems: single number or string or list of numbers or strings

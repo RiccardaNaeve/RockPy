@@ -47,8 +47,7 @@ def get_fname_from_info(sample_group='', sample_name='',
                        series=list(), svals=[], sunits=[],
                        standard_measurement='',
                        index='',
-                       **options
-):
+                       **options):
     """
     generates a name according to the RockPy specific naming scheme.
     :param sample_group:
@@ -72,9 +71,9 @@ def get_fname_from_info(sample_group='', sample_name='',
         index = '%03i' % (np.random.randint(999, size=1)[0])
 
     # check that series, svals, sunits are lists
-    series = RockPy.core._to_list(series)
-    svals = RockPy.core._to_list(svals)
-    sunits = RockPy.core._to_list(sunits)
+    series = RockPy.core.to_list(series)
+    svals = RockPy.core.to_list(svals)
+    sunits = RockPy.core.to_list(sunits)
 
     sample = '_'.join([sample_group, sample_name, mtype.upper(), machine.upper()])
     sample_info = '_'.join(

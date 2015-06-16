@@ -80,7 +80,7 @@ class Visual(object):
         """
         list2add = getattr(self, feature_list)
 
-        features = RockPy.core._to_list(features)  # convert to list if necessary
+        features = RockPy.core.to_list(features)  # convert to list if necessary
         # check if feature has been provided, if not show list of implemented features
         if not features:
             self.logger.warning('NO feature selcted chose one of the following:')
@@ -120,7 +120,7 @@ class Visual(object):
         list2remove = getattr(self, feature_list)
         list_names = [i.__name__[8:] for i in list2remove]
 
-        features = RockPy.core._to_list(features)  # convert to list if necessary
+        features = RockPy.core.to_list(features)  # convert to list if necessary
 
         # check if feature has been provided, if not show list of implemented features
         if not features:

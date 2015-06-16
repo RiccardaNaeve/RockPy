@@ -8,7 +8,7 @@ import numpy as np
 import tabulate
 from profilehooks import profile
 
-from RockPy.core import _to_list
+from RockPy.core import to_list
 from RockPy.Measurements.base import Measurement
 from RockPy.Structure.data import RockPyData, condense
 import RockPy.Visualize.base
@@ -530,14 +530,14 @@ class Sample(object):
                 out = self.measurements
 
         if mtype:  # filter mtypes, if given
-            mtype = _to_list(mtype)
+            mtype = to_list(mtype)
             out = [m for m in out if m.mtype in mtype]
         if stype:
-            stype = _to_list(stype)
+            stype = to_list(stype)
             out = [m for m in out for t in stype if t in m.stypes]
 
         if sval is not None:
-            sval = _to_list(sval)
+            sval = to_list(sval)
             out = [m for m in out for val in sval if val in m.svals]
 
         if not sval_range is None:
@@ -578,7 +578,7 @@ class Sample(object):
            recalc_magag:
         :return:
         """
-        mlist = _to_list(mlist)
+        mlist = to_list(mlist)
         measurement = deepcopy(mlist[0])
 
         for dtype in measurement.data:
@@ -904,7 +904,7 @@ class Sample(object):
 
     def sort_mlist_in_stype_dict(self, mlist):
         """ sorts a list of measurements according to their stype and svals"""
-        mlist = _to_list(mlist)
+        mlist = to_list(mlist)
         out = {}
         for m in mlist:
             for t in m.series:

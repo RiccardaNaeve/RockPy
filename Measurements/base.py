@@ -207,7 +207,7 @@ class Measurement(object):
         -------
            str: filename from full path
         """
-        return os.path.split(self.mfile.split)[-1]
+        return os.path.split(self.mfile)[-1]
 
     def __initialize(self):
         """
@@ -804,7 +804,8 @@ class Measurement(object):
     +++++++++++++++++++
     """
 
-    def normalize(self, reference='data', ref_dtype='mag', norm_dtypes='all', vval=None, norm_method='max'):
+    def normalize(self, reference='data', ref_dtype='mag', norm_dtypes='all', vval=None, norm_method='max',
+                  normalize_variable=False):
         """
         normalizes all available data to reference value, using norm_method
 
@@ -821,16 +822,20 @@ class Measurement(object):
               variable value, if reference == value then it will search for the point closest to the vval
            norm_method: str
               how the norm_factor is generated, could be min
+           normalize_variable: bool
+              if True, variable is also normalized
+              default: False
         """
         # todo normalize by results
         #getting normalization factor
         norm_factor = self._get_norm_factor(reference, ref_dtype, vval, norm_method)
         norm_dtypes = _to_tuple(norm_dtypes)  # make sure its a list/tuple
         for dtype, dtype_data in self.data.iteritems():  #cycling through all dtypes in data
-            if dtype_data:
                 if 'all' in norm_dtypes:  # if all, all non stype data will be normalized
                     norm_dtypes = [i for i in dtype_data.column_names if not 'stype' in i]
-
+                if not normalize_variable:
+                    print dtype_data.variable
+                    # norm_dtypes = [i for i in norm_dtypes if not i == ]
                 for ntype in norm_dtypes:  #else use norm_dtypes specified
                     try:
                         dtype_data[ntype] = dtype_data[ntype].v / norm_factor

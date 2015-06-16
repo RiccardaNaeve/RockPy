@@ -1,14 +1,17 @@
 # coding=utf-8
-from RockPy.core import _to_list
 from copy import deepcopy
-import numpy as np
-import logging
 import itertools
+import logging
+
+import os.path
+import numpy as np
+import tabulate
+from profilehooks import profile
+
+from RockPy.core import _to_list
 from RockPy.Measurements.base import Measurement
 from RockPy.Structure.data import RockPyData, condense
 import RockPy.Visualize.base
-import tabulate
-from profilehooks import profile
 # RockPy.Functions.general.create_logger(__name__)
 
 class Sample(object):
@@ -262,7 +265,7 @@ class Sample(object):
 
             if mtype in Sample.implemented_measurements():
                 self.logger.info(' ADDING\t << measurement >> %s' % mtype)
-                measurement = implemented[mtype](self,
+                measurement = Sample.implemented_measurements()[mtype](self,
                                                  mtype=mtype, mfile=mfile, machine=machine,
                                                  m_idx=idx, mdata=mdata,
                                                  **options)
@@ -281,6 +284,8 @@ class Sample(object):
             name = RockPy.extract_info_from_filename(fname, folder)
             print name
         if path:
+            folder = os.path.split(path)[0]
+            fname = os.path.split(path)[1]
             name = RockPy.extract_info_from_filename(fname, folder)
 
 

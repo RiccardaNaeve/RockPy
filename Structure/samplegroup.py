@@ -461,8 +461,8 @@ class SampleGroup(object):
                         if reference or vval:
                             for i, m in enumerate(mean_sample.info_dict['mtype_stype_sval'][mtype][stype][sval]):
                                 mean_sample.info_dict['mtype_stype_sval'][mtype][stype][sval][i] = m.normalize(
-                                    reference=reference, rtype=rtype,
-                                    ntypes=ntypes,
+                                    reference=reference, ref_dtype=rtype,
+                                    norm_dtypes=ntypes,
                                     vval=vval, norm_method=norm_method)
 
                         # calculating the mean of all measurements
@@ -496,7 +496,7 @@ class SampleGroup(object):
                         for s in samples:
                             measurements.extend(s.get_measurements(mtype=mtype, stype=stype, sval=sval))
                     if reference or vval:
-                        measurements = [m.normalize(reference=reference, rtype=rtype,
+                        measurements = [m.normalize(reference=reference, ref_dtype=rtype,
                                                     vval=vval, norm_method=norm_method)
                                         for m in measurements
                                         if m.mtype not in ['diameter', 'height', 'mass']]

@@ -45,8 +45,8 @@ def get_fname_from_info(sample_group='', sample_name='',
                        height='', height_unit='',
                        diameter='', diameter_unit='',
                        series=list(), svals=[], sunits=[],
-                       standard_measurement='',
-                       index='',
+                       std=None,
+                       idx=None,
                        **options):
     """
     generates a name according to the RockPy specific naming scheme.
@@ -63,24 +63,35 @@ def get_fname_from_info(sample_group='', sample_name='',
     :param series:
     :param svals:
     :param sunits:
-    :param standard_measurement:
-    :param index:
+    :param STD:
+    :param idx:
     :return:
     """
-    if not index:
-        index = '%03i' % (np.random.randint(999, size=1)[0])
+
+    if idx is None:
+        idx = '%03i' % (np.random.randint(999, size=1)[0])
+    else:
+        idx = '%03i' %idx
 
     # check that series, svals, sunits are lists
     series = RockPy.core.to_list(series)
     svals = RockPy.core.to_list(svals)
+    svals = [str(i).replace('.', ',') for i in svals] # replace '.' so no conflict with file ending
     sunits = RockPy.core.to_list(sunits)
 
     sample = '_'.join([sample_group, sample_name, mtype.upper(), machine.upper()])
+
+    if not height_unit and diameter_unit:
+        height_unit = diameter_unit
+    elif height_unit and not diameter_unit:
+        diameter_unit = height_unit
+
     sample_info = '_'.join(
         [add_unit(str(mass).replace('.', ','), mass_unit),
+         add_unit(str(diameter).replace('.', ','), diameter_unit),
          add_unit(str(height).replace('.', ','), height_unit),
-         add_unit(str(diameter).replace('.', ','), diameter_unit)])
-    # print ['_'.join(map(str, [series[i],svals[i], sunits[i]])) for i in range(len(series))]
+         ])
+
     params = ';'.join(
         ['_'.join(map(str, [series[i], svals[i], sunits[i]])) for i in range(len(series))])
 
@@ -88,9 +99,8 @@ def get_fname_from_info(sample_group='', sample_name='',
         opt = ';'.join(['_'.join([k, str(v)]) for k, v in sorted(options.iteritems())])
     else:
         opt = ''
-    out = '#'.join([sample, sample_info, params, standard_measurement, opt])
-
-    out += '.%03i' % int(index)
+    out = '#'.join([sample, sample_info, params, 'STD%03i' %std, opt])
+    out += '.%s' % idx
     return out
 
 
@@ -108,6 +118,8 @@ def get_info_from_fname(path=None):
           complete path, with folder/fname. Will be split into the two
     """
 
+    # todo IMPORTANT change get_info_from_fname and aget_fname_fro_info to accept the exact same things.
+    # change add_measurement accordingly
     folder = os.path.split(path)[0]
     fname = os.path.split(path)[1]
 
@@ -121,10 +133,12 @@ def get_info_from_fname(path=None):
     sample = rest[0].split('_')
     sample_info = [i.strip(']').split('[') for i in rest[1].split('_')]
 
-    print rest
     parameter = rest[2]
 
-    STD = [int(i.lower().strip('std')) for i in rest if 'std' in i.lower()][0]
+    try:
+        STD = [int(i.lower().strip('std')) for i in rest if 'std' in i.lower()][0]
+    except IndexError:
+        STD = None
 
     try:
         options = [i.split('_') for i in rest[4].split('.')[0].split(';')]
@@ -140,12 +154,14 @@ def get_info_from_fname(path=None):
 
     # convert height to float
     try:
+        sample_info[1][0] = sample_info[1][0].replace(',', '.')
         sample_info[1][0] = float(sample_info[1][0])
     except ValueError:
         pass
 
     # convert diameter to float
     try:
+        sample_info[2][0] = sample_info[2][0].replace(',', '.')
         sample_info[2][0] = float(sample_info[2][0])
     except ValueError:
         pass
@@ -187,8 +203,8 @@ def get_info_from_fname(path=None):
         'machine': abbrev[sample[3]],
         'mfile': join(folder, mfile),
         'series': parameter,
-        'STD': STD,
-        'idx': index
+        'std': STD,
+        'idx': int(index)
     }
 
     if sample_info[0][0]:

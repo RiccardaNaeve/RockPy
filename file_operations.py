@@ -1,13 +1,15 @@
 __author__ = 'mike'
 import os
+import os.path
 from os.path import expanduser, join
+from collections import defaultdict
 import numpyson
 import numpy as np
 from pint import UnitRegistry
 import RockPy
 import cPickle
+
 ureg = UnitRegistry()
-from collections import defaultdict
 default_folder = join(expanduser("~"), 'Desktop', 'RockPy')
 
 
@@ -85,11 +87,20 @@ def generate_file_name(sample_group='', sample_name='',
     return out
 
 
-def extract_info_from_filename(fname, data_dir):
+def extract_info_from_filename(fname=None, directory=None, path=None):
     """
     extracts the file information out of the filename
 
+    Parameters
+    ----------
+       fname: str
+          file name
+       directory: str
     """
+    if path:
+        folder = os.path.split(path)[0]
+        fname = os.path.split(path)[1]
+
     index = fname.split('.')[-1]
 
     rest = fname[:-4]
@@ -160,7 +171,7 @@ def extract_info_from_filename(fname, data_dir):
         'name': sample[1],
         'mtype': abbrev[sample[2]],
         'machine': abbrev[sample[3]],
-        'mfile': join(data_dir, fname),
+        'mfile': join(directory, fname),
         'series': parameter,
         'STD': STD,
         'idx': index

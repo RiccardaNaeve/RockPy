@@ -20,6 +20,10 @@ class TestExtract_info_from_filename(TestCase):
 
 class TestGenerate_file_name(TestCase):
     def test_generate_file_name(self):
-        print RockPy.generate_file_name(sample_group='LF4C-HX', sample_name='1a', mtype='TT', machine='CRY',
-                                  mass=320, mass_unit='mg', height=5.17, height_unit='mm', diameter=5.87,
-                                  series='pressure', svals=1.2, sunits='GPa')
+        info_dict = dict(sample_group='LF4C-HX', sample_name='1a', mtype='TT', machine='CRY',
+                         mass=320, mass_unit='mg', height=5.17, height_unit='mm', diameter=5.87,
+                         series='pressure', svals=1.2, sunits='GPa')
+
+        gen_fname = RockPy.get_fname_from_info(**info_dict)
+        print gen_fname
+        idict = RockPy.extract_info_from_filename(os.path.join(RockPy.test_data_path,gen_fname))

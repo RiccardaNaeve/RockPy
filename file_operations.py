@@ -39,7 +39,7 @@ def add_unit(value, unit):
     return out
 
 
-def generate_file_name(sample_group='', sample_name='',
+def get_fname_from_info(sample_group='', sample_name='',
                        mtype='', machine='',
                        mass='', mass_unit='',
                        height='', height_unit='',

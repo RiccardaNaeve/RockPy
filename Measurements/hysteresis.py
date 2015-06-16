@@ -1289,7 +1289,7 @@ class Hys(base.Measurement):
             mass = self.get_mtype_prior_to(mtype='mass').data['data']['mass'].v[0] * 1e5  # mass converted from kg to mg
 
         if not filename:
-            filename = RockPy.generate_file_name(sample_group='RockPy', sample_name=self.sample_obj.name,
+            filename = RockPy.get_fname_from_info(sample_group='RockPy', sample_name=self.sample_obj.name,
                                                  mtype='HYS', machine=self.machine, mass=mass, mass_unit='mg')[
                        :-4].replace('.', ',') \
                        + '.' + abbrev[self.mtype]

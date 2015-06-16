@@ -68,7 +68,7 @@ class TestSample(TestCase):
 
         path = join(RockPy.test_data_path, 'LF4C-HX_1a_TT_CRY#320[mg]_5.17[mm]_5.84[mm]#pressure_1.2_GPa#.000')
 
-        print RockPy.generate_file_name(sample_group='LF4C-HX', sample_name='1a', mtype='TT', machine='CRY',
+        print RockPy.get_fname_from_info(sample_group='LF4C-HX', sample_name='1a', mtype='TT', machine='CRY',
                                   mass=320, mass_unit='mg', height=5.17, height_unit='mm', diameter=5.87,
                                   series='pressure', svals=1.2, sunits='GPa')
         m = self.sample.add_measurement(path=path)

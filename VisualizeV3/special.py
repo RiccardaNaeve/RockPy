@@ -16,7 +16,7 @@ class ResultVsSeries(base.Visual):
 
     # @profile
     def __init__(self, result, series, plt_index,
-                 plt_input=None, plot=None, name=None,
+                 plt_input=None, fig=None, name=None,
                  mtype = None, calculation_parameters=None):
 
         # initialize
@@ -38,8 +38,8 @@ class ResultVsSeries(base.Visual):
         self.res = [] # list of mean of multiples from res_raw
         self.res_std = [] # list of std of multiples of res_raw
 
-        super(ResultVsSeries, self).__init__(plt_input=plt_input, plt_index=plt_index, plot=plot)
-        self.logger.info('CREATING new << %s Vs. %s >> plot' %(result, series))
+        super(ResultVsSeries, self).__init__(plt_input=plt_input, plt_index=plt_index, fig=fig)
+        self.logger.info('CREATING new << %s Vs. %s >> fig' %(result, series))
 
     def plt_visual(self):
         self.add_standard()

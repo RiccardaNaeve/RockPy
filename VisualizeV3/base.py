@@ -3,6 +3,7 @@ import logging
 
 from copy import deepcopy
 from profilehooks import profile
+import itertools
 
 import RockPy
 import RockPy.core
@@ -20,10 +21,11 @@ class Visual(object):
     """
     logger = logging.getLogger('RockPy.MEASUREMENT')
     _required = []
-    linestyles = ['-', '--', ':', '-.']*10
-    marker = ['+', '*', ',', '.', '1', '3', '2', '4', '8', '<', '>', 'D', 'H', '_', '^', 'd', 'h', 'o', 'p', 's', 'v',
-              '|']*10
-    colors = ['b', 'g', 'r', 'c', 'm', 'y', 'k']*10
+
+    linestyles = ['-', '--', ':', '-.'] *10
+    marker = ['o', 's', '.','+', '*', ',',  '1', '3', '2', '4', '8', '<', '>', 'D', 'H', '_', '^',
+                              'd', 'h', 'p', 'v', '|'] *10
+    colors = ['k', 'b', 'g', 'r',  'm', 'y', 'c'] *10
 
     @classmethod
     def inheritors(cls):
@@ -42,6 +44,10 @@ class Visual(object):
         return cls.__name__
 
     @property
+    def calculation_parameter(self):
+        return self._calculation_parameter
+
+    @property
     def implemented_features(self):
         out = {i[8:]: getattr(self, i) for i in dir(self) if i.startswith('feature_') if not i.endswith('names')}
         return out
@@ -50,13 +56,18 @@ class Visual(object):
     def feature_names(self):
         return [i.__name__[8:] for i in self.features]
 
-    def __init__(self, plt_input=None, plt_index=None, plot=None, name=None):
+    def __init__(self, plt_input=None, plt_index=None, fig=None, name=None, calculation_parameters=None):
+
         self.logger = logging.getLogger('RockPy.VISUALIZE.' + self.get_subclass_name())
-        self.logger.info('CREATING new plot')
+        self.logger.info('CREATING new fig')
+
+        if not calculation_parameters:
+            calculation_parameters = None
+        self._calculation_parameter = calculation_parameters #initialize for calculation
 
         self._plt_index = plt_index
         self._plt_input = deepcopy(plt_input)
-        self._plt_obj = plot
+        self._plt_obj = fig
 
         self.title = self.get_subclass_name()
         self.init_visual()
@@ -66,6 +77,16 @@ class Visual(object):
 
         self.features = []  # list containing all features that have to be plotted for each measurement
         self.single_features = []  # list of features that only have to be plotted one e.g. zero lines
+
+        self.xlabel = 'xlabel'
+        self.ylabel = 'ylabel'
+        self.title = 'title'
+
+    def __getattr__(self, item):
+        if item in self.calculation_parameter:
+            return self.calculation_parameter[item]
+        else:
+            return object.__getattribute__(self, item)
 
     def add_feature(self, features=None):
         self.add_feature_to_list(features=features, feature_list='features')
@@ -185,7 +206,6 @@ class Visual(object):
     def plt_visual(self):
         self.add_standard()
         study, all_measurements = self.get_virtual_study()
-        print study
         # plotting over study/ virtual study - > samplegroup / virtual SG ...
         for sg_idx, sg in enumerate(study):
             for sample_idx, sample in enumerate(sg):
@@ -297,6 +317,6 @@ class Generic(Visual):
     # _required for searching through samples for plotables
     _required = []
 
-    def __init__(self, plt_index, plt_input=None, plot=None, name=None):
-        super(Generic, self).__init__(plt_input=plt_input, plt_index=plt_index, plot=plot, name=name)
-        self.logger.info('CREATING new plot')
+    def __init__(self, plt_index, plt_input=None, fig=None, name=None):
+        super(Generic, self).__init__(plt_input=plt_input, plt_index=plt_index, fig=fig, name=name)
+        self.logger.info('CREATING new fig')

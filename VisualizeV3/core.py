@@ -93,3 +93,4 @@ def create_heat_color_map(value_list, reverse=False):
     if reverse:
         out = out[::-1]
     return out
+

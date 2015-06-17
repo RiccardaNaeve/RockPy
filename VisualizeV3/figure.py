@@ -5,13 +5,14 @@ from matplotlib import pyplot as plt
 
 import RockPy
 from RockPy.core import to_list
+import RockPy.VisualizeV3.core
 from RockPy.VisualizeV3.base import Visual
 
 __author__ = 'mike'
 
 
 class NewFigure(object):
-    def __init__(self):
+    def __init__(self): #todo size of figure
         """
         Container for visuals.
 
@@ -65,7 +66,6 @@ class NewFigure(object):
 
         """
         input_exchange = []
-
         # convert visual to list
         visuals = to_list(visual)
         for visual in visuals:
@@ -75,12 +75,14 @@ class NewFigure(object):
                     name = visual
                 n = self._n_visuals
                 # create instance of visual by dynamically calling from inheritors dictionary
-                visual_obj = Visual.inheritors()[visual](plt_input=plt_input, plt_index=n, plot=self, name=name,
+                visual_obj = Visual.inheritors()[visual](plt_input=plt_input, plt_index=n, fig=self, name=name,
                                                          **visual_opt)
                 self._visuals.append([name, visual, visual_obj])
                 self._n_visuals += 1
             else:
                 self.logger.warning('VISUAL << %s >> not implemented yet' % visual)
+                self.logger.warning('\tIMPLEMENTED VISUALS: %s' % Visual.inheritors().keys())
+
                 return
         self.fig = self._create_fig()
         return visual_obj
@@ -110,7 +112,43 @@ class NewFigure(object):
         # create new figure with appropriate number of subplots
         return RockPy.VisualizeV3.core.generate_plots(n=self._n_visuals)
 
-    def show(self):
+    def get_xylims(self, visuals=None):
+        xlim = []
+        ylim = []
+        #cycle throu visuals to get
+        if not visuals:
+            visuals = self.vinstances
+
+        for visual in visuals:
+            xlim.append(visual.ax.get_xlim())
+            ylim.append(visual.ax.get_ylim())
+
+        xlim = [min([i[0] for i in xlim]), max([i[1] for i in xlim])]
+        ylim = [min([i[0] for i in ylim]), max([i[1] for i in ylim])]
+        return xlim, ylim
+
+    def show(self, set_xlim=None, set_ylim=None, equal_lims=False):
         self.plt_all()
-        # plt.tight_layout()
+        if set_xlim == 'equal' or set_ylim == 'equal' or equal_lims:
+            xlim, ylim = self.get_xylims()
+
+            #cycle throu visuals to set
+            for name, type, visual in self._visuals:
+                if set_xlim == 'equal' or equal_lims:
+                    visual.ax.set_xlim(xlim)
+                if set_ylim == 'equal' or equal_lims:
+                    visual.ax.set_ylim(ylim)
+
+        # check if two entries and each is float or int
+        if set_xlim:
+            if len(set_xlim) == 2 and any(isinstance(i, (float, int)) for i in set_xlim):
+                for name, type, visual in self._visuals:
+                    visual.ax.set_xlim(set_xlim)
+        # check if two entries and each is float or int
+        if set_ylim:
+            if len(set_ylim) == 2 and any(isinstance(i, (float, int)) for i in set_ylim):
+                for name, type, visual in self._visuals:
+                    visual.ax.set_ylim(set_ylim)
+
+        plt.tight_layout()
         plt.show()

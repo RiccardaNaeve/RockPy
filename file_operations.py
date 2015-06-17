@@ -71,7 +71,7 @@ def get_fname_from_info(sample_group='', sample_name='',
     if idx is None:
         idx = '%03i' % (np.random.randint(999, size=1)[0])
     else:
-        idx = '%03i' %idx
+        idx = '%03i' % idx
 
     # check that series, svals, sunits are lists
     series = RockPy.core.to_list(series)
@@ -273,7 +273,7 @@ def import_folder(folder, name='study', study=None):
     samples = defaultdict(list)
 
     for i in files:
-        d = RockPy.get_info_from_fname(i, folder)
+        d = RockPy.get_info_from_fname(join(folder, i))
         samples[d['name']].append(d)
 
     for s in samples:

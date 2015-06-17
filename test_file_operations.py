@@ -6,7 +6,7 @@ from pprint import pprint
 __author__ = 'mike'
 
 
-class TestExtract_info_from_filename(TestCase):
+class Test_file_operations(TestCase):
     def test_get_info_from_fname(self):
         path = '/Users/mike/Dropbox/experimental_data/FeNiX/FeNi20J/1mT_hys/FeNi_FeNi20-Jd006\'-G03_HYS_VSM#61,8[mg]_[]_[]##STD019.002'
         compare = RockPy.file_operations.get_info_from_fname(path=path)
@@ -19,7 +19,6 @@ class TestExtract_info_from_filename(TestCase):
         self.assertEqual(dictionary, compare)
 
 
-class TestGenerate_file_name(TestCase):
     def test_get_fname_from_info(self):
         info_dict = dict(sample_group='LF4C-HX', sample_name='1a', mtype='TT', machine='cry',
                          mass=320.0, mass_unit='mg', height=5.17, height_unit='mm', diameter=5.87,

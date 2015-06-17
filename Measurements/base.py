@@ -702,7 +702,7 @@ class Measurement(object):
         :return:
         """
         if self._series_opt:
-            series = self._series_opt.replace(' ', '').split(';')  # split ; for multiple series
+            series = self._series_opt.replace(' ', '').replace(',', '.').split(';')  # split ; for multiple series
             series = [i.split('_') for i in series]  # split , for type, value, unit
             for i in series:
                 try:

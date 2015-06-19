@@ -4,6 +4,8 @@ from os.path import join
 import timeit
 import time
 import sys
+from pprint import pprint
+from copy import deepcopy
 
 __author__ = 'mike'
 
@@ -69,10 +71,9 @@ class TestSample(TestCase):
         path = join(RockPy.test_data_path, 'LF4C-HX_1a_TT_CRY#320[mg]_5.17[mm]_5.84[mm]#pressure_1.2_GPa#.000')
 
         print RockPy.get_fname_from_info(sample_group='LF4C-HX', sample_name='1a', mtype='TT', machine='CRY',
-                                  mass=320, mass_unit='mg', height=5.17, height_unit='mm', diameter=5.87,
-                                  series='pressure', svals=1.2, sunits='GPa')
+                                         mass=320, mass_unit='mg', height=5.17, height_unit='mm', diameter=5.87,
+                                         series='pressure', svals=1.2, sunits='GPa')
         m = self.sample.add_measurement(path=path)
-
 
     def test_filter(self):
         self.add_hys_measurements_with_conditions()
@@ -86,7 +87,6 @@ class TestSample(TestCase):
         self.add_hys_measurements_with_conditions()
         test = sorted(list(set([m.mtype for m in self.sample.measurements])))
         self.assertEquals(test, self.sample.mtypes)
-
 
     def test_stypes(self):
         test = [t.stype for m in self.sample.measurements for t in m.series]
@@ -112,7 +112,6 @@ class TestSample(TestCase):
         self.assertEquals(out, new)
         print '%s - %.2f times faster' % (sys._getframe().f_code.co_name, (old_time / new_time))
 
-
     def test_mtype_stype_dict(self):
         self.add_hys_measurements_with_conditions()
         start = time.clock()
@@ -127,7 +126,6 @@ class TestSample(TestCase):
         self.assertEquals(old, new)
         print '%s - %.2f times faster' % (sys._getframe().f_code.co_name, (old_time / new_time))
 
-
     def test_mtype_stype_mdict(self):
         self.add_hys_measurements_with_conditions()
         start = time.clock()
@@ -141,7 +139,6 @@ class TestSample(TestCase):
         self.assertEquals(old, new)
         print '%s - %.2f times faster' % (sys._getframe().f_code.co_name, (old_time / new_time))
 
-
     def test_stype_sval_dict(self):
         self.add_hys_measurements_with_conditions()
         start = time.clock()
@@ -154,7 +151,6 @@ class TestSample(TestCase):
         self.assertEqual(old.keys(), new.keys())
         # self.assertEqual(old.items(), new.items())
         print '%s - %.2f times faster' % (sys._getframe().f_code.co_name, (old_time / new_time))
-
 
     def test_mtype_stype_sval_mdict(self):
         self.add_hys_measurements_with_conditions()
@@ -186,3 +182,48 @@ class TestSample(TestCase):
         #     # print self.sample.calc_all_mean_results()
         #     print self.sample.all_results()
 
+    def test_remove_m_from_info_dict(self):
+        compare = deepcopy(self.sample._create_info_dict())
+        # self.add_hys_measurements_with_conditions()
+        # pprint(self.sample.info_dict)
+        for m in self.sample.measurements:
+            print m
+            self.sample.remove_m_from_info_dict(m=m)
+        pprint(self.sample.info_dict)
+        self.assertDictEqual(compare, self.sample.info_dict)
+
+    def test_add_m2_info_dict(self):
+        sample = RockPy.Sample(name='test')
+        m = RockPy.Measurement(sample_obj=sample, mfile=None, machine='generic', mtype='mass', mdata=[1])
+        sample.add_measurement(mobj=m)
+        pprint(sample.info_dict)
+        sample2 = RockPy.Sample(name='test')
+        sample2.add_m2_info_dict(m)
+        sample2.add_m2_info_dict(m)
+        pprint(sample2.info_dict)
+
+    def test_get_measurements(self):
+        self.fail()
+
+
+    def test_add_m2_mdict(self):
+        sample = RockPy.Sample(name='test')
+        m1 = RockPy.Measurement(sample_obj=sample, mfile=None, machine='generic', mtype='mass', mdata=[1])
+        m1.add_svalue(stype='m1a', sval=1)
+        m1.add_svalue(stype='m1b', sval=2)
+        sample.add_m2_mdict(mobj=m1)
+        # pprint(sample.mdict['stype'])
+
+        m2 = RockPy.Measurement(sample_obj=sample, mfile=None, machine='generic', mtype='height', mdata=[1])
+        m2.add_svalue(stype='m2a', sval=3)
+        m2.add_svalue(stype='m2b', sval=4)
+        sample.add_m2_mdict(mobj=m2)
+        # pprint(sample.mdict['stype'])
+
+        m2.add_svalue(stype='m2c-added_later', sval=100)
+        # pprint(sample.mdict['stype'])
+
+        sample.remove_m_from_mdict(mobj=m1)
+        pprint(sample.mdict['stype'])
+        sample.remove_m_from_mdict(mobj=m2)
+        pprint(sample.mdict)

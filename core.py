@@ -49,3 +49,29 @@ def plt_logo():
 
 if __name__ == '__main__':
     plt_logo()
+
+
+def compare_array(A,B, AinB=True):
+    """
+    compares two numpy arrays
+    :param A:
+    :param B:
+    :param AinB: bool
+       if true: returns true if A[i] in B
+       if False returns False if A[i] in B
+    :return:
+    """
+
+    out = []
+    for i in A:
+        if i in B:
+            if AinB:
+                out.append(True)
+            else:
+                out.append(False)
+        else:
+            if AinB:
+                out.append(False)
+            else:
+                out.append(True)
+    return out

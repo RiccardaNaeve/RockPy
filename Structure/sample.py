@@ -75,6 +75,7 @@ class Sample(object):
         self._mean_results = None
         self._filtered_data = None
         self._info_dict = self._create_info_dict()
+        self._mdict = self._create_mdict()
 
         if mass is not None:
             mass = self.add_measurement(mtype='mass', mfile=None, machine=mass_machine,
@@ -127,6 +128,30 @@ class Sample(object):
         return m.data['data']['volume'].v[0]
 
     """ INFO DICTIONARY """
+
+    @property
+    def mdict(self):
+        if not self._mdict:
+            self._mdict = self._create_mdict()
+        else:
+            return self._mdict
+
+    def _create_mdict(self):
+        """
+        creates all info dictionaries
+
+        Returns
+        -------
+           dict
+              Dictionary with a permutation of ,type, stype and sval.
+        """
+        d = ['mtype', 'stype', 'sval']
+        keys = ['_'.join(i) for n in range(4) for i in itertools.permutations(d, n) if not len(i) == 0]
+        out = {i: {} for i in keys}
+        out.update({'measurements': set()})
+        out.update({'series': set()})
+        return out
+
     def _create_info_dict(self):
         """
         creates all info dictionaries
@@ -139,7 +164,79 @@ class Sample(object):
         d = ['mtype', 'stype', 'sval']
         keys = ['_'.join(i) for n in range(4) for i in itertools.permutations(d, n) if not len(i) == 0]
         out = {i: {} for i in keys}
+        out.update({'measurements': []})
         return out
+
+    def add_m2_mdict(self, mobj):
+        """
+        adds or removes a measurement from the mdict
+
+        Parameters
+        ----------
+           mobj: measurement object
+              object to be added
+        :param operation:
+        :return:
+        """
+        # cylcle through all the series
+        for s in mobj.series:
+            self.add_series2_mdict(mobj=mobj, series=s)
+
+    def remove_m_from_mdict(self, mobj):
+        """
+        adds or removes a measurement from the mdict
+
+        Parameters
+        ----------
+           mobj: measurement object
+              object to be added
+        :param operation:
+        :return:
+        """
+        # cylcle through all the series
+        for series in mobj.series:
+            self.remove_series_from_mdict(mobj=mobj, series=series)
+
+    def add_series2_mdict(self, mobj, series):
+        self.change_series_in_mdict(mobj=mobj, series=series, operation='add')
+
+    def remove_series_from_mdict(self, mobj, series):
+        self.change_series_in_mdict(mobj=mobj, series=series, operation='discard')
+
+    def change_series_in_mdict(self, mobj, series, operation):
+        # dict for getting the info of the series
+        sinfo = {'mtype': mobj.mtype, 'stype': series.stype, 'sval': series.value}
+
+        if series in self.mdict['series'] and operation == 'add':
+            self.logger.info('SERIES << %s >> already in mdict' %series)
+            return
+
+        # cycle through all the elements of the self.mdict
+        for level in self.mdict:
+            # get sublevels of the level
+            sublevels = level.split('_')
+            if level == 'measurements':
+                getattr(self.mdict['measurements'], operation)(mobj)
+            elif level == 'series':
+                getattr(self.mdict['series'], operation)(series)
+            elif len(sublevels) == 1:
+                d = self.mdict[level].setdefault(sinfo[level], set())
+                getattr(d, operation)(mobj)
+            else:
+                for slevel_idx, sublevel in enumerate(sublevels):
+                    if slevel_idx == 0:
+                        info0 = sinfo[sublevel]
+                        d = self.mdict[level].setdefault(info0, dict())
+                    elif slevel_idx != len(sublevels) - 1:
+                        info0 = sinfo[sublevel]
+                        d = d.setdefault(info0, dict())
+                    else:
+                        info0 = sinfo[sublevel]
+                        d = d.setdefault(info0, set())
+                        getattr(d, operation)(mobj)
+
+        if operation == 'discard':
+            self.mdict_cleanup()
 
     def add_m2_info_dict(self, m):
         keys = self._info_dict.keys()
@@ -149,7 +246,7 @@ class Sample(object):
                 levels = key.split('_')
                 for i, level in enumerate(levels):
                     if level == 'measurements':
-                        # self._info_dict['measurements'].append(m)
+                        self._info_dict['measurements'].append(m)
                         continue
                     if i == 0:
                         if len(levels) == i + 1:
@@ -187,7 +284,7 @@ class Sample(object):
                     if m in value:
                         self.info_dict[key].remove(m)
                 else:
-                # cycle through first level: e.g. sval, stype, mtype...
+                    # cycle through first level: e.g. sval, stype, mtype...
                     for k0, v0 in sorted(value.iteritems()):
                         if isinstance(v0, list):
                             if m in v0:
@@ -206,22 +303,21 @@ class Sample(object):
                                                 v2.remove(m)
             self.remove_empty_val_from_info_dict()
         else:
-            self.logger.warning('MEASUREMENT << %s >> not found' %m)
+            self.logger.warning('MEASUREMENT << %s >> not found' % m)
 
-
-    def remove_empty_val_from_info_dict(self):
+    def mdict_cleanup(self):
         """
         recursively removes all empty lists from dictionary
         :param empties_list:
         :return:
         """
-        for k0,v0 in sorted(self.info_dict.iteritems()):
+        for k0, v0 in sorted(self.mdict.iteritems()):
             if isinstance(v0, dict):
-                for k1,v1 in sorted(v0.iteritems()):
+                for k1, v1 in sorted(v0.iteritems()):
                     if isinstance(v1, dict):
-                        for k2,v2 in sorted(v1.iteritems()):
+                        for k2, v2 in sorted(v1.iteritems()):
                             if isinstance(v2, dict):
-                                for k3,v3 in sorted(v2.iteritems()):
+                                for k3, v3 in sorted(v2.iteritems()):
                                     if not v3:
                                         v2.pop(k3)
                                     if not v2:
@@ -237,6 +333,33 @@ class Sample(object):
                         if not v1:
                             v0.pop(k1)
 
+    def remove_empty_val_from_info_dict(self):
+        """
+        recursively removes all empty lists from dictionary
+        :param empties_list:
+        :return:
+        """
+        for k0, v0 in sorted(self.info_dict.iteritems()):
+            if isinstance(v0, dict):
+                for k1, v1 in sorted(v0.iteritems()):
+                    if isinstance(v1, dict):
+                        for k2, v2 in sorted(v1.iteritems()):
+                            if isinstance(v2, dict):
+                                for k3, v3 in sorted(v2.iteritems()):
+                                    if not v3:
+                                        v2.pop(k3)
+                                    if not v2:
+                                        v1.pop(k2)
+                                    if not v1:
+                                        v0.pop(k1)
+                            else:
+                                if not v2:
+                                    v1.pop(k2)
+                                if not v1:
+                                    v0.pop(k1)
+                    else:
+                        if not v1:
+                            v0.pop(k1)
 
     def recalc_info_dict(self):
         """
@@ -302,7 +425,7 @@ class Sample(object):
 
     def add_measurement(self,
                         mtype=None, mfile=None, machine='generic',  # general
-                        fname=None, folder=None, path=None, # added for automatic import of pathnames
+                        fname=None, folder=None, path=None,  # added for automatic import of pathnames
                         idx=None,
                         mdata=None, mobj=None,
                         # create_parameter = False,
@@ -352,13 +475,14 @@ class Sample(object):
 
         ### INSTANCE IMPORT
         if mobj:
-            self.measurements.append(mobj)
+            self.logger.info(' ADDING\t << measurement >> %s' % mobj.mtype)
+            # self.measurements.append(mobj)
             self.raw_measurements.append(deepcopy(mobj))
             self.add_m2_info_dict(m=mobj)
             return mobj
 
         ### FILE IMPORT
-        file_info = None
+        file_info = None  # file_info includes all info needed for creation of measurement instance
 
         if idx is None:
             idx = len(self.measurements)  # if there is no measurement index
@@ -388,15 +512,15 @@ class Sample(object):
                 self.logger.info(' ADDING\t << measurement >> %s' % mtype)
                 measurement = Sample.implemented_measurements()[mtype](**file_info)
                 if measurement.has_data:
-                    self.measurements.append(measurement)
-                    self.raw_measurements.append(measurement)  # todo is it better to store a deepcopy, so you could have a reset_measurement to get rid of possible mistakes?
+                    # self.measurements.append(measurement)
+                    self.raw_measurements.append(
+                        measurement)  # todo is it better to store a deepcopy, so you could have a reset_measurement to get rid of possible mistakes?
                     self.add_m2_info_dict(measurement)
                     return measurement
                 else:
                     return None
             else:
                 self.logger.error(' << %s >> not implemented, yet' % mtype)
-
 
     def add_simulation(self, mtype, sim_param=None, idx=None, **options):
         """
@@ -450,7 +574,7 @@ class Sample(object):
 
     @property
     def info_dict(self):
-        self._info_dict.update(dict(measurements=self.measurements))
+        # self._info_dict.update(dict(measurements=self.measurements))
         # if not hasattr(self, '_info_dict'):
         # self.recalc_info_dict()
         return self._info_dict
@@ -625,7 +749,6 @@ class Sample(object):
             sval = to_list(sval)
             stype = to_list(stype)
             out = [m for m in out for s in m.series if s.value in sval if s.type in stype]
-
 
         if not sval_range is None:
             if not isinstance(sval_range, list):

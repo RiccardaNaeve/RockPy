@@ -208,22 +208,23 @@ class TestSample(TestCase):
 
     def test_add_m2_mdict(self):
         sample = RockPy.Sample(name='test')
+        compare = deepcopy(sample.mdict)
         m1 = RockPy.Measurement(sample_obj=sample, mfile=None, machine='generic', mtype='mass', mdata=[1])
         m1.add_svalue(stype='m1a', sval=1)
         m1.add_svalue(stype='m1b', sval=2)
         sample.add_m2_mdict(mobj=m1)
-        # pprint(sample.mdict['stype'])
+        self.assertTrue(m1 in sample.mdict['stype']['m1a'])
+        self.assertTrue(m1 in sample.mdict['stype']['m1b'])
 
         m2 = RockPy.Measurement(sample_obj=sample, mfile=None, machine='generic', mtype='height', mdata=[1])
         m2.add_svalue(stype='m2a', sval=3)
         m2.add_svalue(stype='m2b', sval=4)
-        sample.add_m2_mdict(mobj=m2)
-        # pprint(sample.mdict['stype'])
-
+        self.assertTrue(m2 in sample.mdict['stype']['m2a'])
+        self.assertTrue(m2 in sample.mdict['stype']['m2b'])
         m2.add_svalue(stype='m2c-added_later', sval=100)
-        # pprint(sample.mdict['stype'])
-
+        self.assertTrue(m2 in sample.mdict['stype']['m2c-added_later'])
         sample.remove_m_from_mdict(mobj=m1)
-        pprint(sample.mdict['stype'])
+        self.assertFalse('m1a' in sample.mdict['stype'])
+        self.assertFalse('m1b' in sample.mdict['stype'])
         sample.remove_m_from_mdict(mobj=m2)
-        pprint(sample.mdict)
+        self.assertDictEqual(compare, sample.mdict)

@@ -135,6 +135,7 @@ class Sample(object):
             self._mdict = self._create_mdict()
         else:
             return self._mdict
+    #todo maybe create a rdict for results, in the same way the mdict works
 
     def _create_mdict(self):
         """
@@ -238,6 +239,7 @@ class Sample(object):
         if operation == 'discard':
             self.mdict_cleanup()
 
+    # todo remove
     def add_m2_info_dict(self, m):
         keys = self._info_dict.keys()
         for t in m.series:
@@ -270,6 +272,7 @@ class Sample(object):
                                 self._info_dict[key][test[levels[0]]][test[levels[1]]][test[level]] = []
                             self._info_dict[key][test[levels[0]]][test[levels[1]]][test[level]].append(m)
 
+    # todo remove
     def remove_m_from_info_dict(self, m):
         """
         removes a measurement from the info_dict
@@ -333,6 +336,7 @@ class Sample(object):
                         if not v1:
                             v0.pop(k1)
 
+    # todo remove
     def remove_empty_val_from_info_dict(self):
         """
         recursively removes all empty lists from dictionary
@@ -361,6 +365,7 @@ class Sample(object):
                         if not v1:
                             v0.pop(k1)
 
+    # todo remove
     def recalc_info_dict(self):
         """
         calculates a dictionary with information and the corresponding measurement
@@ -375,7 +380,6 @@ class Sample(object):
 
     def __setstate__(self, d):
         self.__dict__.update(d)
-        # self.recalc_info_dict()
 
     def __getstate__(self):
         '''
@@ -387,14 +391,15 @@ class Sample(object):
                          'name', 'index', 'color',
                          'measurements',
                          '_filtered_data', 'sgroups',
-                         '_info_dict',
+                         '_info_dict', #todo remove
+                         '_mdict',
                          'is_mean', 'mean_measurements', '_mean_results',
                          'results',
                      )}
         return pickle_me
 
     @property
-    def filtered_data(self):
+    def filtered_data(self): #todo is this still needed -> use measurements, raw measurements instead
         if not self._filtered_data:
             if self.is_mean:
                 return self.mean_measurements
@@ -409,9 +414,15 @@ class Sample(object):
         return self._mean_results
 
     def __repr__(self):
-        return '<< %s - RockPy.Sample >>' % self.name
+        return '<< RockPy.Sample[%s] >>' % self.name
 
     def __add__(self, other):
+        """
+        adding two samples results in the adding of the sample.measurements lists
+        :param other:
+        :return:
+        """
+        # todo decide on how to handle mdict
         first = deepcopy(self)
 
         for m in other.measurements:
@@ -457,9 +468,11 @@ class Sample(object):
               default: None
            mdata: any kind of data that must fit the required structure of the data of the measurement
                     will be used instead of data from file
-           create_parameter: bool
+           create_parameter: bool NOT IMPLEMENTED YET
               default: False
-              if true it will create the parameter (lenght, mass) measurements before creating the actual measurement
+                  if true it will create the parameter (lenght, mass) measurements from path
+                  before creating the actual measurement
+              Note: NEEDS PATH with RockPy complient fname structure.
             mobj: RockPy.Measurement object
               if provided, the object is added to self.measurements
 
@@ -473,13 +486,6 @@ class Sample(object):
         - mass
         '''
 
-        ### INSTANCE IMPORT
-        if mobj:
-            self.logger.info(' ADDING\t << measurement >> %s' % mobj.mtype)
-            # self.measurements.append(mobj)
-            self.raw_measurements.append(deepcopy(mobj))
-            self.add_m2_info_dict(m=mobj)
-            return mobj
 
         ### FILE IMPORT
         file_info = None  # file_info includes all info needed for creation of measurement instance
@@ -490,7 +496,6 @@ class Sample(object):
         # if auomatic import through filename is needed:
         # either fname AND folder are given OR the full path is passed
         # then the file_info dictionary is created
-
         if fname and folder or path:
             if fname and folder:
                 path = os.path.join(folder, fname)
@@ -498,6 +503,7 @@ class Sample(object):
                 file_info = RockPy.get_info_from_fname(path=path)
             file_info.update(dict(sample_obj=self))
 
+        # create the file_info dictionary for classic import
         elif mtype:
             mtype = mtype.lower()
             file_info = dict(sample_obj=self,
@@ -506,15 +512,17 @@ class Sample(object):
         if options:
             file_info.update(options)
 
-        if file_info:
+        if file_info or mobj:
             mtype = file_info['mtype']
-            if mtype in Sample.implemented_measurements():
+            if mtype in Sample.implemented_measurements() or mobj:
                 self.logger.info(' ADDING\t << measurement >> %s' % mtype)
-                measurement = Sample.implemented_measurements()[mtype](**file_info)
+                if mobj:
+                    measurement = mobj
+                else:
+                    measurement = Sample.implemented_measurements()[mtype](**file_info)
                 if measurement.has_data:
                     # self.measurements.append(measurement)
-                    self.raw_measurements.append(
-                        measurement)  # todo is it better to store a deepcopy, so you could have a reset_measurement to get rid of possible mistakes?
+                    self.raw_measurements.append(deepcopy(measurement))
                     self.add_m2_info_dict(measurement)
                     return measurement
                 else:
@@ -573,28 +581,28 @@ class Sample(object):
         return self.results
 
     @property
-    def info_dict(self):
+    def info_dict(self): #todo remove
         # self._info_dict.update(dict(measurements=self.measurements))
         # if not hasattr(self, '_info_dict'):
         # self.recalc_info_dict()
         return self._info_dict
 
     @property
-    def mtypes(self):
+    def mtypes(self): #todo remove
         """
         returns list of all mtypes
         """
         return sorted(self._info_dict['mtype'].keys())
 
     @property
-    def stypes(self):
+    def stypes(self): #todo remove
         """
         returns a list of all stypes
         """
         return sorted(self._info_dict['stype'].keys())
 
     @property
-    def svals(self):
+    def svals(self): #todo remove
         """
         returns a list of all stypes
         """
@@ -615,7 +623,7 @@ class Sample(object):
         return out
 
     @property
-    def stype_dict(self):
+    def stype_dict(self): #todo remove
         """
         dictionary with all series_types {stype:[list of measurements]}
 
@@ -625,7 +633,7 @@ class Sample(object):
         return self._info_dict['stype']
 
     @property
-    def mtype_stype_dict(self):
+    def mtype_stype_dict(self): #todo remove
         """
         returns a dictionary of mtypes, with all stypes in that mtype
         """
@@ -634,7 +642,7 @@ class Sample(object):
         return {k: v.keys() for k, v in self._info_dict['mtype_stype'].iteritems()}
 
     @property
-    def mtype_stype_mdict(self):
+    def mtype_stype_mdict(self): #todo remove
         """
         returns a dictionary of mtypes, with all stypes in that mtype
         """
@@ -644,13 +652,13 @@ class Sample(object):
         return self._info_dict['mtype_stype']
 
     @property
-    def stype_sval_dict(self):
+    def stype_sval_dict(self): #todo remove
         # out = {stype: self.__sort_list_set([m.stype_dict[stype].value for m in self.stype_dict[stype]]) for stype in
         # self.stypes}
         return {k: v.keys() for k, v in self._info_dict['stype_sval'].iteritems()}
 
     @property
-    def mtype_stype_sval_mdict(self):
+    def mtype_stype_sval_mdict(self): #todo remove
         # out = {mt:
         # {tt: {tv: self.get_measurements(mtype=mt, stype=tt, sval=tv)
         # for tv in self.stype_sval_dict[tt]}
@@ -662,6 +670,7 @@ class Sample(object):
 
     def filter(self, mtype=None, stype=None, sval=None, sval_range=None,
                **kwargs):
+        #todo should now remove measurements that are non complient to criteria from sample.measurements
         """
         used to filter measurement data.
 
@@ -682,6 +691,7 @@ class Sample(object):
         rests filter applied using sample.filter()
         :return:
         """
+        # todo should now add MISSING (not all because of possible calculations) from _raw_measurements back to measurements
         self._filtered_data = None
 
     ''' FIND FUNCTIONS '''
@@ -692,7 +702,7 @@ class Sample(object):
                          is_mean=False,
                          filtered=True,
                          reversed=False,
-                         **options):
+                         **options): #todo get rid of filtering, there is no filtered anymore
         """
         Returns a list of measurements of type = mtype
 
@@ -770,7 +780,7 @@ class Sample(object):
             out = [i for i in self.filtered_data if not i in out]
         return out
 
-    def delete_measurements(self, mtype=None, stype=None, sval=None, sval_range=None, **options):
+    def delete_measurements(self, mtype=None, stype=None, sval=None, sval_range=None, **options): #todo rename remove
         measurements_for_del = self.get_measurements(mtype=mtype, stype=stype, sval=sval, sval_range=sval_range)
         if measurements_for_del:
             self.measurements = [m for m in self.measurements if not m in measurements_for_del]

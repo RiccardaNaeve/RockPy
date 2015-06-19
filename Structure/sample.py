@@ -74,7 +74,7 @@ class Sample(object):
         self.mean_measurements = []
         self._mean_results = None
         self._filtered_data = None
-        self._info_dict = self.__create_info_dict()
+        self._info_dict = self._create_info_dict()
 
         if mass is not None:
             mass = self.add_measurement(mtype='mass', mfile=None, machine=mass_machine,
@@ -127,8 +127,7 @@ class Sample(object):
         return m.data['data']['volume'].v[0]
 
     """ INFO DICTIONARY """
-
-    def __create_info_dict(self):
+    def _create_info_dict(self):
         """
         creates all info dictionaries
 
@@ -149,6 +148,9 @@ class Sample(object):
             for key in keys:
                 levels = key.split('_')
                 for i, level in enumerate(levels):
+                    if level == 'measurements':
+                        # self._info_dict['measurements'].append(m)
+                        continue
                     if i == 0:
                         if len(levels) == i + 1:
                             if not test[level] in self._info_dict[key]:
@@ -171,6 +173,71 @@ class Sample(object):
                                 self._info_dict[key][test[levels[0]]][test[levels[1]]][test[level]] = []
                             self._info_dict[key][test[levels[0]]][test[levels[1]]][test[level]].append(m)
 
+    def remove_m_from_info_dict(self, m):
+        """
+        removes a measurement from the info_dict
+        :param m:
+        :return:
+        """
+        empty_cells = []
+        if m in self.info_dict['measurements']:
+            for key, value in sorted(self.info_dict.iteritems()):
+                # remove from self.measurements
+                if isinstance(value, list):
+                    if m in value:
+                        self.info_dict[key].remove(m)
+                else:
+                # cycle through first level: e.g. sval, stype, mtype...
+                    for k0, v0 in sorted(value.iteritems()):
+                        if isinstance(v0, list):
+                            if m in v0:
+                                v0.remove(m)
+                                if not v0:
+                                    empty_cells.append([key, k0])
+                        else:
+                            for k1, v1 in sorted(v0.iteritems()):
+                                if isinstance(v1, list):
+                                    if m in v1:
+                                        v1.remove(m)
+                                else:
+                                    for k2, v2 in sorted(v1.iteritems()):
+                                        if isinstance(v2, list):
+                                            if m in v2:
+                                                v2.remove(m)
+            self.remove_empty_val_from_info_dict()
+        else:
+            self.logger.warning('MEASUREMENT << %s >> not found' %m)
+
+
+    def remove_empty_val_from_info_dict(self):
+        """
+        recursively removes all empty lists from dictionary
+        :param empties_list:
+        :return:
+        """
+        for k0,v0 in sorted(self.info_dict.iteritems()):
+            if isinstance(v0, dict):
+                for k1,v1 in sorted(v0.iteritems()):
+                    if isinstance(v1, dict):
+                        for k2,v2 in sorted(v1.iteritems()):
+                            if isinstance(v2, dict):
+                                for k3,v3 in sorted(v2.iteritems()):
+                                    if not v3:
+                                        v2.pop(k3)
+                                    if not v2:
+                                        v1.pop(k2)
+                                    if not v1:
+                                        v0.pop(k1)
+                            else:
+                                if not v2:
+                                    v1.pop(k2)
+                                if not v1:
+                                    v0.pop(k1)
+                    else:
+                        if not v1:
+                            v0.pop(k1)
+
+
     def recalc_info_dict(self):
         """
         calculates a dictionary with information and the corresponding measurement
@@ -178,7 +245,7 @@ class Sample(object):
         :return:
 
         """
-        self._info_dict = self.__create_info_dict()
+        self._info_dict = self._create_info_dict()
         map(self.add_m2_info_dict, self.measurements)
 
     """ PICKL """
@@ -236,8 +303,9 @@ class Sample(object):
     def add_measurement(self,
                         mtype=None, mfile=None, machine='generic',  # general
                         fname=None, folder=None, path=None, # added for automatic import of pathnames
-                        idx=None, mdata=None,
-                        create_parameter = False,
+                        idx=None,
+                        mdata=None, mobj=None,
+                        # create_parameter = False,
                         **options):
         '''
         All measurements have to be added here
@@ -269,6 +337,8 @@ class Sample(object):
            create_parameter: bool
               default: False
               if true it will create the parameter (lenght, mass) measurements before creating the actual measurement
+            mobj: RockPy.Measurement object
+              if provided, the object is added to self.measurements
 
 
         Returns
@@ -280,6 +350,14 @@ class Sample(object):
         - mass
         '''
 
+        ### INSTANCE IMPORT
+        if mobj:
+            self.measurements.append(mobj)
+            self.raw_measurements.append(deepcopy(mobj))
+            self.add_m2_info_dict(m=mobj)
+            return mobj
+
+        ### FILE IMPORT
         file_info = None
 
         if idx is None:
@@ -372,6 +450,7 @@ class Sample(object):
 
     @property
     def info_dict(self):
+        self._info_dict.update(dict(measurements=self.measurements))
         # if not hasattr(self, '_info_dict'):
         # self.recalc_info_dict()
         return self._info_dict
@@ -528,17 +607,25 @@ class Sample(object):
             else:
                 # self.logger.debug('SEARCHING\t measurements with  << %s, %s, %s >>' % (mtype, stype, svalue))
                 out = self.measurements
+        print mtype, stype, sval
 
         if mtype:  # filter mtypes, if given
             mtype = to_list(mtype)
             out = [m for m in out if m.mtype in mtype]
-        if stype:
-            stype = to_list(stype)
-            out = [m for m in out for t in stype if t in m.stypes]
 
-        if sval is not None:
+        if stype and not sval:
+            stype = to_list(stype)
+            out = [m for m in out for st in stype if st in m.stypes]
+
+        if sval and not stype:
             sval = to_list(sval)
             out = [m for m in out for val in sval if val in m.svals]
+
+        if sval and stype:
+            sval = to_list(sval)
+            stype = to_list(stype)
+            out = [m for m in out for s in m.series if s.value in sval if s.type in stype]
+
 
         if not sval_range is None:
             if not isinstance(sval_range, list):

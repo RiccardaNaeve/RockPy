@@ -4,7 +4,7 @@ import numpy as np
 import logging
 from RockPy.Structure.data import RockPyData
 import base
-
+from copy import deepcopy
 
 class Backfield(base.Measurement):
     logger = logging.getLogger('RockPy.MEASUREMENT.Backfield')
@@ -63,7 +63,8 @@ class Backfield(base.Measurement):
         if self.machine_data.measurement_header['SCRIPT']['Include IRM?'] == 'Yes':
             data_idx += 1
             self.logger.info('IRM acquisition measured, adding new measurement')
-            self.sample_obj.add_measurement(mtype='irm_acquisition', mfile=self.mfile, machine=self.machine)
+            irm = self.sample_obj.add_measurement(mtype='irm_acquisition', mfile=self.mfile, machine=self.machine)
+            irm._series = self._series
 
         self._raw_data['remanence'] = RockPyData(column_names=['field', 'mag'], data=data[data_idx][:, [0, 1]])
 

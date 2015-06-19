@@ -105,13 +105,13 @@ class Measurement(object):
                  series = None,
                  **options):
         """
-        :param sample_obj:
-        :param mtype:
-        :param mfile:
-        :param machine:
-        :param mdata: when mdata is set, this will be directly used as measurement data without formatting from file
-        :param color: color used for plotting if specified
-        :param options:
+           sample_obj:
+           mtype:
+           mfile:
+           machine:
+           mdata: when mdata is set, this will be directly used as measurement data without formatting from file
+           color: color used for plotting if specified
+           options:
         :return:
         """
 
@@ -277,7 +277,7 @@ class Measurement(object):
     def __setstate__(self, d):
         '''
         d is unpickled data
-        :param d:
+           d:
         :return:
         '''
         self.__dict__.update(d)
@@ -297,8 +297,8 @@ class Measurement(object):
     def import_data(self, rtn_raw_data=None, **options):
         '''
         Importing the data from mfile and machine
-        :param rtn_raw_data:
-        :param options:
+           rtn_raw_data:
+           options:
         :return:
         '''
 
@@ -523,9 +523,9 @@ class Measurement(object):
                   NO : calculate result with new parameters
                   YES: return previous result
 
-        :param parameter: dict
+           parameter: dict
                         dictionary with parameters needed for calculation
-        :param force_caller: not dynamically retrieved caller name.
+           force_caller: not dynamically retrieved caller name.
 
         :return:
         '''
@@ -573,11 +573,11 @@ class Measurement(object):
              calculation_generic(A=3) # will calculate with A=3, B=2
              calculation_generic(A=2, recalc=True) # will calculate with A=2 B=standard_parameter['B']
 
-        :param caller: str
+           caller: str
                      name of calling function ('result_generic' should be given as 'generic')
-        :param parameter:
+           parameter:
                         Parameters to check
-        :param recalc: Boolean
+           recalc: Boolean
                      True if forced recalculation, False if not
         :return:
         """
@@ -595,9 +595,9 @@ class Measurement(object):
         """
         deletes step with var = var and val = val
 
-        :param dtype: the step type to be deleted e.g. th
-        :param var: the variable e.g. temperature
-        :param val: the value of that step e.g. 500
+           dtype: the step type to be deleted e.g. th
+           var: the variable e.g. temperature
+           val: the value of that step e.g. 500
 
         example: measurement.delete_step(step='th', var='temp', val=500) will delete the th step where the temperature is 500
         """
@@ -610,9 +610,9 @@ class Measurement(object):
         Checks if previous calculation used the same parameters, if yes returns the previous calculation
         if no calculates with new parameters
 
-        :param caller: str
+           caller: str
            name of calling function ('result_generic' should be given as 'result')
-        :param parameter:
+           parameter:
         :return:
         '''
         if self.calculation_parameter[caller]:
@@ -738,16 +738,27 @@ class Measurement(object):
     def add_svalue(self, stype, sval, unit=None, comment=''):
         """
         adds a series to measurement.series, then adds is to the data and results datastructure
-        :param stype:
-        :param sval:
-        :param unit:
-        :param comment:
-        :return:
+        
+        Parameters
+        ----------
+           stype: str
+              series type to be added
+           sval: float or int
+              series value to be added
+           unit: str
+              unit to be added. can be None #todo change so it uses Pint
+           comment: str
+              adds a comment to the series
+
+        Returns
+        -------
+           RockPy.Series instance
         """
         series = RockPy.Series(stype=stype, value=sval, unit=unit, comment=comment)
         self._series.append(series)
         self._add_sval_to_data(series)
         self._add_sval_to_results(series)
+        self.sample_obj.add_series2_mdict(series=series, mobj=self)
         return series
 
     def _add_sval_to_data(self, sobj):
@@ -783,7 +794,7 @@ class Measurement(object):
     def __sort_list_set(self, values):
         """
         returns a sorted list of non duplicate values
-        :param values:
+           values:
         :return:
         """
         return sorted(list(set(values)))
@@ -1008,10 +1019,10 @@ class Measurement(object):
         """
         corrects the remaining moment from the last th_step
 
-        :param dtype:
-        :param var:
-        :param val:
-        :param initial_state: also corrects the iinitial state if one exists
+           dtype:
+           var:
+           val:
+           initial_state: also corrects the iinitial state if one exists
         """
 
         try:
@@ -1063,7 +1074,7 @@ class Measurement(object):
     def set_get_attr(self, attr, value=None):
         """
         checks if attribute exists, if not, creates attribute with value None
-        :param attr:
+           attr:
         :return:
         """
         if not hasattr(self, attr):

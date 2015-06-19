@@ -492,7 +492,7 @@ class Measurement(object):
             # todo figuer out why logger wrong when called from VisualizeV3
             self.logger = logging.getLogger('RockPy.MEASURMENT.' + self.mtype+'[%s]'%self.sample_obj.name)
             self.logger.info('CALCULATING << %s >>' % result)
-            out = getattr(self, 'calculate_'+result)(**parameter)
+            out = getattr(self, 'result_'+result)(**parameter)
         return out
 
 
@@ -831,6 +831,7 @@ class Measurement(object):
         norm_factor = self._get_norm_factor(reference, ref_dtype, vval, norm_method)
         norm_dtypes = _to_tuple(norm_dtypes)  # make sure its a list/tuple
         for dtype, dtype_data in self.data.iteritems():  #cycling through all dtypes in data
+            if dtype_data: #if dtype_data == None
                 if 'all' in norm_dtypes:  # if all, all non stype data will be normalized
                     norm_dtypes = [i for i in dtype_data.column_names if not 'stype' in i]
                 if not normalize_variable:

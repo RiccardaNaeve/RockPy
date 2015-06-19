@@ -5,6 +5,20 @@ def grid(ax, **options):
     line_out = ax.grid(zorder=0)
     return line_out
 
+def add_result_text(ax, mobj, result, text = '', unit='', **plt_opt):
+
+    if mobj.has_result(result=result):
+        res = mobj.calculate_result(result = result).v[0]
+    else:
+        return
+
+    if not text:
+        text = result + ': '
+
+    ax.text(0.5, 0.8, '%s %.2f %s' %(text, res, unit),
+        verticalalignment='bottom', horizontalalignment='left',
+        transform=ax.transAxes,
+        color='k', fontsize=12)
 
 def zero_lines(ax, **options):
     x = ax.get_xlim()

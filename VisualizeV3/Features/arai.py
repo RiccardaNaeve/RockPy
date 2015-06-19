@@ -5,12 +5,12 @@ import numpy as np
 import RockPy.core
 
 
-def arai_points(ax, m_obj, component='mag', tmin=0, tmax=700, **plt_opt):
+def arai_points(ax, mobj, component='mag', tmin=0, tmax=700, **plt_opt):
     """
     Feature to plot the points in an arai diagram. Points used for calculation of best fit slope
     are filled, points not used for calculation or nor filled
     :param ax:
-    :param m_obj:
+    :param mobj:
     :param component:
     :param tmin:
     :param tmax:
@@ -18,9 +18,9 @@ def arai_points(ax, m_obj, component='mag', tmin=0, tmax=700, **plt_opt):
     :return:
     """
 
-    idx = m_obj._get_idx_equal_val('ptrm', 'th', 'temp')
-    x = m_obj.ptrm.filter_idx(idx[:, 0])
-    y = m_obj.th.filter_idx(idx[:, 1])
+    idx = mobj._get_idx_equal_val('ptrm', 'th', 'temp')
+    x = mobj.ptrm.filter_idx(idx[:, 0])
+    y = mobj.th.filter_idx(idx[:, 1])
 
     x_fill = x.filter((tmin <= x['temp'].v) & (tmax >= x['temp'].v))
     y_fill = y.filter((tmin <= y['temp'].v) & (tmax >= y['temp'].v))
@@ -55,12 +55,12 @@ def arai_points(ax, m_obj, component='mag', tmin=0, tmax=700, **plt_opt):
     return [nofill_line, fill_lines]
 
 
-def arai_fit(ax, m_obj, component='mag', tmin=0, tmax=700, **plt_opt):
+def arai_fit(ax, mobj, component='mag', tmin=0, tmax=700, **plt_opt):
     calculation_parameter = dict(component=component, tmin=tmin, tmax=tmax)
-    slope = m_obj.calculate_result(result = 'slope', parameter=calculation_parameter).v[0]
-    intercept = m_obj.calculate_result(result = 'y_int', parameter=calculation_parameter).v[0]
+    slope = mobj.calculate_result(result = 'slope', parameter=calculation_parameter).v[0]
+    intercept = mobj.calculate_result(result = 'y_int', parameter=calculation_parameter).v[0]
 
-    ptrm = m_obj.ptrm.filter((tmin <= m_obj.ptrm['temp'].v) & (tmax >= m_obj.ptrm['temp'].v))
+    ptrm = mobj.ptrm.filter((tmin <= mobj.ptrm['temp'].v) & (tmax >= mobj.ptrm['temp'].v))
 
     x = ptrm['mag'].v
     y = x * slope + intercept
@@ -76,15 +76,15 @@ def arai_fit(ax, m_obj, component='mag', tmin=0, tmax=700, **plt_opt):
             color = color,
             # markersize=markersize,
             zorder=100,
-            # label=m_obj.sample_obj.name,
+            # label=mobj.sample_obj.name,
             **plt_opt)
 
     return lines
 
-def arai_stdev(ax, m_obj, component='mag', **plt_opt):
-    idx = m_obj._get_idx_equal_val('ptrm', 'th', 'temp')
-    x = m_obj.ptrm.filter_idx(idx[:, 0])
-    y = m_obj.th.filter_idx(idx[:, 1])
+def arai_stdev(ax, mobj, component='mag', **plt_opt):
+    idx = mobj._get_idx_equal_val('ptrm', 'th', 'temp')
+    x = mobj.ptrm.filter_idx(idx[:, 0])
+    y = mobj.th.filter_idx(idx[:, 1])
     color = plt_opt.pop('color', 'k')
     alpha = plt_opt.pop('alpha', 0.1)
     if not np.all(np.isnan(x[component].e)):
@@ -106,12 +106,12 @@ def arai_stdev(ax, m_obj, component='mag', **plt_opt):
         return lines
 
 
-def add_ck_check(ax, m_obj, component='mag', **plt_opt):
+def add_ck_check(ax, mobj, component='mag', **plt_opt):
     if not plt_opt: plt_opt = {}
 
-    check_data = m_obj._get_ck_data()
-    th_idx = m_obj.data['th'].column_dict[component][0]
-    ptrm_idx = m_obj.data['ptrm'].column_dict[component][0]
+    check_data = mobj._get_ck_data()
+    th_idx = mobj.data['th'].column_dict[component][0]
+    ptrm_idx = mobj.data['ptrm'].column_dict[component][0]
 
     plt_opt.pop('marker')
     plt_opt.pop('ls')
@@ -131,3 +131,43 @@ def add_ck_check(ax, m_obj, component='mag', **plt_opt):
                 marker = '^',
                 markerfacecolor='w',
                 **plt_opt)
+
+
+def add_temperatures(ax, mobj, component='mag',  n = 6, **plt_opt):
+
+    idx = mobj._get_idx_equal_val('ptrm', 'th', 'temp')
+    x = mobj.ptrm.filter_idx(idx[:, 0])
+    y = mobj.th.filter_idx(idx[:, 1])
+
+    # get moment of all ptrm steps
+    data = mobj.ptrm[component].v
+    # get_maximum
+    mx = max(data)
+    # calculatee the intervals
+    intervals = [i * (mx/(n+1)) for i in xrange(1, n)]
+
+    # get indices of momen closest to the interval
+    idx = [np.argmin(abs(data - i)) for i in intervals]
+
+    # filter for indices
+    x = x.filter_idx(idx)
+    y = y.filter_idx(idx)
+
+    locs = zip(x[component].v, y[component].v)
+    temps = x['temp'].v
+
+    for i, text in enumerate(temps):
+        if locs[i][1]+0.1*mx > ax.get_ylim()[1]:
+            text_loc = [locs[i][0], locs[i][1] - 0.1*mx]
+        else:
+            text_loc = [locs[i][0], locs[i][1] + 0.1*mx]
+
+        ax.annotate(text,
+            xy=locs[i], xycoords='data',
+            xytext=text_loc,
+                    # textcoords='data',
+            arrowprops=dict(arrowstyle="-",
+                            # connectionstyle="arc3",
+                            connectionstyle="angle,angleA=0,angleB=90,rad=10",
+                            alpha=0.5),
+            )

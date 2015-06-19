@@ -66,14 +66,14 @@ class ResultVsSeries(base.Visual):
                 for m in measurements:
                     if m.has_result(self.result) and m.has_series(self.series):
                         sval = m.get_series(stypes=self.series)[0].value
-                        res = m.calculate_result(result= self.result, **self.calculation_parameters)
+                        res = m.calculate_result(result= self.result, **self.calculation_parameters).v[0]
                         res_series_dict.setdefault(sval, {}).setdefault(sample.name, []).append(res)
-
+        print res_series_dict
         self.res_series_raw_data = res_series_dict
         self.svals = sorted(res_series_dict.keys())
         self.res_raw = [res_series_dict[i][j] for i in self.svals for j in res_series_dict[i]]
-        self.res = [np.mean(i) for i in self.res_raw]
-        self.res_std = [np.std(i) for i in self.res_raw]
+        self.res = [np.nanmean(i) for i in self.res_raw]
+        self.res_std = [np.nanstd(i) for i in self.res_raw]
 
         return res_series_dict
 
@@ -81,6 +81,7 @@ class ResultVsSeries(base.Visual):
         self.features = [self.feature_res_v_series]
         self.single_features = [self.feature_grid]
 
+        self.title = '%s vs. %s' %(self.result, self.series)
         self.xlabel = self.series
         self.ylabel = self.result
 

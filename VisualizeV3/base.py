@@ -10,7 +10,7 @@ import RockPy.core
 import RockPy.Functions
 import RockPy.Measurements.base
 import RockPy.VisualizeV3.core
-
+import RockPy.VisualizeV3.Features.generic
 
 
 class Visual(object):
@@ -22,10 +22,10 @@ class Visual(object):
     logger = logging.getLogger('RockPy.MEASUREMENT')
     _required = []
 
-    linestyles = ['-', '--', ':', '-.'] *10
+    linestyles = ['-', '--', ':', '-.'] *100
     marker = ['o', 's', '.','+', '*', ',',  '1', '3', '2', '4', '8', '<', '>', 'D', 'H', '_', '^',
-                              'd', 'h', 'p', 'v', '|'] *10
-    colors = ['k', 'b', 'g', 'r',  'm', 'y', 'c'] *10
+                              'd', 'h', 'p', 'v', '|'] *100
+    colors = ['k', 'b', 'g', 'r',  'm', 'y', 'c'] *100
 
     @classmethod
     def inheritors(cls):
@@ -223,7 +223,9 @@ class Visual(object):
         for feature in self.single_features:
             feature()
 
-    def normalize_all(self, reference='data', rtype='mag', ntypes='all', vval=None, norm_method='max', norm_parameter=False):
+    def normalize_all(self, reference='data', ref_dtype='mag',
+                      norm_dtypes='all', vval=None,
+                      norm_method='max', norm_parameter=False):
         """
         Normalizes all measurements from _required. Ich _required is empty it will normalize all measurement.
         
@@ -231,15 +233,15 @@ class Visual(object):
         ----------
            reference: str
               reference to normalize to e.g. 'mass', 'th', 'initial_state' ...
-           rtype: str
+           ref_dtype: str
               data type of the reference. e.g. if you want to normalize to the magnetization of the downfield path in a
-              hysteresis loop you pur reference = 'downfield', rtype='mag'
-           ntypes: list, str
+              hysteresis loop you pur reference = 'downfield', ref_dtype='mag'
+           norm_dtypes: list, str
               string or list of strings with the datatypes to be normalized to.
               default: 'all' -> normalizes all dtypes
            vval: flot
               a variable to me normalizes to.
-              example: reference='downfield', rtype='mag', vval='1.0', will normalize the
+              example: reference='downfield', ref_dtype='mag', vval='1.0', will normalize the
                  data to the downfield branch magnetization at +1.0 T in a hysteresis loop
            norm_method: str
               the method for normalization.
@@ -260,7 +262,9 @@ class Visual(object):
                     measurements = [m for m in measurements if not isinstance(m, RockPy.Measurements.parameters.Parameter)]
                 if len(measurements) > 0:
                     for m_idx, m in enumerate(measurements):
-                        m.normalize(reference=reference, ref_dtype=rtype, norm_dtypes=ntypes, vval=vval, norm_method=norm_method)
+                        m.normalize(reference=reference, ref_dtype=ref_dtype,
+                                    norm_dtypes=norm_dtypes, norm_method=norm_method,
+                                    vval=vval)
 
     def get_ls_marker_color(self, indices):
         """
@@ -287,6 +291,9 @@ class Visual(object):
                         **plt_opt)
         return 'single'
 
+    # def feature_result_text(self, mobj, **plt_opt):
+    #
+    #     RockPy.VisualizeV3.Features.generic.add_result_text()
     @property
     def ax(self):
         return RockPy.VisualizeV3.core.get_subplot(self.fig, self._plt_index)
@@ -298,6 +305,19 @@ class Visual(object):
     ### PLOT PARAMETERS
     def set_plot_parameter(self):
         pass
+
+    def set_xscale(self, value):
+        """
+        'linear': LinearScale,
+        'log':    LogScale,
+        'symlog': SymmetricalLogScale
+
+        Parameter
+        ---------
+           scale:
+        """
+        # try:
+        self.ax.set_xscale(value=value)
 
     def set_yscale(self, value):
         """

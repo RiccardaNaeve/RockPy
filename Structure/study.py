@@ -3,6 +3,7 @@ import logging
 
 import RockPy
 from copy import deepcopy
+from prettytable import PrettyTable
 
 # RockPy.Functions.general.create_logger(__name__)
 log = logging.getLogger(__name__)
@@ -176,23 +177,22 @@ class Study(object):
         return sorted(list(set([i for j in self.samplegroups for i in j.mtypes])))
 
     def info(self):
-        from prettytable import PrettyTable
+
+        out = PrettyTable(['Sample Group', 'Sample Name', 'Measurements', 'series', 'Initial State'])
+        out.align['Measurements'] = 'l'
+        out.align['series'] = 'l'
+        out.align['Initial State'] = 'l'
 
         for sg in self._samplegroups:
-            print sg
-            print ''.join(['-' for i in range(20)])
-            out = PrettyTable(['Sample Name', 'Measurements', 'series', 'Initial State'])
-            out.align['Measurements'] = 'l'
-            out.align['series'] = 'l'
-            out.align['Initial State'] = 'l'
             for s in sg:
-                measurements = '|'.join(
-                    [m.mtype for m in s.filtered_data if m.mtype not in ['mass', 'diameter', 'height']])
+                mtypes = [m.mtype for m in s.measurements]
+                # series = [s.stype for m in ]
+                measurements = ', '.join(['%ix%s' %(mtypes.count(i), i) for i in sorted(set(mtypes))])
                 stypes = '|'.join(
                     [' '.join([t.stype, str(t.value), t.unit]) for m in s.filtered_data for t in m.series
                      if m.mtype not in ['mass', 'diameter', 'height']])
                 initial = '|'.join(
                     [m.initial_state.mtype if m.initial_state is not None else '-' for m in s.filtered_data
                      if m.mtype not in ['mass', 'diameter', 'height']])
-                out.add_row([s.name, measurements, stypes, initial])
-            print out
+                out.add_row([sg.name, s.name, measurements, stypes, initial])
+        print out

@@ -127,7 +127,6 @@ class Sample(object):
         m = self.get_measurements(mtype='volume')[-1]
         return m.data['data']['volume'].v[0]
 
-    """ INFO DICTIONARY """
 
     @property
     def mdict(self):
@@ -153,20 +152,33 @@ class Sample(object):
         out.update({'series': set()})
         return out
 
-    def _create_info_dict(self):
+    def mdict_cleanup(self):
         """
-        creates all info dictionaries
-
-        Returns
-        -------
-           dict
-              Dictionary with a permutation of ,type, stype and sval.
+        recursively removes all empty lists from dictionary
+        :param empties_list:
+        :return:
         """
-        d = ['mtype', 'stype', 'sval']
-        keys = ['_'.join(i) for n in range(4) for i in itertools.permutations(d, n) if not len(i) == 0]
-        out = {i: {} for i in keys}
-        out.update({'measurements': []})
-        return out
+        for k0, v0 in sorted(self.mdict.iteritems()):
+            if isinstance(v0, dict):
+                for k1, v1 in sorted(v0.iteritems()):
+                    if isinstance(v1, dict):
+                        for k2, v2 in sorted(v1.iteritems()):
+                            if isinstance(v2, dict):
+                                for k3, v3 in sorted(v2.iteritems()):
+                                    if not v3:
+                                        v2.pop(k3)
+                                    if not v2:
+                                        v1.pop(k2)
+                                    if not v1:
+                                        v0.pop(k1)
+                            else:
+                                if not v2:
+                                    v1.pop(k2)
+                                if not v1:
+                                    v0.pop(k1)
+                    else:
+                        if not v1:
+                            v0.pop(k1)
 
     def add_m2_mdict(self, mobj):
         """
@@ -239,6 +251,29 @@ class Sample(object):
         if operation == 'discard':
             self.mdict_cleanup()
 
+    def populate_mdict(self):
+        """
+        Populates the mdict with all measurements
+        :return:
+        """
+        map(self.add_m2_mdict, self.measurements)
+
+    """ OLD INFO DICTIONARY """
+    def _create_info_dict(self):
+        """
+        creates all info dictionaries
+
+        Returns
+        -------
+           dict
+              Dictionary with a permutation of ,type, stype and sval.
+        """
+        d = ['mtype', 'stype', 'sval']
+        keys = ['_'.join(i) for n in range(4) for i in itertools.permutations(d, n) if not len(i) == 0]
+        out = {i: {} for i in keys}
+        out.update({'measurements': []})
+        return out
+
     # todo remove
     def add_m2_info_dict(self, m):
         keys = self._info_dict.keys()
@@ -308,33 +343,6 @@ class Sample(object):
         else:
             self.logger.warning('MEASUREMENT << %s >> not found' % m)
 
-    def mdict_cleanup(self):
-        """
-        recursively removes all empty lists from dictionary
-        :param empties_list:
-        :return:
-        """
-        for k0, v0 in sorted(self.mdict.iteritems()):
-            if isinstance(v0, dict):
-                for k1, v1 in sorted(v0.iteritems()):
-                    if isinstance(v1, dict):
-                        for k2, v2 in sorted(v1.iteritems()):
-                            if isinstance(v2, dict):
-                                for k3, v3 in sorted(v2.iteritems()):
-                                    if not v3:
-                                        v2.pop(k3)
-                                    if not v2:
-                                        v1.pop(k2)
-                                    if not v1:
-                                        v0.pop(k1)
-                            else:
-                                if not v2:
-                                    v1.pop(k2)
-                                if not v1:
-                                    v0.pop(k1)
-                    else:
-                        if not v1:
-                            v0.pop(k1)
 
     # todo remove
     def remove_empty_val_from_info_dict(self):
@@ -431,6 +439,13 @@ class Sample(object):
         first.measurements.extend(other.measurements)
         first.recalc_info_dict()
         return first
+
+    def __getattr__(self, name):
+        if name in self.mdict:
+            return self.mdict[name]
+        else:
+            # Default behaviour
+            raise AttributeError
 
     ''' ADD FUNCTIONS '''
 
@@ -699,7 +714,7 @@ class Sample(object):
     def get_measurements(self,
                          mtype=None,
                          stype=None, sval=None, sval_range=None,
-                         is_mean=False,
+                         mean=False,
                          filtered=True,
                          reversed=False,
                          **options): #todo get rid of filtering, there is no filtered anymore
@@ -714,7 +729,7 @@ class Sample(object):
               series value
            sval_range: list
               series range e.g. sval_range = [0,2] will give all from 0 to 2
-           is_mean:
+           mean:
            filtered:
            revesed:
               if reversed true it returns only measurements that do not meet criteria
@@ -731,11 +746,11 @@ class Sample(object):
         else:
             svalue = str(sval)
 
-        if is_mean:
+        if mean:
             # self.logger.debug('SEARCHING\t measurements(mean_list) with  << %s, %s, %s >>' % (mtype, stype, svalue))
             out = self.mean_measurements
         else:
-            if filtered:
+            if filtered: #todo no more filtered data
                 # self.logger.debug('SEARCHING\t measurements with  << %s, %s, %s >> in filtered data' % (mtype, stype, svalue))
                 out = self.filtered_data
             else:
@@ -877,7 +892,10 @@ class Sample(object):
     def mean_measurement(self,
                          mtype=None, stype=None, sval=None, sval_range=None, mlist=None,
                          interpolate=True, recalc_magag=False,
-                         substfunc='mean'):
+                         substfunc='mean',
+                         reference=None, ref_dtype='mag', norm_dtypes='all', vval=None, norm_method='max',
+                         normalize_variable=False, dont_normalize=None):
+
         """
         takes a list of measurements and creates a mean measurement out of all measurements data
 
@@ -892,6 +910,12 @@ class Sample(object):
             raise ValueError('No mtype specified')
 
         mlist = self.get_measurements(mtype=mtype, stype=stype, sval=sval, sval_range=sval_range, filtered=True)
+
+        if reference:
+            mlist = [m.normalize(reference=reference, ref_dtype=ref_dtype, norm_dtypes=norm_dtypes, vval=vval,
+                                 norm_method=norm_method, normalize_variable=normalize_variable,
+                                 dont_normalize=dont_normalize) for m in mlist]
+
         if not mlist:
             return None
 

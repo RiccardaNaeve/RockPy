@@ -11,6 +11,7 @@ import itertools
 from pprint import pprint
 from profilehooks import profile
 
+
 class SampleGroup(object):
     """
     Container for Samples, has special calculation methods
@@ -53,7 +54,7 @@ class SampleGroup(object):
                      'samples',
                      'results'
                  )
-        }
+                 }
 
         return state
 
@@ -72,7 +73,6 @@ class SampleGroup(object):
             return self.sample_list[item]
         except KeyError:
             raise KeyError('SampleGroup has no Sample << %s >>' % item)
-
 
     def import_multiple_samples(self, sample_file, length_unit='mm', mass_unit='mg', **options):
         """
@@ -104,7 +104,6 @@ class SampleGroup(object):
             if sample in self.samples:
                 self.samples.pop(sample)
         return self
-
 
     # ### DATA properties
     @property
@@ -206,7 +205,6 @@ class SampleGroup(object):
             out.update({mtype: self.__sort_list_set(aux)})
         return out
 
-
     # mtype: svals
     @property
     def mtype_svals_dict(self):
@@ -284,7 +282,6 @@ class SampleGroup(object):
         out = {s.name: s for s in s_list}
         return out
 
-
     def calc_all(self, **parameter):
         for sample in self.sample_list:
             label = sample.name
@@ -319,7 +316,6 @@ class SampleGroup(object):
                     out[stype] = out[stype].append_rows(aux)
         return out
 
-
     def __add__(self, other):
         self_copy = SampleGroup(sample_list=self.sample_list)
         self_copy.samples.update(other.samples)
@@ -344,7 +340,6 @@ class SampleGroup(object):
             except TypeError:
                 pass
         return out
-
 
     def delete_measurements(self, sname=None, mtype=None, stype=None, sval=None, sval_range=None):
         """
@@ -430,11 +425,66 @@ class SampleGroup(object):
 
     def create_mean_sample(self,
                            reference=None,
-                           rtype='mag', dtye='mag', vval=None,
-                           ntypes='all',
+                           ref_dtype='mag', vval=None,
+                           norm_dtypes='all',
                            norm_method='max',
                            interpolate=True,
                            substfunc='mean'):
+        """
+        Creates a mean sample out of all samples
+
+        :param reference:
+        :param ref_dtype:
+        :param dtye:
+        :param vval:
+        :param norm_method:
+        :param interpolate:
+        :param substfunc:
+        :return:
+        """
+
+        # create new sample_obj
+        mean_sample = Sample(name='mean ' + self.name)
+        # get all measurements from all samples in sample group and add to mean sample
+        mean_sample.measurements = [m for s in self.sample_list for m in s.measurements]
+        mean_sample.populate_mdict()
+
+        for mtype in sorted(mean_sample.mdict['mtype_stype_sval']):
+            if not mtype in ['mass', 'diameter', 'height', 'volume', 'x_len', 'y_len', 'z_len']:
+                for stype in sorted(mean_sample.mdict['mtype_stype_sval'][mtype]):
+                    for sval in sorted(mean_sample.mdict['mtype_stype_sval'][mtype][stype]):
+                        if reference or vval:
+                            for i, m in enumerate(mean_sample.mdict['mtype_stype_sval'][mtype][stype][sval]):
+                                mean_sample.mdict['mtype_stype_sval'][mtype][stype][sval][i] = m.normalize(
+                                    reference=reference, ref_dtype=ref_dtype,
+                                    norm_dtypes=norm_dtypes,
+                                    vval=vval, norm_method=norm_method)
+
+                        # calculating the mean of all measurements
+                        M = mean_sample.mean_measurement(mtype=mtype, stype=stype, sval=sval,
+                                                         substfunc=substfunc,
+                                                         interpolate=interpolate,
+                                                         # reference=reference, ref_dtype=ref_dtype,
+                                                         # norm_dtypes=norm_dtypes,
+                                                         # vval=vval, norm_method=norm_method,
+                                                         )
+                        # print M.th
+                        if reference or vval:
+                            M.is_normalized = True
+                            M.norm = [reference, ref_dtype, vval, norm_method, np.nan]
+
+                        mean_sample.mean_measurements.append(M)
+
+        mean_sample.is_mean = True  # set is_mean flag after all measuerements are created
+        return mean_sample
+
+    def create_mean_sample_OLD(self,
+                               reference=None,
+                               rtype='mag', dtye='mag', vval=None,
+                               ntypes='all',
+                               norm_method='max',
+                               interpolate=True,
+                               substfunc='mean'):
         """
         Creates a mean sample out of all samples
 
@@ -573,7 +623,6 @@ class SampleGroup(object):
             out.extend(rp['variable'].v)
         return self.__sort_list_set(out)
 
-
     def __sort_list_set(self, values):
         """
         returns a sorted list of non duplicate values
@@ -643,7 +692,7 @@ class SampleGroup(object):
                         elif i > 0:
                             self._info_dict[key][e0].setdefault(e1, dict())
 
-                            #level 2
+                            # level 2
                             for e2 in s.info_dict[key][e0][e1]:
                                 if i == n == 2:
                                     self._info_dict[key][e0][e1].setdefault(e2, list())

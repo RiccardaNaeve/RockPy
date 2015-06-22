@@ -817,7 +817,7 @@ class Measurement(object):
     """
 
     def normalize(self, reference='data', ref_dtype='mag', norm_dtypes='all', vval=None, norm_method='max',
-                  normalize_variable=False):
+                  normalize_variable=False, dont_normalize=None):
         """
         normalizes all available data to reference value, using norm_method
 
@@ -837,6 +837,9 @@ class Measurement(object):
            normalize_variable: bool
               if True, variable is also normalized
               default: False
+           dont_normalize: list
+              list of dtypes that will not be normalized
+              default: None
         """
         # todo normalize by results
         #getting normalization factor
@@ -846,9 +849,17 @@ class Measurement(object):
             if dtype_data: #if dtype_data == None
                 if 'all' in norm_dtypes:  # if all, all non stype data will be normalized
                     norm_dtypes = [i for i in dtype_data.column_names if not 'stype' in i]
+
+                ### DO not normalize:
+                # variable
                 if not normalize_variable:
                     variable = dtype_data.column_names[dtype_data.column_dict['variable'][0]]
                     norm_dtypes = [i for i in norm_dtypes if not i == variable]
+
+                if dont_normalize:
+                    dont_normalize = _to_tuple(dont_normalize)
+                    norm_dtypes = [i for i in norm_dtypes if not i in dont_normalize]
+
                 for ntype in norm_dtypes:  #else use norm_dtypes specified
                     try:
                         dtype_data[ntype] = dtype_data[ntype].v / norm_factor

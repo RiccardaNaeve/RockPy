@@ -758,7 +758,6 @@ class Measurement(object):
         self._series.append(series)
         self._add_sval_to_data(series)
         self._add_sval_to_results(series)
-        print self.sample_obj
         self.sample_obj.add_series2_mdict(series=series, mobj=self)
         return series
 

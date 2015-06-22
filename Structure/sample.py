@@ -148,8 +148,8 @@ class Sample(object):
         d = ['mtype', 'stype', 'sval']
         keys = ['_'.join(i) for n in range(4) for i in itertools.permutations(d, n) if not len(i) == 0]
         out = {i: {} for i in keys}
-        out.update({'measurements': set()})
-        out.update({'series': set()})
+        out.update({'measurements': list()})
+        out.update({'series': list()})
         return out
 
     def mdict_cleanup(self):
@@ -211,16 +211,16 @@ class Sample(object):
             self.remove_series_from_mdict(mobj=mobj, series=series)
 
     def add_series2_mdict(self, mobj, series):
-        self.change_series_in_mdict(mobj=mobj, series=series, operation='add')
+        self.change_series_in_mdict(mobj=mobj, series=series, operation='append')
 
     def remove_series_from_mdict(self, mobj, series):
-        self.change_series_in_mdict(mobj=mobj, series=series, operation='discard')
+        self.change_series_in_mdict(mobj=mobj, series=series, operation='remove')
 
     def change_series_in_mdict(self, mobj, series, operation):
         # dict for getting the info of the series
         sinfo = {'mtype': mobj.mtype, 'stype': series.stype, 'sval': series.value}
 
-        if series in self.mdict['series'] and operation == 'add':
+        if series in self.mdict['series'] and operation == 'append':
             self.logger.info('SERIES << %s >> already in mdict' %series)
             return
 
@@ -229,12 +229,16 @@ class Sample(object):
             # get sublevels of the level
             sublevels = level.split('_')
             if level == 'measurements':
-                getattr(self.mdict['measurements'], operation)(mobj)
+                append_if_not_exists(self.mdict['measurements'], mobj, operation=operation)
+                # getattr(self.mdict['measurements'], operation)(mobj)
             elif level == 'series':
-                getattr(self.mdict['series'], operation)(series)
+                append_if_not_exists(self.mdict['series'], series, operation=operation)
+
+                # getattr(self.mdict['series'], operation)(series)
             elif len(sublevels) == 1:
-                d = self.mdict[level].setdefault(sinfo[level], set())
-                getattr(d, operation)(mobj)
+                d = self.mdict[level].setdefault(sinfo[level], list())
+                append_if_not_exists(d, mobj, operation=operation)
+                # getattr(d, operation)(mobj)
             else:
                 for slevel_idx, sublevel in enumerate(sublevels):
                     if slevel_idx == 0:
@@ -245,10 +249,12 @@ class Sample(object):
                         d = d.setdefault(info0, dict())
                     else:
                         info0 = sinfo[sublevel]
-                        d = d.setdefault(info0, set())
-                        getattr(d, operation)(mobj)
+                        d = d.setdefault(info0, list())
+                        append_if_not_exists(d, mobj, operation=operation)
 
-        if operation == 'discard':
+                        # getattr(d, operation)(mobj)
+
+        if operation == 'remove':
             self.mdict_cleanup()
 
     def populate_mdict(self):
@@ -1206,3 +1212,12 @@ def get_common_dtypes_from_list(mlist):
         else:
             dtypes = dtypes & set(m.data.keys())
     return sorted(list(dtypes))
+
+def append_if_not_exists(elist, element, operation):
+    if operation == 'append':
+        if not element in elist:
+            elist.append(element)
+    if operation == 'remove':
+        if element in elist:
+            elist.remove(element)
+    return elist

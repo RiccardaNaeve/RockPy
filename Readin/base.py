@@ -1,9 +1,11 @@
 __author__ = 'volk'
 import logging
-
+import gc
 
 class Machine(object):
     log = logging.getLogger('RockPy.READIN')
+    def split_tab(self, line):
+        return line.split('\t')
 
     def __init__(self, dfile, sample_name):
         Machine.log.info('IMPORTING << %s , %s >> file: << %s >>' % (sample_name, type(self).__name__, dfile))
@@ -23,6 +25,7 @@ class Machine(object):
             out = f.readlines()
 
         out = map(str.rstrip, out)
+        gc.collect()
         return out
 
     @property

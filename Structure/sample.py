@@ -521,7 +521,7 @@ class Sample(object):
                 else:
                     measurement = Sample.implemented_measurements()[mtype](**file_info)
                 if measurement.has_data:
-                    # self.measurements.append(measurement)
+                    self.measurements.append(measurement)
                     self.raw_measurements.append(deepcopy(measurement))
                     self.add_m2_info_dict(measurement)
                     return measurement
@@ -741,7 +741,7 @@ class Sample(object):
             else:
                 # self.logger.debug('SEARCHING\t measurements with  << %s, %s, %s >>' % (mtype, stype, svalue))
                 out = self.measurements
-        print mtype, stype, sval
+        # print mtype, stype, sval
 
         if mtype:  # filter mtypes, if given
             mtype = to_list(mtype)
@@ -758,7 +758,7 @@ class Sample(object):
         if sval and stype:
             sval = to_list(sval)
             stype = to_list(stype)
-            out = [m for m in out for s in m.series if s.value in sval if s.type in stype]
+            out = [m for m in out for s in m.series if s.value in sval if s.stype in stype]
 
         if not sval_range is None:
             if not isinstance(sval_range, list):

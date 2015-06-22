@@ -5,12 +5,15 @@ import numpy as np
 import matplotlib.dates
 
 import base
-
+from functools import partial
 
 class CryoMag(base.Machine):
     def __init__(self, dfile, sample_name):
         super(CryoMag, self).__init__(dfile, sample_name)
-        self.raw_data = [i.strip('\n\r').split('\t') for i in open(self.file_name).readlines()]
+        # self.raw_data = self.simple_import()
+        self.raw_data = map(self.split_tab , self.simple_import())
+
+        # self.raw_data = [i.strip('\n\r').split('\t') for i in open(self.file_name).readlines()]
 
         d = np.array(self.raw_data[2:])
         self.float_data_idx = [7, 12, 13, 14, 16]#, 1, 2, 3, 4, 5, 6, 17, 18, 19, 20

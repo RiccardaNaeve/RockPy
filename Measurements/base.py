@@ -144,11 +144,6 @@ class Measurement(object):
 
         self.__initialize()
 
-        # add series if provied
-        # has to come past __initialize()
-        if self._series_opt:
-            self._add_series_from_opt()
-
         if mtype in Measurement.measurement_formatters():
             self.logger.debug('MTYPE << %s >> implemented' % mtype)
             self.mtype = mtype  # set mtype
@@ -193,6 +188,11 @@ class Measurement(object):
         else:
             self.logger.error(
                 'FORMATTING raw data from << %s >> not possible, probably not implemented, yet.' % machine)
+
+        # add series if provied
+        # has to come past __initialize()
+        if self._series_opt:
+            self._add_series_from_opt()
 
     @property
     def m_idx(self):
@@ -758,6 +758,7 @@ class Measurement(object):
         self._series.append(series)
         self._add_sval_to_data(series)
         self._add_sval_to_results(series)
+        print self.sample_obj
         self.sample_obj.add_series2_mdict(series=series, mobj=self)
         return series
 

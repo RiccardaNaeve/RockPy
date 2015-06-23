@@ -36,20 +36,19 @@ class TestSample(TestCase):
         self.vsm_rmp_file = ''
 
     def add_hys_measurements_with_conditions(self):
-        print 'adding measurements'
-        self.sample.add_measurement(mtype='hys', machine='vftb', mfile=self.vftb_hys_file,
+        self.hys1 = self.sample.add_measurement(mtype='hys', machine='vftb', mfile=self.vftb_hys_file,
                                     series='pressure_0.0_GPa; temperature_100.0_C')
 
-        self.sample.add_measurement(mtype='hys', machine='vftb', mfile=self.vftb_hys_file,
+        self.hys2 = self.sample.add_measurement(mtype='hys', machine='vftb', mfile=self.vftb_hys_file,
                                     series='pressure_1.0_GPa; temperature_200.0_C')
 
-        self.sample.add_measurement(mtype='hys', machine='vftb', mfile=self.vftb_hys_file,
+        self.hys3 = self.sample.add_measurement(mtype='hys', machine='vftb', mfile=self.vftb_hys_file,
                                     series='pressure_2.0_GPa; temperature_300.0_C')
 
-        self.sample.add_measurement(mtype='hys', machine='vftb', mfile=self.vftb_hys_file,
+        self.hys4 = self.sample.add_measurement(mtype='hys', machine='vftb', mfile=self.vftb_hys_file,
                                     series='pressure_3.0_GPa; temperature_400.0_C')
 
-        self.sample.add_measurement(mtype='hys', machine='vftb', mfile=self.vftb_hys_file,
+        self.hys5 = self.sample.add_measurement(mtype='hys', machine='vftb', mfile=self.vftb_hys_file,
                                     series='pressure_4.0_GPa; temperature_500.0_C')
 
     def add_vftb_measurements(self):
@@ -203,7 +202,12 @@ class TestSample(TestCase):
         pprint(sample2.info_dict)
 
     def test_get_measurements(self):
-        self.fail()
+        self.add_hys_measurements_with_conditions()
+        self.assertEqual([], self.sample.get_measurements(mtype='thellier', stype='pressure', sval=0))
+        self.assertEqual([self.hys1], self.sample.get_measurements(mtype='hys', stype='pressure', sval=0))
+        self.assertEqual([self.hys1], self.sample.get_measurements(mtype='hys', stype='pressure', sval=0.0))
+        self.assertEqual([self.hys1, self.hys2, self.hys3, self.hys4, self.hys5],
+                         self.sample.get_measurements(mtype='hys', stype='pressure'))
 
 
     def test_add_m2_mdict(self):

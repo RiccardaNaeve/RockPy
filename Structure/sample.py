@@ -747,58 +747,36 @@ class Sample(object):
               if true measurements will only be searched in filtered data
            mtype:
         """
+        from pprint import pprint
         if sval is None:
             svalue = np.nan
         else:
             svalue = str(sval)
 
-        if mean:
-            # self.logger.debug('SEARCHING\t measurements(mean_list) with  << %s, %s, %s >>' % (mtype, stype, svalue))
-            out = self.mean_measurements
-        else:
-            if filtered: #todo no more filtered data
-                # self.logger.debug('SEARCHING\t measurements with  << %s, %s, %s >> in filtered data' % (mtype, stype, svalue))
-                out = self.filtered_data
-            else:
-                # self.logger.debug('SEARCHING\t measurements with  << %s, %s, %s >>' % (mtype, stype, svalue))
-                out = self.measurements
-        # print mtype, stype, sval
+        # todo sval_range [0,5] would mean everything within 0...5, '<5', '>5'
+        # todo search mean measurements
+        if not sval_range:
+            self.logger.info('SEARCHING\t measurements with  << %s, %s, %s >>' % (mtype, stype, svalue))
+            # create dictionary with mtype, stype, sval search parameters
+            lookup_dict = {mtype:'mtype', stype:'stype', sval:'sval'}
+            # create string for mdict lookup e.g. if mtype and stype is given then sval == None -> lookup = mtype_stype
+            # and we can search in Sample.mdict[mtype_stype] for the measurements
+            lookup = '_'.join([lookup_dict[i] for i in sorted(lookup_dict) if i is not None])
+            # create reverse dict for lookup of value
+            rev_lookup_dict = {v:k for k,v in lookup_dict.iteritems()}
 
-        if mtype:  # filter mtypes, if given
-            mtype = to_list(mtype)
-            out = [m for m in out if m.mtype in mtype]
+        # copy of mdict[lookup] for dynamic lookup of arbitrary level depth
+        out = self.mdict[lookup]
+        for i in lookup.split('_'): #cycle through levels
+            # catch Keyerror exception for question without answer
+            try:
+                # store next level
+                out = out[rev_lookup_dict[i]]
+            # if key not exists return empty list
+            except KeyError:
+                self.logger.error('CANT find measurement with << %s, %s >>'%(i, rev_lookup_dict[i]))
+                return []
 
-        if stype and not sval:
-            stype = to_list(stype)
-            out = [m for m in out for st in stype if st in m.stypes]
-
-        if sval and not stype:
-            sval = to_list(sval)
-            out = [m for m in out for val in sval if val in m.svals]
-
-        if sval and stype:
-            sval = to_list(sval)
-            stype = to_list(stype)
-            out = [m for m in out for s in m.series if s.value in sval if s.stype in stype]
-
-        if not sval_range is None:
-            if not isinstance(sval_range, list):
-                sval_range = [0, sval_range]
-            else:
-                if len(sval_range) == 1:
-                    sval_range = [0] + sval_range
-            out = [m for m in out for val in m.svals
-                   if val <= max(sval_range)
-                   if val >= min(sval_range)]
-
-        if len(out) == 0:
-            self.logger.error(
-                'UNKNOWN\t << %s, %s, %s >> or no measurement found for sample << %s >>' % (
-                    mtype, stype, svalue, self.name))
-            return []
-
-        if reversed:
-            out = [i for i in self.filtered_data if not i in out]
         return out
 
     def delete_measurements(self, mtype=None, stype=None, sval=None, sval_range=None, **options): #todo rename remove
@@ -909,14 +887,13 @@ class Sample(object):
         ----------
            mlist:
            interpolate:
-           recalc_magag:
+           recalc_mag:
         :return:
         """
         if not mtype:
             raise ValueError('No mtype specified')
-
-        mlist = self.get_measurements(mtype=mtype, stype=stype, sval=sval, sval_range=sval_range, filtered=True)
-
+        mlist = self.get_measurements(mtype=mtype, stype=stype, sval=sval, sval_range=sval_range, mean=False)
+        print 'len', len(mlist)
         if reference:
             mlist = [m.normalize(reference=reference, ref_dtype=ref_dtype, norm_dtypes=norm_dtypes, vval=vval,
                                  norm_method=norm_method, normalize_variable=normalize_variable,
@@ -932,7 +909,6 @@ class Sample(object):
         base_measurement = RockPy.Functions.general.create_dummy_measurement(mtype=mlist[0].mtype,
                                                                              machine=mlist[0].machine,
                                                                              mdata=deepcopy(mlist[0].data))
-
         # delete uncommon dtype from base_measurement
         for key in base_measurement.data:
             if key not in dtypes:
@@ -940,6 +916,7 @@ class Sample(object):
 
         for dtype in dtypes:  # cycle through all dtypes e.g. 'down_field', 'up_field' for hysteresis
             dtype_list = [m.data[dtype] for m in mlist]
+            print dtype, len(dtype_list), dtype_list
             if interpolate:
                 varlist = self.__get_variable_list(dtype_list, var='temp')
                 if len(varlist) > 1:

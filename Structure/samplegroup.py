@@ -455,7 +455,8 @@ class SampleGroup(object):
                     for sval in sorted(mean_sample.mdict['mtype_stype_sval'][mtype][stype]):
                         if reference or vval:
                             for i, m in enumerate(mean_sample.mdict['mtype_stype_sval'][mtype][stype][sval]):
-                                mean_sample.mdict['mtype_stype_sval'][mtype][stype][sval][i] = m.normalize(
+                                m = m.normalize(
+                                # mean_sample.mdict['mtype_stype_sval'][mtype][stype][sval][i] = m.normalize(
                                     reference=reference, ref_dtype=ref_dtype,
                                     norm_dtypes=norm_dtypes,
                                     vval=vval, norm_method=norm_method)
@@ -468,6 +469,7 @@ class SampleGroup(object):
                                                          # norm_dtypes=norm_dtypes,
                                                          # vval=vval, norm_method=norm_method,
                                                          )
+                        M.add_series()
                         # print M.th
                         if reference or vval:
                             M.is_normalized = True

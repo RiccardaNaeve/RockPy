@@ -460,7 +460,7 @@ class SampleGroup(object):
                                     reference=reference, ref_dtype=ref_dtype,
                                     norm_dtypes=norm_dtypes,
                                     vval=vval, norm_method=norm_method)
-
+                        series = m.get_series(stypes=stype, svals=sval)[0]
                         # calculating the mean of all measurements
                         M = mean_sample.mean_measurement(mtype=mtype, stype=stype, sval=sval,
                                                          substfunc=substfunc,
@@ -469,7 +469,7 @@ class SampleGroup(object):
                                                          # norm_dtypes=norm_dtypes,
                                                          # vval=vval, norm_method=norm_method,
                                                          )
-                        M.add_series()
+                        M.add_sval(series_obj=series)
                         # print M.th
                         if reference or vval:
                             M.is_normalized = True
@@ -546,7 +546,7 @@ class SampleGroup(object):
                         samples = self.info_dict['mtype_stype_sval'][mtype][stype][sval]
                         measurements = []
                         for s in samples:
-                            measurements.extend(s.get_measurements(mtype=mtype, stype=stype, sval=sval))
+                            measurements.extend(s.get_measurements(mtypes=mtype, stypes=stype, svals=sval))
                     if reference or vval:
                         measurements = [m.normalize(reference=reference, ref_dtype=rtype,
                                                     vval=vval, norm_method=norm_method)

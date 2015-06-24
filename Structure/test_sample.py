@@ -37,19 +37,19 @@ class TestSample(TestCase):
 
     def add_hys_measurements_with_conditions(self):
         self.hys1 = self.sample.add_measurement(mtype='hys', machine='vftb', mfile=self.vftb_hys_file,
-                                    series='pressure_0.0_GPa; temperature_100.0_C')
+                                                series='pressure_0.0_GPa; temperature_100.0_C')
 
         self.hys2 = self.sample.add_measurement(mtype='hys', machine='vftb', mfile=self.vftb_hys_file,
-                                    series='pressure_1.0_GPa; temperature_200.0_C')
+                                                series='pressure_1.0_GPa; temperature_200.0_C')
 
         self.hys3 = self.sample.add_measurement(mtype='hys', machine='vftb', mfile=self.vftb_hys_file,
-                                    series='pressure_2.0_GPa; temperature_300.0_C')
+                                                series='pressure_2.0_GPa; temperature_300.0_C')
 
         self.hys4 = self.sample.add_measurement(mtype='hys', machine='vftb', mfile=self.vftb_hys_file,
-                                    series='pressure_3.0_GPa; temperature_400.0_C')
+                                                series='pressure_3.0_GPa; temperature_400.0_C')
 
         self.hys5 = self.sample.add_measurement(mtype='hys', machine='vftb', mfile=self.vftb_hys_file,
-                                    series='pressure_4.0_GPa; temperature_500.0_C')
+                                                series='pressure_4.0_GPa; temperature_500.0_C')
 
     def add_vftb_measurements(self):
         self.sample.add_measurement(mtype='backfiled', mfile=self.vftb_coe_file, machine='vftb')
@@ -103,7 +103,7 @@ class TestSample(TestCase):
     def test_stype_dict(self):
         self.add_hys_measurements_with_conditions()
         start = time.clock()
-        out = {stype: self.sample.get_measurements(stype=stype) for stype in self.sample.stypes}
+        out = {stype: self.sample.get_measurements(stypes=stype) for stype in self.sample.stypes}
         old_time = time.clock() - start
         start = time.clock()
         new = self.sample.stype_dict
@@ -115,7 +115,7 @@ class TestSample(TestCase):
         self.add_hys_measurements_with_conditions()
         start = time.clock()
 
-        old = {mtype: sorted(list(set([stype for m in self.sample.get_measurements(mtype=mtype)
+        old = {mtype: sorted(list(set([stype for m in self.sample.get_measurements(mtypes=mtype)
                                        for stype in m.stypes])))
                for mtype in self.sample.mtypes}
         old_time = time.clock() - start
@@ -128,7 +128,7 @@ class TestSample(TestCase):
     def test_mtype_stype_mdict(self):
         self.add_hys_measurements_with_conditions()
         start = time.clock()
-        old = {mtype: {stype: self.sample.get_measurements(mtype=mtype, stype=stype)
+        old = {mtype: {stype: self.sample.get_measurements(mtypes=mtype, stypes=stype)
                        for stype in self.sample.mtype_stype_dict[mtype]}
                for mtype in self.sample.mtypes}
         old_time = time.clock() - start
@@ -156,7 +156,7 @@ class TestSample(TestCase):
 
         start = time.clock()
         old = {mt:
-                   {tt: {tv: self.sample.get_measurements(mtype=mt, stype=tt, sval=tv)
+                   {tt: {tv: self.sample.get_measurements(mtypes=mt, stypes=tt, svals=tv)
                          for tv in self.sample.stype_sval_dict[tt]}
                     for tt in self.sample.mtype_stype_dict[mt]}
                for mt in self.sample.mtypes}
@@ -203,29 +203,48 @@ class TestSample(TestCase):
 
     def test_get_measurements(self):
         self.add_hys_measurements_with_conditions()
-        self.assertEqual([], self.sample.get_measurements(mtype='thellier', stype='pressure', sval=0))
-        self.assertEqual([self.hys1], self.sample.get_measurements(mtype='hys', stype='pressure', sval=0))
-        self.assertEqual([self.hys1], self.sample.get_measurements(mtype='hys', stype='pressure', sval=0.0))
+        self.assertEqual([], self.sample.get_measurements(mtypes='thellier', stypes='pressure', svals=0))
+        self.assertEqual([self.hys1], self.sample.get_measurements(mtypes='hys', stypes='pressure', svals=0))
+        self.assertEqual([self.hys1], self.sample.get_measurements(mtypes='hys', stypes='temperature', svals=100))
+        self.assertEqual([self.hys1], self.sample.get_measurements(mtypes='hys', stypes='pressure', svals=0.0))
         self.assertEqual([self.hys1, self.hys2, self.hys3, self.hys4, self.hys5],
-                         self.sample.get_measurements(mtype='hys', stype='pressure'))
+                         self.sample.get_measurements(mtypes='hys', stypes='pressure'))
 
+        # multiple mtypes
+        self.assertEqual([self.hys1],
+                         self.sample.get_measurements(mtypes='hys', stypes=['pressure', 'temperature'], svals=0))
+        self.assertEqual([self.hys1, self.hys2],
+                         self.sample.get_measurements(mtypes='hys', stypes=['pressure', 'temperature'], svals=[0, 200]))
+        # multiple stypes
+        self.assertEqual([self.hys1, self.hys2],
+                         self.sample.get_measurements(mtypes='hys', stypes='pressure', svals=[0, 1]))
+        self.assertEqual([self.hys1, self.hys2, self.hys3],
+                         self.sample.get_measurements(mtypes='hys', stypes=['pressure', 'temperature'],
+                                                      svals=[0, 1, 300]))
+        # sval_range
+        self.assertEqual([self.hys1, self.hys2],
+                         self.sample.get_measurements(mtypes='hys', stypes='pressure', sval_range=[0, 1]))
+        self.assertEqual([self.hys1],
+                         self.sample.get_measurements(mtypes='hys', stypes='pressure', sval_range='<1'))
+        self.assertEqual([self.hys1, self.hys2],
+                         self.sample.get_measurements(mtypes='hys', stypes='pressure', sval_range='<=1'))
 
     def test_add_m2_mdict(self):
         sample = RockPy.Sample(name='test')
         compare = deepcopy(sample.mdict)
         m1 = RockPy.Measurement(sample_obj=sample, mfile=None, machine='generic', mtype='mass', mdata=[1])
-        m1.add_svalue(stype='m1a', sval=1)
-        m1.add_svalue(stype='m1b', sval=2)
+        m1.add_sval(stype='m1a', sval=1)
+        m1.add_sval(stype='m1b', sval=2)
         sample.add_m2_mdict(mobj=m1)
         self.assertTrue(m1 in sample.mdict['stype']['m1a'])
         self.assertTrue(m1 in sample.mdict['stype']['m1b'])
 
         m2 = RockPy.Measurement(sample_obj=sample, mfile=None, machine='generic', mtype='height', mdata=[1])
-        m2.add_svalue(stype='m2a', sval=3)
-        m2.add_svalue(stype='m2b', sval=4)
+        m2.add_sval(stype='m2a', sval=3)
+        m2.add_sval(stype='m2b', sval=4)
         self.assertTrue(m2 in sample.mdict['stype']['m2a'])
         self.assertTrue(m2 in sample.mdict['stype']['m2b'])
-        m2.add_svalue(stype='m2c-added_later', sval=100)
+        m2.add_sval(stype='m2c-added_later', sval=100)
         self.assertTrue(m2 in sample.mdict['stype']['m2c-added_later'])
         sample.remove_m_from_mdict(mobj=m1)
         self.assertFalse('m1a' in sample.mdict['stype'])

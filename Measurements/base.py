@@ -347,8 +347,10 @@ class Measurement(object):
         if mtype in implemented:
             self.initial_state = implemented[mtype](self.sample_obj, mtype, mfile, machine)
             self.initial_state.is_initial_state = True
+            return self.initial_state
         else:
             self.logger.error('UNABLE to find measurement << %s >>' % (mtype))
+
 
     ### INFO DICTIONARY
 
@@ -692,7 +694,7 @@ class Measurement(object):
         """
         series = self._get_series_from_opt()
         for t in series:
-            self.add_svalue(stype=t[0], sval=t[1], unit=t[2])
+            self.add_sval(stype=t[0], sval=t[1], unit=t[2])
 
     def _get_series_from_opt(self):
         """
@@ -731,11 +733,11 @@ class Measurement(object):
             stypes = to_list(stypes)
             out = [i for i in out if i.stype in stypes]
         if svals:
-            svals = to_list(map(float, svals))
+            svals = to_list(svals)
             out = [i for i in out if i.value in svals]
         return out
 
-    def add_svalue(self, stype, sval, unit=None, comment=''):
+    def add_sval(self, stype=None, sval=None, unit=None, series_obj=None, comment=''):
         """
         adds a series to measurement.series, then adds is to the data and results datastructure
         
@@ -754,7 +756,11 @@ class Measurement(object):
         -------
            RockPy.Series instance
         """
-        series = RockPy.Series(stype=stype, value=sval, unit=unit, comment=comment)
+
+        if series_obj:
+            series = series_obj
+        else:
+            series = RockPy.Series(stype=stype, value=sval, unit=unit, comment=comment)
         self._series.append(series)
         self._add_sval_to_data(series)
         self._add_sval_to_results(series)
@@ -815,7 +821,9 @@ class Measurement(object):
     +++++++++++++++++++
     """
 
-    def normalize(self, reference='data', ref_dtype='mag', norm_dtypes='all', vval=None, norm_method='max',
+    def normalize(self,
+                  reference='data', ref_dtype='mag', norm_dtypes='all', vval=None,
+                  norm_method='max', norm_factor=None,
                   normalize_variable=False, dont_normalize=None):
         """
         normalizes all available data to reference value, using norm_method
@@ -842,7 +850,8 @@ class Measurement(object):
         """
         # todo normalize by results
         #getting normalization factor
-        norm_factor = self._get_norm_factor(reference, ref_dtype, vval, norm_method)
+        if not norm_factor:
+            norm_factor = self._get_norm_factor(reference, ref_dtype, vval, norm_method)
         norm_dtypes = _to_tuple(norm_dtypes)  # make sure its a list/tuple
         for dtype, dtype_data in self.data.iteritems():  #cycling through all dtypes in data
             if dtype_data: #if dtype_data == None
@@ -992,7 +1001,10 @@ class Measurement(object):
         -------
            RockPy.Measurement
         """
-        measurements = self.sample_obj.get_measurements(mtype)
+
+        # print self.sample_obj.mdict['mtype'][mtype]
+        print [m for m in self.sample_obj.measurements if m.mtype ==mtype]
+        measurements = self.sample_obj.get_measurements(mtypes=mtype)
         if measurements:
             out = [i for i in measurements if i.m_idx <= self.m_idx]
             return out[-1]

@@ -115,7 +115,7 @@ class Sample(object):
         Searches for last mass measurement and returns value in kg
         :return:
         """
-        m = self.get_measurements(mtype='mass')[-1]
+        m = self.get_measurements(mtypes='mass')[-1]
         return m.data['data']['mass'].v[0]
 
     @property
@@ -124,7 +124,7 @@ class Sample(object):
         Searches for last volume measurement and returns value in m^3
         :return:
         """
-        m = self.get_measurements(mtype='volume')[-1]
+        m = self.get_measurements(mtypes='volume')[-1]
         return m.data['data']['volume'].v[0]
 
 
@@ -638,7 +638,7 @@ class Sample(object):
         out = {}
         for mtype in self.mtypes:
             aux = []
-            for m in self.get_measurements(mtype=mtype):
+            for m in self.get_measurements(mtypes=mtype):
                 aux.extend(m.series)
             out.update({mtype: aux})
         return out
@@ -703,8 +703,8 @@ class Sample(object):
            sval_range: sval_range to be filtered for, can only be used in conjuction with stype
            kwargs:
         """
-        self._filtered_data = self.get_measurements(mtype=mtype,
-                                                    stype=stype, sval=sval, sval_range=sval_range, filtered=False)
+        self._filtered_data = self.get_measurements(mtypes=mtype,
+                                                    stypes=stype, svals=sval, sval_range=sval_range, filtered=False)
         return self._filtered_data
 
     def reset_filter(self):
@@ -718,52 +718,96 @@ class Sample(object):
     ''' FIND FUNCTIONS '''
 
     def get_measurements(self,
-                         mtype=None,
-                         stype=None, sval=None, sval_range=None,
+                         mtypes=None,
+                         stypes=None, svals=None, sval_range=None,
                          mean=False,
-                         filtered=True,
-                         reversed=False,
-                         **options): #todo get rid of filtering, there is no filtered anymore
+                         invert = False,
+                         **options):
         """
-        Returns a list of measurements of type = mtype
+        Returns a list of measurements of type = mtypes
 
         Parameters
         ----------
-           stype: str
+           mtypes: list, str
+              mtypes to be returned
+           stypes: list, str
               series type
-           sval: float
-              series value
-           sval_range: list
-              series range e.g. sval_range = [0,2] will give all from 0 to 2
-           mean:
-           filtered:
-           revesed:
-              if reversed true it returns only measurements that do not meet criteria
+           sval_range: list, str
+              series range e.g. sval_range = [0,2] will give all from 0 to 2 including 0,2
+              also '<2', '<=2', '>2', and '>=2' are allowed.
+           svals: float
+              series value to be searched for.
+              caution:
+                 will be overwritten when sval_range is given
+           invert:
+              if invert true it returns only measurements that do not meet criteria
            sval_range:
               can be used to look up measurements within a certain range. if only one value is given,
                      it is assumed to be an upper limit and the range is set to [0, sval_range]
+           mean: bool
+              not implemented, yet
 
-           filtered:
-              if true measurements will only be searched in filtered data
-           mtype:
+        Returns
+        -------
+           list
+              list of RockPy.Measurements that meet search criteria or if invert is True, do not meet criteria.
+
+        Note
+        ----
+            there is no connection between stype and sval. This may cause problems. I you have measurements with
+               M1: [pressure, 0.0, GPa], [temperature, 100.0, C]
+               M2: [pressure, 1.0, GPa], [temperature, 100.0, C]
+            and you search for stypes=['pressure','temperature'], svals=[0,100]. It will return both M1 and M2 because
+            both M1 and M2 have [temperature, 100.0, C].
+
         """
-        from pprint import pprint
-        if sval is None:
-            svalue = np.nan
-        else:
-            svalue = str(sval)
+        mtypes = to_list(mtypes)
+        stypes = to_list(stypes)
+        svals = to_list(svals)
 
-        # todo sval_range [0,5] would mean everything within 0...5, '<5', '>5'
         # todo search mean measurements
-        if not sval_range:
-            self.logger.info('SEARCHING\t measurements with  << %s, %s, %s >>' % (mtype, stype, svalue))
-            # create dictionary with mtype, stype, sval search parameters
-            lookup_dict = {mtype:'mtype', stype:'stype', sval:'sval'}
-            # create string for mdict lookup e.g. if mtype and stype is given then sval == None -> lookup = mtype_stype
-            # and we can search in Sample.mdict[mtype_stype] for the measurements
-            lookup = '_'.join([lookup_dict[i] for i in sorted(lookup_dict) if i is not None])
-            # create reverse dict for lookup of value
-            rev_lookup_dict = {v:k for k,v in lookup_dict.iteritems()}
+        if sval_range:
+            if isinstance(sval_range, list):
+                svals = [i for i in self.mdict['sval'] if sval_range[0] <= i <= sval_range[1]]
+            if isinstance(sval_range, str):
+                sval_range = sval_range.strip() #remove whitespaces in case '> 4' is provided
+                if '<' in sval_range:
+                    if '=' in sval_range:
+                        svals = [i for i in self.mdict['sval'] if i <= float(sval_range.replace('<=',''))]
+                    else:
+                        svals = [i for i in self.mdict['sval'] if i < float(sval_range.replace('<',''))]
+                if '>' in sval_range:
+                    if '=' in sval_range:
+                        svals = [i for i in self.mdict['sval'] if i >= float(sval_range.replace('>=',''))]
+                    else:
+                        svals = [i for i in self.mdict['sval'] if i > float(sval_range.replace('>',''))]
+            self.logger.info('SEARCHING for sval_range << %s >>' %(', '.join(map(str, svals))))
+
+
+        out = []
+        for mtype in mtypes:
+            for stype in stypes:
+                for sval in svals:
+                    measurements = self.get_mtype_stype_sval(mtype=mtype, stype=stype, sval=sval)
+                    for m in measurements:
+                        if not m in out:
+                            out.append(m)
+
+        # invert list to contain only measurements that do not meet criteria
+        if invert:
+            out = [i for i in self.measurements if not i in out]
+
+        return out
+
+    def get_mtype_stype_sval(self, mtype, stype, sval):
+        self.logger.info('SEARCHING\t measurements with  << %s, %s, %s >>' % (mtype, stype, sval))
+        # create dictionary with mtypes, stypes, svals search parameters
+        lookup_dict = {mtype:'mtype', stype:'stype', sval:'sval'}
+        # create string for mdict lookup e.g. if mtypes and stypes is given then svals == None -> lookup = mtype_stype
+        # and we can search in Sample.mdict[mtype_stype] for the measurements
+        lookup = '_'.join([lookup_dict[i] for i in sorted(lookup_dict) if i is not None])
+        # create reverse dict for lookup of value
+        rev_lookup_dict = {v:k for k,v in lookup_dict.iteritems()}
 
         # copy of mdict[lookup] for dynamic lookup of arbitrary level depth
         out = self.mdict[lookup]
@@ -774,13 +818,12 @@ class Sample(object):
                 out = out[rev_lookup_dict[i]]
             # if key not exists return empty list
             except KeyError:
-                self.logger.error('CANT find measurement with << %s, %s >>'%(i, rev_lookup_dict[i]))
+                self.logger.error('CANT find measurement with << %s: %s >>'%(i, rev_lookup_dict[i]))
                 return []
-
         return out
 
     def delete_measurements(self, mtype=None, stype=None, sval=None, sval_range=None, **options): #todo rename remove
-        measurements_for_del = self.get_measurements(mtype=mtype, stype=stype, sval=sval, sval_range=sval_range)
+        measurements_for_del = self.get_measurements(mtypes=mtype, stypes=stype, svals=sval, sval_range=sval_range)
         if measurements_for_del:
             self.measurements = [m for m in self.measurements if not m in measurements_for_del]
 
@@ -850,7 +893,7 @@ class Sample(object):
             return
 
         # get measurement list from criteria
-        mlist = self.get_measurements(mtype=mtype, stype=stype, sval=sval, sval_range=sval_range, filtered=True)
+        mlist = self.get_measurements(mtypes=mtype, stypes=stype, svals=sval, sval_range=sval_range, filtered=True)
 
         if len(mlist) == 1:
             self.logger.warning('Only one measurement found returning measurement')
@@ -892,8 +935,8 @@ class Sample(object):
         """
         if not mtype:
             raise ValueError('No mtype specified')
-        mlist = self.get_measurements(mtype=mtype, stype=stype, sval=sval, sval_range=sval_range, mean=False)
-        print 'len', len(mlist)
+        mlist = self.get_measurements(mtypes=mtype, stypes=stype, svals=sval, sval_range=sval_range, mean=False)
+
         if reference:
             mlist = [m.normalize(reference=reference, ref_dtype=ref_dtype, norm_dtypes=norm_dtypes, vval=vval,
                                  norm_method=norm_method, normalize_variable=normalize_variable,
@@ -916,7 +959,7 @@ class Sample(object):
 
         for dtype in dtypes:  # cycle through all dtypes e.g. 'down_field', 'up_field' for hysteresis
             dtype_list = [m.data[dtype] for m in mlist]
-            print dtype, len(dtype_list), dtype_list
+
             if interpolate:
                 varlist = self.__get_variable_list(dtype_list, var='temp')
                 if len(varlist) > 1:
@@ -958,7 +1001,7 @@ class Sample(object):
         """
 
         if not mlist:
-            mlist = self.get_measurements(mtype=mtype, stype=stype, sval=sval, sval_range=sval_range, filtered=filtered)
+            mlist = self.get_measurements(mtypes=mtype, stypes=stype, svals=sval, sval_range=sval_range, filtered=filtered)
 
         mlist = [m for m in mlist if m.mtype not in ['mass', 'diameter', 'height']]  # get rid of parameter measurements
 
@@ -1052,8 +1095,8 @@ class Sample(object):
         """
 
         if not mlist:
-            mlist = self.get_measurements(mtype=mtype,
-                                          stype=stype, sval=sval, sval_range=sval_range,
+            mlist = self.get_measurements(mtypes=mtype,
+                                          stypes=stype, svals=sval, sval_range=sval_range,
                                           filtered=filtered)
 
         all_results = self.all_results(mlist=mlist, **parameter)

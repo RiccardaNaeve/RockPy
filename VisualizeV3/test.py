@@ -27,10 +27,10 @@ if __name__  == '__main__':
     h1b2 = s1b.add_measurement(mtype='hys', mfile=join(folder, 'FeNi_FeNi20-Jd120-G03_HYS_VSM#50,8[mg]_[]_[]##STD015.001'), machine='vsm')
 
     # adding series parapmeters
-    h1a1.add_svalue(stype='mtime', sval=1)
-    h1a2.add_svalue(stype='mtime', sval=1)
-    h1b1.add_svalue(stype='mtime', sval=120)
-    h1b2.add_svalue(stype='mtime', sval=120)
+    h1a1.add_sval(stype='mtime', sval=1)
+    h1a2.add_sval(stype='mtime', sval=1)
+    h1b1.add_sval(stype='mtime', sval=120)
+    h1b2.add_sval(stype='mtime', sval=120)
     #
     # ''' SG 2 '''
     # sg2 = RockPy.SampleGroup(name='SG2')

@@ -210,7 +210,7 @@ class Visual(object):
         for sg_idx, sg in enumerate(study):
             for sample_idx, sample in enumerate(sg):
                 if not all_measurements:
-                    measurements = sample.get_measurements(mtype=self.__class__._required)
+                    measurements = sample.get_measurements(mtypes=self.__class__._required)
                 else:
                     measurements = study[0][0]
                 if len(measurements) > 0:
@@ -255,13 +255,14 @@ class Visual(object):
         for sg_idx, sg in enumerate(study):
             for sample_idx, sample in enumerate(sg):
                 if not all_measurements:
-                    measurements = sample.get_measurements(mtype=self.__class__._required)
+                    measurements = sample.get_measurements(mtypes=self.__class__._required)
                 else:
                     measurements = study[0][0]
                 if not norm_parameter:
                     measurements = [m for m in measurements if not isinstance(m, RockPy.Measurements.parameters.Parameter)]
                 if len(measurements) > 0:
                     for m_idx, m in enumerate(measurements):
+                        print m
                         m.normalize(reference=reference, ref_dtype=ref_dtype,
                                     norm_dtypes=norm_dtypes, norm_method=norm_method,
                                     vval=vval)

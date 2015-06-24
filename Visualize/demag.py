@@ -44,7 +44,7 @@ class ThermoCurve(base.Generic):
 
     def plotting(self, samples, **plt_opt):
         for sample in samples:
-            measurements = sample.get_measurements(mtype=ThermoCurve._required)
+            measurements = sample.get_measurements(mtypes=ThermoCurve._required)
             for feat in self.standard_features:
                 for m in measurements:
                     feat(m, **plt_opt)

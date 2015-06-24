@@ -12,6 +12,7 @@ from RockPy.core import to_list
 from RockPy.Measurements.base import Measurement
 from RockPy.Structure.data import RockPyData, condense
 import RockPy.Visualize.base
+from collections import Counter
 # RockPy.Functions.general.create_logger(__name__)
 
 class Sample(object):
@@ -719,6 +720,7 @@ class Sample(object):
 
     def get_measurements(self,
                          mtypes=None,
+                         series=None,
                          stypes=None, svals=None, sval_range=None,
                          mean=False,
                          invert = False,
@@ -730,6 +732,10 @@ class Sample(object):
         ----------
            mtypes: list, str
               mtypes to be returned
+           series: list(tuple)
+              list of tuples, to search for several sepcific series. e.g. [('mtime',4),('gc',2)] will only return
+              mesurements that fulfill both criteria.
+              Supercedes stype, sval and sval_range. Returnes only measurements that meet series exactly!
            stypes: list, str
               series type
            sval_range: list, str
@@ -745,7 +751,7 @@ class Sample(object):
               can be used to look up measurements within a certain range. if only one value is given,
                      it is assumed to be an upper limit and the range is set to [0, sval_range]
            mean: bool
-              not implemented, yet
+              not implemented, yet^
 
         Returns
         -------
@@ -783,24 +789,35 @@ class Sample(object):
                         svals = [i for i in self.mdict['sval'] if i > float(sval_range.replace('>',''))]
             self.logger.info('SEARCHING for sval_range << %s >>' %(', '.join(map(str, svals))))
 
-
         out = []
-        for mtype in mtypes:
-            for stype in stypes:
-                for sval in svals:
-                    measurements = self.get_mtype_stype_sval(mtype=mtype, stype=stype, sval=sval)
-                    for m in measurements:
-                        if not m in out:
-                            out.append(m)
-
+        if not series:
+            for mtype in mtypes:
+                for stype in stypes:
+                    for sval in svals:
+                        measurements = self.get_mtype_stype_sval(mtype=mtype, stype=stype, sval=sval)
+                        for m in measurements:
+                            if not m in out:
+                                out.append(m)
+        else:
+            # searching for specific series, all mtypes specified that fit the series description will be returned
+            series = to_list(series)
+            for mtype in mtypes: #cycle through mtypes
+                aux = []
+                for s in series:
+                    aux.extend(self.get_mtype_stype_sval(mtype=mtype, stype=s[0], sval=float(s[1])))
+                out.extend(list(set([i for i in aux if aux.count(i) == len(series)])))
         # invert list to contain only measurements that do not meet criteria
         if invert:
             out = [i for i in self.measurements if not i in out]
-
         return out
 
     def get_mtype_stype_sval(self, mtype, stype, sval):
         self.logger.info('SEARCHING\t measurements with  << %s, %s, %s >>' % (mtype, stype, sval))
+
+        # searching for no value returns all measurements
+        if not mtype and not stype and not sval:
+            return self.measurements
+
         # create dictionary with mtypes, stypes, svals search parameters
         lookup_dict = {mtype:'mtype', stype:'stype', sval:'sval'}
         # create string for mdict lookup e.g. if mtypes and stypes is given then svals == None -> lookup = mtype_stype

@@ -229,6 +229,12 @@ class TestSample(TestCase):
         self.assertEqual([self.hys1, self.hys2],
                          self.sample.get_measurements(mtypes='hys', stypes='pressure', sval_range='<=1'))
 
+        # search for specific series
+        self.assertEqual([self.hys1],
+                         self.sample.get_measurements(mtypes='hys', series=[('pressure', '0'), ('pressure', '0')]))
+        self.assertEqual([],
+                         self.sample.get_measurements(mtypes='hys', series=[('pressure', '0'), ('temperature', '1')]))
+
     def test_add_m2_mdict(self):
         sample = RockPy.Sample(name='test')
         compare = deepcopy(sample.mdict)

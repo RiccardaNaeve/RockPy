@@ -22,10 +22,10 @@ class Visual(object):
     logger = logging.getLogger('RockPy.MEASUREMENT')
     _required = []
 
-    linestyles = ['-', '--', ':', '-.'] *100
-    marker = ['o', 's', '.','+', '*', ',',  '1', '3', '2', '4', '8', '<', '>', 'D', 'H', '_', '^',
-                              'd', 'h', 'p', 'v', '|'] *100
-    colors = ['k', 'b', 'g', 'r',  'm', 'y', 'c'] *100
+    linestyles = ['-', '--', ':', '-.'] * 100
+    marker = ['o', 's', '.', '+', '*', ',', '1', '3', '2', '4', '8', '<', '>', 'D', 'H', '_', '^',
+              'd', 'h', 'p', 'v', '|'] * 100
+    colors = ['k', 'b', 'g', 'r', 'm', 'y', 'c'] * 100
 
     @classmethod
     def inheritors(cls):
@@ -63,7 +63,7 @@ class Visual(object):
 
         if not calculation_parameters:
             calculation_parameters = None
-        self._calculation_parameter = calculation_parameters #initialize for calculation
+        self._calculation_parameter = calculation_parameters  # initialize for calculation
 
         self._plt_index = plt_index
         self._plt_input = deepcopy(plt_input)
@@ -128,7 +128,7 @@ class Visual(object):
     def remove_feature(self, features=None):
         self.remove_feature_from_list(feature_list='features', features=features)
 
-    def remove_single_feature(self, features=None): #todo automatic determination if single figure
+    def remove_single_feature(self, features=None):  # todo automatic determination if single figure
         self.remove_feature_from_list(feature_list='single_features', features=features)
 
     def remove_feature_from_list(self, feature_list, features=None):
@@ -189,8 +189,8 @@ class Visual(object):
         if isinstance(self._plt_input, RockPy.Sample):  # input is sample
             study = [[self._plt_input]]  # list(list) = virtual study with a virtual samplegroup
         if type(self._plt_input) in RockPy.Measurements.base.Measurement.inheritors():
-                only_measurements = True
-                study = [[[self._plt_input]]]
+            only_measurements = True
+            study = [[[self._plt_input]]]
         if isinstance(self._plt_input, list):
             if all(isinstance(item, RockPy.SampleGroup) for item in self._plt_input):  # all input == samples
                 study = self._plt_input
@@ -223,9 +223,12 @@ class Visual(object):
         for feature in self.single_features:
             feature()
 
-    def normalize_all(self, reference='data', ref_dtype='mag',
-                      norm_dtypes='all', vval=None,
-                      norm_method='max', norm_parameter=False):
+    def normalize_all(self,
+                      reference='data', ref_dtype='mag', norm_dtypes='all', vval=None,
+                      norm_method='max', norm_factor=None,
+                      norm_parameter =False,
+                      normalize_variable=False,
+                      dont_normalize=None):
         """
         Normalizes all measurements from _required. Ich _required is empty it will normalize all measurement.
         
@@ -252,17 +255,22 @@ class Visual(object):
         """
         study, all_measurements = self.get_virtual_study()
         # cycle through all measurements that will get plotted
+        if not self.__class__._required:
+            mtypes = None
+        else:
+            mtypes = self.__class__._required
+            
         for sg_idx, sg in enumerate(study):
             for sample_idx, sample in enumerate(sg):
                 if not all_measurements:
-                    measurements = sample.get_measurements(mtypes=self.__class__._required)
+                    measurements = sample.get_measurements(mtypes=mtypes)
                 else:
                     measurements = study[0][0]
                 if not norm_parameter:
-                    measurements = [m for m in measurements if not isinstance(m, RockPy.Measurements.parameters.Parameter)]
+                    measurements = [m for m in measurements if
+                                    not isinstance(m, RockPy.Measurements.parameters.Parameter)]
                 if len(measurements) > 0:
                     for m_idx, m in enumerate(measurements):
-                        print m
                         m.normalize(reference=reference, ref_dtype=ref_dtype,
                                     norm_dtypes=norm_dtypes, norm_method=norm_method,
                                     vval=vval)
@@ -332,6 +340,7 @@ class Visual(object):
         """
         # try:
         self.ax.set_yscale(value=value)
+
 
 ### generic class:
 class Generic(Visual):

@@ -850,8 +850,9 @@ class Measurement(object):
         """
         # todo normalize by results
         #getting normalization factor
-        if not norm_factor:
+        if not norm_factor: # if norm_factor specified
             norm_factor = self._get_norm_factor(reference, ref_dtype, vval, norm_method)
+
         norm_dtypes = _to_tuple(norm_dtypes)  # make sure its a list/tuple
         for dtype, dtype_data in self.data.iteritems():  #cycling through all dtypes in data
             if dtype_data: #if dtype_data == None

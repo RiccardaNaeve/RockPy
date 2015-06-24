@@ -475,11 +475,15 @@ class Hys(base.Measurement):
             b_sat = max(self.data[dtype]['field'].v) * saturation_percent
             data_plus = self.data[dtype].filter(self.data[dtype]['field'].v >= b_sat)
             data_minus = self.data[dtype].filter(self.data[dtype]['field'].v <= -b_sat)
-
             for dir in [data_plus, data_minus]:
-                slope, intercept, r_value, p_value, std_err = stats.linregress(abs(dir['field'].v), abs(dir['mag'].v))
-                ms_all.append(intercept)
-                slope_all.append(slope)
+                try:
+                    slope, intercept, r_value, p_value, std_err = stats.linregress(abs(dir['field'].v), abs(dir['mag'].v))
+                    ms_all.append(intercept)
+                    slope_all.append(slope)
+                except ValueError:
+                    print self.sample_obj.name, self.mtype
+                    print '-----------------------'
+                    print dir['field'].v, dir['mag'].v
         return ms_all, slope_all
 
     def calculate_ms(self, method='simple', **parameter):
@@ -559,6 +563,9 @@ class Hys(base.Measurement):
             d = self.data[direction]
             data = d['mag'].v
             idx = np.argmin(abs(data))  # index of closest to 0
+            print self.mtype, self.mfile
+            print len(data)
+            print data
             if data[idx] < 0:
                 if data[idx + 1] < 0:
                     i = (idx, idx - 1)

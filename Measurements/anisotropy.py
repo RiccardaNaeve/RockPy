@@ -17,7 +17,6 @@ class Anisotropy(base.Measurement):
 
     logger = logging.getLogger('RockPy.MEASUREMENT.Anisotropy')
 
-
     @classmethod
     def simulate(cls, sample_obj, color=None, **parameter):
         """
@@ -33,7 +32,6 @@ class Anisotropy(base.Measurement):
         # get random measurement errors
         measerr = parameter.get('measerr', 0)
 
-
         # todo: normalize evals to 1?
 
         R = Anisotropy.createDiagonalTensor(*evals)
@@ -48,17 +46,14 @@ class Anisotropy(base.Measurement):
             measurement = np.dot(R, DIL2XYZ((mdir[0], mdir[1], 1))) + errs
             data = data.append_rows(np.hstack([np.array(mdir), measurement]))
 
-
         data.define_alias('variable', ('D', 'I'))
 
         mdata = {'data': data}
 
         return cls(sample_obj, 'anisotropy', mfile=None, mdata=mdata, machine='simulation', color=color, **parameter)
 
-
-
     @staticmethod
-    def createDiagonalTensor( ev1, ev2, ev3):
+    def createDiagonalTensor(ev1, ev2, ev3):
         """
         create a tensor (3x3 matrix) with the 3 given eigenvalues on its diagonal
         :param eigenvalues:
@@ -121,7 +116,6 @@ class Anisotropy(base.Measurement):
         B = np.dot(ATAI, AT)
 
         return B
-
 
     @staticmethod
     def CalcEigenValVec(T):
@@ -210,11 +204,9 @@ class Anisotropy(base.Measurement):
         aniso_dict['D2'], aniso_dict['I2'] = MirrorDirectionToPositiveInclination( D2, I2)
         aniso_dict['D3'], aniso_dict['I3'] = MirrorDirectionToPositiveInclination( D3, I3)
 
-
         #calc mean magnetization
         M = (eigvals[0]+eigvals[1]+eigvals[2])/3
         aniso_dict['M'] = M
-
 
         #calc normalized eigenvalues k
         k = eigvals / (eigvals[0]+eigvals[1]+eigvals[2])*3
@@ -271,7 +263,6 @@ class Anisotropy(base.Measurement):
         E = k[1]**2 / (k[0] * k[2])
         aniso_dict['E'] = E
 
-
         #calculate best fit values of K
         Kf = np.dot(A, s)
         aniso_dict['Kf'] = Kf
@@ -301,7 +292,6 @@ class Anisotropy(base.Measurement):
         QF = (P-1) / (stddev / M)
         aniso_dict['QF'] = QF
 
-
         # claculate errors of principal values (Hext 63)
         # A = design matrix
         #AA = (A^T*A)^(-1)
@@ -316,7 +306,6 @@ class Anisotropy(base.Measurement):
             eigval_errs.append(t_alpha*stddev*np.sqrt(np.dot(np.transpose(av), np.dot(AA, av))))
 
         aniso_dict['eval_err'] = eigval_errs
-
 
         # calculate confidence ellipses
         #F = 3.89 --> looked up from tauxe lecture 2005; F-table
@@ -338,16 +327,12 @@ class Anisotropy(base.Measurement):
         aniso_dict['F12'] = F12
         aniso_dict['F23'] = F23
 
-
         return aniso_dict  # return the whole bunch of values
-
 
     #def __init__(self, sample_obj, mtype, mfile, machine, **options):
     #    super(Anisotropy, self).__init__(sample_obj, mtype, mfile, machine, **options)
 
-
     ''' FORMAT SECTION '''
-
 
     def format_ani(self):
         self.header = self.machine_data.header
@@ -444,7 +429,6 @@ class Anisotropy(base.Measurement):
     def result_QF(self, recalc=False):
         self.calc_result(parameter={}, recalc=recalc, force_method='tensor')
 
-
     ''' CALCULATION SECTION '''
 
     def calculate_tensor(self, method='full'):
@@ -463,7 +447,7 @@ class Anisotropy(base.Measurement):
         elif method == 'proj':
             xyz = False  # calculate design matrix for one component per measurement
         else:
-            raise RuntimeError('calcualte_tensor: unknown method %s', str(method))
+            raise RuntimeError('calculate_tensor: unknown method %s', str(method))
 
         dm = Anisotropy.makeDesignMatrix(mdirs, xyz)
 
@@ -491,7 +475,6 @@ class Anisotropy(base.Measurement):
         self.results['eval1_err'] = self.aniso_dict['eval_err'][0]
         self.results['eval2_err'] = self.aniso_dict['eval_err'][1]
         self.results['eval3_err'] = self.aniso_dict['eval_err'][2]
-
 
         for k in ('I1', 'D1', 'I2', 'D2', 'I3', 'D3', 'P', 'P1', 'F', 'L', 'T', 'E12', 'E13', 'E23', 'E', 'Q', 'U', 'F0', 'F12', 'F23', 'stddev', 'QF', 'M'):
             self.results[k] = self.aniso_dict[k]

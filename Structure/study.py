@@ -164,10 +164,9 @@ class Study(object):
 
     @property
     def all_samplegroup(self):
-        # if not hasattr(self, '_all_samplegroup'):
-        self.all_group()
-        out = self._all_samplegroup
-        return out
+        if not self._all_samplegroup:
+            self.all_group()
+        return self._all_samplegroup
 
     @property
     def mtypes(self):

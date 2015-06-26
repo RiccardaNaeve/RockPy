@@ -231,7 +231,7 @@ class TestSample(TestCase):
 
         # search for specific series
         self.assertEqual([self.hys1],
-                         self.sample.get_measurements(mtypes='hys', series=[('pressure', '0'), ('pressure', '0')]))
+                         self.sample.get_measurements(mtypes='hys', series=[('pressure', '0'), ('temperature', '100')]))
         self.assertEqual([],
                          self.sample.get_measurements(mtypes='hys', series=[('pressure', '0'), ('temperature', '1')]))
 

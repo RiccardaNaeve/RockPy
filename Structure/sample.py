@@ -508,7 +508,7 @@ class Sample(object):
         - mass
         '''
 
-
+        #todo change series to list(tuples)
         ### FILE IMPORT
         file_info = None  # file_info includes all info needed for creation of measurement instance
 
@@ -602,28 +602,28 @@ class Sample(object):
         self.results = self.all_results(**parameter)
         return self.results
 
-    @property
+    @property #todo remove?
     def info_dict(self): #todo remove
         # self._info_dict.update(dict(measurements=self.measurements))
         # if not hasattr(self, '_info_dict'):
         # self.recalc_info_dict()
         return self._info_dict
 
-    @property
+    @property #todo remove?
     def mtypes(self): #todo remove
         """
         returns list of all mtypes
         """
         return sorted(self._info_dict['mtype'].keys())
 
-    @property
+    @property #todo remove?
     def stypes(self): #todo remove
         """
         returns a list of all stypes
         """
         return sorted(self._info_dict['stype'].keys())
 
-    @property
+    @property #todo remove?
     def svals(self): #todo remove
         """
         returns a list of all stypes
@@ -631,7 +631,7 @@ class Sample(object):
 
         return sorted(self._info_dict['sval'].keys())
 
-    @property
+    @property #todo remove?
     def mtype_tdict(self):  # todo: delete?
         """
         dictionary with all measurement_types {mtype:[tretments to corresponding m]}
@@ -644,7 +644,7 @@ class Sample(object):
             out.update({mtype: aux})
         return out
 
-    @property
+    @property #todo remove?
     def stype_dict(self): #todo remove
         """
         dictionary with all series_types {stype:[list of measurements]}
@@ -654,7 +654,7 @@ class Sample(object):
         """
         return self._info_dict['stype']
 
-    @property
+    @property #todo remove?
     def mtype_stype_dict(self): #todo remove
         """
         returns a dictionary of mtypes, with all stypes in that mtype
@@ -663,7 +663,7 @@ class Sample(object):
         # for mtype in self.mtypes}
         return {k: v.keys() for k, v in self._info_dict['mtype_stype'].iteritems()}
 
-    @property
+    @property #todo remove?
     def mtype_stype_mdict(self): #todo remove
         """
         returns a dictionary of mtypes, with all stypes in that mtype
@@ -673,13 +673,13 @@ class Sample(object):
         # for mtype in self.mtypes}
         return self._info_dict['mtype_stype']
 
-    @property
+    @property #todo remove?
     def stype_sval_dict(self): #todo remove
         # out = {stype: self.__sort_list_set([m.stype_dict[stype].value for m in self.stype_dict[stype]]) for stype in
         # self.stypes}
         return {k: v.keys() for k, v in self._info_dict['stype_sval'].iteritems()}
 
-    @property
+    @property #todo remove?
     def mtype_stype_sval_mdict(self): #todo remove
         # out = {mt:
         # {tt: {tv: self.get_measurements(mtype=mt, stype=tt, sval=tv)

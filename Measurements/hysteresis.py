@@ -563,9 +563,6 @@ class Hys(base.Measurement):
             d = self.data[direction]
             data = d['mag'].v
             idx = np.argmin(abs(data))  # index of closest to 0
-            print self.mtype, self.mfile
-            print len(data)
-            print data
             if data[idx] < 0:
                 if data[idx + 1] < 0:
                     i = (idx, idx - 1)
@@ -588,7 +585,7 @@ class Hys(base.Measurement):
 
         df = calc('down_field')
         uf = calc('up_field')
-        self.results['bc'] = [[[np.mean([df, uf]), np.std([df, uf])]]]
+        self.results['bc'] = [[[np.nanmean([df, uf]), np.nanstd([df, uf])]]]
         return np.mean([df, uf])
 
     def calculate_brh(self, **parameter):

@@ -13,6 +13,7 @@ from numbers import Number
 from tabulate import tabulate
 from RockPy.Structure import ureg
 from RockPy.Functions import general
+import RockPy.Functions.general
 from scipy import stats
 general.create_logger(__name__)
 log = logging.getLogger(__name__)
@@ -53,7 +54,7 @@ def condense(listofRPD, substfunc='mean'):
 
 class RockPyData(object):
     # todo units
-    # todo fill column, so you can do append column -> fill column with single value e.g. for treatments
+    # todo fill column, so you can do append column -> fill column with single value e.g. for series
     """
     class to manage specific numeric data based on a numpy array
     e.g. d = rockpydata( column_names=( 'F','Mx', 'My', 'Mz'))
@@ -77,7 +78,7 @@ class RockPyData(object):
         """
         convert given input to 2D numpy array
            input: array data consisting of values or errors
-           column: if FALSE -> 1D data is treated as a single row, otherwise as single column
+           column: if FALSE -> 1D data is seriesed as a single row, otherwise as single column
         :return: 2D numpy array, representing matrix of values or errors as used by RockPyData.data
         """
         # convert input data to a numpy array
@@ -102,7 +103,7 @@ class RockPyData(object):
         """
         convert given data to 3D numpy array
            input: array data consisting of values (and errors)
-           column: if FALSE -> 1D data is treated as a single row, otherwise as single column
+           column: if FALSE -> 1D data is seriesed as a single row, otherwise as single column
         :return: 3D numpy array, representing matrix of values and errors as used by RockPyData.data
         """
         if input is None:
@@ -171,7 +172,7 @@ class RockPyData(object):
 
         self.data = RockPyData._convert_to_data3D(data)
 
-        self.showfmt = {'show_rowlabels': True, 'floatfmt': '.3e'}
+        self.showfmt = {'show_rowlabels': True, 'floatfmt': '.2e'}
 
         if row_names is None:
             self._row_names = None  # don't use row names
@@ -848,7 +849,7 @@ class RockPyData(object):
         if key not in self._column_dict:
             raise KeyError('key %s is not a valid column name or alias' % key)
 
-        data = RockPyData._convert_to_data3D(data, column=True)  # since we are indexing columns, a 1D array should be treated as a column
+        data = RockPyData._convert_to_data3D(data, column=True)  # since we are indexing columns, a 1D array should be seriesed as a column
 
         # if we have no data, initialize everything to np.NAN with number of lines matching the new data
         if self._data is None:
@@ -1087,7 +1088,6 @@ class RockPyData(object):
         rd1e = self.data[mridx[:, 0], :][:, mcidx[:, 0]][:, :, 1]  # errors
         rd2e = other.data[mridx[:, 1], :][:, mcidx[:, 1]][:, :, 1] # errors
 
-        # todo: care about errors
         if op == '+':
             result_values = rd1v + rd2v
             result_errors = rd1e + rd2e  # add absolute errors
@@ -1143,7 +1143,7 @@ class RockPyData(object):
             header = self.column_names
         tab = []
         for i in range(self.row_count):
-            linestrs = tuple(['%s +- %s' % (str(v), str(u)) if not np.isnan(u) else str(v) for (v, u) in self.data[i]])
+            linestrs = tuple(['%.3e +- %.3e' % (v, u) if not np.isnan(u) else str(v) for (v, u) in self.data[i]])
             if self.showfmt['show_rowlabels']:
                 if self.row_names is None:
                     l = (i,) + linestrs  # if there are no row labels, put numeric index in first column
@@ -1169,7 +1169,19 @@ class RockPyData(object):
 
     """ METHODS returning OBJECTS """
 
-    def running_ave(self):
+    def running_average(self, key='data', width=3):
+        """
+        colidxs = self._keyseq2colseq(key)
+
+        rpd = RockPyData(column_names=self.column_indices_to_names(colidxs),
+                          row_names=self.row_names,
+                          units=None,
+                          data=self.data[:, colidxs])
+
+        # rpd.showfmt = self.showfmt
+
+        return rpd
+        """
         raise NotImplemented
 
     def differentiate(self):

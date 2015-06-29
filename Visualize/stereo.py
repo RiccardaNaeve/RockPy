@@ -52,7 +52,7 @@ class Stereo(base.Generic):
     def feature_points(self, m_obj, **plt_opt):
         d, i = (30, 50, 120, 150), (-10, -20, -30, -40)
         lines = self.ax.plot(*self.stereomap(d, i), **plt_opt)
-        self._add_line_text_dict(m_obj.sample_obj.name, '_'.join(m_obj.ttypes), '_'.join(map(str, m_obj.tvals)), lines)
+        self._add_line_text_dict(m_obj.sample_obj.name, '_'.join(m_obj.stypes), '_'.join(map(str, m_obj.svals)), lines)
 
 
     def show(self):

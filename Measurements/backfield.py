@@ -4,7 +4,7 @@ import numpy as np
 import logging
 from RockPy.Structure.data import RockPyData
 import base
-
+from copy import deepcopy
 
 class Backfield(base.Measurement):
     logger = logging.getLogger('RockPy.MEASUREMENT.Backfield')
@@ -48,6 +48,7 @@ class Backfield(base.Measurement):
         header = self.machine_data.header
         self._raw_data['remanence'] = RockPyData(column_names=header, data=data[0])
         self._raw_data['induced'] = None
+
     def format_vsm(self):
         """
         formats the vsm output to be compatible with backfield measurements
@@ -58,10 +59,12 @@ class Backfield(base.Measurement):
 
         # check for IRM acquisition -> index is changed
         data_idx = 0
+
         if self.machine_data.measurement_header['SCRIPT']['Include IRM?'] == 'Yes':
             data_idx += 1
             self.logger.info('IRM acquisition measured, adding new measurement')
-            self.sample_obj.add_measurement(mtype='irm_acquisition', mfile=self.mfile, machine=self.machine)
+            irm = self.sample_obj.add_measurement(mtype='irm_acquisition', mfile=self.mfile, machine=self.machine)
+            irm._series = self._series
 
         self._raw_data['remanence'] = RockPyData(column_names=['field', 'mag'], data=data[data_idx][:, [0, 1]])
 
@@ -96,9 +99,9 @@ class Backfield(base.Measurement):
         :return:
 
         .. doctest::
-           >>> from Structure.sample import Sample
+           >>> import RockPy
            >>> vftb_file = tutorials.rst
-           >>> sample = Sample(name='vftb_test_sample')
+           >>> sample = RockPy.Sample(name='vftb_test_sample')
            >>> M = sample.add_measurement(mtype='backfield', mfile=vftb_file, machine='vftb')
            >>> M.calculate_bcr()
            >>> print M.bcr
@@ -186,7 +189,8 @@ class Backfield(base.Measurement):
         """
         start = self._data['remanence']['mag'].v[0]
         end = self._data['remanence']['mag'].v[-1]
-        self.results['mrs'] = np.mean(np.fabs([end]))
+        mrs = np.mean([abs(start), abs(end)])
+        self.results['mrs'] = mrs
 
     def calculate_ms(self, **parameter):
         self.results['ms'] = None

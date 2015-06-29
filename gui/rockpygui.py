@@ -109,7 +109,7 @@ class MainFrame(wx.Frame):
 
         self.nav_nb.AddPage(self.samples_nav_tree, "Samples")
         self.nav_nb.AddPage(self.measurements_nav_tree, "Measurements")
-        self.nav_nb.AddPage(wx.Panel(self.nav_nb), "Treatments")
+        self.nav_nb.AddPage(wx.Panel(self.nav_nb), "series")
 
 
         self._mgr.AddPane(self.nav_nb, wx.aui.AuiPaneInfo().
@@ -191,7 +191,7 @@ class MainFrame(wx.Frame):
                 # iterate over all measurements of each sample
                 for m in s.measurements:
                     if 1:  #not 'parameters' in type(m).__module__:
-                        m_item_title = "%s (%s)[%s]" % (m.mtype, type(m.machine_data).__name__, getattr(m, "treatments", ""))
+                        m_item_title = "%s (%s)[%s]" % (m.mtype, type(m.machine_data).__name__, getattr(m, "series", ""))
                         m_item = self.samples_nav_tree.AppendItem(s_item, m_item_title, ct_type=1)
                         m_item.SetData(m)
                         self.samples_nav_tree.SetItemImage(m_item, 2, wx.TreeItemIcon_Normal)
@@ -287,22 +287,22 @@ class MainFrame(wx.Frame):
         Create and show dynamic context menu
         """
         # identify tree item
-        hitobj, flags = self.samples_nav_tree.HitTest(self.samples_nav_tree.ScreenToClient(event.GetPosition()))
-        if isinstance(hitobj, ctc.GenericTreeItem):
-            #print hitobj.GetText()
-            #print hitobj.GetData()
+        hisobj, flags = self.samples_nav_tree.HitTest(self.samples_nav_tree.ScreenToClient(event.GetPosition()))
+        if isinstance(hisobj, ctc.GenericTreeItem):
+            #print hisobj.GetText()
+            #print hisobj.GetData()
             # get some entries
 
-            data = hitobj.GetData()
+            data = hisobj.GetData()
             if data is not None:
                 # build the menu
                 menu = wx.Menu()
                 if isinstance(data, RockPy.Study):
                     pass
                 elif isinstance(data, RockPy.SampleGroup):
-                    menu.Append(wx.NewId(), 'Delete %s' % hitobj.GetText())
+                    menu.Append(wx.NewId(), 'Delete %s' % hisobj.GetText())
                 elif isinstance(data, RockPy.Sample):
-                    menu.Append(wx.NewId(), 'Delete %s' % hitobj.GetText())
+                    menu.Append(wx.NewId(), 'Delete %s' % hisobj.GetText())
                     plotmenu = wx.Menu()
                     plots = data.plottable
                     for p in plots:
@@ -311,7 +311,7 @@ class MainFrame(wx.Frame):
                         menu.AppendMenu(wx.NewId(), 'Plot', plotmenu)
 
                 elif isinstance(data, RockPy.Measurement):
-                    menu.Append(wx.NewId(), 'Delete %s' % hitobj.GetText())
+                    menu.Append(wx.NewId(), 'Delete %s' % hisobj.GetText())
                 else:
                     print("unknown data in nav tree item")
 
@@ -329,7 +329,7 @@ class MainFrame(wx.Frame):
                 menu.Destroy()
 
     def onNavTreePopup(self, event):
-        l = event.GetEventObject().FindItemById(event.GetId()).GetLabel()
+        l = event.GetEvensobject().FindItemById(event.GetId()).GetLabel()
 
         wx.MessageBox('Context Menu %s selected' % l)
 

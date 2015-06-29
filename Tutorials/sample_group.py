@@ -14,7 +14,7 @@ def get_thellier_samplegroup():
     SG = RockPy.SampleGroup(name='TT-test-SG')
     SG.import_multiple_samples(sample_file=sample_file)
     for sample in SG.sample_list:
-        M = sample.add_measurement(mtype='thellier', mfile=tt_data, machine='cryomag', treat='p0')
+        M = sample.add_measurement(mtype='thellier', mfile=tt_data, machine='cryomag', series='p0')
     return SG
 
 

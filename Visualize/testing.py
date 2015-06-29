@@ -24,7 +24,7 @@ def Day1977():
 
 def test():
     S = RockPy.Tutorials.sample.get_hys_all_sample()
-    ms = S.get_measurements(mtype='hysteresis')
+    ms = S.get_measurements(mtypes='hysteresis')
     results = S.mean_results(mlist=ms)
     print results
 

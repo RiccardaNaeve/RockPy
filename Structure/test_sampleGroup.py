@@ -29,12 +29,11 @@ class TestSampleGroup(TestCase):
     #     self.assertTrue(self.group not in self.s1.sgroups)
 
 
-    # def test_average_sample(self):
-    #     s = RockPy.Tutorials.sample.get_sample_with_multiple_hys()
-    #     sg = RockPy.SampleGroup(sample_list=[s, s])
-    #
-    #     mean = sg.mean_sample(interpolate=False)
-    #     print mean.mean_measurements
+    def test_average_sample(self):
+        s = RockPy.Tutorials.sample.get_sample_with_multiple_hys()
+        sg = RockPy.SampleGroup(sample_list=[s, s])
+        mean = sg.mean_sample(interpolate=False)
+        print mean.mean_measurements
 
 
     def test_info_dict(self):
@@ -43,14 +42,14 @@ class TestSampleGroup(TestCase):
 
         s_keys, sg_keys = [], []
 
-        for mtype in s.info_dict['mtype_ttype_tval'].keys():
-            for ttype in s.info_dict['mtype_ttype_tval'][mtype].keys():
-                for tval in s.info_dict['mtype_ttype_tval'][mtype][ttype].keys():
-                    s_keys.append('_'.join([mtype, ttype, str(tval)]))
+        for mtype in s.info_dict['mtype_stype_sval'].keys():
+            for stype in s.info_dict['mtype_stype_sval'][mtype].keys():
+                for sval in s.info_dict['mtype_stype_sval'][mtype][stype].keys():
+                    s_keys.append('_'.join([mtype, stype, str(sval)]))
                     
-        for mtype in sg.info_dict['mtype_ttype_tval'].keys():
-            for ttype in sg.info_dict['mtype_ttype_tval'][mtype].keys():
-                for tval in sg.info_dict['mtype_ttype_tval'][mtype][ttype].keys():
-                    sg_keys.append('_'.join([mtype, ttype, str(tval)]))
+        for mtype in sg.info_dict['mtype_stype_sval'].keys():
+            for stype in sg.info_dict['mtype_stype_sval'][mtype].keys():
+                for sval in sg.info_dict['mtype_stype_sval'][mtype][stype].keys():
+                    sg_keys.append('_'.join([mtype, stype, str(sval)]))
 
-        # self.assertEqual(sorted(s_keys), sorted(sg_keys))
+        self.assertEqual(sorted(s_keys), sorted(sg_keys))

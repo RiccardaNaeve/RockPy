@@ -32,8 +32,8 @@ class Day1977(base.Generic):
     def plotting(self, samples, **plt_opt):
         samples = self.get_plot_samples()
         for sample in samples:
-            hys = sample.get_measurements(mtype='hysteresis')[0]
-            coe = sample.get_measurements(mtype='backfield')[0]
+            hys = sample.get_measurements(mtypes='hysteresis')[0]
+            coe = sample.get_measurements(mtypes='backfield')[0]
             hys.calc_all()
             coe.calc_all()
             mrs_ms = hys.results['mrs'].v / hys.results['ms'].v
@@ -93,8 +93,8 @@ class Fabian2010(base.Generic):
         self.ax.ticklabel_format(axis='both', style='sci', scilimits=(-2, 2))
 
     def plotting(self, sample):
-        hys = sample.get_measurements(mtype='hysteresis')[0]
-        coe = sample.get_measurements(mtype='backfield')[0]
+        hys = sample.get_measurements(mtypes='hysteresis')[0]
+        coe = sample.get_measurements(mtypes='backfield')[0]
 
         p_cor = self.options.get('paramag_correct', False)
 

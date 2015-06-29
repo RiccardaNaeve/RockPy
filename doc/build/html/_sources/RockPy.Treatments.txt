@@ -1,10 +1,10 @@
-Treatments Package
+series Package
 ==================
 
-:mod:`Treatments` Package
+:mod:`series` Package
 -------------------------
 
-.. automodule:: RockPy.Treatments
+.. automodule:: RockPy.series
     :members:
     :undoc-members:
     :show-inheritance:
@@ -12,7 +12,7 @@ Treatments Package
 :mod:`base` Module
 ------------------
 
-.. automodule:: RockPy.Treatments.base
+.. automodule:: RockPy.series.base
     :members:
     :undoc-members:
     :show-inheritance:

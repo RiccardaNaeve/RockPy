@@ -3,8 +3,9 @@ import logging
 
 import RockPy
 from copy import deepcopy
+from prettytable import PrettyTable
 
-RockPy.Functions.general.create_logger(__name__)
+# RockPy.Functions.general.create_logger(__name__)
 log = logging.getLogger(__name__)
 
 
@@ -37,7 +38,7 @@ class Study(object):
                      'name',
                      '_samplegroups'
                  )
-        }
+                 }
 
         return state
 
@@ -54,8 +55,10 @@ class Study(object):
         """
         if item in self.gdict:
             return self.gdict[item]
+        if item == 'all':
+            return self.all_samplegroup
         try:
-            return self.samplegroups[item]
+            return self._samplegroups[item]
         except KeyError:
             raise KeyError('Study has no SampleGroup << %s >>' % item)
 
@@ -109,12 +112,12 @@ class Study(object):
             self.all_group()
             return samplegroup
 
-    def get_samples(self, snames=None, mtypes=None, ttypes=None, tvals=None, tval_range=None):
+    def get_samples(self, snames=None, mtypes=None, stypes=None, svals=None, sval_range=None):
         """
         Primary search function for all parameters
         """
-        out = self._all_samplegroup.get_samples(snames=snames, mtypes=mtypes, ttypes=ttypes, tvals=tvals,
-                                                tval_range=tval_range)
+        out = self._all_samplegroup.get_samples(snames=snames, mtypes=mtypes, stypes=stypes, svals=svals,
+                                                sval_range=sval_range)
         return out
 
     def _check_samplegroup_list(self, samplegroup):
@@ -128,10 +131,15 @@ class Study(object):
         # check for list
         if isinstance(samplegroup, list):
             # check for sample_group
-            if all(isinstance(item, RockPy.Sample) for item in samplegroup):
+            if all(isinstance(item, RockPy.Sample) for item in samplegroup):  # all input == samples
                 samplegroup = [RockPy.SampleGroup(sample_list=samplegroup)]
-            if all(isinstance(item, RockPy.SampleGroup) for item in samplegroup):
+            elif all(isinstance(item, RockPy.SampleGroup) for item in samplegroup):  # all input == sample_groups
                 samplegroup = samplegroup
+            elif all(isinstance(item, RockPy.Study) for item in samplegroup):  # all input == samples
+                sgs = []
+                for study in samplegroup:
+                    sgs.extend(study.samplegroups)
+                samplegroup = sgs
             else:
                 log.error('MIXED lists not allowed or no Sample/SampleGroup instance found')
                 return None
@@ -139,6 +147,8 @@ class Study(object):
             samplegroup = [RockPy.SampleGroup(sample_list=samplegroup)]
         if isinstance(samplegroup, RockPy.SampleGroup):
             samplegroup = [samplegroup]
+        if isinstance(samplegroup, RockPy.Study):
+            samplegroup = [samplegroup.all_samplegroup]
         return samplegroup
 
     def __add__(self, other):
@@ -154,10 +164,9 @@ class Study(object):
 
     @property
     def all_samplegroup(self):
-        # if not hasattr(self, '_all_samplegroup'):
-        self.all_group()
-        out = self._all_samplegroup
-        return out
+        if not self._all_samplegroup:
+            self.all_group()
+        return self._all_samplegroup
 
     @property
     def mtypes(self):
@@ -167,23 +176,22 @@ class Study(object):
         return sorted(list(set([i for j in self.samplegroups for i in j.mtypes])))
 
     def info(self):
-        from prettytable import PrettyTable
+
+        out = PrettyTable(['Sample Group', 'Sample Name', 'Measurements', 'series', 'Initial State'])
+        out.align['Measurements'] = 'l'
+        out.align['series'] = 'l'
+        out.align['Initial State'] = 'l'
 
         for sg in self._samplegroups:
-            print sg
-            print ''.join(['-' for i in range(20)])
-            out = PrettyTable(['Sample Name', 'Measurements', 'Treatments', 'Initial State'])
-            out.align['Measurements'] = 'l'
-            out.align['Treatments'] = 'l'
-            out.align['Initial State'] = 'l'
             for s in sg:
-                measurements = '|'.join(
-                    [m.mtype for m in s.filtered_data if m.mtype not in ['mass', 'diameter', 'height']])
-                ttypes = '|'.join(
-                    [' '.join([t.ttype, str(t.value), t.unit]) for m in s.filtered_data for t in m.treatments
+                mtypes = [m.mtype for m in s.measurements]
+                # series = [s.stype for m in ]
+                measurements = ', '.join(['%ix%s' %(mtypes.count(i), i) for i in sorted(set(mtypes))])
+                stypes = '|'.join(
+                    [' '.join([t.stype, str(t.value), t.unit]) for m in s.filtered_data for t in m.series
                      if m.mtype not in ['mass', 'diameter', 'height']])
                 initial = '|'.join(
                     [m.initial_state.mtype if m.initial_state is not None else '-' for m in s.filtered_data
                      if m.mtype not in ['mass', 'diameter', 'height']])
-                out.add_row([s.name, measurements, ttypes, initial])
-            print out
+                out.add_row([sg.name, s.name, measurements, stypes, initial])
+        print out

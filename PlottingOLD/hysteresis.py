@@ -40,10 +40,11 @@ def down_field_branch(ax, hysteresis_obj, norm_factor=[1, 1],
     ls = plt_opt.pop('ls', '-')
     marker = plt_opt.pop('marker', '.')
 
-    ax.plot(hysteresis_obj.data['down_field']['field'].v / norm_factor[0],
+    std, = ax.plot(hysteresis_obj.data['down_field']['field'].v / norm_factor[0],
             hysteresis_obj.data['down_field']['mag'].v / norm_factor[1],
             linestyle=ls, marker=marker,
             **plt_opt)
+    return std.get_color()
 
 
 def zero_lines(ax, **plt_opt):
@@ -60,8 +61,13 @@ def hysteresis(ax, hysteresis_obj, norm_factor=[1, 1],
                plt_idx=0,
                **plt_opt):
     zero_lines(ax)
-    c = virgin_branch(ax, hysteresis_obj, norm_factor, plt_idx, **plt_opt)
+    c = down_field_branch(ax, hysteresis_obj, norm_factor, plt_idx, **plt_opt)
+
     if 'label' in plt_opt:
         plt_opt.pop('label')
-    down_field_branch(ax, hysteresis_obj, norm_factor, plt_idx, color = c, **plt_opt)
+
+    if 'color' in plt_opt:
+        c = plt_opt.pop('color')
+
     up_field_branch(ax, hysteresis_obj, norm_factor, plt_idx, color = c, **plt_opt)
+    # virgin_branch(ax, hysteresis_obj, norm_factor, plt_idx, color = c, **plt_opt)

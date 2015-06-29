@@ -19,11 +19,11 @@ def get_test_sample(recalc=False):
 
         # adding the measurement to the sample
         M = sample.add_measurement(mtype='thellier', mfile=cryomag_file1, machine='cryomag',
-                                   treatments='Pressure_0.0_GPa')
+                                   series='Pressure_0.0_GPa')
         M = sample.add_measurement(mtype='thellier', mfile=cryomag_file2, machine='cryomag',
-                                   treatments='Pressure_1.0_GPa')
+                                   series='Pressure_1.0_GPa')
         M = sample.add_measurement(mtype='thellier', mfile=cryomag_file3, machine='cryomag',
-                                   treatments='Pressure_0.0_GPa')
+                                   series='Pressure_0.0_GPa')
 
         RockPy.save(sample, 'TTtest.rpy', RockPy.test_data_path)
     else:

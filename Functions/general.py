@@ -1,9 +1,12 @@
 __author__ = 'Mike'
 import logging
-import numpy as np
-import matplotlib.pyplot as plt
 from math import degrees, radians
 from math import sin, cos, tan, asin, atan2
+
+import numpy as np
+import matplotlib.pyplot as plt
+
+import RockPy
 
 
 def create_logger(name):
@@ -14,13 +17,19 @@ def create_logger(name):
     # fh.setFormatter(formatter)
     # ch = logging.FileHandler('RPV3.log')
     ch = logging.StreamHandler()
-    ch.setLevel(logging.INFO)
+    ch.setLevel(logging.DEBUG)
     ch.setFormatter(formatter)
     # log.addHandler(fh)
     log.addHandler(ch)
 
     return ch#, fh
 
+def create_dummy_measurement(mtype, mfile=None, machine=None, idx=0, mdata=None):
+    s = RockPy.Sample(name='dummy_sample')
+    m = s.add_measurement(mtype=mtype, mfile=mfile, machine=machine,  # general
+                        idx=idx, mdata=mdata,
+                        )
+    return m
 
 def differentiate(data_list, diff=1, smoothing=1, norm=False, check=False):
     """
@@ -111,13 +120,6 @@ def abs_min_max(list):
     max_idx = np.argmax(np.fabs(list))
     return list[min_idx], list[max_idx]
 
-def _to_list(oneormoreitems):
-    """
-    convert argument to tuple of elements
-    :param oneormoreitems: single number or string or list of numbers or strings
-    :return: tuple of elements
-    """
-    return oneormoreitems if hasattr(oneormoreitems, '__iter__') else [oneormoreitems]
 
 def XYZ2DIL( XYZ):
     """

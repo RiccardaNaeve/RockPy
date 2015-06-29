@@ -9,8 +9,8 @@ def dunlop(ax, thellier_obj, component='mag', norm_factor=None,
     for i, v in enumerate(['th', 'ptrm']):
         plt_opt.update({'label': v})
         plt_opt.update({'color': c[i]})
-        if thellier_obj.treatments:
-            plt_opt['label'] += ' '.join([j.label for j in thellier_obj.treatments])
+        if thellier_obj.series:
+            plt_opt['label'] += ' '.join([j.label for j in thellier_obj.series])
 
         ax.plot(thellier_obj.data[v]['temp'].v / norm_factor[0],
                 thellier_obj.data[v][component].v / norm_factor[1], **plt_opt)
@@ -35,7 +35,7 @@ def difference(ax, thellier_obj_A, thellier_obj_B, component='mag', norm_factor=
     c = ['r', 'g', 'b']
     for i, v in enumerate(['th', 'ptrm']):
         plt_opt.update({'color': c[i + 1]})
-        plt_opt.update({'marker': '.', 'markersize': thellier_obj_B.data[v]['ttype pressure'].v[0] * 4 + 2})
+        plt_opt.update({'marker': '.', 'markersize': thellier_obj_B.data[v]['stype pressure'].v[0] * 4 + 2})
         aux = thellier_obj_A.data[v] - thellier_obj_B.data[v]
         aux['mag'] = aux.magnitude(('x', 'y', 'z'))
 
@@ -84,8 +84,8 @@ def derivative(ax, thellier_obj, component='mag', norm_factor=None,
     for i, v in enumerate(['sum', 'th', 'ptrm']):
         plt_opt.update({'label': v})
         plt_opt.update({'color': c[i]})
-        if thellier_obj.treatments:
-            plt_opt['label'] += ' '.join([j.label for j in thellier_obj.treatments])
+        if thellier_obj.series:
+            plt_opt['label'] += ' '.join([j.label for j in thellier_obj.series])
         data = thellier_obj.data[v]
         if interpolate:
             temps = data['temp'].v

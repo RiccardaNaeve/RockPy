@@ -15,7 +15,6 @@ Contents:
    RockPy.Measurements
    RockPy.Readin
    RockPy.Structure
-   RockPy.Treatments
 
 
 Indices and tables

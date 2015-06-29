@@ -11,8 +11,6 @@ import itertools
 from pprint import pprint
 from profilehooks import profile
 
-RockPy.Functions.general.create_logger(__name__)
-
 
 class SampleGroup(object):
     """
@@ -45,19 +43,36 @@ class SampleGroup(object):
         if sample_list:
             self.add_samples(sample_list)
 
+    def __getstate__(self):
+        '''
+        returned dict will be pickled
+        :return:
+        '''
+        state = {k: v for k, v in self.__dict__.iteritems() if k in
+                 (
+                     'name',
+                     'samples',
+                     'results'
+                 )
+                 }
+
+        return state
+
+    def __setstate__(self, state):
+        self.__dict__.update(state)
+        # self.recalc_info_dict()
 
     def __repr__(self):
         # return super(SampleGroup, self).__repr__()
         return "<RockPy.SampleGroup - << %s - %i samples >> >" % (self.name, len(self.sample_names))
 
     def __getitem__(self, item):
-        if item in self.samples:
+        if item in self.sdict:
             return self.samples[item]
         try:
             return self.sample_list[item]
         except KeyError:
             raise KeyError('SampleGroup has no Sample << %s >>' % item)
-
 
     def import_multiple_samples(self, sample_file, length_unit='mm', mass_unit='mg', **options):
         """
@@ -90,7 +105,6 @@ class SampleGroup(object):
                 self.samples.pop(sample)
         return self
 
-
     # ### DATA properties
     @property
     def sample_list(self):
@@ -116,7 +130,7 @@ class SampleGroup(object):
 
         s_list = _to_list(s_list)
         self.samples.update(self._sdict_from_slist(s_list=s_list))
-
+        self.log.info('ADDING sample(s) %s' % [s.name for s in s_list])
         for s in s_list:
             s.sgroups.append(self)
             self.add_s2_info_dict(s)
@@ -157,17 +171,17 @@ class SampleGroup(object):
         return self.__sort_list_set(out)
 
     @property
-    def ttypes(self):
+    def stypes(self):
         out = []
         for sample in self.sample_list:
-            out.extend(sample.ttypes)
+            out.extend(sample.stypes)
         return self.__sort_list_set(out)
 
     @property
-    def tvals(self):
+    def svals(self):
         out = []
         for sample in self.sample_list:
-            out.extend(sample.tvals)
+            out.extend(sample.svals)
         return self.__sort_list_set(out)
 
     # measurement: samples
@@ -176,9 +190,9 @@ class SampleGroup(object):
         out = {mtype: self.get_samples(mtypes=mtype) for mtype in self.mtypes}
         return out
 
-    # mtype: ttypes
+    # mtype: stypes
     @property
-    def mtype_ttype_dict(self):
+    def mtype_stype_dict(self):
         """
         returns a list of tratment types within a certain measurement type
         """
@@ -187,14 +201,13 @@ class SampleGroup(object):
             aux = []
             for s in self.get_samples(mtypes=mtype):
                 for t in s.mtype_tdict[mtype]:
-                    aux.extend([t.ttype])
+                    aux.extend([t.stype])
             out.update({mtype: self.__sort_list_set(aux)})
         return out
 
-
-    # mtype: tvals
+    # mtype: svals
     @property
-    def mtype_tvals_dict(self):
+    def mtype_svals_dict(self):
         """
         returns a list of tratment types within a certain measurement type
         """
@@ -208,18 +221,18 @@ class SampleGroup(object):
         return out
 
     @property
-    def ttype_tval_dict(self):
-        ttype_tval_dict = {i: self._get_all_treatment_values(i) for i in self.ttypes}
-        return ttype_tval_dict
+    def stype_sval_dict(self):
+        stype_sval_dict = {i: self._get_all_series_values(i) for i in self.stypes}
+        return stype_sval_dict
 
     @property
     def mtype_dict(self):
         m_dict = {i: [m for s in self.sample_list for m in s.get_measurements(i)] for i in self.mtypes}
         return m_dict
 
-    def _get_all_treatment_values(self, ttype):
-        return sorted(list(set([n.value for j in self.sample_list for i in j.measurements for n in i.treatments
-                                if n.ttype == ttype])))
+    def _get_all_series_values(self, stype):
+        return sorted(list(set([n.value for j in self.sample_list for i in j.measurements for n in i.series
+                                if n.stype == stype])))
 
     @property
     def mtypes(self):
@@ -229,23 +242,23 @@ class SampleGroup(object):
         return sorted(list(set([i.mtype for j in self.sample_list for i in j.measurements])))
 
     @property
-    def ttypes(self):
+    def stypes(self):
         """
         looks through all samples and returns measurement types
         """
-        return sorted(list(set([t for sample in self.sample_list for t in sample.ttypes])))
+        return sorted(list(set([t for sample in self.sample_list for t in sample.stypes])))
 
-    def ttype_results(self, **parameter):
+    def stype_results(self, **parameter):
         if not self.results:
             self.results = self.calc_all(**parameter)
-        ttypes = [i for i in self.results.column_names if 'ttype' in i]
-        out = {i.split()[1]: {round(j, 2): None for j in self.results[i].v} for i in ttypes}
+        stypes = [i for i in self.results.column_names if 'stype' in i]
+        out = {i.split()[1]: {round(j, 2): None for j in self.results[i].v} for i in stypes}
 
-        for ttype in out:
-            for tval in out[ttype]:
-                key = 'ttype ' + ttype
-                idx = np.where(self.results[key].v == tval)[0]
-                out[ttype][tval] = self.results.filter_idx(idx)
+        for stype in out:
+            for sval in out[stype]:
+                key = 'stype ' + stype
+                idx = np.where(self.results[key].v == sval)[0]
+                out[stype][sval] = self.results.filter_idx(idx)
         return out
 
     def _sdict_from_slist(self, s_list):
@@ -269,7 +282,6 @@ class SampleGroup(object):
         out = {s.name: s for s in s_list}
         return out
 
-
     def calc_all(self, **parameter):
         for sample in self.sample_list:
             label = sample.name
@@ -286,24 +298,23 @@ class SampleGroup(object):
 
     def average_results(self, **parameter):
         """
-        makes averages of all calculations for all samples in group. Only samples with same treatments are averaged
+        makes averages of all calculations for all samples in group. Only samples with same series are averaged
 
         prams: parameter are calculation parameters, has to be a dictionary
         """
         substfunc = parameter.pop('substfunc', 'mean')
         out = None
-        ttype_results = self.ttype_results(**parameter)
-        for ttype in ttype_results:
-            for tval in sorted(ttype_results[ttype].keys()):
-                aux = ttype_results[ttype][tval]
-                aux.define_alias('variable', 'ttype ' + ttype)
+        stype_results = self.stype_results(**parameter)
+        for stype in stype_results:
+            for sval in sorted(stype_results[stype].keys()):
+                aux = stype_results[stype][sval]
+                aux.define_alias('variable', 'stype ' + stype)
                 aux = condense(aux, substfunc=substfunc)
                 if out == None:
-                    out = {ttype: aux}
+                    out = {stype: aux}
                 else:
-                    out[ttype] = out[ttype].append_rows(aux)
+                    out[stype] = out[stype].append_rows(aux)
         return out
-
 
     def __add__(self, other):
         self_copy = SampleGroup(sample_list=self.sample_list)
@@ -312,43 +323,42 @@ class SampleGroup(object):
 
     def _mlist_to_tdict(self, mlist):
         """
-        takes a list of measurements looks for common ttypes
+        takes a list of measurements looks for common stypes
         """
-        ttypes = sorted(list(set([m.ttypes for m in mlist])))
-        return {ttype: [m for m in mlist if ttype in m.ttypes] for ttype in ttypes}
+        stypes = sorted(list(set([m.stypes for m in mlist])))
+        return {stype: [m for m in mlist if stype in m.stypes] for stype in stypes}
 
-    def get_measurements(self, sname=None, mtype=None, ttype=None, tval=None, tval_range=None):
+    def get_measurements(self, sname=None, mtype=None, stype=None, sval=None, sval_range=None):
         """
         Wrapper, for finding measurements, calls get_samples first and sample.get_measurements
         """
-        samples = self.get_samples(sname, mtype, ttype, tval, tval_range)
+        samples = self.get_samples(sname, mtype, stype, sval, sval_range)
         out = []
         for sample in samples:
             try:
-                out.extend(sample.get_measurements(mtype, ttype, tval, tval_range, filtered=True))
+                out.extend(sample.get_measurements(mtype, stype, sval, sval_range, filtered=True))
             except TypeError:
                 pass
         return out
 
-
-    def delete_measurements(self, sname=None, mtype=None, ttype=None, tval=None, tval_range=None):
+    def delete_measurements(self, sname=None, mtype=None, stype=None, sval=None, sval_range=None):
         """
         deletes measurements according to criteria
         """
-        samples = self.get_samples(snames=sname, mtypes=mtype, ttypes=ttype, tvals=tval,
-                                   tval_range=tval_range)  # search for samples with measurement fitting criteria
+        samples = self.get_samples(snames=sname, mtypes=mtype, stypes=stype, svals=sval,
+                                   sval_range=sval_range)  # search for samples with measurement fitting criteria
         for sample in samples:
-            sample.delete_measurements(mtype=mtype, ttype=ttype, tval=tval,
-                                       tval_range=tval_range)  # individually delete measurements from samples
+            sample.delete_measurements(mtype=mtype, stype=stype, sval=sval,
+                                       sval_range=sval_range)  # individually delete measurements from samples
 
-    def get_samples(self, snames=None, mtypes=None, ttypes=None, tvals=None, tval_range=None):
+    def get_samples(self, snames=None, mtypes=None, stypes=None, svals=None, sval_range=None):
         """
         Primary search function for all parameters
         """
-        if tvals is None:
+        if svals is None:
             t_value = np.nan
         else:
-            t_value = tvals
+            t_value = svals
 
         out = []
 
@@ -374,45 +384,151 @@ class SampleGroup(object):
             raise KeyError('RockPy.sample_group does not contain sample with mtypes: << %s >>' % mtypes)
             return
 
-        if ttypes:
-            ttypes = _to_list(ttypes)
-            out = [s for s in out for ttype in ttypes if ttype in s.ttypes]
+        if stypes:
+            stypes = _to_list(stypes)
+            out = [s for s in out for stype in stypes if stype in s.stypes]
             if len(out) == 0:
-                raise KeyError('RockPy.sample_group does not contain sample with ttypes: << %s >>' % ttypes)
+                raise KeyError('RockPy.sample_group does not contain sample with stypes: << %s >>' % stypes)
                 return
 
-        if tvals:
-            tvals = _to_list(tvals)
-            out = [s for s in out for tval in tvals for ttype in ttypes if tval in s.ttype_tval_dict[ttype]]
+        if svals:
+            svals = _to_list(svals)
+            out = [s for s in out for sval in svals for stype in stypes if sval in s.stype_sval_dict[stype]]
             if len(out) == 0:
                 self.log.error(
-                    'RockPy.sample_group does not contain sample with (ttypes, tvals) pair: << %s, %s >>' % (
-                        str(ttypes), str(t_value)))
+                    'RockPy.sample_group does not contain sample with (stypes, svals) pair: << %s, %s >>' % (
+                        str(stypes), str(t_value)))
                 return []
 
-        if tval_range:
-            if not isinstance(tval_range, list):
-                tval_range = [0, tval_range]
+        if sval_range:
+            if not isinstance(sval_range, list):
+                sval_range = [0, sval_range]
             else:
-                if len(tval_range) == 1:
-                    tval_range = [0] + tval_range
+                if len(sval_range) == 1:
+                    sval_range = [0] + sval_range
 
-            out = [s for s in out for tv in s.ttype_tval_dict[ttype] for ttype in ttypes
-                   if tv <= max(tval_range)
-                   if tv >= min(tval_range)]
+            out = [s for s in out for tv in s.stype_sval_dict[stype] for stype in stypes
+                   if tv <= max(sval_range)
+                   if tv >= min(sval_range)]
 
             if len(out) == 0:
                 raise KeyError(
-                    'RockPy.sample_group does not contain sample with (ttypes, tval_range) pair: << %s, %.2f >>' % (
-                        ttypes, t_value))
+                    'RockPy.sample_group does not contain sample with (stypes, sval_range) pair: << %s, %.2f >>' % (
+                        stypes, t_value))
                 return
 
         if len(out) == 0:
             SampleGroup.log.error(
-                'UNABLE to find sample with << %s, %s, %s, %.2f >>' % (snames, mtypes, ttypes, t_value))
+                'UNABLE to find sample with << %s, %s, %s, %.2f >>' % (snames, mtypes, stypes, t_value))
 
         return out
 
+    def create_mean_sample(self,
+                           reference=None,
+                           ref_dtype='mag', vval=None,
+                           norm_dtypes='all',
+                           norm_method='max',
+                           interpolate=True,
+                           substfunc='mean'):
+        """
+        Creates a mean sample out of all samples
+
+        :param reference:
+        :param ref_dtype:
+        :param dtye:
+        :param vval:
+        :param norm_method:
+        :param interpolate:
+        :param substfunc:
+        :return:
+        """
+
+        # create new sample_obj
+        mean_sample = Sample(name='mean ' + self.name)
+        # get all measurements from all samples in sample group and add to mean sample
+        mean_sample.measurements = [m for s in self.sample_list for m in s.measurements]
+        mean_sample.populate_mdict()
+
+        for mtype in sorted(mean_sample.mdict['mtype_stype_sval']):
+            if not mtype in ['mass', 'diameter', 'height', 'volume', 'x_len', 'y_len', 'z_len']:
+                for stype in sorted(mean_sample.mdict['mtype_stype_sval'][mtype]):
+                    for sval in sorted(mean_sample.mdict['mtype_stype_sval'][mtype][stype]):
+                        if reference or vval:
+                            for i, m in enumerate(mean_sample.mdict['mtype_stype_sval'][mtype][stype][sval]):
+                                m = m.normalize(
+                                # mean_sample.mdict['mtype_stype_sval'][mtype][stype][sval][i] = m.normalize(
+                                    reference=reference, ref_dtype=ref_dtype,
+                                    norm_dtypes=norm_dtypes,
+                                    vval=vval, norm_method=norm_method)
+                        series = m.get_series(stypes=stype, svals=sval)[0]
+                        # calculating the mean of all measurements
+                        M = mean_sample.mean_measurement(mtype=mtype, stype=stype, sval=sval,
+                                                         substfunc=substfunc,
+                                                         interpolate=interpolate,
+                                                         # reference=reference, ref_dtype=ref_dtype,
+                                                         # norm_dtypes=norm_dtypes,
+                                                         # vval=vval, norm_method=norm_method,
+                                                         )
+                        M.add_sval(series_obj=series)
+                        # print M.th
+                        if reference or vval:
+                            M.is_normalized = True
+                            M.norm = [reference, ref_dtype, vval, norm_method, np.nan]
+
+                        mean_sample.mean_measurements.append(M)
+
+        mean_sample.is_mean = True  # set is_mean flag after all measuerements are created
+        return mean_sample
+
+    def create_mean_sample_OLD(self,
+                               reference=None,
+                               rtype='mag', dtye='mag', vval=None,
+                               ntypes='all',
+                               norm_method='max',
+                               interpolate=True,
+                               substfunc='mean'):
+        """
+        Creates a mean sample out of all samples
+
+        :param reference:
+        :param rtype:
+        :param dtye:
+        :param vval:
+        :param norm_method:
+        :param interpolate:
+        :param substfunc:
+        :return:
+        """
+
+        # create new sample_obj
+        mean_sample = Sample(name='mean ' + self.name)
+        # get all measurements from all samples in sample group and add to mean sample
+        mean_sample.measurements = [m for s in self.sample_list for m in s.measurements]
+        mean_sample.recalc_info_dict()
+
+        for mtype in mean_sample.info_dict['mtype_stype_sval']:
+            if not mtype in ['mass', 'diameter', 'height', 'volume', 'x_len', 'y_len', 'z_len']:
+                for stype in mean_sample.info_dict['mtype_stype_sval'][mtype]:
+                    for sval in mean_sample.info_dict['mtype_stype_sval'][mtype][stype]:
+                        if reference or vval:
+                            for i, m in enumerate(mean_sample.info_dict['mtype_stype_sval'][mtype][stype][sval]):
+                                mean_sample.info_dict['mtype_stype_sval'][mtype][stype][sval][i] = m.normalize(
+                                    reference=reference, ref_dtype=rtype,
+                                    norm_dtypes=ntypes,
+                                    vval=vval, norm_method=norm_method)
+
+                        # calculating the mean of all measurements
+                        M = mean_sample.mean_measurement(mtype=mtype, stype=stype, sval=sval,
+                                                         substfunc=substfunc,
+                                                         interpolate=interpolate)
+                        if reference or vval:
+                            M.is_normalized = True
+                            M.norm = [reference, rtype, vval, norm_method, np.nan]
+
+                        mean_sample.mean_measurements.append(M)
+
+        mean_sample.is_mean = True  # set is_mean flag after all measuerements are created
+        return mean_sample
 
     def mean_sample(self,
                     reference=None,
@@ -423,32 +539,30 @@ class SampleGroup(object):
 
         # create new sample_obj
         mean_sample = Sample(name='mean ' + self.name)
-
-        for mtype in self.info_dict['mtype_ttype_tval']:
+        for mtype in self.info_dict['mtype_stype_sval']:
             if not mtype in ['mass', 'diameter', 'height', 'volume', 'x_len', 'y_len', 'z_len']:
-                for ttype in self.info_dict['mtype_ttype_tval'][mtype]:
-                    for tval in self.info_dict['mtype_ttype_tval'][mtype][ttype]:
-                        samples = self.info_dict['mtype_ttype_tval'][mtype][ttype][tval]
+                for stype in self.info_dict['mtype_stype_sval'][mtype]:
+                    for sval in self.info_dict['mtype_stype_sval'][mtype][stype]:
+                        samples = self.info_dict['mtype_stype_sval'][mtype][stype][sval]
                         measurements = []
                         for s in samples:
-                            measurements.extend(s.get_measurements(mtype=mtype, ttype=ttype, tval=tval))
-                            # print measurements
-                            # if reference or vval:
-                            # measurements = [m.normalizeNEW(reference=reference, rtype=rtype,
-                            #                                 vval=vval, norm_method=norm_method)
-                            #                     for m in measurements
-                            #                     if m.mtype not in ['diameter', 'height', 'mass']]
-                            #
-                            # mean_sample.measurements.extend(measurements)
-                            #
-                            # if mtype not in ['diameter', 'height', 'mass']:
-                            #     # calculating the mean of all measurements
-                            #     M = mean_sample.mean_measurement(mtype=mtype, ttype=ttype, tval=tval, substfunc=substfunc)
-                            #     if reference or vval:
-                            #         M.is_normalized = True
-                            #         M.norm = [reference, rtype, vval, norm_method, np.nan]
-                            #
-                            #     mean_sample.mean_measurements.append(M)
+                            measurements.extend(s.get_measurements(mtypes=mtype, stypes=stype, svals=sval))
+                    if reference or vval:
+                        measurements = [m.normalize(reference=reference, ref_dtype=rtype,
+                                                    vval=vval, norm_method=norm_method)
+                                        for m in measurements
+                                        if m.mtype not in ['diameter', 'height', 'mass']]
+
+                    mean_sample.measurements.extend(measurements)
+
+                    if mtype not in ['diameter', 'height', 'mass']:
+                        # calculating the mean of all measurements
+                        M = mean_sample.mean_measurement(mtype=mtype, stype=stype, sval=sval, substfunc=substfunc)
+                        if reference or vval:
+                            M.is_normalized = True
+                            M.norm = [reference, rtype, vval, norm_method, np.nan]
+
+                        mean_sample.mean_measurements.append(M)
 
         mean_sample.is_mean = True  # set is_mean flag after all measuerements are created
         return mean_sample
@@ -483,9 +597,9 @@ class SampleGroup(object):
 
         for mtype in ['diameter', 'height', 'mass', 'volume']:
             try:
-                for ttype in self.mtype_ttype_dict[mtype]:
-                    for tval in self.ttype_tval_dict[ttype]:
-                        measurements = self.get_measurements(mtype=mtype, ttype=ttype, tval=tval)
+                for stype in self.mtype_stype_dict[mtype]:
+                    for sval in self.stype_sval_dict[stype]:
+                        measurements = self.get_measurements(mtype=mtype, stype=stype, sval=sval)
                         M = average_sample.mean_measurement_from_list(measurements)
                         average_sample.measurements.append(M)
             except:
@@ -493,11 +607,11 @@ class SampleGroup(object):
 
         for mtype in self.mtypes:
             if mtype not in ['diameter', 'height', 'mass', 'volume']:
-                for ttype in self.mtype_ttype_dict[mtype]:
-                    for tval in self.ttype_tval_dict[ttype]:
-                        measurements = self.get_measurements(mtype=mtype, ttype=ttype, tval=tval)
-                        measurements = [m.normalize(reference=reference, rtype=rtype, dtype=dtype,
-                                                    vval=vval, norm_method=norm_method)
+                for stype in self.mtype_stype_dict[mtype]:
+                    for sval in self.stype_sval_dict[stype]:
+                        measurements = self.get_measurements(mtype=mtype, stype=stype, sval=sval)
+                        measurements = [m.normalizeOLD(reference=reference, rtype=rtype, dtype=dtype,
+                                                       vval=vval, norm_method=norm_method)
                                         for m in measurements]
                         M = average_sample.mean_measurement_from_list(measurements, interpolate=interpolate)
                         # print average_sample.get_mean_results(mlist=measurements)
@@ -510,7 +624,6 @@ class SampleGroup(object):
         for rp in rpdata_list:
             out.extend(rp['variable'].v)
         return self.__sort_list_set(out)
-
 
     def __sort_list_set(self, values):
         """
@@ -529,9 +642,9 @@ class SampleGroup(object):
         Returns
         -------
            dict
-              Dictionary with a permutation of sample ,type, ttype and tval.
+              Dictionary with a permutation of sample ,type, stype and sval.
         """
-        d = ['sample', 'mtype', 'ttype', 'tval']
+        d = ['mtype', 'stype', 'sval']
         keys = ['_'.join(i) for n in range(5) for i in itertools.permutations(d, n) if not len(i) == 0]
         out = {i: {} for i in keys}
         return out
@@ -547,77 +660,57 @@ class SampleGroup(object):
               The sample that should be added to the dictionary
         """
 
-        keys = self._info_dict.keys()
+        keys = self.info_dict.keys()  # all possible keys
 
-        # zero level
-        levels = [k.split('_') for k in keys]
-        level0 = [level for level in levels if len(level)==1]
+        for key in keys:
+            # split keys into levels
+            split_keys = key.split('_')
+            for i, level in enumerate(split_keys):
+                # i == level number, n == maximal level
+                # if i == n _> last level -> list instead of dict
+                n = len(split_keys) - 1
 
-        for level in levels:
-            name = '_'.join(level)
-            # simple level 0
-            if level[0] == 'sample':
-                l1_entries = [s.name]
-            else:
-                l1_entries = s.info_dict[level[0]].keys()
-            for l1 in l1_entries:
-                if len(level) == 1:
-                    self._info_dict[level[0]].setdefault(l1, [])
-                    if not s in self._info_dict[level[0]][l1]:
-                        self._info_dict[level[0]][l1].append(s)
-                else:
-                    self._info_dict[name].setdefault(l1, {})
-                    # sub-level
+                # level 0
+                for e0 in s.info_dict[key]:
+                    # if only 1 level
+                    if i == n == 0:
+                        # create key with empty list
+                        self._info_dict[key].setdefault(e0, list())
+                        # add sample if not already in list
+                        if not s in self._info_dict[key][e0]:
+                            self._info_dict[key][e0].append(s)
+                        continue
+                    else:
+                        # if not last entry generate key: dict() pair
+                        self._info_dict[key].setdefault(e0, dict())
 
-                    for i, subl in enumerate(level):
-                        nlist = level[:i+1]
-                        # level 1
-                        llist = [level[0]] + [level[1]] # entries
-                        try:
-                            llist.remove('sample') # remove 'sample' other wise 'KeyError'
-                            nlist.remove('sample') # remove 'sample' other wise 'KeyError'
-                        except ValueError:
-                            pass
-                        level_name = '_'.join(llist)
-                        if level[1] == 'sample':
-                            l2_entries = [s.name]
-                        else:
-                            if l1 != s.name:
-                                l2_entries = s.info_dict[level_name][l1]
-                            else:
-                                l2_entries = s.info_dict[level_name]
+                    # level 1
+                    for e1 in s.info_dict[key][e0]:
+                        if i == n == 1:
+                            self._info_dict[key][e0].setdefault(e1, list())
+                            if not s in self._info_dict[key][e0][e1]:
+                                self._info_dict[key][e0][e1].append(s)
+                            continue
+                        elif i > 0:
+                            self._info_dict[key][e0].setdefault(e1, dict())
 
-                        for l2 in l2_entries:
-                            if len(level) == 2:
-                                self._info_dict[name][l1].setdefault(l2, [])
-                                if not s in self._info_dict[name][l1][l2]:
-                                    self._info_dict[name][l1][l2].append(s)
-                                    break
-                            else:
-                                self._info_dict[name][l1].setdefault(l2, {})
-                                if level[2] == 'sample':
-                                    l3_entries = [s.name]
-                                else:
-                                    if level[2] != s.name:
-                                        level_name += '_'+level[2]
-                                    try:
-                                        l3_entries = s.info_dict[level_name][l1][l2]
-                                    except KeyError:
-                                        try:
-                                            l3_entries = s.info_dict[level_name][l2]
-                                        except KeyError:
-                                            l3_entries = s.info_dict[level_name]
-                                    for l3 in l3_entries:
-                                        if len(level) == 2:
-                                            self._info_dict[name][l1][l2].setdefault(l3, [])
-                                            if not s in self._info_dict[name][l1][l2][l3]:
-                                                self._info_dict[name][l1][l2][l3].append(s)
-                                                break
-                                        else:
-                                            self._info_dict[name][l1][l2].setdefault(l3, {})
+                            # level 2
+                            for e2 in s.info_dict[key][e0][e1]:
+                                if i == n == 2:
+                                    self._info_dict[key][e0][e1].setdefault(e2, list())
+                                    if not s in self._info_dict[key][e0][e1][e2]:
+                                        self._info_dict[key][e0][e1][e2].append(s)
+                                    continue
+                                elif i > 1:
+                                    self._info_dict[key][e0][e1].setdefault(e2, dict())
 
+    def recalc_info_dict(self):
+        """
+        Recalculates the info_dictionary with information of all samples and their corresponding measurements
 
-
+        """
+        self._info_dict = self.__create_info_dict()
+        map(self.add_s2_info_dict, self.slist)
 
     @property
     def info_dict(self):
@@ -626,8 +719,7 @@ class SampleGroup(object):
         """
         if not hasattr(self, '_info_dict'):
             self._info_dict = self.__create_info_dict()
-            for s in self.sample_list:
-                self.add_s2_info_dict(s)
+            self.recalc_info_dict()
         return self._info_dict
 
 
@@ -641,19 +733,12 @@ def _to_list(oneormoreitems):
 
 
 def test():
-    # import RockPy.Tutorials.sample_group
-    from copy import deepcopy
-    # sg = RockPy.Tutorials.sample_group.get_hys_coe_irm_rmp_sample_group(load=True)
-    sg = RockPy.SampleGroup()
-    s = RockPy.Sample(name='test', mass=22)
-    m = deepcopy(s.get_measurements(mtype='mass')[0])
-    m.add_treatment(ttype='p', tval=5)
-    s.measurements.append(m)
-    print s.info()
-    sg.add_samples(s)
-    # print sg.info_dict['sample_mtype_ttype']
+    import RockPy.Tutorials.sample_group
+
+    sg = RockPy.Tutorials.sample_group.get_hys_coe_irm_rmp_sample_group(load=True)
+    # print sg.info_dict['sample_mtype_stype']
     # print sg.info_dict.keys()
-    pprint(sg.info_dict)
+    # pprint(sg.info_dict)
 
 
 if __name__ == '__main__':

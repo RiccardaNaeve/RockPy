@@ -1,13 +1,16 @@
 __author__ = 'mike'
 import os
+import os.path
 from os.path import expanduser, join
+from collections import defaultdict
 import numpyson
 import numpy as np
 from pint import UnitRegistry
 import RockPy
 import cPickle
+import RockPy.core
+
 ureg = UnitRegistry()
-from collections import defaultdict
 default_folder = join(expanduser("~"), 'Desktop', 'RockPy')
 
 
@@ -36,16 +39,15 @@ def add_unit(value, unit):
     return out
 
 
-def generate_file_name(sample_group='', sample_name='',
+def get_fname_from_info(sample_group='', sample_name='',
                        mtype='', machine='',
                        mass='', mass_unit='',
                        height='', height_unit='',
                        diameter='', diameter_unit='',
-                       parameter=list(), parameter_values=[], parameter_units=[],
-                       standard_measurement='',
-                       index='',
-                       **options
-):
+                       series=list(), svals=[], sunits=[],
+                       std=None,
+                       idx=None,
+                       **options):
     """
     generates a name according to the RockPy specific naming scheme.
     :param sample_group:
@@ -58,44 +60,85 @@ def generate_file_name(sample_group='', sample_name='',
     :param height_unit:
     :param diameter:
     :param diameter_unit:
-    :param parameter:
-    :param parameter_values:
-    :param parameter_units:
-    :param standard_measurement:
-    :param index:
+    :param series:
+    :param svals:
+    :param sunits:
+    :param STD:
+    :param idx:
     :return:
     """
-    if not index:
-        index = '%03i' % (np.random.randint(999, size=1)[0])
+
+    if idx is None:
+        idx = '%03i' % (np.random.randint(999, size=1)[0])
+    else:
+        idx = '%03i' % idx
+
+    # check that series, svals, sunits are lists
+    series = RockPy.core.to_list(series)
+    svals = RockPy.core.to_list(svals)
+    svals = [str(i).replace('.', ',') for i in svals] # replace '.' so no conflict with file ending
+    sunits = RockPy.core.to_list(sunits)
 
     sample = '_'.join([sample_group, sample_name, mtype.upper(), machine.upper()])
+
+    if not height_unit and diameter_unit:
+        height_unit = diameter_unit
+    elif height_unit and not diameter_unit:
+        diameter_unit = height_unit
+
     sample_info = '_'.join(
-        [add_unit(mass, mass_unit), add_unit(height, height_unit), add_unit(diameter, diameter_unit)])
-    # print ['_'.join(map(str, [parameter[i],parameter_values[i], parameter_units[i]])) for i in range(len(parameter))]
+        [add_unit(str(mass).replace('.', ','), mass_unit),
+         add_unit(str(diameter).replace('.', ','), diameter_unit),
+         add_unit(str(height).replace('.', ','), height_unit),
+         ])
+
     params = ';'.join(
-        ['_'.join(map(str, [parameter[i], parameter_values[i], parameter_units[i]])) for i,v in enumerate(parameter)])
+        ['_'.join(map(str, [series[i], svals[i], sunits[i]])) for i in range(len(series))])
 
     if options:
         opt = ';'.join(['_'.join([k, str(v)]) for k, v in sorted(options.iteritems())])
     else:
         opt = ''
-    out = '#'.join([sample, sample_info, params, standard_measurement, opt])
-
-    out += '.%03i' % int(index)
+    out = '#'.join([sample, sample_info, params, 'STD%03i' %std, opt])
+    out += '.%s' % idx
     return out
 
 
-def extract_info_from_filename(fname, data_dir):
-    index = fname.split('.')[-1]
+def get_info_from_fname(path=None):
+    """
+    extracts the file information out of the filename
 
-    rest = fname[:-4]
+    Parameters
+    ----------
+       fname: str
+          file name
+       folder: str
+          only the folder name of the stored data
+       path:
+          complete path, with folder/fname. Will be split into the two
+    """
+
+    # todo IMPORTANT change get_info_from_fname and aget_fname_fro_info to accept the exact same things.
+    # change add_measurement accordingly
+    folder = os.path.split(path)[0]
+    fname = os.path.split(path)[1]
+
+    mfile = fname
+
+    index = fname.split('.')[-1]
+    fname = fname.split('.')[:-1][0]
+
     rest = fname.split('#')
 
     sample = rest[0].split('_')
     sample_info = [i.strip(']').split('[') for i in rest[1].split('_')]
+
     parameter = rest[2]
 
-    STD = [i for i in rest if 'std' in i.lower()]
+    try:
+        STD = [int(i.lower().strip('std')) for i in rest if 'std' in i.lower()][0]
+    except IndexError:
+        STD = None
 
     try:
         options = [i.split('_') for i in rest[4].split('.')[0].split(';')]
@@ -111,12 +154,14 @@ def extract_info_from_filename(fname, data_dir):
 
     # convert height to float
     try:
+        sample_info[1][0] = sample_info[1][0].replace(',', '.')
         sample_info[1][0] = float(sample_info[1][0])
     except ValueError:
         pass
 
     # convert diameter to float
     try:
+        sample_info[2][0] = sample_info[2][0].replace(',', '.')
         sample_info[2][0] = float(sample_info[2][0])
     except ValueError:
         pass
@@ -148,7 +193,7 @@ def extract_info_from_filename(fname, data_dir):
     try:
         abbrev[sample[2]]
     except KeyError:
-        print '%s not implemented yet' % sample[2]
+        raise KeyError('%s not implemented yet' % sample[2])
         return
 
     out = {
@@ -156,10 +201,10 @@ def extract_info_from_filename(fname, data_dir):
         'name': sample[1],
         'mtype': abbrev[sample[2]],
         'machine': abbrev[sample[3]],
-        'mfile': join(data_dir, fname),
-        'treatments': parameter,
-        'STD': STD,
-        'idx': index
+        'mfile': join(folder, mfile),
+        'series': parameter,
+        'std': STD,
+        'idx': int(index)
     }
 
     if sample_info[0][0]:
@@ -187,7 +232,7 @@ def import_folderOLD(folder, name='study', study=None):
     files = [i for i in os.listdir(folder) if not i == '.DS_Store' if not i.startswith('#')]
 
     for f in files:
-        d = RockPy.extract_info_from_filename(f, folder)
+        d = RockPy.get_info_from_fname(f, folder)
         if 'IS' in d and d['IS']:
             pass
         if not d['sample_group'] in study.samplegroup_names:
@@ -207,7 +252,7 @@ def import_folderOLD(folder, name='study', study=None):
             if len(idx) >1:
                 print 'more than one initial state found not adding any'
             else:
-                initial = RockPy.extract_info_from_filename(files[idx[0]], folder)
+                initial = RockPy.get_info_from_fname(files[idx[0]], folder)
                 del files[idx[0]]
                 m.set_initial_state(**initial)
 
@@ -228,7 +273,7 @@ def import_folder(folder, name='study', study=None):
     samples = defaultdict(list)
 
     for i in files:
-        d = RockPy.extract_info_from_filename(i, folder)
+        d = RockPy.get_info_from_fname(join(folder, i))
         samples[d['name']].append(d)
 
     for s in samples:

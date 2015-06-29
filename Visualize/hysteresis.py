@@ -2,7 +2,6 @@ __author__ = 'mike'
 import base
 import Features.hysteresis
 
-
 class Hysteresis(base.Generic):
     _required = ['hys']
 
@@ -15,18 +14,17 @@ class Hysteresis(base.Generic):
         self.xlabel = 'Field'
         self.ylabel = 'Moment'
 
-    def feature_hys(self, hys_obj, **plt_opt):
-        print hys_obj
-        hys_obj = hys_obj.normalize(**self.norm)
-        lines, texts = Features.hysteresis.df_branch(self.ax, hys_obj, **plt_opt)
-        self._add_line_text_dict(lines, texts)
-        lines, texts = Features.hysteresis.uf_branch(self.ax, hys_obj, **plt_opt)
-        self._add_line_text_dict(lines, texts)
+    def feature_hys(self, m_obj, **plt_opt):
+        # hys_obj = hys_obj.normalize(**self.norm)
+        lines, texts = Features.hysteresis.df_branch(self.ax, m_obj, **plt_opt)
+        self._add_line_text_dict(m_obj.sample_obj.name, '_'.join(m_obj.stypes), '_'.join(map(str, m_obj.svals)), lines)
+        lines, texts = Features.hysteresis.uf_branch(self.ax, m_obj, **plt_opt)
+        self._add_line_text_dict(m_obj.sample_obj.name, '_'.join(m_obj.stypes), '_'.join(map(str, m_obj.svals)), lines)
 
-    def feature_virgin(self, hys_obj, **plt_opt):
-        if hys_obj.virgin:
-            lines, texts = Features.hysteresis.virgin_branch(self.ax, hys_obj, **plt_opt)
-            self._add_line_text_dict(lines, texts)
+    def feature_virgin(self, m_obj, **plt_opt):
+        if m_obj.virgin:
+            lines, texts = Features.hysteresis.virgin_branch(self.ax, m_obj, **plt_opt)
+            self._add_line_text_dict(m_obj.sample_obj.name, '_'.join(m_obj.stypes), '_'.join(map(str, m_obj.svals)), lines)
 
     def feature_zero_lines(self):
         pass

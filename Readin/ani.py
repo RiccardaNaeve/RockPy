@@ -11,7 +11,8 @@ class Ani(base.Machine):
     """
     ani file format to describe anisotropy measurements
     format:
-    first line: header / comment
+    first line header: sample name; type (IRM / ARM / TRM / SUS); window (90-0); magnetizing field; comment
+    e.g.: ABC; ARM; 50-40; 0.1; no comment
     second line: reference/measurement directions in pairs of declination and inclinations (mdirs)
     i.e. D1,I1;D2,I2;D3,I3
     remaining lines 1 or 3 components of measurements

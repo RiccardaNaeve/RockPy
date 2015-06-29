@@ -59,11 +59,11 @@ class Arai(base.Generic):
 
     def feature_points(self, m_obj, **plt_opt):
         lines = arai.arai_points(self.ax, m_obj, **plt_opt)
-        self._add_line_text_dict(m_obj.sample_obj.name, '_'.join(m_obj.ttypes), '_'.join(map(str, m_obj.tvals)), lines)
+        self._add_line_text_dict(m_obj.sample_obj.name, '_'.join(m_obj.stypes), '_'.join(map(str, m_obj.svals)), lines)
 
     def feature_arai_stdev(self, m_obj, **plt_opt):
         lines = arai.arai_stdev(self.ax, m_obj, **plt_opt)
-        self._add_line_text_dict(m_obj.sample_obj.name, '_'.join(m_obj.ttypes), '_'.join(map(str, m_obj.tvals)), lines)
+        self._add_line_text_dict(m_obj.sample_obj.name, '_'.join(m_obj.stypes), '_'.join(map(str, m_obj.svals)), lines)
 
 
 def test():

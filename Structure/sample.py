@@ -13,7 +13,7 @@ from RockPy.Measurements.base import Measurement
 from RockPy.Structure.data import RockPyData, condense
 import RockPy.Visualize.base
 from collections import Counter
-# RockPy.Functions.general.create_logger(__name__)
+from functools import partial
 
 class Sample(object):
     """
@@ -168,7 +168,7 @@ class Sample(object):
         :return:
         """
 
-         mdict = getattr(self, mdict_type)
+        mdict = getattr(self, mdict_type)
 
         for k0, v0 in sorted(mdict.iteritems()):
             if isinstance(v0, dict):
@@ -271,12 +271,17 @@ class Sample(object):
         if operation == 'remove':
             self.mdict_cleanup(mdict_type=mdict_type)
 
-    def populate_mdict(self):
+    def populate_mdict(self, mdict_type='mdict'):
         """
         Populates the mdict with all measurements
         :return:
         """
-        map(self.add_m2_mdict, self.measurements)
+        if mdict_type == 'mdict':
+            map(self.add_m2_mdict, self.measurements)
+        if mdict_type == 'mean_mdict':
+            add_m2_mean_mdict = partial(self.add_m2_mdict, mdict_type='mean_mdict')
+            map(add_m2_mean_mdict, self.measurements)
+
 
     """ OLD INFO DICTIONARY """
     def _create_info_dict(self):
@@ -425,16 +430,6 @@ class Sample(object):
                          'results',
                      )}
         return pickle_me
-
-    @property
-    def filtered_data(self): #todo is this still needed -> use measurements, raw measurements instead
-        if not self._filtered_data:
-            if self.is_mean:
-                return self.mean_measurements
-            else:
-                return self.measurements
-        else:
-            return self._filtered_data
 
     def mean_results(self, **parameter):
         if not self._mean_results:
@@ -738,6 +733,7 @@ class Sample(object):
                          stypes=None, svals=None, sval_range=None,
                          mean=False,
                          invert = False,
+                         mdict_type='mdict',
                          **options):
         """
         Returns a list of measurements of type = mtypes
@@ -785,30 +781,38 @@ class Sample(object):
         stypes = to_list(stypes)
         svals = to_list(svals)
 
-        # todo search mean measurements
+        if mean:
+            mdict = self.mean_mdict
+            mdict_type = 'mean_mdict'
+        else:
+            mdict = self.mdict
+            mdict_type = 'mdict'
+
         if sval_range:
             if isinstance(sval_range, list):
-                svals = [i for i in self.mdict['sval'] if sval_range[0] <= i <= sval_range[1]]
+                svals = [i for i in mdict['sval'] if sval_range[0] <= i <= sval_range[1]]
             if isinstance(sval_range, str):
                 sval_range = sval_range.strip() #remove whitespaces in case '> 4' is provided
                 if '<' in sval_range:
                     if '=' in sval_range:
-                        svals = [i for i in self.mdict['sval'] if i <= float(sval_range.replace('<=',''))]
+                        svals = [i for i in mdict['sval'] if i <= float(sval_range.replace('<=',''))]
                     else:
-                        svals = [i for i in self.mdict['sval'] if i < float(sval_range.replace('<',''))]
+                        svals = [i for i in mdict['sval'] if i < float(sval_range.replace('<',''))]
                 if '>' in sval_range:
                     if '=' in sval_range:
-                        svals = [i for i in self.mdict['sval'] if i >= float(sval_range.replace('>=',''))]
+                        svals = [i for i in mdict['sval'] if i >= float(sval_range.replace('>=',''))]
                     else:
-                        svals = [i for i in self.mdict['sval'] if i > float(sval_range.replace('>',''))]
-            self.logger.info('SEARCHING for sval_range << %s >>' %(', '.join(map(str, svals))))
+                        svals = [i for i in mdict['sval'] if i > float(sval_range.replace('>',''))]
+            self.logger.info('SEARCHING %s for sval_range << %s >>' %(mdict_type, ', '.join(map(str, svals))))
 
         out = []
+
         if not series:
             for mtype in mtypes:
                 for stype in stypes:
                     for sval in svals:
-                        measurements = self.get_mtype_stype_sval(mtype=mtype, stype=stype, sval=sval)
+                        measurements = self.get_mtype_stype_sval(mtype=mtype, stype=stype, sval=sval,
+                                                                 mdict_type=mdict_type)
                         for m in measurements:
                             if not m in out:
                                 out.append(m)
@@ -820,18 +824,40 @@ class Sample(object):
                 for s in series:
                     aux.extend(self.get_mtype_stype_sval(mtype=mtype, stype=s[0], sval=float(s[1])))
                 out.extend(list(set([i for i in aux if aux.count(i) == len(series)])))
+
         # invert list to contain only measurements that do not meet criteria
         if invert:
-            out = [i for i in self.measurements if not i in out]
+            out = [i for i in mdict['measurements'] if not i in out]
         return out
 
-    def get_mtype_stype_sval(self, mtype, stype, sval):
+    def get_mtype_stype_sval(self, mtype, stype, sval, mdict_type='mdict'):
+        """
+        Searches for a single set of mtype, stype, sval
+
+        Parameters
+        ----------
+           mtype: str
+              mtype to be looked up
+           stype: str
+              stype to be looked up
+           sval: float
+              sval to be looked up
+           mdict_type:
+              chose which mdict to use:
+                 e.g. 'mdict' -> lookup in measurement_dictionary
+                 or.  'mean_mdict' -> lookup in mean_measurement_dictionary
+        """
         self.logger.info('SEARCHING\t measurements with  << %s, %s, %s >>' % (mtype, stype, sval))
 
         # searching for no value returns all measurements
         if not mtype and not stype and not sval:
-            return self.measurements
+            if mdict_type == 'mdict':
+                return self.measurements
+            if mdict_type == 'mean_mdict':
+                return self.mean_measurements
 
+        # get right mdict for lookup:
+        mdict = getattr(self, mdict_type)
         # create dictionary with mtypes, stypes, svals search parameters
         lookup_dict = {mtype:'mtype', stype:'stype', sval:'sval'}
         # create string for mdict lookup e.g. if mtypes and stypes is given then svals == None -> lookup = mtype_stype
@@ -841,7 +867,7 @@ class Sample(object):
         rev_lookup_dict = {v:k for k,v in lookup_dict.iteritems()}
 
         # copy of mdict[lookup] for dynamic lookup of arbitrary level depth
-        out = self.mdict[lookup]
+        out = mdict[lookup]
         for i in lookup.split('_'): #cycle through levels
             # catch Keyerror exception for question without answer
             try:
@@ -849,7 +875,7 @@ class Sample(object):
                 out = out[rev_lookup_dict[i]]
             # if key not exists return empty list
             except KeyError:
-                self.logger.error('CANT find measurement with << %s: %s >>'%(i, rev_lookup_dict[i]))
+                self.logger.error('CANT find measurement with << %s: %s >> in %s'%(i, rev_lookup_dict[i], mdict_type))
                 return []
         return out
 
@@ -952,7 +978,8 @@ class Sample(object):
                          interpolate=True, recalc_mag=False,
                          substfunc='mean',
                          reference=None, ref_dtype='mag', norm_dtypes='all', vval=None, norm_method='max',
-                         normalize_variable=False, dont_normalize=None):
+                         normalize_variable=False, dont_normalize=None,
+                         add2list=True):
 
         """
         takes a list of measurements and creates a mean measurement out of all measurements data
@@ -962,10 +989,21 @@ class Sample(object):
            mlist:
            interpolate:
            recalc_mag:
-        :return:
+           add2list: bool
+              will add measurement to the mean_measurements list
+
+        Returns
+        -------
+           RockPy.Measurement
+              The mean measurement that fits to the specified lookup
+
+
         """
         if not mtype:
-            raise ValueError('No mtype specified')
+            # raise ValueError('No mtype specified')
+
+            self.logger.error('NO mtype specified. Please specify mtype')
+            return
 
         mlist = self.get_measurements(mtypes=mtype, stypes=stype, svals=sval, sval_range=sval_range, mean=False)
 
@@ -978,7 +1016,12 @@ class Sample(object):
         series = [i.split('_') for i in series]
 
         if not mlist:
+            self.logger.warning('NO measurement found >> %s, %s, %f >>' %(mtype, stype, sval))
             return None
+
+        if len(mlist) == 1:
+            self.logger.warning('Only one measurement found returning measurement')
+            return mlist[0]
 
         # use first measurement as base
         dtypes = get_common_dtypes_from_list(mlist=mlist)
@@ -986,28 +1029,29 @@ class Sample(object):
         # create a base measurement
         base_measurement = RockPy.Functions.general.create_dummy_measurement(mtype=mlist[0].mtype,
                                                                              machine=mlist[0].machine,
-                                                                             mdata=deepcopy(mlist[0].data))
+                                                                             mdata=deepcopy(mlist[0].data), sample=self)
         # delete uncommon dtype from base_measurement
         for key in base_measurement.data:
             if key not in dtypes:
                 base_measurement.data.pop(key)
 
         for dtype in dtypes:  # cycle through all dtypes e.g. 'down_field', 'up_field' for hysteresis
-            dtype_list = [m.data[dtype] for m in mlist]
+            dtype_list = [m.data[dtype] for m in mlist] # get all data for dtype in one list
 
             if interpolate:
-                varlist = self.__get_variable_list(dtype_list, var='temp')
+                varlist = self.__get_variable_list(dtype_list, var='temp') #todo check why var=temp
                 if len(varlist) > 1:
                     dtype_list = [m.interpolate(varlist) for m in dtype_list]
 
             if len(dtype_list) > 1:  # for single measurements
-                base_measurement.data[dtype] = condense(dtype_list)
+                base_measurement.data[dtype] = condense(dtype_list, substfunc=substfunc)
                 base_measurement.data[dtype] = base_measurement.data[dtype].sort('variable')
 
             if recalc_mag:
                 base_measurement.data[dtype].define_alias('m', ('x', 'y', 'z'))
                 base_measurement.data[dtype]['mag'].v = base_measurement.data[dtype].magnitude('m')
 
+        # check if there is an initial state measurement and mean them, too.
         if base_measurement.initial_state:
             for dtype in base_measurement.initial_state.data:
                 dtype_list = [m.initial_state.data[dtype] for m in mlist if m.initial_state]
@@ -1024,6 +1068,11 @@ class Sample(object):
         # add all comon series to mean_m_object
         for s in series:
             base_measurement.add_sval(stype=s[0], sval=float(s[1]), unit=s[2])
+
+        # add to self.mean_measurements if specified
+        if add2list:
+            self.mean_measurements.append(base_measurement)
+            self.add_m2_mdict(mobj=base_measurement, mdict_type='mean_mdict')
         return base_measurement
 
     def all_results(self, mtype=None,
@@ -1169,7 +1218,6 @@ class Sample(object):
         """
         return sorted(list(set(values)))
 
-    # def _sort_stype_sval(self, mlist):
     ''' FOR PLOTTING FUNCTIONS '''
 
     @property
@@ -1212,7 +1260,7 @@ class Sample(object):
         else:
             return False
 
-    def sort_mlist_in_stype_dict(self, mlist):
+    def sort_mlist_in_stype_dict(self, mlist): #todo needed?
         """ sorts a list of measurements according to their stype and svals"""
         mlist = to_list(mlist)
         out = {}

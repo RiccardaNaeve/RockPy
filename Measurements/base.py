@@ -595,7 +595,7 @@ class Measurement(object):
                      True if forced recalculation, False if not
         :return:
         """
-        # caller = inspect.stack()[1][3].split('_')[-1]
+        if not parameter: parameter = dict()
 
         for key, value in parameter.iteritems():
             if value is None:
@@ -1015,12 +1015,12 @@ class Measurement(object):
            RockPy.Measurement
         """
 
-        # print self.sample_obj.mdict['mtype'][mtype]
-        print [m for m in self.sample_obj.measurements if m.mtype ==mtype]
-        measurements = self.sample_obj.get_measurements(mtypes=mtype)
+        measurements = self.sample_obj.get_measurements(mtypes=mtype, )
+
         if measurements:
             out = [i for i in measurements if i.m_idx <= self.m_idx]
             return out[-1]
+
         else:
             return None
 

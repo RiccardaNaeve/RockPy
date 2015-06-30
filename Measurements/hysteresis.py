@@ -426,7 +426,7 @@ class Hys(base.Measurement):
         return self.results['hf_sus']
 
     def result_mrs(self, recalc=False, **parameter):
-        self.calc_result(dict(), recalc)
+        self.calc_result(parameter = parameter, recalc=recalc)
         return self.results['mrs']
 
     def result_ms(self, method='simple', recalc=False, **parameter):

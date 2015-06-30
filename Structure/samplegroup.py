@@ -539,7 +539,10 @@ class SampleGroup(object):
 
         # create new sample_obj
         mean_sample = Sample(name='mean ' + self.name)
+
+        # get measurements that have specific mtype, stype, sval pair
         for mtype in self.info_dict['mtype_stype_sval']:
+            # exclude
             if not mtype in ['mass', 'diameter', 'height', 'volume', 'x_len', 'y_len', 'z_len']:
                 for stype in self.info_dict['mtype_stype_sval'][mtype]:
                     for sval in self.info_dict['mtype_stype_sval'][mtype][stype]:
@@ -553,7 +556,9 @@ class SampleGroup(object):
                                         for m in measurements
                                         if m.mtype not in ['diameter', 'height', 'mass']]
 
+                    # add the measurements to the
                     mean_sample.measurements.extend(measurements)
+                    mean_sample.populate_mdict()
 
                     if mtype not in ['diameter', 'height', 'mass']:
                         # calculating the mean of all measurements

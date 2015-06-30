@@ -77,6 +77,7 @@ class Sample(object):
         self._filtered_data = None
         self._info_dict = self._create_info_dict()
         self._mdict = self._create_mdict()
+        self._mean_mdict = self._create_mdict()
 
         if mass is not None:
             mass = self.add_measurement(mtype='mass', mfile=None, machine=mass_machine,
@@ -137,6 +138,13 @@ class Sample(object):
             return self._mdict
     #todo maybe create a rdict for results, in the same way the mdict works
 
+    @property
+    def mean_mdict(self):
+        if not self._mean_mdict:
+            self._mean_mdict = self._create_mdict()
+        else:
+            return self._mean_mdict
+
     def _create_mdict(self):
         """
         creates all info dictionaries
@@ -153,13 +161,16 @@ class Sample(object):
         out.update({'series': list()})
         return out
 
-    def mdict_cleanup(self):
+    def mdict_cleanup(self, mdict_type='mdict'):
         """
         recursively removes all empty lists from dictionary
         :param empties_list:
         :return:
         """
-        for k0, v0 in sorted(self.mdict.iteritems()):
+
+         mdict = getattr(self, mdict_type)
+
+        for k0, v0 in sorted(mdict.iteritems()):
             if isinstance(v0, dict):
                 for k1, v1 in sorted(v0.iteritems()):
                     if isinstance(v1, dict):
@@ -181,7 +192,7 @@ class Sample(object):
                         if not v1:
                             v0.pop(k1)
 
-    def add_m2_mdict(self, mobj):
+    def add_m2_mdict(self, mobj, mdict_type='mdict'):
         """
         adds or removes a measurement from the mdict
 
@@ -194,9 +205,9 @@ class Sample(object):
         """
         # cylcle through all the series
         for s in mobj.series:
-            self.add_series2_mdict(mobj=mobj, series=s)
+            self.add_series2_mdict(mobj=mobj, series=s, mdict_type=mdict_type)
 
-    def remove_m_from_mdict(self, mobj):
+    def remove_m_from_mdict(self, mobj, mdict_type='mdict'):
         """
         adds or removes a measurement from the mdict
 
@@ -209,42 +220,44 @@ class Sample(object):
         """
         # cylcle through all the series
         for series in mobj.series:
-            self.remove_series_from_mdict(mobj=mobj, series=series)
+            self.remove_series_from_mdict(mobj=mobj, series=series, mdict_type=mdict_type)
 
-    def add_series2_mdict(self, mobj, series):
-        self.change_series_in_mdict(mobj=mobj, series=series, operation='append')
+    def add_series2_mdict(self, mobj, series, mdict_type='mdict'):
+        self.change_series_in_mdict(mobj=mobj, series=series, operation='append', mdict_type=mdict_type)
 
-    def remove_series_from_mdict(self, mobj, series):
-        self.change_series_in_mdict(mobj=mobj, series=series, operation='remove')
+    def remove_series_from_mdict(self, mobj, series, mdict_type='mdict'):
+        self.change_series_in_mdict(mobj=mobj, series=series, operation='remove', mdict_type=mdict_type)
 
-    def change_series_in_mdict(self, mobj, series, operation):
+    def change_series_in_mdict(self, mobj, series, operation, mdict_type='mdict'):
         # dict for getting the info of the series
         sinfo = {'mtype': mobj.mtype, 'stype': series.stype, 'sval': series.value}
 
-        if series in self.mdict['series'] and operation == 'append':
+        mdict = getattr(self, mdict_type)
+
+        if series in mdict['series'] and operation == 'append':
             self.logger.info('SERIES << %s >> already in mdict' %series)
             return
 
         # cycle through all the elements of the self.mdict
-        for level in self.mdict:
+        for level in mdict:
             # get sublevels of the level
             sublevels = level.split('_')
             if level == 'measurements':
-                append_if_not_exists(self.mdict['measurements'], mobj, operation=operation)
+                append_if_not_exists(mdict['measurements'], mobj, operation=operation)
                 # getattr(self.mdict['measurements'], operation)(mobj)
             elif level == 'series':
-                append_if_not_exists(self.mdict['series'], series, operation=operation)
+                append_if_not_exists(mdict['series'], series, operation=operation)
 
                 # getattr(self.mdict['series'], operation)(series)
             elif len(sublevels) == 1:
-                d = self.mdict[level].setdefault(sinfo[level], list())
+                d = mdict[level].setdefault(sinfo[level], list())
                 append_if_not_exists(d, mobj, operation=operation)
                 # getattr(d, operation)(mobj)
             else:
                 for slevel_idx, sublevel in enumerate(sublevels):
                     if slevel_idx == 0:
                         info0 = sinfo[sublevel]
-                        d = self.mdict[level].setdefault(info0, dict())
+                        d = mdict[level].setdefault(info0, dict())
                     elif slevel_idx != len(sublevels) - 1:
                         info0 = sinfo[sublevel]
                         d = d.setdefault(info0, dict())
@@ -256,7 +269,7 @@ class Sample(object):
                         # getattr(d, operation)(mobj)
 
         if operation == 'remove':
-            self.mdict_cleanup()
+            self.mdict_cleanup(mdict_type=mdict_type)
 
     def populate_mdict(self):
         """
@@ -545,7 +558,8 @@ class Sample(object):
                 if measurement.has_data:
                     self.measurements.append(measurement)
                     self.raw_measurements.append(deepcopy(measurement))
-                    self.add_m2_info_dict(measurement)
+                    self.add_m2_info_dict(measurement) # todo remove when infodict cleanup
+                    self.add_m2_mdict(measurement)
                     return measurement
                 else:
                     return None

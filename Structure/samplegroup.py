@@ -556,13 +556,16 @@ class SampleGroup(object):
                                         for m in measurements
                                         if m.mtype not in ['diameter', 'height', 'mass']]
 
-                    # add the measurements to the
+                    # add measurements to the mean_sample
                     mean_sample.measurements.extend(measurements)
+
+                    #repopulate the mdict after adding measurements
                     mean_sample.populate_mdict()
 
                     if mtype not in ['diameter', 'height', 'mass']:
                         # calculating the mean of all measurements
-                        M = mean_sample.mean_measurement(mtype=mtype, stype=stype, sval=sval, substfunc=substfunc)
+                        M = mean_sample.mean_measurement(mtype=mtype, stype=stype, sval=sval,
+                                                         substfunc=substfunc, interpolate=interpolate)
                         if reference or vval:
                             M.is_normalized = True
                             M.norm = [reference, rtype, vval, norm_method, np.nan]

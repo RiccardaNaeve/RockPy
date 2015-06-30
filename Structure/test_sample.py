@@ -64,8 +64,8 @@ class TestSample(TestCase):
                     2.32652650e-08],
         }
         for i in check:
-            for j in range(len(check[i])):
-                self.assertAlmostEqual(measurement.data[i].v[0][j], check[i][j], 5)
+            for j,v in enumerate(check[i]):
+                self.assertAlmostEqual(measurement.data[i].v[0][j], v, 5)
 
         path = join(RockPy.test_data_path, 'LF4C-HX_1a_TT_CRY#320[mg]_5.17[mm]_5.84[mm]#pressure_1.2_GPa#.000')
 

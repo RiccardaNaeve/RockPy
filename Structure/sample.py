@@ -949,7 +949,7 @@ class Sample(object):
 
     def mean_measurement(self,
                          mtype=None, stype=None, sval=None, sval_range=None, mlist=None,
-                         interpolate=True, recalc_magag=False,
+                         interpolate=True, recalc_mag=False,
                          substfunc='mean',
                          reference=None, ref_dtype='mag', norm_dtypes='all', vval=None, norm_method='max',
                          normalize_variable=False, dont_normalize=None):
@@ -966,12 +966,16 @@ class Sample(object):
         """
         if not mtype:
             raise ValueError('No mtype specified')
+
         mlist = self.get_measurements(mtypes=mtype, stypes=stype, svals=sval, sval_range=sval_range, mean=False)
 
         if reference:
             mlist = [m.normalize(reference=reference, ref_dtype=ref_dtype, norm_dtypes=norm_dtypes, vval=vval,
                                  norm_method=norm_method, normalize_variable=normalize_variable,
                                  dont_normalize=dont_normalize) for m in mlist]
+        # get common series
+        series = list(set(['%s_%.3f_%s' %(s.stype, s.value, s.unit) for m in mlist for s in m.series]))
+        series = [i.split('_') for i in series]
 
         if not mlist:
             return None
@@ -1000,7 +1004,7 @@ class Sample(object):
                 base_measurement.data[dtype] = condense(dtype_list)
                 base_measurement.data[dtype] = base_measurement.data[dtype].sort('variable')
 
-            if recalc_magag:
+            if recalc_mag:
                 base_measurement.data[dtype].define_alias('m', ('x', 'y', 'z'))
                 base_measurement.data[dtype]['mag'].v = base_measurement.data[dtype].magnitude('m')
 
@@ -1009,12 +1013,17 @@ class Sample(object):
                 dtype_list = [m.initial_state.data[dtype] for m in mlist if m.initial_state]
                 base_measurement.initial_state.data[dtype] = condense(dtype_list, substfunc=substfunc)
                 base_measurement.initial_state.data[dtype] = base_measurement.initial_state.data[dtype].sort('variable')
-                if recalc_magag:
+                if recalc_mag:
                     base_measurement.initial_state.data[dtype].define_alias('m', ('x', 'y', 'z'))
                     base_measurement.initial_state.data[dtype]['mag'].v = base_measurement.initial_state.data[
                         dtype].magnitude(
                         'm')
+
         base_measurement.sample_obj = self
+
+        # add all comon series to mean_m_object
+        for s in series:
+            base_measurement.add_sval(stype=s[0], sval=float(s[1]), unit=s[2])
         return base_measurement
 
     def all_results(self, mtype=None,

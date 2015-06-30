@@ -23,7 +23,7 @@ class PMD(base.Machine):
         l = self.raw_data[1]
         # specify string indices of fields
         fidc = [0, 10, 20, 30, 40, 50, 63, None]
-        fields = [l[fidc[i]:fidc[i+1]].strip() for i in range(len(fidc)-1)]
+        fields = [l[fidc[i]:fidc[i+1]].strip() for i in xrange(len(fidc)-1)]
         sample_name = fields[0]
         if sample_name != self.sample_name:  # the sample name that we want to read and the one in the pmd file do not match
             self.log.warning('Sample name %s found in %s does not match %s' % (sample_name, self.file_name, self.sample_name))

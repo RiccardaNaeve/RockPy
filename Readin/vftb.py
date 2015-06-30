@@ -13,7 +13,7 @@ class Vftb(base.Machine):
         idx = [j for j, v2 in enumerate(self.raw_data) for i, v in enumerate(v2) if v.startswith('Set')]
         # appending length of measurement (-1 because of empty last line
         idx.append(len(self.raw_data))
-        self.set_idx = [(idx[i], idx[i + 1]) for i in range(len(idx) - 1)]
+        self.set_idx = [(idx[i], idx[i + 1]) for i in xrange(len(idx) - 1)]
         self.units = self.get_units()
         self.header = self.get_header()
         self.data = self.get_data()

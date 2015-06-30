@@ -48,9 +48,9 @@ class Parm_Spectra(base.Measurement):
             cumulative_data['z'] = cumulative_data['z'].v - self.af3['z'].v
             cumulative_data['mag'] = cumulative_data.magnitude('m')
 
-        cumulative_data['x'] = [np.sum(cumulative_data['x'].v[:i]) for i in range(len(cumulative_data['x'].v))]
-        cumulative_data['y'] = [np.sum(cumulative_data['y'].v[:i]) for i in range(len(cumulative_data['y'].v))]
-        cumulative_data['z'] = [np.sum(cumulative_data['z'].v[:i]) for i in range(len(cumulative_data['z'].v))]
+        cumulative_data['x'] = [np.sum(cumulative_data['x'].v[:i]) for i,v in enumerate(cumulative_data['x'].v)]
+        cumulative_data['y'] = [np.sum(cumulative_data['y'].v[:i]) for i,v in enumerate(cumulative_data['y'].v)]
+        cumulative_data['z'] = [np.sum(cumulative_data['z'].v[:i]) for i,v in enumerate(cumulative_data['z'].v)]
         cumulative_data['mag'] = cumulative_data.magnitude('m')
 
         return cumulative_data

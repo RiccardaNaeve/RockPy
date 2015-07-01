@@ -938,6 +938,8 @@ class Measurement(object):
 
             if isinstance(reference, float) or isinstance(reference, int):
                 norm_factor = float(reference)
+        else:
+            self.logger.warning('NO reference specified, do not know what to normalize to.')
         return norm_factor
 
     def _norm_method(self, norm_method, vval, rtype, data):

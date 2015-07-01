@@ -328,15 +328,27 @@ class SampleGroup(object):
         stypes = sorted(list(set([m.stypes for m in mlist])))
         return {stype: [m for m in mlist if stype in m.stypes] for stype in stypes}
 
-    def get_measurements(self, sname=None, mtype=None, stype=None, sval=None, sval_range=None):
+    def get_measurements(self,
+                         snames=None,
+                         mtypes=None,
+                         series=None,
+                         stypes=None, svals=None, sval_range=None,
+                         mean=False,
+                         invert=False,
+                         **options):
         """
         Wrapper, for finding measurements, calls get_samples first and sample.get_measurements
         """
-        samples = self.get_samples(sname, mtype, stype, sval, sval_range)
+        samples = self.get_samples(snames, mtypes, stypes, svals, sval_range)
         out = []
         for sample in samples:
             try:
-                out.extend(sample.get_measurements(mtype, stype, sval, sval_range, filtered=True))
+                out.extend(sample.get_measurements(mtypes=mtypes,
+                                                   series=series,
+                                                   stypes=stypes, svals=svals, sval_range=sval_range,
+                                                   mean=mean,
+                                                   invert=invert,
+                                                   ))
             except TypeError:
                 pass
         return out
@@ -354,6 +366,11 @@ class SampleGroup(object):
     def get_samples(self, snames=None, mtypes=None, stypes=None, svals=None, sval_range=None):
         """
         Primary search function for all parameters
+
+        Parameters
+        ----------
+           snames: list, str
+              list of names or a single name of the sample to be retrieved
         """
         if svals is None:
             t_value = np.nan
@@ -429,7 +446,8 @@ class SampleGroup(object):
                            norm_dtypes='all',
                            norm_method='max',
                            interpolate=True,
-                           substfunc='mean'):
+                           substfunc='mean',
+                           ):
         """
         Creates a mean sample out of all samples
 
@@ -453,14 +471,18 @@ class SampleGroup(object):
             if not mtype in ['mass', 'diameter', 'height', 'volume', 'x_len', 'y_len', 'z_len']:
                 for stype in sorted(mean_sample.mdict['mtype_stype_sval'][mtype]):
                     for sval in sorted(mean_sample.mdict['mtype_stype_sval'][mtype][stype]):
+                        series = None #initialize
+
+                        # normalize if needed
                         if reference or vval:
                             for i, m in enumerate(mean_sample.mdict['mtype_stype_sval'][mtype][stype][sval]):
                                 m = m.normalize(
-                                # mean_sample.mdict['mtype_stype_sval'][mtype][stype][sval][i] = m.normalize(
                                     reference=reference, ref_dtype=ref_dtype,
                                     norm_dtypes=norm_dtypes,
                                     vval=vval, norm_method=norm_method)
-                        series = m.get_series(stypes=stype, svals=sval)[0]
+                            series = m.get_series(stypes=stype, svals=sval)[0]
+                            # print m, m.series, stype, sval
+
                         # calculating the mean of all measurements
                         M = mean_sample.mean_measurement(mtype=mtype, stype=stype, sval=sval,
                                                          substfunc=substfunc,
@@ -469,7 +491,8 @@ class SampleGroup(object):
                                                          # norm_dtypes=norm_dtypes,
                                                          # vval=vval, norm_method=norm_method,
                                                          )
-                        M.add_sval(series_obj=series)
+                        if series:
+                            M.add_sval(series_obj=series)
                         # print M.th
                         if reference or vval:
                             M.is_normalized = True

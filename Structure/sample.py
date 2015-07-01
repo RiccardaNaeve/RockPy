@@ -733,7 +733,6 @@ class Sample(object):
                          stypes=None, svals=None, sval_range=None,
                          mean=False,
                          invert = False,
-                         mdict_type='mdict',
                          **options):
         """
         Returns a list of measurements of type = mtypes

@@ -900,48 +900,6 @@ class Measurement(object):
                     self.initial_state.data[dtype]['mag'] = self.initial_state.data[dtype].magnitude(('x', 'y', 'z'))
         return self
 
-    def normalizeOLD(self, reference='data', rtype='mag', dtype='mag', vval=None, norm_method='max'):
-        """
-        normalizes all available data to reference value, using norm_method
-
-        Parameter
-        ---------
-           reference: str
-              reference state, to which to normalize to e.g. 'NRM'
-              also possible to normalize to mass
-            rtype: str
-               component of the reference, if applicable. standard - 'mag'
-            dtype: str
-               dtype to be normalized, if dtype = 'all' all variables will be normalized
-            vval: float
-               variable value, if reference == value then it will search for the point closest to the vval
-            norm_method: str
-               how the norm_factor is generated, could be min
-        """
-
-        norm_factor = self._get_norm_factor(reference, rtype, vval, norm_method)
-        for dtype, dtype_rpd in self.data.iteritems():
-            stypes = [i for i in dtype_rpd.column_names if 'stype' in i]
-            self.data[dtype] = dtype_rpd / norm_factor
-            if stypes:
-                for tt in stypes:
-                    self.data[dtype][tt] = np.ones(len(dtype_rpd['variable'].v)) * self.stype_dict[tt[6:]].value
-            if 'mag' in self.data[dtype].column_names:
-                try:
-                    self.data[dtype]['mag'] = self.data[dtype].magnitude(('x', 'y', 'z'))
-                except:
-                    self.logger.debug('no (x,y,z) data found keeping << mag >>')
-
-        if self.initial_state:
-            for dtype, dtype_rpd in self.initial_state.data.iteritems():
-                self.initial_state.data[dtype] = dtype_rpd / norm_factor
-            if 'mag' in self.initial_state.data[dtype].column_names:
-                self.initial_state.data[dtype]['mag'] = self.initial_state.data[dtype].magnitude(('x', 'y', 'z'))
-
-        self.is_normalized = True
-        self.norm = [reference, rtype, vval, norm_method, norm_factor]
-        return self
-
     def _get_norm_factor(self, reference, rtype, vval, norm_method):
         """
         Calculates the normalization factor from the data according to specified input

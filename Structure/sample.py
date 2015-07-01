@@ -878,12 +878,23 @@ class Sample(object):
                 return []
         return out
 
-    def remove_measurements(self, mtypes=None, stypes=None, svals=None, sval_range=None, **options):
+    def remove_measurements(self, mtypes=None, stypes=None, svals=None, sval_range=None, **options): #todo include mean_measurements
+        """
+        Removes a certain type of measurement from the sample.measurements list.
+        :param mtypes:
+        :param stypes:
+        :param svals:
+        :param sval_range:
+        :param options:
+        :return:
+        """
         measurements_for_del = self.get_measurements(mtypes=mtypes,
                                                      stypes=stypes, svals=svals, sval_range=sval_range,
                                                      **options)
         if measurements_for_del:
             self.measurements = [m for m in self.measurements if not m in measurements_for_del]
+            for m in measurements_for_del:
+                self.remove_m_from_mdict(mobj=m, mdict_type='mdict')
 
     ''' MISC FUNTIONS '''
 

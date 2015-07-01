@@ -878,7 +878,7 @@ class Sample(object):
                 return []
         return out
 
-    def delete_measurements(self, mtypes=None, stypes=None, svals=None, sval_range=None, **options): #todo rename remove
+    def remove_measurements(self, mtypes=None, stypes=None, svals=None, sval_range=None, **options):
         measurements_for_del = self.get_measurements(mtypes=mtypes,
                                                      stypes=stypes, svals=svals, sval_range=sval_range,
                                                      **options)

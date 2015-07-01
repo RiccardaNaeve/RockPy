@@ -360,7 +360,7 @@ class SampleGroup(object):
         samples = self.get_samples(snames=sname, mtypes=mtype, stypes=stype, svals=sval,
                                    sval_range=sval_range)  # search for samples with measurement fitting criteria
         for sample in samples:
-            sample.delete_measurements(mtypes=mtype, stypes=stype, svals=sval,
+            sample.remove_measurements(mtypes=mtype, stypes=stype, svals=sval,
                                        sval_range=sval_range)  # individually delete measurements from samples
 
     def get_samples(self, snames=None, mtypes=None, stypes=None, svals=None, sval_range=None):

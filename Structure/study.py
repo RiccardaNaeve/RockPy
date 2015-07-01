@@ -188,10 +188,10 @@ class Study(object):
                 # series = [s.stype for m in ]
                 measurements = ', '.join(['%ix%s' %(mtypes.count(i), i) for i in sorted(set(mtypes))])
                 stypes = '|'.join(
-                    [' '.join([t.stype, str(t.value), t.unit]) for m in s.filtered_data for t in m.series
+                    [' '.join([t.stype, str(t.value), t.unit]) for m in s.measurements for t in m.series
                      if m.mtype not in ['mass', 'diameter', 'height']])
                 initial = '|'.join(
-                    [m.initial_state.mtype if m.initial_state is not None else '-' for m in s.filtered_data
+                    [m.initial_state.mtype if m.initial_state is not None else '-' for m in s.measurements
                      if m.mtype not in ['mass', 'diameter', 'height']])
                 out.add_row([sg.name, s.name, measurements, stypes, initial])
         print out

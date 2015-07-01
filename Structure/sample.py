@@ -878,8 +878,10 @@ class Sample(object):
                 return []
         return out
 
-    def delete_measurements(self, mtype=None, stype=None, sval=None, sval_range=None, **options): #todo rename remove
-        measurements_for_del = self.get_measurements(mtypes=mtype, stypes=stype, svals=sval, sval_range=sval_range)
+    def delete_measurements(self, mtypes=None, stypes=None, svals=None, sval_range=None, **options): #todo rename remove
+        measurements_for_del = self.get_measurements(mtypes=mtypes,
+                                                     stypes=stypes, svals=svals, sval_range=sval_range,
+                                                     **options)
         if measurements_for_del:
             self.measurements = [m for m in self.measurements if not m in measurements_for_del]
 

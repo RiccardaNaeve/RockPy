@@ -460,7 +460,7 @@ class Sample(object):
             return self.mdict[name]
         else:
             # Default behaviour
-            raise AttributeError
+            raise AttributeError('%s has not attribute %s'%(self, name))
 
     ''' ADD FUNCTIONS '''
 

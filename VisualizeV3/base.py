@@ -45,7 +45,10 @@ class Visual(object):
 
     @property
     def calculation_parameter(self):
-        return self._calculation_parameter
+        if not self._calculation_parameter:
+            return dict()
+        else:
+            return self._calculation_parameter
 
     @property
     def implemented_features(self):
@@ -56,13 +59,9 @@ class Visual(object):
     def feature_names(self):
         return [i.__name__[8:] for i in self.features]
 
-    def __init__(self, plt_input=None, plt_index=None, fig=None, name=None, calculation_parameters=None):
+    def __init__(self, plt_input=None, plt_index=None, fig=None, name=None):
         self.logger = logging.getLogger('RockPy.VISUALIZE.' + self.get_subclass_name())
         self.logger.info('CREATING new fig')
-
-        if not calculation_parameters:
-            calculation_parameters = None
-        self._calculation_parameter = calculation_parameters  # initialize for calculation
 
         self._plt_index = plt_index
         self._plt_input = deepcopy(plt_input)
@@ -203,12 +202,17 @@ class Visual(object):
         return study, only_measurements
 
     def plt_visual(self):
+        """
+
+        :return:
+        """
         self.add_standard()
         study, all_measurements = self.get_virtual_study()
         # plotting over study/ virtual study - > samplegroup / virtual SG ...
         for sg_idx, sg in enumerate(study):
             for sample_idx, sample in enumerate(sg):
                 if not all_measurements:
+                    # get measurements that fit _required. if _required = [] then all measurements are used
                     measurements = sample.get_measurements(mtypes=self.__class__._required)
                 else:
                     measurements = study[0][0]

@@ -30,6 +30,7 @@ class Backfield(base.Measurement):
     - VSM- files with irm acquisition will add a new irm_acquisition measurement to the sample
 
     """
+    _standard_parameter = {}
 
     def __init__(self, sample_obj,
                  mtype, mfile, machine,

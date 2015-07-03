@@ -465,7 +465,7 @@ class Sample(object):
     ''' ADD FUNCTIONS '''
 
     def add_measurement(self,
-                        mtype=None, mfile=None, machine='generic',  # general
+                        mtype=None, mfile=None, machine='generic',  # mandatory! general
                         fname=None, folder=None, path=None,  # added for automatic import of pathnames
                         idx=None,
                         mdata=None, mobj=None,
@@ -544,11 +544,13 @@ class Sample(object):
 
         if file_info or mobj:
             mtype = file_info['mtype']
+            # check if mtype exists of instance is present
             if mtype in Sample.implemented_measurements() or mobj:
-                self.logger.info(' ADDING\t << measurement >> %s' % mtype)
+                self.logger.info('ADDING\t << measurement >> %s' % mtype)
                 if mobj:
                     measurement = mobj
                 else:
+                    # create instance from implemented_measurements dictionary
                     # call constructor of a subclassed measurement
                     measurement = Sample.implemented_measurements()[mtype](**file_info)
                 if measurement.has_data:

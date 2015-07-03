@@ -65,7 +65,7 @@ class ResultVsSeries(base.Visual):
                     measurements = study[0][0]
                 for m in measurements:
                     if m.has_result(self.result) and m.has_series(self.series):
-                        print(m)
+                        # print(m)
                         sval = m.get_series(stypes=self.series)[0].value
                         res = m.calculate_result(result= self.result, **self.calculation_parameters).v[0]
                         res_series_dict.setdefault(sval, {}).setdefault(sample.name, []).append(res)

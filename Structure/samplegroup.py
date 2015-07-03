@@ -328,15 +328,27 @@ class SampleGroup(object):
         stypes = sorted(list(set([m.stypes for m in mlist])))
         return {stype: [m for m in mlist if stype in m.stypes] for stype in stypes}
 
-    def get_measurements(self, sname=None, mtype=None, stype=None, sval=None, sval_range=None):
+    def get_measurements(self,
+                         snames=None,
+                         mtypes=None,
+                         series=None,
+                         stypes=None, svals=None, sval_range=None,
+                         mean=False,
+                         invert=False,
+                         **options):
         """
         Wrapper, for finding measurements, calls get_samples first and sample.get_measurements
         """
-        samples = self.get_samples(sname, mtype, stype, sval, sval_range)
+        samples = self.get_samples(snames, mtypes, stypes, svals, sval_range)
         out = []
         for sample in samples:
             try:
-                out.extend(sample.get_measurements(mtype, stype, sval, sval_range, filtered=True))
+                out.extend(sample.get_measurements(mtypes=mtypes,
+                                                   series=series,
+                                                   stypes=stypes, svals=svals, sval_range=sval_range,
+                                                   mean=mean,
+                                                   invert=invert,
+                                                   ))
             except TypeError:
                 pass
         return out
@@ -348,12 +360,17 @@ class SampleGroup(object):
         samples = self.get_samples(snames=sname, mtypes=mtype, stypes=stype, svals=sval,
                                    sval_range=sval_range)  # search for samples with measurement fitting criteria
         for sample in samples:
-            sample.delete_measurements(mtype=mtype, stype=stype, sval=sval,
+            sample.remove_measurements(mtypes=mtype, stypes=stype, svals=sval,
                                        sval_range=sval_range)  # individually delete measurements from samples
 
     def get_samples(self, snames=None, mtypes=None, stypes=None, svals=None, sval_range=None):
         """
         Primary search function for all parameters
+
+        Parameters
+        ----------
+           snames: list, str
+              list of names or a single name of the sample to be retrieved
         """
         if svals is None:
             t_value = np.nan
@@ -429,7 +446,8 @@ class SampleGroup(object):
                            norm_dtypes='all',
                            norm_method='max',
                            interpolate=True,
-                           substfunc='mean'):
+                           substfunc='mean',
+                           ):
         """
         Creates a mean sample out of all samples
 
@@ -453,14 +471,18 @@ class SampleGroup(object):
             if not mtype in ['mass', 'diameter', 'height', 'volume', 'x_len', 'y_len', 'z_len']:
                 for stype in sorted(mean_sample.mdict['mtype_stype_sval'][mtype]):
                     for sval in sorted(mean_sample.mdict['mtype_stype_sval'][mtype][stype]):
+                        series = None #initialize
+
+                        # normalize if needed
                         if reference or vval:
                             for i, m in enumerate(mean_sample.mdict['mtype_stype_sval'][mtype][stype][sval]):
                                 m = m.normalize(
-                                # mean_sample.mdict['mtype_stype_sval'][mtype][stype][sval][i] = m.normalize(
                                     reference=reference, ref_dtype=ref_dtype,
                                     norm_dtypes=norm_dtypes,
                                     vval=vval, norm_method=norm_method)
-                        series = m.get_series(stypes=stype, svals=sval)[0]
+                            series = m.get_series(stypes=stype, svals=sval)[0]
+                            # print m, m.series, stype, sval
+
                         # calculating the mean of all measurements
                         M = mean_sample.mean_measurement(mtype=mtype, stype=stype, sval=sval,
                                                          substfunc=substfunc,
@@ -469,7 +491,8 @@ class SampleGroup(object):
                                                          # norm_dtypes=norm_dtypes,
                                                          # vval=vval, norm_method=norm_method,
                                                          )
-                        M.add_sval(series_obj=series)
+                        if series:
+                            M.add_sval(series_obj=series)
                         # print M.th
                         if reference or vval:
                             M.is_normalized = True
@@ -479,145 +502,6 @@ class SampleGroup(object):
 
         mean_sample.is_mean = True  # set is_mean flag after all measuerements are created
         return mean_sample
-
-    def create_mean_sample_OLD(self,
-                               reference=None,
-                               rtype='mag', dtye='mag', vval=None,
-                               ntypes='all',
-                               norm_method='max',
-                               interpolate=True,
-                               substfunc='mean'):
-        """
-        Creates a mean sample out of all samples
-
-        :param reference:
-        :param rtype:
-        :param dtye:
-        :param vval:
-        :param norm_method:
-        :param interpolate:
-        :param substfunc:
-        :return:
-        """
-
-        # create new sample_obj
-        mean_sample = Sample(name='mean ' + self.name)
-        # get all measurements from all samples in sample group and add to mean sample
-        mean_sample.measurements = [m for s in self.sample_list for m in s.measurements]
-        mean_sample.recalc_info_dict()
-
-        for mtype in mean_sample.info_dict['mtype_stype_sval']:
-            if not mtype in ['mass', 'diameter', 'height', 'volume', 'x_len', 'y_len', 'z_len']:
-                for stype in mean_sample.info_dict['mtype_stype_sval'][mtype]:
-                    for sval in mean_sample.info_dict['mtype_stype_sval'][mtype][stype]:
-                        if reference or vval:
-                            for i, m in enumerate(mean_sample.info_dict['mtype_stype_sval'][mtype][stype][sval]):
-                                mean_sample.info_dict['mtype_stype_sval'][mtype][stype][sval][i] = m.normalize(
-                                    reference=reference, ref_dtype=rtype,
-                                    norm_dtypes=ntypes,
-                                    vval=vval, norm_method=norm_method)
-
-                        # calculating the mean of all measurements
-                        M = mean_sample.mean_measurement(mtype=mtype, stype=stype, sval=sval,
-                                                         substfunc=substfunc,
-                                                         interpolate=interpolate)
-                        if reference or vval:
-                            M.is_normalized = True
-                            M.norm = [reference, rtype, vval, norm_method, np.nan]
-
-                        mean_sample.mean_measurements.append(M)
-
-        mean_sample.is_mean = True  # set is_mean flag after all measuerements are created
-        return mean_sample
-
-    def mean_sample(self,
-                    reference=None,
-                    rtype='mag', dtye='mag', vval=None,
-                    norm_method='max',
-                    interpolate=True,
-                    substfunc='mean'):
-
-        # create new sample_obj
-        mean_sample = Sample(name='mean ' + self.name)
-        for mtype in self.info_dict['mtype_stype_sval']:
-            if not mtype in ['mass', 'diameter', 'height', 'volume', 'x_len', 'y_len', 'z_len']:
-                for stype in self.info_dict['mtype_stype_sval'][mtype]:
-                    for sval in self.info_dict['mtype_stype_sval'][mtype][stype]:
-                        samples = self.info_dict['mtype_stype_sval'][mtype][stype][sval]
-                        measurements = []
-                        for s in samples:
-                            measurements.extend(s.get_measurements(mtypes=mtype, stypes=stype, svals=sval))
-                    if reference or vval:
-                        measurements = [m.normalize(reference=reference, ref_dtype=rtype,
-                                                    vval=vval, norm_method=norm_method)
-                                        for m in measurements
-                                        if m.mtype not in ['diameter', 'height', 'mass']]
-
-                    mean_sample.measurements.extend(measurements)
-
-                    if mtype not in ['diameter', 'height', 'mass']:
-                        # calculating the mean of all measurements
-                        M = mean_sample.mean_measurement(mtype=mtype, stype=stype, sval=sval, substfunc=substfunc)
-                        if reference or vval:
-                            M.is_normalized = True
-                            M.norm = [reference, rtype, vval, norm_method, np.nan]
-
-                        mean_sample.mean_measurements.append(M)
-
-        mean_sample.is_mean = True  # set is_mean flag after all measuerements are created
-        return mean_sample
-
-    def average_sample(self, name=None,
-                       reference='data',
-                       rtype='mag', dtype='mag',
-                       vval=None, norm_method='max',
-                       interpolate=True):
-        """
-        Averages all samples and returns a sample with an average measurement for all measurements in all samples.
-        
-        Parameters
-        ----------
-           name: str
-              Name of the samplegroup. *default:* mean_*sample_group_name*
-           reference: str
-              used for normalize
-           rtype:
-           vval: 
-           norm_method: 
-           interpolate: bool
-              it True all measurements are interpolated to equal variables and then normalized
-        :return:
-        """
-
-        if not name:
-            name = 'mean ' + self.name
-
-        average_sample = Sample(name=name)
-        average_sample.is_mean = True
-
-        for mtype in ['diameter', 'height', 'mass', 'volume']:
-            try:
-                for stype in self.mtype_stype_dict[mtype]:
-                    for sval in self.stype_sval_dict[stype]:
-                        measurements = self.get_measurements(mtype=mtype, stype=stype, sval=sval)
-                        M = average_sample.mean_measurement_from_list(measurements)
-                        average_sample.measurements.append(M)
-            except:
-                self.log.info('NO %s found' % (mtype))
-
-        for mtype in self.mtypes:
-            if mtype not in ['diameter', 'height', 'mass', 'volume']:
-                for stype in self.mtype_stype_dict[mtype]:
-                    for sval in self.stype_sval_dict[stype]:
-                        measurements = self.get_measurements(mtype=mtype, stype=stype, sval=sval)
-                        measurements = [m.normalizeOLD(reference=reference, rtype=rtype, dtype=dtype,
-                                                       vval=vval, norm_method=norm_method)
-                                        for m in measurements]
-                        M = average_sample.mean_measurement_from_list(measurements, interpolate=interpolate)
-                        # print average_sample.get_mean_results(mlist=measurements)
-                        average_sample.measurements.append(M)
-
-        return average_sample
 
     def __get_variable_list(self, rpdata_list):
         out = []

@@ -24,11 +24,13 @@ def create_logger(name):
 
     return ch#, fh
 
-def create_dummy_measurement(mtype, mfile=None, machine=None, idx=0, mdata=None):
+def create_dummy_measurement(mtype, mfile=None, machine=None, idx=0, mdata=None, sample=None):
     s = RockPy.Sample(name='dummy_sample')
     m = s.add_measurement(mtype=mtype, mfile=mfile, machine=machine,  # general
                         idx=idx, mdata=mdata,
                         )
+    if sample:
+        m.sample_obj = sample
     return m
 
 def differentiate(data_list, diff=1, smoothing=1, norm=False, check=False):

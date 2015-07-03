@@ -100,6 +100,17 @@ class Measurement(object):
     def get_subclass_name(cls):
         return cls.__name__
 
+    @property
+    def standard_parameter(self):
+        """
+        property that returns the standard calculation parameter if specified, otherwise returns an empty dictionary
+        :return:
+        """
+        if hasattr(self, '_standard_parameter'):
+            return self._standard_parameter
+        else:
+            return dict()
+
     def __init__(self, sample_obj,
                  mtype, mfile, machine, mdata=None, color=None,
                  series = None,
@@ -531,8 +542,9 @@ class Measurement(object):
 
         :return:
         '''
-        if not parameter: parameter = dict()
+        # if not parameter: parameter = dict()
         caller = '_'.join(inspect.stack()[1][3].split('_')[1:])  # get calling function
+        if not parameter: parameter = self.standard_parameter[caller]
 
         if force_method is not None:
             method = force_method  # method for calculation if any: result_CALLER_method
@@ -583,7 +595,7 @@ class Measurement(object):
                      True if forced recalculation, False if not
         :return:
         """
-        # caller = inspect.stack()[1][3].split('_')[-1]
+        if not parameter: parameter = dict()
 
         for key, value in parameter.iteritems():
             if value is None:
@@ -888,48 +900,6 @@ class Measurement(object):
                     self.initial_state.data[dtype]['mag'] = self.initial_state.data[dtype].magnitude(('x', 'y', 'z'))
         return self
 
-    def normalizeOLD(self, reference='data', rtype='mag', dtype='mag', vval=None, norm_method='max'):
-        """
-        normalizes all available data to reference value, using norm_method
-
-        Parameter
-        ---------
-           reference: str
-              reference state, to which to normalize to e.g. 'NRM'
-              also possible to normalize to mass
-            rtype: str
-               component of the reference, if applicable. standard - 'mag'
-            dtype: str
-               dtype to be normalized, if dtype = 'all' all variables will be normalized
-            vval: float
-               variable value, if reference == value then it will search for the point closest to the vval
-            norm_method: str
-               how the norm_factor is generated, could be min
-        """
-
-        norm_factor = self._get_norm_factor(reference, rtype, vval, norm_method)
-        for dtype, dtype_rpd in self.data.iteritems():
-            stypes = [i for i in dtype_rpd.column_names if 'stype' in i]
-            self.data[dtype] = dtype_rpd / norm_factor
-            if stypes:
-                for tt in stypes:
-                    self.data[dtype][tt] = np.ones(len(dtype_rpd['variable'].v)) * self.stype_dict[tt[6:]].value
-            if 'mag' in self.data[dtype].column_names:
-                try:
-                    self.data[dtype]['mag'] = self.data[dtype].magnitude(('x', 'y', 'z'))
-                except:
-                    self.logger.debug('no (x,y,z) data found keeping << mag >>')
-
-        if self.initial_state:
-            for dtype, dtype_rpd in self.initial_state.data.iteritems():
-                self.initial_state.data[dtype] = dtype_rpd / norm_factor
-            if 'mag' in self.initial_state.data[dtype].column_names:
-                self.initial_state.data[dtype]['mag'] = self.initial_state.data[dtype].magnitude(('x', 'y', 'z'))
-
-        self.is_normalized = True
-        self.norm = [reference, rtype, vval, norm_method, norm_factor]
-        return self
-
     def _get_norm_factor(self, reference, rtype, vval, norm_method):
         """
         Calculates the normalization factor from the data according to specified input
@@ -968,6 +938,8 @@ class Measurement(object):
 
             if isinstance(reference, float) or isinstance(reference, int):
                 norm_factor = float(reference)
+        else:
+            self.logger.warning('NO reference specified, do not know what to normalize to.')
         return norm_factor
 
     def _norm_method(self, norm_method, vval, rtype, data):
@@ -1003,12 +975,12 @@ class Measurement(object):
            RockPy.Measurement
         """
 
-        # print self.sample_obj.mdict['mtype'][mtype]
-        print [m for m in self.sample_obj.measurements if m.mtype ==mtype]
-        measurements = self.sample_obj.get_measurements(mtypes=mtype)
+        measurements = self.sample_obj.get_measurements(mtypes=mtype, )
+
         if measurements:
             out = [i for i in measurements if i.m_idx <= self.m_idx]
             return out[-1]
+
         else:
             return None
 

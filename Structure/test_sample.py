@@ -64,8 +64,8 @@ class TestSample(TestCase):
                     2.32652650e-08],
         }
         for i in check:
-            for j in range(len(check[i])):
-                self.assertAlmostEqual(measurement.data[i].v[0][j], check[i][j], 5)
+            for j,v in enumerate(check[i]):
+                self.assertAlmostEqual(measurement.data[i].v[0][j], v, 5)
 
         path = join(RockPy.test_data_path, 'LF4C-HX_1a_TT_CRY#320[mg]_5.17[mm]_5.84[mm]#pressure_1.2_GPa#.000')
 
@@ -231,9 +231,15 @@ class TestSample(TestCase):
 
         # search for specific series
         self.assertEqual([self.hys1],
-                         self.sample.get_measurements(mtypes='hys', series=[('pressure', '0'), ('pressure', '0')]))
+                         self.sample.get_measurements(mtypes='hys', series=[('pressure', '0'), ('temperature', '100')]))
         self.assertEqual([],
                          self.sample.get_measurements(mtypes='hys', series=[('pressure', '0'), ('temperature', '1')]))
+
+        #test mean measurement lookup
+        m =  self.sample.mean_measurement(mtype='hys', stype='pressure')
+        self.assertEqual([m],
+                         self.sample.get_measurements(mtypes='hys', stypes='pressure', mean=True))
+
 
     def test_add_m2_mdict(self):
         sample = RockPy.Sample(name='test')

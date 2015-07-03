@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 def scatter_xy(ax, m_obj, x_dtype, y_dtype, x_component, y_component, **plt_opt):
     pass
 
-def generate_plots(n=3, xsize=5., ysize=5. , tight_layout=False):
+def generate_plots(n=3, xsize=5., ysize=5., tight_layout=False):
     """
     Generates a number of subplots that are organized i a way to fit on a landscape plot.
 

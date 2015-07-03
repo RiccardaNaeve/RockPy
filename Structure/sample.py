@@ -475,7 +475,7 @@ class Sample(object):
               the measurement file
               default: None
            machine: str
-              the machine from which the file is output
+              the machine from which the file is output aka file format
               default: 'generic
            idx: index of measurement
               default: None, will be the index of the measurement in sample_obj.measurements
@@ -541,6 +541,7 @@ class Sample(object):
                 if mobj:
                     measurement = mobj
                 else:
+                    # call constructor of a subclassed measurement
                     measurement = Sample.implemented_measurements()[mtype](**file_info)
                 if measurement.has_data:
                     self.measurements.append(measurement)

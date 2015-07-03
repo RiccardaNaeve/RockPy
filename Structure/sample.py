@@ -63,8 +63,8 @@ class Sample(object):
         self.name = name
         self.comment = comment
 
-        self.logger = logging.getLogger('RockPy.Sample.%s' % name)
-        self.logger.info('CREATING\t new sample << %s >>' % self.name)
+        Sample.logger.info('CREATING\t new sample << %s >>' % self.name)
+        self.logger = logging.getLogger('RockPy.Sample[%s]' % name)
 
         self.raw_measurements = []
         self.measurements = []
@@ -483,7 +483,7 @@ class Sample(object):
               the measurement file
               default: None
            machine: str
-              the machine from which the file is output
+              the machine from which the file is output aka file format
               default: 'generic
            idx: index of measurement
               default: None, will be the index of the measurement in sample_obj.measurements
@@ -551,6 +551,7 @@ class Sample(object):
                     measurement = mobj
                 else:
                     # create instance from implemented_measurements dictionary
+                    # call constructor of a subclassed measurement
                     measurement = Sample.implemented_measurements()[mtype](**file_info)
                 if measurement.has_data:
                     self.measurements.append(measurement)

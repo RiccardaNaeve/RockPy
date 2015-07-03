@@ -57,7 +57,6 @@ class Visual(object):
         return [i.__name__[8:] for i in self.features]
 
     def __init__(self, plt_input=None, plt_index=None, fig=None, name=None, calculation_parameters=None):
-
         self.logger = logging.getLogger('RockPy.VISUALIZE.' + self.get_subclass_name())
         self.logger.info('CREATING new fig')
 
@@ -96,7 +95,7 @@ class Visual(object):
 
     def add_feature_to_list(self, feature_list, features=None):
         """
-        Adds a feature to the list of pfeature that will be plotted (self.features)
+        Adds a feature to the list of feature that will be plotted (self.features)
 
         """
         list2add = getattr(self, feature_list)

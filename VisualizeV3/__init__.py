@@ -1,8 +1,10 @@
 __author__ = 'mike'
 
-import hysteresis, backfield
+import hysteresis
+import backfield
 import special
 import thellier
+import stereo
 
 from profilehooks import profile
 

@@ -12,8 +12,8 @@ class Stereo(base.Visual):
     #     super(Stereo, self).__init__(plt_input=plt_input, plt_index=plt_index, plot=plot, name=name)
 
     def init_visual(self):
-        self.features = [self.feature_dir]
-        self.single_features = [stereo.stereogrid, stereo.stereogridlabels]
+        self.features = [self.feature_stereodirs]
+        self.single_features = [self.feature_stereogrid, self.feature_stereogridlabels]
 
         self.stereomap = Basemap(projection='spstere', boundinglat=0, lon_0=180, resolution='l', round=True, suppress_ticks=True, rsphere=1)
         self.grid_D_spacing = 30
@@ -22,8 +22,16 @@ class Stereo(base.Visual):
         self.xlabel = ''
         self.ylabel = ''
 
-    def feature_dir(self, mobj, **plt_opt):
-        plt_opt.pop('marker')
-        stereo.dir(self.ax, mobj, **plt_opt)
+    def feature_stereogrid(self, **plt_opt):
+        stereo.stereogrid(self.ax, self.stereomap, self.grid_D_spacing, self.grid_I_spacing, **plt_opt)
+        return 'single'
+
+    def feature_stereogridlabels(self, **plt_opt):
+        stereo.stereogridlabels(self.ax, self.stereomap, self.grid_D_spacing, self.grid_I_spacing, **plt_opt)
+        return 'single'
+
+    def feature_stereodirs(self, mobj, **plt_opt):
+        stereo.stereodirs(self.ax, self.stereomap, mobj, **plt_opt)
         return 'multiple'
+
 

@@ -13,7 +13,7 @@ def df_branch(ax, hys_obj, **plt_opt):
 
     line_out = ax.plot(hys_obj.data['down_field']['field'].v,
             hys_obj.data['down_field']['mag'].v,
-            ls = ls, marker = marker,
+            ls=ls, marker=marker,
             **plt_opt)
 
     return line_out, None

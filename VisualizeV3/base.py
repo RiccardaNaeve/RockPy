@@ -82,8 +82,8 @@ class Visual(object):
         self.title = 'title'
 
     def __getattr__(self, item):
-        if item in self.calculation_parameter:
-            return self.calculation_parameter[item]
+        if item in self._calculation_parameter:
+            return self._calculation_parameter[item]
         else:
             return object.__getattribute__(self, item)
 

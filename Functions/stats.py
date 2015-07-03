@@ -58,4 +58,4 @@ def normal_skew(x, location=0, scale=1, shape=0):
 
     location, scale = float(location), float(scale)
     t = (x - location) / scale
-    return 2 / scale * pdf(t) * cdf(shape * t)
+    return (2 / scale * pdf(t) * cdf(shape * t))

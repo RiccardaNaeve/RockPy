@@ -15,14 +15,13 @@ def create_logger(name):
     formatter = logging.Formatter('%(asctime)s: %(levelname)-10s %(name)-20s %(message)s')
     # fh = logging.FileHandler('RPV3.log')
     # fh.setFormatter(formatter)
-    # ch = logging.FileHandler('RPV3.log')
     ch = logging.StreamHandler()
-    ch.setLevel(logging.DEBUG)
+    ch.setLevel(logging.NOTSET)
     ch.setFormatter(formatter)
     # log.addHandler(fh)
     log.addHandler(ch)
 
-    return ch#, fh
+    return log#ch#, fh
 
 def create_dummy_measurement(mtype, mfile=None, machine=None, idx=0, mdata=None, sample=None):
     s = RockPy.Sample(name='dummy_sample')

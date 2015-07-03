@@ -63,7 +63,7 @@ class Thellier(base.Measurement):
     # todo format_sushibar
     # todo format_jr6
 
-    _standard_parameter = {'slope': {'t_min': 20, 't_max': 700, 'component': 'mag'},
+    _standard_parameter = {'slope': {'t_min': 20, 't_max': 700, 'component': 'mag', 'b_lab': 35.0},
                            'b_anc': {'b_lab': 35.0} }
 
     _standard_simulation = dict(b_lab=35.0, b_anc=50.0)
@@ -549,7 +549,7 @@ class Thellier(base.Measurement):
         self.calc_result(parameter, recalc, force_method='slope')
         return self.results['y_int']
 
-    def result_b_anc(self, t_min=None, t_max=None, component=None, b_lab=35.0, recalc=False, **options):
+    def result_b_anc(self, t_min=None, t_max=None, component='mag', b_lab=35.0, recalc=False, **options):
         parameter_a = {'t_min': t_min,
                        't_max': t_max,
                        'component': component,
@@ -678,7 +678,7 @@ class Thellier(base.Measurement):
         self.results['x_int'] = x_int
         self.results['n'] = len(th_data[component].v)
 
-        self.calculation_parameter['slope'] = {'t_min': t_min, 't_max': t_max, 'component': component}
+        self.calculation_parameter['slope'].update(parameter)# = {'t_min': t_min, 't_max': t_max, 'component': component}
 
     def calculate_b_anc(self, **parameter):
         """
@@ -968,7 +968,7 @@ class Thellier(base.Measurement):
         :return:
 
         """
-        # self.log.debug('CALCULATING\t quality parameter')
+        self.logger.debug('CALCULATING\t quality parameter')
 
         beta = self.result_beta(**parameter).v
         f = self.result_f(**parameter).v

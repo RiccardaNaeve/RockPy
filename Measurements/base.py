@@ -49,6 +49,10 @@ class Measurement(object):
 
     logger = logging.getLogger('RockPy.MEASUREMENT')
 
+    # @classmethod
+    # def _standard_parameter(cls):
+    #     return {i:{} for i in cls.result_methods}
+
     @classmethod
     def simulate(cls, **parameter):
         """
@@ -67,6 +71,13 @@ class Measurement(object):
 
     @classmethod
     def inheritors(cls):
+        """
+        Method that gets all children and childrens-children ... from a class
+
+        Returns
+        -------
+           list
+        """
         subclasses = set()
         work = [cls]
         while work:
@@ -79,6 +90,13 @@ class Measurement(object):
 
     @classmethod
     def implemented_measurements(self):
+        """
+        method that dynamically creates a dictionary with "obj.name : obj" entries
+
+        Returns
+        -------
+           dict
+        """
         return {i.__name__.lower(): i for i in Measurement.inheritors()}
 
     @classmethod
@@ -106,10 +124,12 @@ class Measurement(object):
         property that returns the standard calculation parameter if specified, otherwise returns an empty dictionary
         :return:
         """
-        if hasattr(self, '_standard_parameter'):
-            return self._standard_parameter
+        print self.__class__._standard_parameter
+        if hasattr(self.__class__, '_standard_parameter'):
+            return self.__class__._standard_parameter
         else:
-            return dict()
+            print 'test'
+            return {}
 
     def __init__(self, sample_obj,
                  mtype, mfile, machine, mdata=None, color=None,
@@ -542,10 +562,17 @@ class Measurement(object):
 
         :return:
         '''
-        # if not parameter: parameter = dict()
-        caller = '_'.join(inspect.stack()[1][3].split('_')[1:])  # get calling function
-        if not parameter: parameter = self.standard_parameter[caller]
 
+        caller = '_'.join(inspect.stack()[1][3].split('_')[1:])  # get calling function #todo get rid of inspect
+
+        if not parameter: # todo streamline the generation of standard parameters
+            try:
+                parameter = self.standard_parameter[caller]
+            except KeyError:
+                parameter = dict(caller = {})
+
+        # get the method to be used for calculation. It is either the calling method determined by inspect
+        # or the method specified with force_method
         if force_method is not None:
             method = force_method  # method for calculation if any: result_CALLER_method
         else:
@@ -554,8 +581,10 @@ class Measurement(object):
         if callable(getattr(self, 'calculate_' + method)):  # check if calculation function exists
             # check for None and replaces it with standard
             parameter = self.compare_parameters(method, parameter, recalc)
-            if self.results[caller] is None or self.results[
-                caller] == np.nan or recalc:  # if results dont exist or force recalc
+
+            # if results dont exist or force recalc
+            if self.results[caller] is None or self.results[caller] == np.nan or recalc:
+                # recalc causes a forced racalculation of the result
                 if recalc:
                     self.logger.debug('FORCED recalculation of << %s >>' % (method))
                 else:
@@ -624,13 +653,20 @@ class Measurement(object):
         Checks if previous calculation used the same parameters, if yes returns the previous calculation
         if no calculates with new parameters
 
+        Parameters
+        ----------
            caller: str
-           name of calling function ('result_generic' should be given as 'result')
+               name of calling function ('result_generic' should be given as 'generic')
            parameter:
-        :return:
+        Returns
+        -------
+           bool
+              returns true is parameters are not the same
         '''
         if self.calculation_parameter[caller]:
+            # parameter for new calculation
             a = [parameter[i] for i in self.calculation_parameter[caller]]
+            # get parameter values used for calculation
             b = [self.calculation_parameter[caller][i] for i in self.calculation_parameter[caller]]
             if a != b:
                 return True
@@ -836,7 +872,8 @@ class Measurement(object):
     def normalize(self,
                   reference='data', ref_dtype='mag', norm_dtypes='all', vval=None,
                   norm_method='max', norm_factor=None,
-                  normalize_variable=False, dont_normalize=None):
+                  normalize_variable=False, dont_normalize=None,
+                  norm_initial_state=True):
         """
         normalizes all available data to reference value, using norm_method
 
@@ -859,6 +896,9 @@ class Measurement(object):
            dont_normalize: list
               list of dtypes that will not be normalized
               default: None
+           norm_initial_state: bool
+              if true, initial state values are normalized in the same manner as normal data
+              default: True
         """
         # todo normalize by results
         #getting normalization factor
@@ -893,7 +933,7 @@ class Measurement(object):
                     except:
                         self.logger.debug('no (x,y,z) data found keeping << mag >>')
 
-        if self.initial_state:
+        if self.initial_state and norm_initial_state:
             for dtype, dtype_rpd in self.initial_state.data.iteritems():
                 self.initial_state.data[dtype] = dtype_rpd / norm_factor
                 if 'mag' in self.initial_state.data[dtype].column_names:

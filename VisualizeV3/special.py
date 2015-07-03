@@ -17,7 +17,7 @@ class ResultVsSeries(base.Visual):
     # @profile
     def __init__(self, result, series, plt_index,
                  plt_input=None, fig=None, name=None,
-                 mtype = None, calculation_parameters=None):
+                 mtype = None, calculation_parameter=None):
 
         # initialize
         self.series = series # the series that should be plotted
@@ -27,9 +27,7 @@ class ResultVsSeries(base.Visual):
         # If there is no result stored in the measurement from an earlier call
         # e.g. hysteresis.calculate_ms(SOME_PARAMETERS)
         # self.calculation_parameters can provide the parameters for the calculation of the result.
-
-        if not calculation_parameters: calculation_parameters = dict()
-        self.calculation_parameters = calculation_parameters
+        self._calculation_parameter = calculation_parameter
 
         self.res_series_raw_data = dict() # dictionary for all series and results
 
@@ -67,7 +65,7 @@ class ResultVsSeries(base.Visual):
                     if m.has_result(self.result) and m.has_series(self.series):
                         # print(m)
                         sval = m.get_series(stypes=self.series)[0].value
-                        res = m.calculate_result(result= self.result, **self.calculation_parameters).v[0]
+                        res = m.calculate_result(result= self.result, **self.calculation_parameter).v[0]
                         res_series_dict.setdefault(sval, {}).setdefault(sample.name, []).append(res)
 
         self.res_series_raw_data = res_series_dict

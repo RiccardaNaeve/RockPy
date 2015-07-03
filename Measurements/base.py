@@ -568,6 +568,8 @@ class Measurement(object):
         if not parameter: # todo streamline the generation of standard parameters
             try:
                 parameter = self.standard_parameter[caller]
+            except AttributeError:
+                parameter = dict(caller = {})
             except KeyError:
                 parameter = dict(caller = {})
 

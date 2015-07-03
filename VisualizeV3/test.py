@@ -26,38 +26,56 @@ if __name__  == '__main__':
     s1b.add_measurement(mtype='mass', value=50.8, unit='mg')
     h1b2 = s1b.add_measurement(mtype='hys', mfile=join(folder, 'FeNi_FeNi20-Jd120-G03_HYS_VSM#50,8[mg]_[]_[]##STD015.001'), machine='vsm')
 
-    # adding series parapmeters
+    # adding series parameters
     h1a1.add_sval(stype='mtime', sval=1)
     h1a2.add_sval(stype='mtime', sval=1)
     h1b1.add_sval(stype='mtime', sval=120)
     h1b2.add_sval(stype='mtime', sval=120)
-    #
-    # ''' SG 2 '''
-    # sg2 = RockPy.SampleGroup(name='SG2')
-    # s2a = RockPy.Sample(name='2a', mass=1, mass_unit='mg')
-    # s2b = RockPy.Sample(name='2b', mass=1, mass_unit='mg')
-    # sg2.add_samples([s2a, s2b])
-    # s2a.add_measurement(mtype='hysteresis', mfile=join(folder, 'LTPY_512,2a_HYS_VSM#[]_[]_[]#TEMP_300_K##STD000#.000'), machine='vsm')
-    # s2a.add_measurement(mtype='hys', mfile=join(folder, 'LTPY_527,1a_HYS_VSM#[]_[]_[]#TEMP_300_K##STD000#.000'), machine='vsm')
-    # s2b.add_measurement(mtype='hys', mfile=join(folder, 'LTPY_527,1a_HYS_VSM#[]_[]_[]#TEMP_300_K##STD000#.001'), machine='vsm')
-    # s2b.add_measurement(mtype='hys', mfile=join(folder, 'LTPY_512,2a_HYS_VSM#[]_[]_[]#TEMP_300_K##STD000#.001'), machine='vsm')
-    #
-    # study.add_samplegroup([sg1, sg2])
+
+    ''' SG 2 '''
+    sg2 = RockPy.SampleGroup(name='SG2')
+    s2a = RockPy.Sample(name='2a', mass=1, mass_unit='mg')
+    s2b = RockPy.Sample(name='2b', mass=1, mass_unit='mg')
+    sg2.add_samples([s2a, s2b])
+    s2a.add_measurement(mtype='hysteresis', mfile=join(folder, 'LTPY_512,2a_HYS_VSM#[]_[]_[]#TEMP_300_K##STD000#.000'), machine='vsm')
+    s2a.add_measurement(mtype='hys', mfile=join(folder, 'LTPY_527,1a_HYS_VSM#[]_[]_[]#TEMP_300_K##STD000#.000'), machine='vsm')
+    s2b.add_measurement(mtype='hys', mfile=join(folder, 'LTPY_527,1a_HYS_VSM#[]_[]_[]#TEMP_300_K##STD000#.001'), machine='vsm')
+    s2b.add_measurement(mtype='hys', mfile=join(folder, 'LTPY_512,2a_HYS_VSM#[]_[]_[]#TEMP_300_K##STD000#.001'), machine='vsm')
+
+    study.add_samplegroup([sg1, sg2])
 
     # print study.info()
 
     fig = NewFigure()
-    h1 = fig.add_visual(visual='hysteresis', name='hys', plt_input=sg1)
-    h2 = fig.add_visual(visual='hysteresis', name='hys', plt_input=sg1)
+    # h1 = fig.add_visual(visual='hysteresis', name='hys', plt_input=sg1)
+    # h2 = fig.add_visual(visual='hysteresis', name='hys', plt_input=sg1)
     # c1 = fig.add_visual(visual='backfield', name='coe', plt_input=sg1)
-    s1 = fig.add_visual(visual='resultvsseries', result='bc', series='mtime', name='rvs', plt_input=sg1)
-    s2 = fig.add_visual(visual='resultvsseries', result='bc', series='mtime', name='rvs', plt_input=sg1)
+
+    # plotting the same data with different calculation types
+    s1 = fig.add_visual(visual='resultvsseries', result='ms', series='mtime', name='rvs', plt_input=sg1,
+                        calculation_parameter=dict(saturation_percent=20))
+    s1.normalize_all(reference='mass', norm_dtypes=['mag'])
+    s1.title = '20% sat'
+    s1 = fig.add_visual(visual='resultvsseries', result='ms', series='mtime', name='rvs', plt_input=sg1,
+                        calculation_parameter=dict(saturation_percent=40))
+    s1.normalize_all(reference='mass', norm_dtypes=['mag'])
+    s1.title = '40% sat'
+    s1 = fig.add_visual(visual='resultvsseries', result='ms', series='mtime', name='rvs', plt_input=sg1,
+                        calculation_parameter=dict(saturation_percent=60))
+    s1.normalize_all(reference='mass', norm_dtypes=['mag'])
+    s1.title = '60% sat'
+    s1 = fig.add_visual(visual='resultvsseries', result='ms', series='mtime', name='rvs', plt_input=sg1,
+                        calculation_parameter=dict(saturation_percent=80))
+    s1.normalize_all(reference='mass', norm_dtypes=['mag'])
+    s1.title = '80% sat'
+
+    # s2 = fig.add_visual(visual='resultvsseries', result='ms', series='mtime', name='rvs', plt_input=sg1)
     # h2 = fig.add_visual(visual='hysteresis', name='hys2', plt_input=study)
     # h1.remove_single_feature(features=['grid'])
     # h1.remove_single_feature(features=['zero_lines'])
     # h1.add_single_feature(features=['zero_lines'])
     # h1.add_single_feature(features=['zero_lines', 'grid', 'nothing'])
-    h1.normalize_all(reference='mass', norm_dtypes=['mag'])
-    s1.normalize_all(reference='mass', norm_dtypes=['mag'])
+    # h1.normalize_all(reference='mass', norm_dtypes=['mag'])
+    # s1.normalize_all(reference='mass', norm_dtypes=['mag'])
     # h2.normalize_all(reference='down_field', vval=1, ntypes=['mag'])
     fig.show()

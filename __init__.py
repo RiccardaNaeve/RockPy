@@ -1,4 +1,7 @@
 __author__ = 'volk'
+import matplotlib
+matplotlib.use('QT4Agg')
+
 import RockPy.Functions.general
 import PlottingOLD
 import logging
@@ -16,9 +19,8 @@ from RockPy.VisualizeV3 import NewFigure
 RockPy.Functions.general.create_logger('RockPy')
 logger = logging.getLogger('RockPy')
 
-
-import matplotlib
 logger.info('using matplotlib version %s' % matplotlib.__version__)
+
 
 import numpy
 logger.info('using numpy version %s' % numpy.__version__)

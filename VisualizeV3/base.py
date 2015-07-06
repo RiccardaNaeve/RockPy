@@ -59,7 +59,7 @@ class Visual(object):
     def feature_names(self):
         return [i.__name__[8:] for i in self.features]
 
-    def __init__(self, plt_input=None, plt_index=None, fig=None, name=None):
+    def __init__(self, plt_input=None, plt_index=None, fig=None, name=None, calculation_parameter=None):
         self.logger = logging.getLogger('RockPy.VISUALIZE.' + self.get_subclass_name())
         self.logger.info('CREATING new fig')
 

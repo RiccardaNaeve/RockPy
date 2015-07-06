@@ -22,6 +22,8 @@ class Stereo(base.Visual):
         self.xlabel = ''
         self.ylabel = ''
 
+        print "***STEREO***"
+
     def feature_stereogrid(self, **plt_opt):
         stereo.stereogrid(self.ax, self.stereomap, self.grid_D_spacing, self.grid_I_spacing, **plt_opt)
         return 'single'

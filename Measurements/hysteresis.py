@@ -828,10 +828,28 @@ class Hys(base.Measurement):
             self.check_plot(uncorrected_data)
 
     def correct_paramag(self, saturation_percent=75., method='simple', check=False, **parameter):
-        "corrects data according to specified method"
+        """
+        corrects data according to specified method
+
+        Parameters
+        ----------
+           saturation_percent: float
+              default: 75.0
+           method: str
+              default='simple'
+              methods= ...
+           check: bool
+           parameter: dict
+
+        Returns
+        -------
+
+        """
+
         hf_sus = self.result_hf_sus(method=method).v[0]
 
         if check:
+            # make deepcopy for checkplot
             uncorrected_data = deepcopy(self.data)
 
         for dtype in self.data:

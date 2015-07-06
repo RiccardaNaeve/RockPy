@@ -1,6 +1,8 @@
 __author__ = 'wack'
 
 import numpy as np
+from RockPy.Measurements.anisotropy import Anisotropy
+from RockPy.Functions.general import XYZ2DIL
 
 '''
 stereo features
@@ -45,7 +47,37 @@ def stereodirs(ax, stereomap, m_obj, **plt_opt):
     :return:
     '''
     # example values
-    d, i = (30, 50, 120, 150), (-10, -20, -30, -40)
-    lines = ax.plot(*stereomap(d, i), **plt_opt)
-    print m_obj
+    #
+    #if isinstance(m_obj, Anisotropy):
+    #    print m_obj
+    lines = []
+    # get data from measurement object
+    d = m_obj._data['data']
+    # check if there is vectorial data
+    if d.column_exists('X') and d.column_exists('Y') and d.column_exists('Z'):
+        # calculate declination and inclination for each data point
+        DIL = np.array(map(XYZ2DIL, d[('X', 'Y', 'Z')].v))
+        d = DIL[:, 0]  # declinations
+        i = DIL[:, 1]  # inclinations
+        iabs = np.fabs(i)
+
+        # plot lines without markers
+        plt_opt['markerfacecolor'] = 'white'
+        plt_opt['marker'] = ''
+        lines.append(ax.plot(*stereomap(d, -iabs), **plt_opt))
+
+        #plot markers upper hemisphere with negative inclinations (hollow)
+        dil_neg = DIL[DIL[:, 1] < 0.0]
+        d = dil_neg[:, 0]
+        i = dil_neg[:, 1]
+        plt_opt['marker'] = 'o'
+        lines.append(ax.plot(*stereomap(d, i), **plt_opt))
+
+        #plot markers lower hemisphere with positive incliantions (filled)
+        dil_pos = DIL[DIL[:, 1] >= 0.0]
+        d = dil_pos[:, 0]
+        i = dil_pos[:, 1]
+        plt_opt['markerfacecolor'] = 'black'
+        lines.append(ax.plot(*stereomap(d, -i), **plt_opt))
+
     return lines, None

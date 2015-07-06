@@ -9,7 +9,7 @@ class Stereo(base.Visual):
     _required = ['anisotropy']
 
     def init_visual(self):
-        self.features = [self.feature_stereodirs]
+        self.features = [self.feature_stereodir_lines, self.feature_stereodir_markers]
         self.single_features = [self.feature_stereogrid, self.feature_stereogridlabels]
 
         self.stereomap = Basemap(projection='spstere', boundinglat=0, lon_0=180, resolution='l', round=True, suppress_ticks=True, rsphere=1)
@@ -27,8 +27,12 @@ class Stereo(base.Visual):
         stereo.stereogridlabels(self.ax, self.stereomap, self.grid_D_spacing, self.grid_I_spacing, **plt_opt)
         return 'single'
 
-    def feature_stereodirs(self, mobj, **plt_opt):
-        stereo.stereodirs(self.ax, self.stereomap, mobj, **plt_opt)
+    def feature_stereodir_lines(self, mobj, **plt_opt):
+        stereo.stereodir_lines(self.ax, self.stereomap, mobj, **plt_opt)
+        return 'multiple'
+
+    def feature_stereodir_markers(self, mobj, **plt_opt):
+        stereo.stereodir_markers(self.ax, self.stereomap, mobj, **plt_opt)
         return 'multiple'
 
 

@@ -59,7 +59,7 @@ class Visual(object):
     def feature_names(self):
         return [i.__name__[8:] for i in self.features]
 
-    def __init__(self, plt_input=None, plt_index=None, fig=None, name=None):
+    def __init__(self, plt_input=None, plt_index=None, fig=None, name=None, calculation_parameter=None):
         self.logger = logging.getLogger('RockPy.VISUALIZE.' + self.get_subclass_name())
         self.logger.info('CREATING new fig')
 
@@ -81,8 +81,8 @@ class Visual(object):
         self.title = 'title'
 
     def __getattr__(self, item):
-        if item in self.calculation_parameter:
-            return self.calculation_parameter[item]
+        if item in self._calculation_parameter:
+            return self._calculation_parameter[item]
         else:
             return object.__getattribute__(self, item)
 
@@ -115,7 +115,7 @@ class Visual(object):
                     features.remove(feature)
             self.logger.warning('%s' % sorted(self.implemented_features.keys()))
 
-        # check for duplicates and dont add them
+        # check for duplicates and don't add them
         for feature in features:
             if feature not in self.feature_names:
                 # add features to self.features

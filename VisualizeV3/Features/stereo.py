@@ -46,10 +46,6 @@ def stereodirs(ax, stereomap, m_obj, **plt_opt):
     :param plt_opt:
     :return:
     '''
-    # example values
-    #
-    #if isinstance(m_obj, Anisotropy):
-    #    print m_obj
     lines = []
     # get data from measurement object
     d = m_obj._data['data']

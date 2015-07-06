@@ -14,7 +14,7 @@ from RockPy.Structure.series import Generic as Series
 from file_operations import save, load
 from file_operations import get_fname_from_info, get_info_from_fname, import_folder
 
-from RockPy.VisualizeV3 import NewFigure
+from RockPy.VisualizeV3 import Figure
 
 RockPy.Functions.general.create_logger('RockPy')
 logger = logging.getLogger('RockPy')

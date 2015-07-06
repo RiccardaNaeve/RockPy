@@ -9,4 +9,4 @@ import stereo
 
 from profilehooks import profile
 
-from RockPy.VisualizeV3.figure import NewFigure
+from RockPy.VisualizeV3.figure import Figure

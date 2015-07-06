@@ -47,5 +47,5 @@ def stereodirs(ax, stereomap, m_obj, **plt_opt):
     # example values
     d, i = (30, 50, 120, 150), (-10, -20, -30, -40)
     lines = ax.plot(*stereomap(d, i), **plt_opt)
-
+    print m_obj
     return lines, None

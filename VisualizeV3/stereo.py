@@ -6,10 +6,7 @@ from mpl_toolkits.basemap import Basemap
 
 class Stereo(base.Visual):
     # _required for searching through samples for plotables
-    #_required = ['hys']
-
-    # def __init__(self, plt_index, plt_input=None, plot=None, name=None):
-    #     super(Stereo, self).__init__(plt_input=plt_input, plt_index=plt_index, plot=plot, name=name)
+    _required = ['anisotropy']
 
     def init_visual(self):
         self.features = [self.feature_stereodirs]
@@ -21,8 +18,6 @@ class Stereo(base.Visual):
 
         self.xlabel = ''
         self.ylabel = ''
-
-        print "***STEREO***"
 
     def feature_stereogrid(self, **plt_opt):
         stereo.stereogrid(self.ax, self.stereomap, self.grid_D_spacing, self.grid_I_spacing, **plt_opt)

@@ -115,7 +115,7 @@ class Visual(object):
                     features.remove(feature)
             self.logger.warning('%s' % sorted(self.implemented_features.keys()))
 
-        # check for duplicates and dont add them
+        # check for duplicates and don't add them
         for feature in features:
             if feature not in self.feature_names:
                 # add features to self.features

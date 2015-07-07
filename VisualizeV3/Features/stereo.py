@@ -8,7 +8,6 @@ from RockPy.Functions.general import XYZ2DIL
 stereo features
 '''
 
-
 def stereogrid(ax, stereomap, grid_D_spacing, grid_I_spacing, **plt_opt):
     # set the grid up
     Grid_D = np.arange(-180.0, 180.0, grid_D_spacing)
@@ -48,11 +47,11 @@ def stereodir_lines(ax, stereomap, m_obj, **plt_opt):
     '''
     lines = []
     # get data from measurement object
-    d = m_obj._data['data']
+    d = m_obj.data['data']
     # check if there is vectorial data
-    if d.column_exists('X') and d.column_exists('Y') and d.column_exists('Z'):
+    if d.column_exists('x') and d.column_exists('y') and d.column_exists('z'):
         # calculate declination and inclination for each data point
-        DIL = np.array(map(XYZ2DIL, d[('X', 'Y', 'Z')].v))
+        DIL = np.array(map(XYZ2DIL, d[('x', 'y', 'z')].v))
         d = DIL[:, 0]  # declinations
         i = DIL[:, 1]  # inclinations
         iabs = np.fabs(i)
@@ -74,11 +73,11 @@ def stereodir_markers(ax, stereomap, m_obj, **plt_opt):
     '''
     lines = []
     # get data from measurement object
-    d = m_obj._data['data']
+    d = m_obj.data['data']
     # check if there is vectorial data
-    if d.column_exists('X') and d.column_exists('Y') and d.column_exists('Z'):
+    if d.column_exists('x') and d.column_exists('y') and d.column_exists('z'):
         # calculate declination and inclination for each data point
-        DIL = np.array(map(XYZ2DIL, d[('X', 'Y', 'Z')].v))
+        DIL = np.array(map(XYZ2DIL, d[('x', 'y', 'z')].v))
 
         plt_opt['markerfacecolor'] = 'white'
         # circular marker

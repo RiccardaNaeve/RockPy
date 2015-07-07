@@ -223,6 +223,7 @@ class Visual(object):
                             plt_opt = dict(color=color, marker=marker, ls=ls)
                             feature(m, **plt_opt)
 
+        # plot all features that are not measurement specific, i.e. have to be plotted only once like coordinate axes
         for feature in self.single_features:
             feature()
 

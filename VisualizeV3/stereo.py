@@ -6,7 +6,7 @@ from mpl_toolkits.basemap import Basemap
 
 class Stereo(base.Visual):
     # _required for searching through samples for plotables
-    _required = ['afdemag', 'anisotropy']
+    _required = ['afdemag']
 
     def init_visual(self):
         self.features = [self.feature_stereodir_lines, self.feature_stereodir_markers]

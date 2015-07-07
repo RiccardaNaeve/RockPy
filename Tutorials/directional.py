@@ -12,9 +12,7 @@ from os.path import join
 af_file = join(RockPy.test_data_path, 'MUCSUSH_af_test.af')
 
 s = Sample("WURM")
-m = s.add_measurement(machine='sushibar', mtype='afdemag', mfile=af_file)
-# problem?
-print m._data['data']
+afd = s.add_measurement(machine='sushibar', mtype='afdemag', mfile=af_file)
 
 
 # do plotting stuff

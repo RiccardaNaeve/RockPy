@@ -8,7 +8,6 @@ from RockPy.Functions.general import XYZ2DIL
 stereo features
 '''
 
-
 def stereogrid(ax, stereomap, grid_D_spacing, grid_I_spacing, **plt_opt):
     # set the grid up
     Grid_D = np.arange(-180.0, 180.0, grid_D_spacing)
@@ -40,37 +39,57 @@ def stereogridlabels(ax, stereomap, grid_D_spacing, grid_I_spacing, **plt_opt):
     return lines, None
 
 
-def stereodirs(ax, stereomap, m_obj, **plt_opt):
+def stereodir_lines(ax, stereomap, m_obj, **plt_opt):
     '''
-    :param m_obj: plot single direction
+    :param m_obj: measurement object
     :param plt_opt:
     :return:
     '''
-    # example values
-    #
-    #if isinstance(m_obj, Anisotropy):
-    #    print m_obj
     lines = []
     # get data from measurement object
-    d = m_obj._data['data']
+    d = m_obj.data['data']
     # check if there is vectorial data
-    if d.column_exists('X') and d.column_exists('Y') and d.column_exists('Z'):
+    if d.column_exists('x') and d.column_exists('y') and d.column_exists('z'):
         # calculate declination and inclination for each data point
-        DIL = np.array(map(XYZ2DIL, d[('X', 'Y', 'Z')].v))
+        DIL = np.array(map(XYZ2DIL, d[('x', 'y', 'z')].v))
         d = DIL[:, 0]  # declinations
         i = DIL[:, 1]  # inclinations
         iabs = np.fabs(i)
 
         # plot lines without markers
-        plt_opt['markerfacecolor'] = 'white'
+        plt_opt['linestyle'] = '-'
         plt_opt['marker'] = ''
+
         lines.append(ax.plot(*stereomap(d, -iabs), **plt_opt))
+
+    return lines, None
+
+
+def stereodir_markers(ax, stereomap, m_obj, **plt_opt):
+    '''
+    :param m_obj: measurement object
+    :param plt_opt:
+    :return:
+    '''
+    lines = []
+    # get data from measurement object
+    d = m_obj.data['data']
+    # check if there is vectorial data
+    if d.column_exists('x') and d.column_exists('y') and d.column_exists('z'):
+        # calculate declination and inclination for each data point
+        DIL = np.array(map(XYZ2DIL, d[('x', 'y', 'z')].v))
+
+        plt_opt['markerfacecolor'] = 'white'
+        # circular marker
+        plt_opt['marker'] = 'o'
+        # no lines between data points
+        plt_opt['ls'] = ''
 
         #plot markers upper hemisphere with negative inclinations (hollow)
         dil_neg = DIL[DIL[:, 1] < 0.0]
         d = dil_neg[:, 0]
         i = dil_neg[:, 1]
-        plt_opt['marker'] = 'o'
+
         lines.append(ax.plot(*stereomap(d, i), **plt_opt))
 
         #plot markers lower hemisphere with positive incliantions (filled)

@@ -11,7 +11,7 @@ from RockPy.VisualizeV3.base import Visual
 __author__ = 'mike'
 
 
-class NewFigure(object):
+class Figure(object):
     def __init__(self): #todo size of figure
         """
         Container for visuals.

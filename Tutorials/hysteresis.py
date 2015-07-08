@@ -1,8 +1,9 @@
 __author__ = 'volk'
 import RockPy
-from os.path import join
+
 from RockPy.Structure.sample import Sample
 from os.path import join
+
 def test():
     vftb_file = join(RockPy.test_data_path, 'MUCVFTB_test.hys')
     # vsm_file = join(RockPy.test_data_path, 'vsm', 'MUCVSM_test.hys')

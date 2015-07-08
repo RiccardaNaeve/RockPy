@@ -38,7 +38,7 @@ class Anisotropy(base.Measurement):
 
         #todo: also implement 1D measurement
 
-        data = RockPyData(column_names=['D', 'I', 'X', 'Y', 'Z'])
+        data = RockPyData(column_names=['d', 'i', 'x', 'y', 'z'])
 
         for mdir in mdirs:
             # M = R * H
@@ -46,7 +46,7 @@ class Anisotropy(base.Measurement):
             measurement = np.dot(R, DIL2XYZ((mdir[0], mdir[1], 1))) + errs
             data = data.append_rows(np.hstack([np.array(mdir), measurement]))
 
-        data.define_alias('variable', ('D', 'I'))
+        data.define_alias('variable', ('d', 'i'))
 
         mdata = {'data': data}
 
@@ -206,7 +206,7 @@ class Anisotropy(base.Measurement):
 
         #calc mean magnetization
         M = (eigvals[0]+eigvals[1]+eigvals[2])/3
-        aniso_dict['M'] = M
+        aniso_dict['m'] = M
 
         #calc normalized eigenvalues k
         k = eigvals / (eigvals[0]+eigvals[1]+eigvals[2])*3
@@ -342,9 +342,9 @@ class Anisotropy(base.Measurement):
 
         #do we have scalar or vectorial measurements?
         if len(measurements.flatten()) == len(mdirs):  #scalar
-            data = RockPyData(column_names=['D', 'I', 'M'])
+            data = RockPyData(column_names=['d', 'i', 'm'])
         elif len(measurements.flatten()) / len(mdirs) == 3:  #vectorial
-            data = RockPyData(column_names=['D', 'I', 'X', 'Y', 'Z'])
+            data = RockPyData(column_names=['d', 'i', 'x', 'y', 'z'])
         else:
             Anisotropy.logger.error("anisotropy measurements have %d components")
             return
@@ -352,7 +352,7 @@ class Anisotropy(base.Measurement):
         for idx in range(len(mdirs)):
             data = data.append_rows(np.hstack([np.array(mdirs[idx]), measurements[idx]]))
 
-        data.define_alias('variable', ('D', 'I'))
+        data.define_alias('variable', ('d', 'i'))
         self._data['data'] = data
 
 
@@ -441,9 +441,9 @@ class Anisotropy(base.Measurement):
         :return: nothing, results are stored in self.results dictionary
         """
         # calculate design matrix
-        mdirs = self._data['data']['D', 'I'].v.tolist()
+        mdirs = self._data['data']['d', 'i'].v.tolist()
         if method == 'full':
-            xyz = self._data['data'].column_exists('Z')
+            xyz = self._data['data'].column_exists('z')
         elif method == 'proj':
             xyz = False  # calculate design matrix for one component per measurement
         else:
@@ -476,5 +476,5 @@ class Anisotropy(base.Measurement):
         self.results['eval2_err'] = self.aniso_dict['eval_err'][1]
         self.results['eval3_err'] = self.aniso_dict['eval_err'][2]
 
-        for k in ('I1', 'D1', 'I2', 'D2', 'I3', 'D3', 'P', 'P1', 'F', 'L', 'T', 'E12', 'E13', 'E23', 'E', 'Q', 'U', 'F0', 'F12', 'F23', 'stddev', 'QF', 'M'):
+        for k in ('I1', 'D1', 'I2', 'D2', 'I3', 'D3', 'P', 'P1', 'F', 'L', 'T', 'E12', 'E13', 'E23', 'E', 'Q', 'U', 'F0', 'F12', 'F23', 'stddev', 'QF', 'm'):
             self.results[k] = self.aniso_dict[k]

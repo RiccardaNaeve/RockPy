@@ -479,7 +479,7 @@ class Measurement(object):
 
     @property
     def data(self):
-        if not self._data:
+        if self._data == {}:
             self._data = deepcopy(self._raw_data)
         return self._data
 

@@ -1,4 +1,4 @@
-from RockPy.VisualizeV3 import NewFigure
+from RockPy.VisualizeV3 import Figure
 
 __author__ = 'mike'
 import RockPy
@@ -46,7 +46,7 @@ if __name__  == '__main__':
 
     # print study.info()
 
-    fig = NewFigure()
+    fig = Figure()
     # h1 = fig.add_visual(visual='hysteresis', name='hys', plt_input=sg1)
     # h2 = fig.add_visual(visual='hysteresis', name='hys', plt_input=sg1)
     # c1 = fig.add_visual(visual='backfield', name='coe', plt_input=sg1)

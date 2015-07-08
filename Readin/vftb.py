@@ -42,8 +42,8 @@ class Vftb(base.Machine):
         data = self.convert_to_T(data)
 
         # convert to A m instead of A m^2
-        convert = [self.mass*1e-6 if 'g' in v else 1 for i,v in enumerate(self.units)]
-        data = np.array([i * convert for i in data])
+        # convert = [self.mass*1e-6 if 'g' in v else 1 for i,v in enumerate(self.units)]
+        # data = np.array([i * convert for i in data])
 
         # some vftb files have a prefix of E-3
         # -> data is corrected

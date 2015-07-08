@@ -879,7 +879,7 @@ class Hys(base.Measurement):
             plt.show()
             self.check_plot(uncorrected_data)
 
-    def correct_center(self, check=True):  # todo rewrite for data
+    def correct_center(self, check=False):
 
         if check:
             uncorrected_data = deepcopy(self.data)

@@ -12,7 +12,8 @@ class Stereo(base.Visual):
         self.features = [self.feature_stereodirs]
         self.single_features = [self.feature_stereogrid, self.feature_stereogridlabels]
 
-        self.stereomap = Basemap(projection='spstere', boundinglat=0, lon_0=180, resolution='l', round=True, suppress_ticks=True, rsphere=1)
+        self.stereomap = Basemap(projection='spstere', boundinglat=0, lon_0=180, resolution='l', round=True,
+                                 suppress_ticks=True, rsphere=1)
         self.grid_D_spacing = 30
         self.grid_I_spacing = 15
 

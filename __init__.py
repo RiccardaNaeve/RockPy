@@ -1,6 +1,6 @@
 __author__ = 'volk'
 import matplotlib
-matplotlib.use('QT4Agg')
+# matplotlib.use('QT4Agg') #not working on OSX!
 
 import RockPy.Functions.general
 import PlottingOLD

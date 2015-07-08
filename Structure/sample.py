@@ -425,7 +425,7 @@ class Sample(object):
                          'measurements',
                          '_filtered_data', 'sgroups',
                          '_info_dict', #todo remove
-                         '_mdict',
+                         '_mdict', '_mean_mdict',
                          'is_mean', 'mean_measurements', '_mean_results',
                          'results',
                      )}

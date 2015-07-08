@@ -667,7 +667,13 @@ class Measurement(object):
         '''
         if self.calculation_parameter[caller]:
             # parameter for new calculation
-            a = [parameter[i] for i in self.calculation_parameter[caller]]
+            a = []
+            for key in self.calculation_parameter[caller]:
+                if key in parameter:
+                    a.append(parameter[key])
+                else:
+                    a.append(self.calculation_parameter[caller][key])
+                # a = [parameter[i] for i in self.calculation_parameter[caller]]
             # get parameter values used for calculation
             b = [self.calculation_parameter[caller][i] for i in self.calculation_parameter[caller]]
             if a != b:
